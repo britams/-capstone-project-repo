@@ -1,0 +1,23 @@
+# 팀 초벌 캡스톤 레포 — 올리지 않는 것 (docs/GitHub_사용법_Chrome.md 7장)
+# 논문·대용량 자료
+*.pdf
+!cad/**/*.pdf
+!design/**/*.pdf
+*.pptx
+*.heic
+*.zip
+# FreeCAD 백업
+*.FCBak
+*.FCStd1
+# 파이썬·모델 가중치·데이터
+__pycache__/
+*.pyc
+.venv/
+*.pt
+*.hef
+*.onnx
+datasets/
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
