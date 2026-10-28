@@ -57,16 +57,16 @@ try {
     Write-Host "Python $v  -> route $route  (A = torch 2.3.1 like the paper era, B = latest torch)"
 
     # 2. venv + packages
-    Step '2/6 Virtual environment + packages (first run downloads about 300 MB)'
+    Step '2/6 Virtual environment + packages (first run downloads about 300 MB, 5-15 min - do not close)'
     if (-not (Test-Path $VPy)) { & $pyExe @pyArgs -m venv $Venv; if ($LASTEXITCODE) { throw 'venv failed' } }
-    & $VPy -m pip install --upgrade pip --quiet --disable-pip-version-check
+    & $VPy -m pip install --upgrade pip --disable-pip-version-check
     $common = @('setuptools<80', 'pandas', 'matplotlib', 'seaborn', 'pyyaml', 'requests', 'scipy', 'tqdm', 'pillow', 'psutil', 'filetype')
     if ($route -eq 'A') {
         $pkgs = @('torch==2.3.1', 'torchvision==0.18.1', 'numpy<2', 'opencv-python==4.10.0.84') + $common
     } else {
         $pkgs = @('torch', 'torchvision', 'numpy', 'opencv-python') + $common
     }
-    & $VPy -m pip install @pkgs --quiet --disable-pip-version-check
+    & $VPy -m pip install @pkgs --disable-pip-version-check --progress-bar on
     if ($LASTEXITCODE) { throw 'pip install failed. If your Python is 3.13 or newer, install Python 3.12 and run again.' }
 
     # 3. YOLOv5 at the pinned commit (zip, no git needed)
