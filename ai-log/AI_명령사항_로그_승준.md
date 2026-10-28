@@ -30,3 +30,24 @@
 - 만든 파일: `vision/2026-10-28_VespAI_저장소_확인과_실행계획.md`, `vision/scripts/run_vespai_examples.py`
 - 검증: 커밋 비교·가중치 클래스명·라이선스 원문 [확실]. torch 버전 문제는 코드 확인만(실행 `미검증`). Hailo·IMX500 변환 절차 `미검증`. 스크립트는 문법 검사만 통과(실행 `미검증`)
 - 남은 결정: 승준 PC OS·Python → 1단계 실행, 상용 판매 시나리오 유지 여부(라이선스), 여왕벌 판별을 카메라/기구 중 무엇으로 할지(D3), 분업 역할 동의, 10/30 회의 1, 표본 채집 경로
+
+## CAP-AI-SJ-03 · 2026-10-28
+- 도구: Claude (Claude 앱, GitHub 레포 연결 + 승준 Windows PC 연결(셸 없음) + 클라우드 작업 환경)
+- 승준 결정·명령:
+  1. 서현의 지시를 따름. **분업계획 역할에 동의** (VespAI·비전·전자·구매)
+  2. 표본: 인터넷에서 구매, 안 되면 최대한 구해 봄
+  3. PC는 **Windows**, Python 다운로드함 (버전 미확인)
+  4. `docs/2026-10-28_승준_작업지시.md`를 읽고 **J1부터** 진행, 끝나면 로그 기록·push
+- AI가 한 일:
+  - pull 후 읽음: 승준 작업지시(J1~J7), D5 개념설계 안 1, 서현 로그 CAP-AI-10·11, 인수인계 5장(Issue #1 반영 확인)
+  - J1 직접 실행 시도 → 승준 PC는 연결돼 있으나 이 세션에 셸 도구가 없고, 문서 폴더 접근 요청은 거부됨. 클라우드에선 외부 가중치 로드가 막힘 → **승준이 더블클릭 한 번으로 실행하는 Windows 스크립트**로 전환
+  - `j1_vespai_windows.ps1/.bat`: Python 3.12/3.11 찾기(경로 A: torch 2.3.1, 없으면 B: 최신 torch + `TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD`) → 가상환경 → YOLOv5 고정 커밋 zip → 가중치·예시 프레임만 받기 → **가중치 SHA-256 검사** → 실행 → 결과 파일. git 설치 불필요, 다시 실행해도 안전
+  - 고정 YOLOv5(2022) 호환성 확인: `pkg_resources` 필요(→ `setuptools<80`), 실행 중 자동 pip install 기능 있음(→ `YOLOv5_AUTOINSTALL=False`), numpy 2 충돌은 CoreML 경로뿐이라 무관
+  - `run_vespai_examples.py`에 원 결과 비교 추가 — 원 라벨 파일이 표를 줄바꿈 없이 덧붙여 써서 줄 수로 세면 틀림 → 마지막 표만 읽음. 결과를 `result.tsv`·`summary.txt`(UTF-8)로 저장
+  - 실행계획 문서 4-1을 Windows 원클릭 절차로 갱신
+- 만든 파일: `vision/scripts/j1_vespai_windows.ps1`, `vision/scripts/j1_vespai_windows.bat`
+- 고친 파일: `vision/scripts/run_vespai_examples.py`, `vision/2026-10-28_VespAI_저장소_확인과_실행계획.md`
+- 검증: 원 결과 파서는 실제 라벨 21개로 시험 [확실] (등검은말벌 15장 28마리, 유럽말벌 6장 18마리). Python 문법 검사 통과. **PowerShell 스크립트는 문법 검사·실행 모두 못 함(`미검증`)** — 이 환경에 PowerShell이 없고 설치도 막힘. torch 2.3.1 + numpy<2 + opencv 4.10 조합 Windows 실행 `미검증`
+- **J1 상태: 미완료** — 승준이 `.bat` 실행 후 `summary.txt`·`result.tsv`를 채팅에 주면 결과 기록 (완료 기준: 종별 개수 일치, 장당 추론 시간)
+- 남은 결정: 표본 구매 전 합법 여부 확인(등검은말벌은 생태계교란 생물 — 아래 참고), J2 보유품 실물 점검(10/30), 승준 PC Python 버전
+- 표본 구매 메모: [확실] 등검은말벌은 생태계교란 생물(양도·양수·보관·운반 제한). 죽은 표본 거래도 해당되는지는 [추측] 미확인 → 구매 전 판매자·환경청에 확인 필요
