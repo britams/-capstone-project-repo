@@ -102,7 +102,7 @@ def choose_targets(points, probs, k=3, min_sep=1.5, p_min=0.0):
             chosen.append(i)
         if len(chosen) == k:
             break
-    return [(tuple(points[i]), float(probs[i])) for i in chosen]
+    return [(tuple(float(c) for c in points[i]), float(probs[i])) for i in chosen]
 
 
 def move_time(a, b, vx, vy, t_settle=0.05):
