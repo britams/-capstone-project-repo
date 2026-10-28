@@ -235,3 +235,8 @@
 - 만든 파일: `vision/scripts/dot_detect.py`, `vision/scripts/make_synthetic_dummies.py`, `vision/2026-10-28_J4_노랑점_검출_합성시험.md`, `vision/results/2026-10-28_J4_synthetic/*.jpg`
 - 검증: 합성 기준만, 실물 `미검증` (J4 완료 기준은 실물 더미 20장)
 - 남은 결정: 실물 더미 촬영(J3 후), J8 흉부 좌표(사진 필요)
+
+## CAP-AI-SJ-21 · 2026-10-28
+- 승준: J6 설명 요청 → 쉬운 말로 설명. microSD 카드 리더 필요 여부 질문 → 필요 가능성 높음(PC에서 OS 설치), 대안(Pi 5 네트워크 설치) 안내 → 승준 "그냥 사자"
+- 한 일: 구매목록 A-2 추가 (USB microSD 리더, 디바이스마트 후보, **전산용품이라 정산 제외 권장**)
+- 검증: 상품 사양·가격 `미검증`
