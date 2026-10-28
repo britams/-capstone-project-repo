@@ -111,3 +111,15 @@
 - 승준 전달: ① **포획통은 돌려서 끼우고 빼는 방식** [확실, 실물 확인] ② 캘리퍼스 측정은 다음에 실험실에서 빌려서 ③ J2 상자 안 무엇을 확인할지 자세히 알려 달라
 - AI가 한 일: ①을 Issue #2 댓글로 서현에게 전달 (104 돌려 끼움 확정 근거). J2 개봉 점검 체크리스트(10개 항목, 찾는 법·적을 것·없으면 조치) 작성해 승준에게 안내
 - 남은 결정: J2 체크리스트 결과 → `inventory/` 반영·J7 구매 목록, 캘리퍼스 측정(D2·h·D3)
+
+## CAP-AI-SJ-09 · 2026-10-28
+- 도구: Claude (Claude 앱, GitHub 레포 + 승준 PC 폴더 `창의적종합설계` 연결)
+- 승준 명령: 부품 점검은 나중에. **VespAI를 내 PC에서 PC에 연결된 카메라로 실시간 구동**되는지 해 볼 것
+- AI가 한 일:
+  - PC 확인: 폴더 정리 스크립트 실행됨(`05_VespAI_실행`에 venv·yolov5·vespai), Python은 Microsoft Store판 3.13, venv의 `home`이 설치 경로라 폴더 이동 뒤에도 쓸 수 있을 것 [가능성 높음]
+  - 원본 `monitor_run.py`는 화면 표시 없음·메일 비밀번호 하드코딩 → **새 실시간 스크립트** `vespai_live_webcam.py`: 카메라 자동 찾기(0~3번, DSHOW→MSMF), 1280×720, 박스·종명·신뢰도·fps 화면 표시, 키(q 끝/s 저장/±신뢰도/c 카메라 바꾸기), `detections.csv`(1초 간격), `live_summary.txt`. 화면·종이 속 사진은 신뢰도가 낮게 나와 표시 기준 기본 0.5 (VespAI 기본 0.8)
+  - 실행 파일 `vespai_webcam_windows.bat/.ps1`: 파일 확인 → 가중치 SHA-256 → venv 동작 확인 → 실행. PC `05_VespAI_실행`에 직접 넣음
+  - 시험: 예시 프레임으로 만든 영상 + **가짜 모델**(고정 박스)로 화면 없이 루프 실행 → 그리기·기준 거르기·기록·요약 정상 [확실]
+- 만든 파일: `vision/scripts/vespai_live_webcam.py`, `vision/scripts/vespai_webcam_windows.ps1`, `vision/scripts/vespai_webcam_windows.bat` (+ 승준 PC `05_VespAI_실행\`에 같은 3개)
+- 검증: 실제 VespAI 가중치·실제 웹캠 실행은 `미검증` (승준 PC에서 실행 필요). PowerShell 문법 검사 못 함
+- 남은 결정: 승준 실행 결과(live_summary.txt, snap) → 카메라 해상도·fps·사진 비춤 검출 여부 기록, J2 부품 점검
