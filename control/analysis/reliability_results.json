@@ -1,0 +1,756 @@
+{
+ "ranges": {
+  "tip_d": [
+   1.5,
+   2.5
+  ],
+  "dot_d": [
+   1.0,
+   2.0
+  ],
+  "sig_v": [
+   0.3,
+   0.7
+  ],
+  "sig_th": [
+   5.0,
+   15.0
+  ],
+  "sig_sz": [
+   0.05,
+   0.15
+  ],
+  "sig_mech": [
+   0.1,
+   0.25
+  ],
+  "kL": [
+   0.65,
+   0.85
+  ],
+  "kW": [
+   0.6,
+   0.8
+  ],
+  "LW": [
+   1.2,
+   1.45
+  ],
+  "p_up": [
+   0.3,
+   0.8
+  ],
+  "a_flip": [
+   0.95,
+   0.995
+  ],
+  "p_ink": [
+   0.8,
+   0.97
+  ],
+  "tpr": [
+   0.9,
+   0.99
+  ],
+  "fpr": [
+   0.01,
+   0.05
+  ]
+ },
+ "n_worlds": 120,
+ "n_geom": 250,
+ "n_hornets": 4000,
+ "designs": {
+  "D0 지금 (사각 격자 피치 4.4·구멍 3.0, 샤피 불렛)": {
+   "geom_good_p50": 0.128,
+   "geom_good_p5": 0.008,
+   "geom_skip_p50": 0.8,
+   "geom_mis_p50": 0.068,
+   "geom_mis_p95": 0.14,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.05325,
+     "success_p5": 0.0053875,
+     "mismark_p50": 0.0465,
+     "mismark_p95": 0.0925375,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.10225000000000001,
+     "success_p5": 0.0091125,
+     "mismark_p50": 0.090125,
+     "mismark_p95": 0.15785,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.9338583333333332
+    },
+    "3": {
+     "success_p50": 0.14687499999999998,
+     "success_p5": 0.0126,
+     "mismark_p50": 0.133125,
+     "mismark_p95": 0.20532499999999998,
+     "false_done_p50": 0.0,
+     "attempts_mean": 2.8082249999999997
+    },
+    "4": {
+     "success_p50": 0.193,
+     "success_p5": 0.022125,
+     "mismark_p50": 0.16125,
+     "mismark_p95": 0.250525,
+     "false_done_p50": 0.0,
+     "attempts_mean": 3.6246125
+    },
+    "6": {
+     "success_p50": 0.27875,
+     "success_p5": 0.025925,
+     "mismark_p50": 0.216,
+     "mismark_p95": 0.32315,
+     "false_done_p50": 0.0,
+     "attempts_mean": 5.132654166666667
+    },
+    "8": {
+     "success_p50": 0.3525,
+     "success_p5": 0.032425,
+     "mismark_p50": 0.26,
+     "mismark_p95": 0.379175,
+     "false_done_p50": 0.0,
+     "attempts_mean": 6.480170833333333
+    },
+    "12": {
+     "success_p50": 0.47975,
+     "success_p5": 0.05645000000000001,
+     "mismark_p50": 0.31825000000000003,
+     "mismark_p95": 0.449575,
+     "false_done_p50": 0.0,
+     "attempts_mean": 8.805658333333332
+    }
+   },
+   "n_for_p5_95": null,
+   "n_for_p50_95": null
+  },
+  "D1 얇은 살 (사각 피치 3.8·구멍 3.0)": {
+   "geom_good_p50": 0.214,
+   "geom_good_p5": 0.003800000000000001,
+   "geom_skip_p50": 0.652,
+   "geom_mis_p50": 0.1,
+   "geom_mis_p95": 0.1682,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.105625,
+     "success_p5": 0.0011875000000000002,
+     "mismark_p50": 0.063,
+     "mismark_p95": 0.10884999999999999,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.209,
+     "success_p5": 0.0019000000000000004,
+     "mismark_p50": 0.115125,
+     "mismark_p95": 0.18009999999999998,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.879497916666667
+    },
+    "3": {
+     "success_p50": 0.291,
+     "success_p5": 0.0023750000000000004,
+     "mismark_p50": 0.153625,
+     "mismark_p95": 0.23591249999999997,
+     "false_done_p50": 0.0,
+     "attempts_mean": 2.6629229166666666
+    },
+    "4": {
+     "success_p50": 0.3795,
+     "success_p5": 0.004750000000000001,
+     "mismark_p50": 0.1955,
+     "mismark_p95": 0.28065,
+     "false_done_p50": 0.0,
+     "attempts_mean": 3.3625458333333333
+    },
+    "6": {
+     "success_p50": 0.509,
+     "success_p5": 0.009500000000000001,
+     "mismark_p50": 0.2425,
+     "mismark_p95": 0.348025,
+     "false_done_p50": 0.0,
+     "attempts_mean": 4.5759
+    },
+    "8": {
+     "success_p50": 0.61275,
+     "success_p5": 0.006650000000000001,
+     "mismark_p50": 0.274,
+     "mismark_p95": 0.378575,
+     "false_done_p50": 0.0,
+     "attempts_mean": 5.5941833333333335
+    },
+    "12": {
+     "success_p50": 0.7425,
+     "success_p5": 0.012350000000000002,
+     "mismark_p50": 0.3045,
+     "mismark_p95": 0.427075,
+     "false_done_p50": 0.0,
+     "attempts_mean": 7.260579166666668
+    }
+   },
+   "n_for_p5_95": null,
+   "n_for_p50_95": null
+  },
+  "D2 슬롯 격자 (피치 4.0·틈 3.0, 리브 12 mm)": {
+   "geom_good_p50": 0.326,
+   "geom_good_p5": 0.06,
+   "geom_skip_p50": 0.528,
+   "geom_mis_p50": 0.128,
+   "geom_mis_p95": 0.21639999999999998,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.1455,
+     "success_p5": 0.017112500000000003,
+     "mismark_p50": 0.075375,
+     "mismark_p95": 0.14679999999999999,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.2715,
+     "success_p5": 0.0382,
+     "mismark_p50": 0.13175,
+     "mismark_p95": 0.23961249999999998,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.8380687500000001
+    },
+    "3": {
+     "success_p50": 0.38225,
+     "success_p5": 0.0550375,
+     "mismark_p50": 0.17662499999999998,
+     "mismark_p95": 0.29681250000000003,
+     "false_done_p50": 0.0,
+     "attempts_mean": 2.5536729166666663
+    },
+    "4": {
+     "success_p50": 0.4785,
+     "success_p5": 0.06885000000000001,
+     "mismark_p50": 0.2125,
+     "mismark_p95": 0.341,
+     "false_done_p50": 0.0,
+     "attempts_mean": 3.1702250000000003
+    },
+    "6": {
+     "success_p50": 0.62025,
+     "success_p5": 0.10245,
+     "mismark_p50": 0.25525,
+     "mismark_p95": 0.38169999999999993,
+     "false_done_p50": 0.0,
+     "attempts_mean": 4.182120833333332
+    },
+    "8": {
+     "success_p50": 0.71825,
+     "success_p5": 0.131525,
+     "mismark_p50": 0.2905,
+     "mismark_p95": 0.41237499999999994,
+     "false_done_p50": 0.0,
+     "attempts_mean": 4.986254166666667
+    },
+    "12": {
+     "success_p50": 0.8514999999999999,
+     "success_p5": 0.196775,
+     "mismark_p50": 0.33025000000000004,
+     "mismark_p95": 0.47014999999999996,
+     "false_done_p50": 0.0,
+     "attempts_mean": 6.172333333333333
+    }
+   },
+   "n_for_p5_95": null,
+   "n_for_p50_95": null
+  },
+  "D3 D2 + 비전 개선 (σ 0.2~0.4 mm)": {
+   "geom_good_p50": 0.412,
+   "geom_good_p5": 0.1916,
+   "geom_skip_p50": 0.488,
+   "geom_mis_p50": 0.1,
+   "geom_mis_p95": 0.168,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.184,
+     "success_p5": 0.08095000000000001,
+     "mismark_p50": 0.06425,
+     "mismark_p95": 0.1165125,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.339375,
+     "success_p5": 0.1631,
+     "mismark_p50": 0.1105,
+     "mismark_p95": 0.1858,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.795008333333333
+    },
+    "3": {
+     "success_p50": 0.460125,
+     "success_p5": 0.219825,
+     "mismark_p50": 0.14725,
+     "mismark_p95": 0.231125,
+     "false_done_p50": 0.0,
+     "attempts_mean": 2.4338291666666665
+    },
+    "4": {
+     "success_p50": 0.5589999999999999,
+     "success_p5": 0.298,
+     "mismark_p50": 0.17325,
+     "mismark_p95": 0.28307499999999997,
+     "false_done_p50": 0.0,
+     "attempts_mean": 2.95375
+    },
+    "6": {
+     "success_p50": 0.7050000000000001,
+     "success_p5": 0.39692500000000003,
+     "mismark_p50": 0.20725,
+     "mismark_p95": 0.33155,
+     "false_done_p50": 0.0,
+     "attempts_mean": 3.7428375
+    },
+    "8": {
+     "success_p50": 0.8075,
+     "success_p5": 0.5057,
+     "mismark_p50": 0.2225,
+     "mismark_p95": 0.3712,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 4.289479166666666
+    },
+    "12": {
+     "success_p50": 0.9155,
+     "success_p5": 0.6486000000000001,
+     "mismark_p50": 0.24725,
+     "mismark_p95": 0.434575,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 4.9671125
+    }
+   },
+   "n_for_p5_95": null,
+   "n_for_p50_95": null
+  },
+  "D4 D3 + 등 위 자세 유도 (p_up 0.6~0.9)": {
+   "geom_good_p50": 0.424,
+   "geom_good_p5": 0.2394,
+   "geom_skip_p50": 0.47,
+   "geom_mis_p50": 0.098,
+   "geom_mis_p95": 0.1604,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.27849999999999997,
+     "success_p5": 0.15575,
+     "mismark_p50": 0.080125,
+     "mismark_p95": 0.12525,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.48124999999999996,
+     "success_p5": 0.28791249999999996,
+     "mismark_p50": 0.12975,
+     "mismark_p95": 0.1990375,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.70975
+    },
+    "3": {
+     "success_p50": 0.61825,
+     "success_p5": 0.394075,
+     "mismark_p50": 0.16262500000000002,
+     "mismark_p95": 0.2510625,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 2.2232041666666666
+    },
+    "4": {
+     "success_p50": 0.72925,
+     "success_p5": 0.4822,
+     "mismark_p50": 0.1835,
+     "mismark_p95": 0.28709999999999997,
+     "false_done_p50": 0.0,
+     "attempts_mean": 2.6011625000000005
+    },
+    "6": {
+     "success_p50": 0.855,
+     "success_p5": 0.6263749999999999,
+     "mismark_p50": 0.20975,
+     "mismark_p95": 0.3278749999999999,
+     "false_done_p50": 0.0,
+     "attempts_mean": 3.090004166666667
+    },
+    "8": {
+     "success_p50": 0.92875,
+     "success_p5": 0.737425,
+     "mismark_p50": 0.21825,
+     "mismark_p95": 0.3696,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 3.3807458333333336
+    },
+    "12": {
+     "success_p50": 0.97975,
+     "success_p5": 0.865975,
+     "mismark_p50": 0.2245,
+     "mismark_p95": 0.386225,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 3.6784833333333333
+    }
+   },
+   "n_for_p5_95": null,
+   "n_for_p50_95": 12
+  },
+  "D5 D4 + 가는 팁 (약 1 mm) + 틈 3.5 (피치 4.5)": {
+   "geom_good_p50": 0.8,
+   "geom_good_p5": 0.5878,
+   "geom_skip_p50": 0.096,
+   "geom_mis_p50": 0.1,
+   "geom_mis_p95": 0.17619999999999997,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.5313749999999999,
+     "success_p5": 0.3945,
+     "mismark_p50": 0.07725,
+     "mismark_p95": 0.1457625,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.78325,
+     "success_p5": 0.6368874999999999,
+     "mismark_p50": 0.10575,
+     "mismark_p95": 0.2025125,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.46034375
+    },
+    "3": {
+     "success_p50": 0.8968750000000001,
+     "success_p5": 0.779725,
+     "mismark_p50": 0.119875,
+     "mismark_p95": 0.23184999999999997,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.6819041666666668
+    },
+    "4": {
+     "success_p50": 0.95225,
+     "success_p5": 0.859875,
+     "mismark_p50": 0.12275,
+     "mismark_p95": 0.24184999999999998,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.7896458333333334
+    },
+    "6": {
+     "success_p50": 0.989,
+     "success_p5": 0.9497749999999999,
+     "mismark_p50": 0.124,
+     "mismark_p95": 0.24912499999999999,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.8784916666666667
+    },
+    "8": {
+     "success_p50": 0.9975,
+     "success_p5": 0.9799249999999999,
+     "mismark_p50": 0.13175,
+     "mismark_p95": 0.25205,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.9077458333333335
+    },
+    "12": {
+     "success_p50": 0.9995,
+     "success_p5": 0.996475,
+     "mismark_p50": 0.12775,
+     "mismark_p95": 0.26287499999999997,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.9096416666666665
+    }
+   },
+   "n_for_p5_95": 8,
+   "n_for_p50_95": 4
+  },
+  "D6 사각 구멍 3.5 (피치 4.3) + 가는 팁 + 비전 개선 + 자세 유도": {
+   "geom_good_p50": 0.786,
+   "geom_good_p5": 0.5668,
+   "geom_skip_p50": 0.09,
+   "geom_mis_p50": 0.108,
+   "geom_mis_p95": 0.184,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.533625,
+     "success_p5": 0.388725,
+     "mismark_p50": 0.086,
+     "mismark_p95": 0.140675,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.7793749999999999,
+     "success_p5": 0.6186499999999999,
+     "mismark_p50": 0.118625,
+     "mismark_p95": 0.20775,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.4684291666666667
+    },
+    "3": {
+     "success_p50": 0.8935,
+     "success_p5": 0.7584624999999999,
+     "mismark_p50": 0.128625,
+     "mismark_p95": 0.233525,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.697064583333333
+    },
+    "4": {
+     "success_p50": 0.9492499999999999,
+     "success_p5": 0.862175,
+     "mismark_p50": 0.136,
+     "mismark_p95": 0.23335,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.8135708333333334
+    },
+    "6": {
+     "success_p50": 0.98975,
+     "success_p5": 0.942275,
+     "mismark_p50": 0.14225,
+     "mismark_p95": 0.24712499999999998,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.9050541666666667
+    },
+    "8": {
+     "success_p50": 0.99725,
+     "success_p5": 0.979375,
+     "mismark_p50": 0.14,
+     "mismark_p95": 0.2512,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.9351916666666669
+    },
+    "12": {
+     "success_p50": 0.9995,
+     "success_p5": 0.995975,
+     "mismark_p50": 0.13775,
+     "mismark_p95": 0.24637499999999998,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.9459291666666667
+    }
+   },
+   "n_for_p5_95": 8,
+   "n_for_p50_95": 6
+  },
+  "D7 D5 + 기준 p_min 0.3 (더 과감히 찍음)": {
+   "geom_good_p50": 0.81,
+   "geom_good_p5": 0.6438,
+   "geom_skip_p50": 0.041999999999999996,
+   "geom_mis_p50": 0.138,
+   "geom_mis_p95": 0.24419999999999997,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.5373749999999999,
+     "success_p5": 0.398575,
+     "mismark_p50": 0.1035,
+     "mismark_p95": 0.18771249999999998,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.78625,
+     "success_p5": 0.645125,
+     "mismark_p50": 0.14287499999999997,
+     "mismark_p95": 0.2490125,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.4536
+    },
+    "3": {
+     "success_p50": 0.903625,
+     "success_p5": 0.794825,
+     "mismark_p50": 0.15675,
+     "mismark_p95": 0.272875,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.6642958333333333
+    },
+    "4": {
+     "success_p50": 0.95475,
+     "success_p5": 0.87485,
+     "mismark_p50": 0.16375,
+     "mismark_p95": 0.2794,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.7685041666666668
+    },
+    "6": {
+     "success_p50": 0.9902500000000001,
+     "success_p5": 0.9538,
+     "mismark_p50": 0.1625,
+     "mismark_p95": 0.29209999999999997,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.8474833333333331
+    },
+    "8": {
+     "success_p50": 0.9975,
+     "success_p5": 0.9835,
+     "mismark_p50": 0.1655,
+     "mismark_p95": 0.28055,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.8632375
+    },
+    "12": {
+     "success_p50": 0.9995,
+     "success_p5": 0.997475,
+     "mismark_p50": 0.1695,
+     "mismark_p95": 0.29259999999999997,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 1.8785041666666666
+    }
+   },
+   "n_for_p5_95": 6,
+   "n_for_p50_95": 4
+  },
+  "D8 D5 + 기준 p_min 0.8 (확실할 때만 찍음)": {
+   "geom_good_p50": 0.6859999999999999,
+   "geom_good_p5": 0.4792,
+   "geom_skip_p50": 0.272,
+   "geom_mis_p50": 0.041999999999999996,
+   "geom_mis_p95": 0.08819999999999999,
+   "by_nmax": {
+    "1": {
+     "success_p50": 0.446625,
+     "success_p5": 0.294725,
+     "mismark_p50": 0.037625,
+     "mismark_p95": 0.07193749999999999,
+     "false_done_p50": 0.0,
+     "attempts_mean": 1.0
+    },
+    "2": {
+     "success_p50": 0.6990000000000001,
+     "success_p5": 0.49375,
+     "mismark_p50": 0.053,
+     "mismark_p95": 0.1132625,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.543339583333333
+    },
+    "3": {
+     "success_p50": 0.832125,
+     "success_p5": 0.6429875,
+     "mismark_p50": 0.06475,
+     "mismark_p95": 0.1338125,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 1.8516145833333333
+    },
+    "4": {
+     "success_p50": 0.9047499999999999,
+     "success_p5": 0.7393000000000001,
+     "mismark_p50": 0.06675,
+     "mismark_p95": 0.14334999999999998,
+     "false_done_p50": 0.00025,
+     "attempts_mean": 2.02915
+    },
+    "6": {
+     "success_p50": 0.9722500000000001,
+     "success_p5": 0.8682500000000001,
+     "mismark_p50": 0.07225,
+     "mismark_p95": 0.15792499999999998,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 2.2096125
+    },
+    "8": {
+     "success_p50": 0.99125,
+     "success_p5": 0.9352,
+     "mismark_p50": 0.07225,
+     "mismark_p95": 0.161,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 2.272254166666667
+    },
+    "12": {
+     "success_p50": 0.9985,
+     "success_p5": 0.982975,
+     "mismark_p50": 0.07225,
+     "mismark_p95": 0.16879999999999998,
+     "false_done_p50": 0.0005,
+     "attempts_mean": 2.3286875
+    }
+   },
+   "n_for_p5_95": 12,
+   "n_for_p50_95": 6
+  }
+ },
+ "top_k_policy_D0": {
+  "2": {
+   "good_any": 0.2625,
+   "bad_dots": 1.7375
+  },
+  "3": {
+   "good_any": 0.2375,
+   "bad_dots": 2.7625
+  },
+  "10": {
+   "good_any": 0.23125,
+   "bad_dots": 4.61875
+  },
+  "20": {
+   "good_any": 0.22499999999999998,
+   "bad_dots": 4.425000000000001
+  }
+ },
+ "queen": {
+  "sigma 0.05 thr 4.4": {
+   "queen_called_worker": 0.0,
+   "worker_called_queen": 0.13071
+  },
+  "sigma 0.05 thr 4.5": {
+   "queen_called_worker": 0.000875,
+   "worker_called_queen": 0.02193
+  },
+  "sigma 0.05 thr 4.55": {
+   "queen_called_worker": 0.010385,
+   "worker_called_queen": 0.00403
+  },
+  "sigma 0.1 thr 4.4": {
+   "queen_called_worker": 0.002385,
+   "worker_called_queen": 0.14463
+  },
+  "sigma 0.1 thr 4.5": {
+   "queen_called_worker": 0.026055,
+   "worker_called_queen": 0.05055
+  },
+  "sigma 0.1 thr 4.55": {
+   "queen_called_worker": 0.06496,
+   "worker_called_queen": 0.02438
+  },
+  "sigma 0.15 thr 4.4": {
+   "queen_called_worker": 0.02103,
+   "worker_called_queen": 0.16646
+  },
+  "sigma 0.15 thr 4.5": {
+   "queen_called_worker": 0.07668,
+   "worker_called_queen": 0.07936
+  },
+  "sigma 0.15 thr 4.55": {
+   "queen_called_worker": 0.12983,
+   "worker_called_queen": 0.05007
+  }
+ },
+ "time": {
+  "28BYJ-48 (보유)": {
+   "1": 64.8,
+   "2": 80.9,
+   "3": 96.9,
+   "4": 113.0
+  },
+  "28BYJ-48 + 미리 이동": {
+   "1": 51.3,
+   "2": 67.3,
+   "3": 83.4,
+   "4": 99.4
+  },
+  "NEMA17 X·Y + 28BYJ 바닥": {
+   "1": 35.3,
+   "2": 49.2,
+   "3": 63.1,
+   "4": 76.9
+  },
+  "NEMA17 X·Y·바닥": {
+   "1": 18.6,
+   "2": 23.2,
+   "3": 27.9,
+   "4": 32.5
+  }
+ },
+ "demo_trials": {
+  "실패 0회 허용": 59,
+  "실패 1회 허용": 93,
+  "실패 2회 허용": 124
+ },
+ "runtime_s": 452.0
+}
