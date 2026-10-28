@@ -38,11 +38,12 @@ GRID = dict(t=1.5, n=9, pitch=4.4, hole=3.0)
 FLOOR = dict(t=6, clear=0.5, stroke=36)     # 140 승강 바닥
 PORT_R = 6                                   # 통로 안 반지름 (지름 12)
 DUCT_R = 8                                   # 통로 바깥 반지름
-MK = dict(R=7.5, body=120, cone=10, tip=4, rt=0.6)   # 201 마커 (잠정 Ø15·길이 134 — 클램프 범위 Ø10~20, 샤피 크리에이티브 Ø14.7~18.9·134)
+MK = dict(R=7.35, R_max=9.45, grip=60, body=60, cone=10, tip=4, rt=0.6)   # 201 샤피 크리에이티브 불렛(노랑): 그립 Ø14.7·최대 Ø18.9·길이 134 (JetPens 사양). 굵은 부분 위치·팁은 실측 전 [추측]
+BRG = dict(x=(7.5, 4.0, 24.0), y=(6.0, 3.0, 19.0))   # 221·222 직선 볼 부싱 LM8UU 8x15x24 / LM6UU 6x12x19 (S4 M5: 플라스틱 부싱은 끼임)
 CUP = dict(R=7, r=3, top=392.0, h=12)       # 219 캡 컵 (실리콘): 마커 원뿔이 컵 안쪽 테두리에 앉음
-XY = dict(rod_z=480, ya=-64, yb=54, x0=19, x1=172,   # 213 X 고정 봉 (Ø8): 높이·y 위치·양 끝
-          yin0=-58, yin1=48,                 # 빔 끝 블록 안쪽 면 y (Y 행정 범위)
-          car_z0=400, car_z1=490, tab_z=462,  # 206 Y 캐리지 높이, 스프링 멈춤 탭
+XY = dict(rod_z=480, ya=-65, yb=57, x0=19, x1=172,   # 213 X 고정 봉 (Ø8): 높이·y 위치·양 끝
+          yin0=-56, yin1=48, eb_t=18,        # 빔 끝 블록 안쪽 면 y (Y 행정 범위), 블록 두께 (LM8UU Ø15 + 벽)
+          car_z0=400, car_z1=490, tab_z=462, eb_top=495,  # 206 Y 캐리지 높이, 스프링 멈춤 탭, 빔 끝 블록 윗면
           xscrew_z=425, yscrew_z=460, yrod_z=(445, 475))
 PARK = (65.0, -40.0)                          # 대기 자리 (캡 컵 중심) — 카메라 시야 밖
 CAM_D = 200                                   # 카메라–격자 거리 (AI 카메라 최소 초점 20 cm)
@@ -246,9 +247,10 @@ def build():
     ex, ey = V(1, 0, 0), V(0, 1, 0)
 
     # 201 마커: 팁(Ø1.2) + 원뿔 + 몸통
+    zg = z_t + MK["tip"] + MK["cone"]
     P["201_marker"] = cyl(rt, MK["tip"], V(xm, ym, z_t)).fuse(
         Part.makeCone(rt, R, MK["cone"], V(xm, ym, z_t + MK["tip"]))).fuse(
-        cyl(R, MK["body"], V(xm, ym, z_t + MK["tip"] + MK["cone"])))
+        cyl(R, MK["grip"], V(xm, ym, zg))).fuse(cyl(MK["R_max"], MK["body"], V(xm, ym, zg + MK["grip"])))
 
     # 202 V블록 홀더 (+ 펜 들기 탭) — 마커 몸통이 V홈 두 면에 닿음
     hb = box(xm + 2, xhb, ym - 14, ym + 14, hz0, hz1)
@@ -265,7 +267,8 @@ def build():
     P["203_clamp_strap"] = bar.fuse(arm1).fuse(arm2)
 
     # 204 홀더 스프링: 찍는 힘 상한 (홀더 윗면 ↔ 캐리지 탭)
-    P["204_holder_spring"] = tube(3, 2, ztab - hz1, V(xm + 12.8, ym, hz1))
+    xsp = xm + MK["R_max"] + 0.6 + 3.2                       # 스프링 축 (마커 굵은 부분과 0.6 mm 이상 떨어짐)
+    P["204_holder_spring"] = tube(3, 2, ztab - hz1, V(xsp, ym, hz1))
 
     # 205 Z 서보 (펜 들기, SG90): 캐리지 +y 면 아래쪽(Y 봉보다 낮게). 혼이 옆으로 누운 상태 = 놓음 (그림의 두 상태). 혼을 세우면 탭을 들어 올림
     sv_body = box(xm + 18, xm + 40.5, ym + 15, ym + 27.2, cz0, cz0 + 22.7)
@@ -275,31 +278,37 @@ def build():
 
     # 206 Y 캐리지 (+ 스프링 멈춤 탭): Y 봉 2개(Ø6)·Y 나사(T8) 너트
     car = box(xhb, xhb + 20, ym - 15, ym + 15, cz0, cz1)
+    rB, rS, LB = BRG["y"]
     for zr in XY["yrod_z"]:
-        car = car.cut(cyl(3, 32, V(xb, ym - 16, zr), ey))
+        car = car.cut(cyl(rB, 32, V(xb, ym - 16, zr), ey))
     car = car.cut(cyl(4, 32, V(xb, ym - 16, XY["yscrew_z"]), ey))
-    car = car.fuse(box(xm + 9, xhb, ym - 6, ym + 6, ztab, ztab + 8))
+    car = car.fuse(box(xm + MK["R_max"] + 0.6, xhb, ym - 6, ym + 6, ztab, ztab + 8))
+    P["221_y_bearings_LM6UU"] = Part.makeCompound([tube(rB, rS, LB, V(xb, ym - LB / 2, zr), ey) for zr in XY["yrod_z"]])
     P["206_y_carriage"] = car
 
     # 207 Y 봉 (Ø6, 2개), 208 Y 리드스크루 (T8)
     y0, y1 = XY["yin0"], XY["yin1"]
     P["207_y_rods"] = cyl(3, y1 - y0, V(xb, y0, XY["yrod_z"][0]), ey).fuse(cyl(3, y1 - y0, V(xb, y0, XY["yrod_z"][1]), ey))
-    P["208_y_lead_screw_T8"] = cyl(4, y1 - (-80), V(xb, -80, XY["yscrew_z"]), ey)
+    P["208_y_lead_screw_T8"] = cyl(4, y1 - (y0 - XY["eb_t"] - 10), V(xb, y0 - XY["eb_t"] - 10, XY["yscrew_z"]), ey)
 
     # 212 빔 끝 블록 2개: X 고정 봉 구멍, (-y 블록) X 나사 너트·Y 나사 구멍
     ya, yb = XY["ya"], XY["yb"]
-    eb0 = box(xb - 10, xb + 10, y0 - 12, y0, cz0, XY["rod_z"] + 10)
-    eb0 = eb0.cut(cyl(4, 22, V(xb - 11, ya, XY["rod_z"]), ex)).cut(cyl(4, 22, V(xb - 11, ya, XY["xscrew_z"]), ex))
-    eb0 = eb0.cut(cyl(4, 14, V(xb, y0 - 13, XY["yscrew_z"]), ey))
-    eb1 = box(xb - 10, xb + 10, y1, y1 + 12, cz0, XY["rod_z"] + 10).cut(cyl(4, 22, V(xb - 11, yb, XY["rod_z"]), ex))
+    xR, xS, xL = BRG["x"]
+    et = XY["eb_t"]
+    yo = y0 - et                                             # -y 끝 블록 바깥면
+    eb0 = box(xb - 12, xb + 12, yo, y0, cz0, XY["eb_top"])
+    eb0 = eb0.cut(cyl(xR, 26, V(xb - 13, ya, XY["rod_z"]), ex)).cut(cyl(4, 26, V(xb - 13, ya, XY["xscrew_z"]), ex))
+    eb0 = eb0.cut(cyl(4, et + 2, V(xb, yo - 1, XY["yscrew_z"]), ey))
+    eb1 = box(xb - 12, xb + 12, y1, y1 + et, cz0, XY["eb_top"]).cut(cyl(xR, 26, V(xb - 13, yb, XY["rod_z"]), ex))
     P["212_beam_end_blocks"] = eb0.fuse(eb1)
+    P["222_x_bearings_LM8UU"] = Part.makeCompound([tube(xR, xS, xL, V(xb - xL / 2, yy, XY["rod_z"]), ex) for yy in (ya, yb)])
 
     # 209 Y 모터 28BYJ-48 (-y 끝 블록 바깥), 210 커플링, 211 모터 브래킷
     zy = XY["yscrew_z"]
-    P["209_y_stepper_28BYJ48"] = cyl(14, 19, V(xb, -117, zy + 8), ey).fuse(cyl(2.5, 16, V(xb, -98, zy), ey))
-    P["210_y_coupling"] = cyl(7, 20, V(xb, -90, zy), ey).cut(cyl(2.5, 10, V(xb, -90, zy), ey)).cut(cyl(4, 10, V(xb, -80, zy), ey))
-    br = box(xb - 10, xb + 10, -98, -95, zy - 10, zy + 26).cut(cyl(3, 5, V(xb, -99, zy), ey))
-    br = br.fuse(box(xb - 10, xb - 7.5, -95, y0 - 12, zy - 10, zy + 26)).fuse(box(xb + 7.5, xb + 10, -95, y0 - 12, zy - 10, zy + 26))
+    P["209_y_stepper_28BYJ48"] = cyl(14, 19, V(xb, yo - 47, zy + 8), ey).fuse(cyl(2.5, 16, V(xb, yo - 28, zy), ey))
+    P["210_y_coupling"] = cyl(7, 20, V(xb, yo - 20, zy), ey).cut(cyl(2.5, 10, V(xb, yo - 20, zy), ey)).cut(cyl(4, 10, V(xb, yo - 10, zy), ey))
+    br = box(xb - 10, xb + 10, yo - 28, yo - 25, zy - 10, zy + 26).cut(cyl(3, 5, V(xb, yo - 29, zy), ey))
+    br = br.fuse(box(xb - 10, xb - 7.5, yo - 25, yo, zy - 10, zy + 26)).fuse(box(xb + 7.5, xb + 10, yo - 25, yo, zy - 10, zy + 26))
     P["211_y_motor_bracket"] = br
 
     # 213 X 고정 봉 (Ø8, 2개), 218 봉 받침 4개 (갠트리 단 레일 위)
