@@ -213,3 +213,25 @@
   - 영수증 PDF·캡처를 순번 이름으로 승준 PC `06_재료비_정산\영수증\`에 저장 (레포 X), `purchase/구매장부.md` 메모 갱신
 - 고친 파일: `purchase/재료비_정산보고서.xlsx`, `purchase/구매장부.md`
 - 남은 결정: 배송비 인정 여부, 어댑터·쿨러 전산용품 해당 여부, 구매영수증으로 충분한지(카드 매출전표 필요?), 물건 도착 후 제품 사진, 샤피 마커 주문
+
+## CAP-AI-SJ-19 · 2026-10-28
+- 승준 명령: 오늘 할 일 끝 — 서현 Claude가 레포로 계속 진행 중이니 너도 할 일 할 것 (사용자 부재, 하드웨어 없이 가능한 J6·J4부터)
+- AI가 한 일 (J6):
+  - `control/firmware/trap_controller/trap_controller.ino`: 구동기 7개(28BYJ-48 ×3: 바닥 F·마커 X·Y / 서보 ×4: 입구 112·격리 170·방생 176·펜 205) + HX711, 비차단 동시 이동, 소프트 한계, 바닥 하중 정지(PRESS), 문·펜, 각도 보정, 워치독, 켤 때 대기 상태
+  - `control/pi/trap_link.py`: Pi·PC용 클라이언트 + 손시험 콘솔(`time X 10` 속도 측정)
+  - PC 시뮬레이션(`control/firmware/sim/`, 흉내 Arduino.h·Servo.h): 명령·X·Y 동시 이동·PRESS 50 g 정지·문·펜·워치독·오류 응답 확인, 파이썬 클라이언트 ↔ 실시간 시뮬레이터 연결 시험 — X 2 mm 1.09 s (**1.83 mm/s**)
+  - 발견: **UNO 18핀이 꽉 참**(진입 감지 114는 Pi GPIO로), **원점(리밋) 스위치 없음**(넣으려면 스텝·방향 드라이버 또는 아두이노 2개), 구동부 별도 5V 전원 필요
+  - 인터페이스 정의서: 'Pi ↔ 아두이노 통신' 1차 값, '진입 감지' 신호 Pi GPIO, 변경 이력 추가
+- 만든 파일: `control/firmware/trap_controller/trap_controller.ino`, `control/pi/trap_link.py`, `control/firmware/sim/*`, `control/2026-10-28_J6_구동부_펌웨어와_시험절차.md` / 고친 파일: `design/인터페이스_정의서.md`
+- 검증: 시뮬레이션만 [확실]. 실제 UNO 컴파일·구동 `미검증` (Arduino IDE 없음). 28BYJ-48 반걸음 수 4075.77 [가능성 높음]
+- 남은 결정: 원점 스위치·드라이버(서현 D6), 실물 J6 시험(승준), 구동부 전원
+
+## CAP-AI-SJ-20 · 2026-10-28
+- AI가 한 일 (J4):
+  - `vision/scripts/dot_detect.py`: 노랑 점 = 색 + 지름(0.6~3.0 mm) + 원형도 + 둘레 어두움, 격자선 이어 붙이기, `--roi`, `--eval` 폴더 평가
+  - `vision/scripts/make_synthetic_dummies.py`: 합성 더미(노랑 다리·주황 배띠·얼굴, 3 mm 격자, 조명·흐림·잡음) + 정답 좌표
+  - 시험: 첫 80장 87.5 % → 원인(흐림으로 작아짐, 격자선이 점을 쪼갬) 고침 → **다른 시드 100장 검출 96 %, 오검출 2 %, 위치 오차 0.3 mm 이내**. 남은 오검출은 흉부 밖 다리 조각 → ROI(J8)로 해결
+  - 발견: **노랑 마커는 등검은말벌의 노랑 다리·주황 배띠와 겹칠 위험** [가능성 높음]
+- 만든 파일: `vision/scripts/dot_detect.py`, `vision/scripts/make_synthetic_dummies.py`, `vision/2026-10-28_J4_노랑점_검출_합성시험.md`, `vision/results/2026-10-28_J4_synthetic/*.jpg`
+- 검증: 합성 기준만, 실물 `미검증` (J4 완료 기준은 실물 더미 20장)
+- 남은 결정: 실물 더미 촬영(J3 후), J8 흉부 좌표(사진 필요)
