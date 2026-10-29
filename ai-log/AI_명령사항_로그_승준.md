@@ -278,3 +278,11 @@
 - 만든 파일: `vision/scripts/mark_planner.py`, `control/analysis/reliability_mc.py`, `control/analysis/reliability_results.json`, `control/proposals/grid_coupons_sj.py`, `control/proposals/stl/*.stl`(4개), `control/2026-10-28_제어부_구성_신뢰성_AI마킹.md` / 고친 파일: `purchase/2026-10-28_구매목록_총정리.md`, `design/인터페이스_정의서.md`(변경 이력 1행)
 - 검증: 기하·확률 계산 코드 실행 [확실]. 입력 범위(팁·점 지름, 비전 오차, 말벌 자세, 잉크)는 [추측] → **신뢰성 숫자는 모두 `미검증` 예측**. STL 프린트 `미검증`
 - 남은 결정 (서현): 격자 틈 3.5 mm·살 두께, 팁 굵기(마커), 조명 위/아래, NEMA17 여부(무게 다시), 오마킹·여왕벌 놓침 목표값, 원점 스위치 위치(UNO 1 vs Pi GPIO) / (승준) J9 팁 실측, 시험 조각 프린트, J8 흉부 키포인트 σ 실측, 펌웨어 UNO 2개로 나누기, 살아 있는 말벌 행동 촬영
+
+## CAP-AI-SJ-25 · 2026-10-29
+- 승준: 말벌 사진 프린트해 옴(인터넷 사진, 실물 크기 아님) → VespAI 웹캠 재시험 시작. "동영상 따로 저장할 수 있나?"
+- AI가 한 일: `vision/scripts/vespai_live_webcam.py`에 녹화 추가 — `r` 키(또는 `--record`)로 시작·끝, 박스 그린 영상(`rec_*_boxes.mp4`)과 원본 영상(`rec_*_raw.mp4`, 나중에 `--source`로 다시 돌리기용) 두 개, 15 fps 실제 시간 맞춤, mp4 안 되면 avi. `vespai_webcam_windows.ps1`: 실행할 때마다 새 결과 폴더 `out_live_날짜_시각` (어제 폐기한 `out_live` 결과와 안 섞이게)
+- 검증: 가짜 모델 + 합성 영상으로 시험 — 6 s 처리 → 93 프레임(15 fps ≈ 6.2 s), 두 파일 모두 다시 읽힘 [확실]. 승준 PC 웹캠에서는 `미검증`. PS1 문법 `미검증`(PowerShell 없음)
+- PC 반영: `창의적종합설계\05_VespAI_실행\`(실행 폴더)와 `repo\vision\scripts\`
+- 주의: 인터넷 사진을 찍은 스냅·영상은 저작권 때문에 레포에 안 올림 (숫자 결과만), 25 MB 넘는 영상도 안 올림
+- 남은 결정: 실물 크기 프린트로 20 cm 거리 시험 (설계 조건)

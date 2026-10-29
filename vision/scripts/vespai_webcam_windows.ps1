@@ -6,7 +6,7 @@ $Py   = Join-Path $Base 'venv\Scripts\python.exe'
 $Yolo = Join-Path $Base 'yolov5'
 $W    = Join-Path $Base 'vespai\models\yolov5-params\yolov5s-all-data.pt'
 $Live = Join-Path $Base 'vespai_live_webcam.py'
-$Out  = Join-Path $Base 'out_live'
+$Out  = Join-Path $Base ('out_live_' + (Get-Date -Format 'yyyyMMdd_HHmm'))   # one folder per run (SJ-25)
 $WEIGHTS_SHA = '1FFF0BDE968690917E6136077BF144DDA2E03CCCAA5AE0648CF2BF5CCE423694'
 
 foreach ($p in @($Py, $Yolo, $W, $Live)) {
@@ -29,7 +29,7 @@ $env:YOLOv5_AUTOINSTALL = 'False'
 $env:TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD = '1'
 $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONWARNINGS = 'ignore::FutureWarning'
-Write-Host 'Click the video window, then: q = quit, s = save picture, + / - = confidence, c = next camera'
+Write-Host 'Click the video window, then: q = quit, s = save picture, r = record video on/off, + / - = confidence, c = next camera'
 & $Py $Live --yolo $Yolo --weights $W --out $Out @args
 Write-Host ''
-Write-Host "Results: $Out  (send live_summary.txt and any snap_*.jpg to Claude)" -ForegroundColor Green
+Write-Host "Results: $Out  (live_summary.txt, detections.csv, snap_*.jpg, rec_*.mp4)" -ForegroundColor Green
