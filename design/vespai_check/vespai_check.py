@@ -161,6 +161,7 @@ def run_live(model, args):
     lw.writerow(['time_s', 'condition', 'n_velutina', 'n_crabro', 'best_velutina_conf'])
     per = {}
     t_start, t_last = time.time(), 0.0
+    t_snap, n_snap = -9.0, 0
     print('키: g 격자  k 마킹실만  i 입력 640/1280  [ ] 화면 폭 mm  +/- 신뢰도  s 저장  q 끝')
     while True:
         ok, fr = cap.read()
@@ -183,6 +184,10 @@ def run_live(model, args):
         cv2.putText(show, tag, (8, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         cv2.imshow('VespAI check (Seohyun)', show)
         now = time.time() - t_start
+        if dets and now - t_snap >= 1.0 and n_snap < 600:      # 박스가 뜬 장면을 1초에 1장 자동 저장 → 진짜 말벌인지 나중에 판정
+            tagc = ('K' if k else 'F') + ('G' if g else '')       # F 전체 / K 마킹실만, G 격자
+            cv2.imwrite(os.path.join(args.out, 'auto_%06.1f_%s.jpg' % (now, tagc)), show)
+            t_snap, n_snap = now, n_snap + 1
         if now - t_last >= 1.0:
             t_last = now
             v = [d for d in dets if d[5] == 1]
