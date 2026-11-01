@@ -1,0 +1,6 @@
+Python 3.14.3 / torch 2.15.0+cpu / OpenCV 5.0.0
+OS Windows-11-10.0.26200-SP0 / CPU AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD
+가중치 yolov5s-all-data.pt / 클래스 {0: 'Vespa crabro', 1: 'Vespa velutina'} / conf 0.8
+모델 로드 20.2 s
+종별 개수 일치 16/21 프레임
+평균 추론 시간 0.106 s/장 (첫 장 제외, CPU, 입력 원본 크기 → 내부 640)
