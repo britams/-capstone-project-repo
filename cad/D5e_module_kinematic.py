@@ -35,6 +35,7 @@ CH = dict(cx=55, inner=40, wall=3, base_t=5, h=50, z_base=330)
 GRID = dict(t=1.5, n=9, pitch=4.4, hole=3.0)
 FLOOR = dict(t=6, clear=0.5, stroke=36.5)
 PORT_R, DUCT_R = 6, 8
+BEND_R = 20.0                                # 통로 굽힘 중심 반지름 (안지름 12의 1.67배) — D5d는 관 두 개를 겹쳐 붙여 꺾인 곳이 막힘 덩어리였음
 MK = dict(R=7.35, R_max=9.45, grip=60, body=60, cone=10, tip=4, rt=0.6)
 BRG = dict(x=(7.5, 4.0, 24.0), y=(6.0, 3.0, 19.0))
 CUP = dict(R=7, r=3, top=392.0, h=12)
@@ -90,6 +91,14 @@ def cyl(r, h, p, d=V(0, 0, 1)):
 
 def tube(R, r, h, p, d=V(0, 0, 1)):
     return cyl(R, h, p, d).cut(cyl(r, h, p, d))
+
+
+def bend(r, p0, t0, c, ang):
+    """굽힘관(꽉 찬 원기둥 굽힘): 시작 단면 중심 p0, 시작 방향 t0, 굽힘 중심 c, ang도만큼 돌림"""
+    face = Part.Face(Part.Wire(Part.makeCircle(r, V(p0), V(t0))))
+    n = V(p0) - V(c)
+    axis = n.cross(V(t0))                                   # 돌리는 축 (단면이 t0 방향으로 나아가게)
+    return face.revolve(V(c), axis, ang)
 
 
 def rot_to(zdir, xdir):
@@ -218,12 +227,19 @@ def build():
     W, w = CH["inner"], CH["wall"]
     x_wall_in = cx - W / 2 - w                              # 32
     hx0 = x_wall_in - 12                                    # 문 하우징 바깥면 20
-    v_duct = tube(DUCT_R, PORT_R, z_entry + DUCT_R - (DECK_TOP + 30), V(0, 0, DECK_TOP + 30))
-    h_duct = tube(DUCT_R, PORT_R, hx0 + DUCT_R, V(-DUCT_R, 0, z_entry), V(1, 0, 0))
-    fixed("110_entry_duct", v_duct.fuse(h_duct).cut(cyl(PORT_R, z_entry - (DECK_TOP + 30), V(0, 0, DECK_TOP + 30))).cut(
-        cyl(PORT_R, hx0 + DUCT_R + 1, V(0, 0, z_entry), V(1, 0, 0))).cut(cyl(PORT_R, DUCT_R, V(0, 0, z_entry))))
-    fixed("114_entry_sensor_tx", box(10, 16, -3, 3, z_entry + DUCT_R, z_entry + DUCT_R + 4))      # 위·아래 (옆은 문 서보 자리)
-    fixed("114_entry_sensor_rx", box(10, 16, -3, 3, z_entry - DUCT_R - 4, z_entry - DUCT_R))
+    # 110 입구 통로: 세로관 → 굽힘(중심 반지름 BEND_R) → 문 하우징 면(x = hx0). 관을 겹쳐 붙이지 않고 굽힘관으로 이음
+    zb0 = z_entry - BEND_R                                  # 굽힘 시작 높이 (세로관 끝)
+    out_e = cyl(DUCT_R, zb0 - (DECK_TOP + 30), V(0, 0, DECK_TOP + 30)).fuse(
+        bend(DUCT_R, V(0, 0, zb0), V(0, 0, 1), V(BEND_R, 0, zb0), 90.0))
+    if hx0 > BEND_R + 1e-6:                                 # 굽힘 끝 ~ 문 하우징 사이 곧은 관 (지금은 0)
+        out_e = out_e.fuse(cyl(DUCT_R, hx0 - BEND_R, V(BEND_R, 0, z_entry), V(1, 0, 0)))
+    in_e = cyl(PORT_R, zb0 - (DECK_TOP + 30) + 1, V(0, 0, DECK_TOP + 29)).fuse(
+        bend(PORT_R, V(0, 0, zb0), V(0, 0, 1), V(BEND_R, 0, zb0), 90.0)).fuse(
+        cyl(PORT_R, hx0 - BEND_R + 1, V(BEND_R, 0, z_entry), V(1, 0, 0)))
+    fixed("110_entry_duct", out_e.cut(in_e).removeSplitter())
+    zs = DECK_TOP + 30 + 40                                 # 빛 게이트: 세로관 양옆 (굽힘·문 서보 자리를 피함)
+    fixed("114_entry_sensor_tx", box(DUCT_R, DUCT_R + 4, -3, 3, zs - 3, zs + 3))
+    fixed("114_entry_sensor_rx", box(-DUCT_R - 4, -DUCT_R, -3, 3, zs - 3, zs + 3))
 
     # 120 마킹실, 121 바닥판, 130 격자
     walls = box(cx - W / 2 - w, cx + W / 2 + w, -W / 2 - w, W / 2 + w, zc0, z_grid_bot).cut(
@@ -343,10 +359,13 @@ def build():
 
     # 172 격리 통로, 173 깔때기, 104·105, REF 포획통
     zfun = TOP_BOT - 25
-    hx = tube(DUCT_R, PORT_R, hx0 + DUCT_R, V(-DUCT_R, 0, z_upper), V(1, 0, 0))
-    vx = tube(DUCT_R, PORT_R, zfun - (z_upper - DUCT_R), V(0, 0, z_upper - DUCT_R))
-    fixed("172_isolation_duct", hx.fuse(vx).cut(cyl(PORT_R, hx0 + DUCT_R + 1, V(0, 0, z_upper), V(1, 0, 0))).cut(
-        cyl(PORT_R, zfun - z_upper + 1, V(0, 0, z_upper))).cut(cyl(PORT_R, DUCT_R, V(0, 0, z_upper))))
+    # 172 격리 통로: 문 하우징 면(x = hx0)에서 -x로 → 굽힘 → 세로관 → 깔때기 173
+    zb1 = z_upper + BEND_R
+    out_i = bend(DUCT_R, V(hx0, 0, z_upper), V(-1, 0, 0), V(hx0, 0, zb1), 90.0).fuse(
+        cyl(DUCT_R, zfun - zb1, V(0, 0, zb1)))
+    in_i = bend(PORT_R, V(hx0, 0, z_upper), V(-1, 0, 0), V(hx0, 0, zb1), 90.0).fuse(
+        cyl(PORT_R, zfun - zb1 + 1, V(0, 0, zb1))).fuse(cyl(PORT_R, 1.0, V(hx0, 0, z_upper), V(1, 0, 0)))
+    fixed("172_isolation_duct", out_i.cut(in_i).removeSplitter())
     fixed("173_isolation_funnel", Part.makeCone(DUCT_R, TRAP["hole_r"] + 3, 25, V(0, 0, zfun)).cut(
         Part.makeCone(PORT_R, TRAP["hole_r"], 25, V(0, 0, zfun))))
     fixed("105_top_plate", box(-TOP["x"], TOP["x"], -TOP["y"], TOP["y"], TOP_BOT, TOP_BOT + TOP["t"]).cut(cyl(TRAP["hole_r"], 20, V(0, 0, TOP_BOT - 5))))
@@ -549,7 +568,7 @@ def build():
 
 # ---------------- 자세 (관절 → Placement) ----------------
 JOINT0 = dict(floor=0.0, xm=XM0, ym=YM0, horn=-20.0, support=0.0, door_entry=60.0, door_iso=60.0, door_rel=60.0,
-              hornet=(-30.0, 0.0, z_entry - 6 + HORNET["h"] / 2, 0.0), dot=0)
+              hornet=(cx + GRID["pitch"], 0.0, z_floor_top_rest + HORNET["h"] / 2, 0.0), dot=0)   # (x, y, z, 들림각 pitch: 90 = 머리 위)
 # door 각: +60 = 닫힘, -60 = 열림 (혼 핀이 문판을 y로 9 sin φ 만큼 옮김)
 
 
@@ -592,8 +611,8 @@ def placement(name, kind, J, M):
         sgn = 1.0 if ax.x > 0 else -1.0
         return App.Placement(c, App.Rotation(ax, sgn * J[m[1]]))
     if k == "hornet":
-        x, y, z, yaw = J["hornet"]
-        return App.Placement(V(x, y, z), App.Rotation(V(0, 0, 1), yaw))
+        x, y, z, pitch = J["hornet"]
+        return App.Placement(V(x, y, z), App.Rotation(V(0, 1, 0), -pitch))
     return App.Placement()
 
 
@@ -617,16 +636,163 @@ def posed(P, M, J):
     return out
 
 
-if __name__ == "__main__":
-    P, M = build()
-    S = posed(P, M, JOINT0)
+# ---------------- FreeCAD 문서: 스프레드시트 'Joints' 값으로 움직임 ----------------
+JOINT_CELLS = [("floor", "바닥 승강 (mm, 0~36.5)"), ("xm", "마커 x (mm, 37.4~72.6, 대기 65)"), ("ym", "마커 y (mm, -40~17.6, 대기 -40)"),
+               ("horn", "펜 서보 각 (°, -20 놓음 ~ 45.6 = 10 mm 들림)"), ("support", "팁 받침 높이 (mm, 컵 0 / 말벌 등 0.56)"),
+               ("door_entry", "입구 문 서보 (°, 60 닫힘 / -60 열림)"), ("door_iso", "격리 문 서보 (°)"), ("door_rel", "방생 문 서보 (°)"),
+               ("hx", "말벌 x"), ("hy", "말벌 y"), ("hz", "말벌 z"), ("hpitch", "말벌 머리 각 (°, 90 = 위)")]
+
+
+def _bake(shp):
+    """형상의 Placement를 기하에 넣고 Placement를 0으로 (식으로 움직일 때 기준)"""
+    s = shp.copy()
+    m = s.Placement.toMatrix()
+    s.Placement = App.Placement()
+    s.transformShape(m, True)
+    return s
+
+
+def _vec(x, y, z):
+    return "create(<<vector>>; %s; %s; %s)" % (x, y, z)
+
+
+def _pl(base, axis=None, ang="0"):
+    ax = _vec(*axis) if axis is not None else _vec(0, 0, 1)
+    return "create(<<placement>>; %s; create(<<rotation>>; %s; %s))" % (base, ax, ang)
+
+
+def placement_expr(n, M):
+    m = M[n]
+    k = m[0]
+    dx, dy = "(Joints.xm - %g)" % XM0, "(Joints.ym - %g)" % YM0
+    if k == "floor":
+        return _pl(_vec(0, 0, "Joints.floor"))
+    if k == "rot_floor":
+        c, ax = m[1], m[2]
+        return _pl(_vec(c.x, c.y, c.z), (ax.x, ax.y, ax.z), "Joints.floor / %g * 360" % LEAD)
+    if k == "beam":
+        return _pl(_vec(dx, 0, 0))
+    if k == "rot_x":
+        c, ax = m[1], m[2]
+        return _pl(_vec("%g + %s" % (c.x, dx), c.y, c.z), (ax.x, ax.y, ax.z), "-%s / %g * 360" % (dx, LEAD))
+    if k == "rot_y":
+        c, ax = m[1], m[2]
+        return _pl(_vec("%g + %s" % (c.x, dx), c.y, c.z), (ax.x, ax.y, ax.z), "%s / %g * 360" % (dy, LEAD))
+    if k == "carriage":
+        return _pl(_vec(dx, dy, 0))
+    if k == "holder":
+        lift = "(Joints.support > %g * sin(Joints.horn) ? Joints.support : %g * sin(Joints.horn))" % (HORN["Rt"], HORN["Rt"])
+        return _pl(_vec(dx, dy, lift))
+    if k == "pen_horn":
+        c, ax = m[1], m[2]
+        return _pl(_vec("%g + %s" % (c.x, dx), "%g + %s" % (c.y, dy), c.z), (ax.x, ax.y, ax.z), "-Joints.horn")
+    if k == "gate_flap":
+        return _pl(_vec(0, "%g * sin(Joints.%s)" % (GATE["rp"], m[1]), 0))
+    if k == "gate_horn":
+        c, ax = m[2], m[3]
+        sgn = "" if ax.x > 0 else "-"
+        return _pl(_vec(c.x, c.y, c.z), (ax.x, ax.y, ax.z), "%sJoints.%s" % (sgn, m[1]))
+    if k == "hornet":
+        return _pl(_vec("Joints.hx", "Joints.hy", "Joints.hz"), (0, 1, 0), "-Joints.hpitch")
+    return None
+
+
+def make_doc(P, M, J=None, gui_colors=True):
+    J = dict(JOINT0 if J is None else J)
     if DOC_NAME in App.listDocuments():
         App.closeDocument(DOC_NAME)
     doc = App.newDocument(DOC_NAME)
-    for n, shp in S.items():
-        o = doc.addObject("Part::Feature", n.replace("-", "_"))
-        o.Label = n
-        o.Shape = shp
+    sh = doc.addObject("Spreadsheet::Sheet", "Joints")
+    sh.set("A1", "관절 변수 — 값을 바꾸고 다시 계산(Ctrl+R)하면 부품이 움직임 (CAP-AI-20)")
+    hx, hy, hz, hpitch = J["hornet"]
+    vals = dict(J, hx=hx, hy=hy, hz=hz, hpitch=hpitch)
+    for i, (k, desc) in enumerate(JOINT_CELLS):
+        r = i + 3
+        sh.set("A%d" % r, k)
+        sh.set("B%d" % r, "%g" % vals[k])
+        sh.set("C%d" % r, desc)
+        sh.setAlias("B%d" % r, k)
     doc.recompute()
+    objs = {}
+    for n, shp in P.items():
+        k = M[n][0]
+        if k == "spring":
+            continue
+        o = doc.addObject("Part::Feature", "P" + n.replace("-", "_"))    # 이름은 숫자로 시작 못 함 → 'P' + 도면부호, 라벨은 도면부호
+        o.Label = n
+        o.Shape = _bake(shp)
+        e = placement_expr(n, M)
+        if e:
+            o.setExpression("Placement", e)
+        objs[n] = o
+    # 204 스프링: Part::Tube (길이 = 멈춤 탭 - 홀더 윗면)
+    c = M["204_holder_spring"][1]
+    lift = "(Joints.support > %g * sin(Joints.horn) ? Joints.support : %g * sin(Joints.horn))" % (HORN["Rt"], HORN["Rt"])
+    cyls = []
+    for nm, r, dz in (("P204a", 3.0, 0.0), ("P204b", 2.0, -0.5)):
+        cy = doc.addObject("Part::Cylinder", nm)
+        cy.Radius = r
+        cy.setExpression("Height", "(%g - %g - %s + %g) * 1 mm" % (XY["tab_z"], HZ1, lift, -2 * dz))
+        cy.setExpression("Placement", _pl(_vec("%g + Joints.xm - %g" % (c.x, XM0), "%g + Joints.ym - %g" % (c.y, YM0), "%g + %s + %g" % (HZ1, lift, dz))))
+        cyls.append(cy)
+    sp = doc.addObject("Part::Cut", "P204_holder_spring")
+    sp.Label = "204_holder_spring"
+    sp.Base, sp.Tool = cyls
+    objs["204_holder_spring"] = sp
+    doc.recompute()
+    if gui_colors and App.GuiUp:
+        color_doc(doc)
+    return doc
+
+
+def color_doc(doc):
+    tr = {"REF_trap_body": 80, "REF_trap_awning": 75, "REF_trap_ring": 60, "REF_trap_dome": 88, "101_deck": 65, "105_top_plate": 70,
+          "120_chamber_walls": 55, "REF_camera_view": 90, "100_frame": 40, "102_collar": 50}
+    for o in doc.Objects:
+        if not hasattr(o, "ViewObject") or o.ViewObject is None or o.TypeId == "Spreadsheet::Sheet":
+            continue
+        n = o.Label
+        vo = o.ViewObject
+        col = (0.75, 0.75, 0.75)
+        if n.startswith("REF"):
+            col = (0.92, 0.92, 0.92)
+        if n.startswith("2"):
+            col = (0.55, 0.62, 0.78)
+        if "stepper" in n or "servo" in n:
+            col = (0.25, 0.25, 0.28) if "stepper" in n else (0.15, 0.35, 0.75)
+        if "28BYJ48" in n:
+            col = (0.55, 0.58, 0.62)
+        if "MG90S" in n or "SG90" in n:
+            col = (0.12, 0.30, 0.70)
+        if "nut" in n:
+            col = (0.85, 0.65, 0.20)
+        if "coupling" in n:
+            col = (0.80, 0.80, 0.85)
+        if "lead_screw" in n or "rods" in n or "guide" in n or "shaft" in n:
+            col = (0.62, 0.64, 0.68)
+        if "horn" in n or "spline" in n:
+            col = (0.95, 0.95, 0.95)
+        if "flap" in n:
+            col = (0.95, 0.55, 0.15)
+        if n == "201_marker":
+            col = (0.98, 0.85, 0.10)
+        if n == "REF_hornet":
+            col = (0.30, 0.22, 0.10)
+        if n == "REF_mark_dot":
+            col = (1.0, 0.92, 0.0)
+        if n == "100_frame":
+            col = (0.62, 0.64, 0.68)
+        if n == "140_lift_floor":
+            col = (0.35, 0.65, 0.40)
+        if n == "REF_camera_view":
+            col = (0.30, 0.60, 1.00)
+        vo.ShapeColor = col
+        vo.LineColor = (0.1, 0.1, 0.1)
+        vo.Transparency = tr.get(n, 0)
+
+
+if __name__ == "__main__":
+    P, M = build()
+    doc = make_doc(P, M)
     if SAVE_PATH:
         doc.saveAs(SAVE_PATH)
