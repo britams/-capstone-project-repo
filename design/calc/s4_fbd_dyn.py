@@ -178,7 +178,7 @@ def m8():
     ax.legend(ncol=3, fontsize=9, loc="upper left", bbox_to_anchor=(0.12, 1.0))
     ax.set_title("(d) 내리는 속도와 찍는 순간 힘", loc="left", fontsize=12, fontweight="bold")
     ax = fig.add_subplot(gs[1, 2])
-    note(ax, (0.0, 0.97), "판정: 서보를 최고 속도로 내리면 불만족\n(정적 0.32 N → 순간 0.8 ~ 1.8 N)\n\n환류 (제어)\n① 두 단계로 내림: 팁 위 2 mm까지 빠르게,\n   마지막 2 mm는 60 °/s 이하 (+%.2f s)\n② 스프링 204를 넣으면 ≤ 15 °/s 이거나 빼기\n③ k_c 측정: 저울 위 펠트 팁 눌림 (F_ink 시험과\n   같이) → 허용 속도 확정\n\n교재와 다른 점: 낙하 높이 대신 '혼이 내려 주는\n속도'가 v_0, 스프링 대신 접촉 강성 k_c\n유제를 안 풀었다면: 정적 힘 0.32 N만 보고\n'0.5 N 안'이라 판정했을 것" % m8["t_slow_2mm_s"], fs=10.5)
+    note(ax, (0.0, 0.97), "판정: 서보를 최고 속도로 내리면 불만족\n(정적 0.32 N → 순간 0.8 ~ 1.8 N)\n\n환류 (제어)\n① 두 단계로 내림: 팁 위 2 mm까지 빠르게,\n   마지막 2 mm는 60 °/s 이하 (+%.2f s)\n② 스프링 204를 넣으면 ≤ 13 °/s 이거나 빼기\n③ k_c 측정: 저울 위 펠트 팁 눌림 (F_ink 시험과\n   같이) → 허용 속도 확정\n\n교재와 다른 점: 낙하 높이 대신 '혼이 내려 주는\n속도'가 v_0, 스프링 대신 접촉 강성 k_c\n유제를 안 풀었다면: 정적 힘 0.32 N만 보고\n'0.5 N 안'이라 판정했을 것" % m8["t_slow_2mm_s"], fs=10.5)
     setup(ax, (0, 1), (0, 1), "(e) 판정과 환류")
     legend(fig.axes[1], ("given", "unk", "fric", "iner"), loc=(0.62, 0.0))
     fig.suptitle("M8  펜 내려찍기 순간의 충격 힘 — 동역학(일-에너지, 스프링) ↔ Meriam 3/108", fontsize=15, x=0.01, ha="left", fontweight="bold")
