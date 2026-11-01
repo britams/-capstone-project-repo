@@ -1,0 +1,686 @@
+{
+ "loads": {
+  "stepper": {
+   "rail": "B",
+   "off": 0.0,
+   "move": 0.12749999999999997,
+   "hold": 0.12749999999999997,
+   "peak": 0.16999999999999998,
+   "src": "28BYJ-48 50 Ω, ULN2003 0.9 V 강하 → 상당 82 mA, 반걸음 평균 1.5상 [확실 계산 / 강하값 가능성 높음]"
+  },
+  "sg90_pen": {
+   "rail": "B",
+   "detached": 0.004,
+   "idle": 0.01,
+   "move": 0.25,
+   "stall": 0.65,
+   "src": "SG90 움직일 때 약 0.25 A, 막힘 약 0.65 A [가능성 높음 — 흔한 측정값, 실측 필요]"
+  },
+  "mg90s_door": {
+   "rail": "B",
+   "detached": 0.004,
+   "idle": 0.01,
+   "move": 0.2,
+   "stall": 0.75,
+   "src": "MG90S 무부하 90 mA, 막힘 750 mA @4.8 V [확실 — 판매처 사양] / 미닫이 이동 평균 0.2 A [추측]"
+  },
+  "ir_emitter": {
+   "rail": "B",
+   "on": 0.02,
+   "src": "Adafruit 2167 송신 20 mA @5 V [확실 — 제조사]"
+  },
+  "ir_receiver": {
+   "rail": "B",
+   "on": 0.002,
+   "src": "수신부 자체 전류 (공개값 없음) [추측]"
+  },
+  "pullup": {
+   "rail": "B",
+   "on": 0.0005,
+   "src": "10 kΩ 풀업, 빔이 끊겼을 때(LOW)만 0.5 mA [확실 계산]"
+  },
+  "light_top": {
+   "rail": "B",
+   "on": 0.2,
+   "src": "위 링 조명 182 [추측 — 보유 조명 실측 필요]"
+  },
+  "light_bot": {
+   "rail": "B",
+   "on": 0.1,
+   "src": "아래 조명 [추측]"
+  },
+  "light_exit": {
+   "rail": "B",
+   "on": 0.06,
+   "src": "출구 조명 [추측]"
+  },
+  "mosfet_led": {
+   "rail": "B",
+   "on": 0.003,
+   "src": "MOSFET 모듈 표시 LED [추측]"
+  },
+  "pi5": {
+   "rail": "A",
+   "halt": 0.01,
+   "idle": 3.0,
+   "active": 4.5,
+   "peak": 8.8,
+   "src": "Pi 5 대기 약 3.0 W, CPU 4코어 최대 약 8.8 W (raspberry.tips 측정), 꺼짐 0.01 W (POWER_OFF_ON_HALT=1, Jeff Geerling) [가능성 높음]. 'active' 4.5 W는 [추측]"
+  },
+  "ai_camera": {
+   "rail": "A",
+   "off": 0.0,
+   "standby": 0.3,
+   "run": 1.87,
+   "src": "AI 카메라 모델 실행 중 약 1.87 W (Hackster 측정) [가능성 높음] / 대기 0.3 W [추측]"
+  },
+  "ai_hat": {
+   "rail": "A",
+   "off": 0.0,
+   "idle": 0.3,
+   "run": 1.5,
+   "src": "Hailo-8L 보통 1.5 W (CNX) [가능성 높음] / 쉴 때 0.3 W [추측]"
+  },
+  "uno": {
+   "rail": "A",
+   "on": 0.25,
+   "src": "UNO R3 약 50 mA (16U2 + 328P + LED) [가능성 높음], Pi USB에서 받음"
+  },
+  "hx711": {
+   "rail": "A",
+   "on": 0.03,
+   "src": "HX711 1.5 mA + 1 kΩ 브리지 약 4 mA [가능성 높음], UNO 1 5V 핀에서 받음"
+  }
+ },
+ "I_phase_A": 0.082,
+ "states_holdF0": [
+  {
+   "state": "0 켤 때 원점 찾기 (F → X·Y)",
+   "iB_typ": 0.43,
+   "iB_peak": 0.515,
+   "pB_W": 2.15,
+   "pA_W": 5.63
+  },
+  {
+   "state": "대기 (아래 조명 켬)",
+   "iB_typ": 0.278,
+   "iB_peak": 0.278,
+   "pB_W": 1.39,
+   "pA_W": 5.7
+  },
+  {
+   "state": "1 진입 → 입구 문 닫기 (0.2 s)",
+   "iB_typ": 0.469,
+   "iB_peak": 1.019,
+   "pB_W": 2.34,
+   "pA_W": 7.2
+  },
+  {
+   "state": "2 판별 (위 조명)",
+   "iB_typ": 0.378,
+   "iB_peak": 0.378,
+   "pB_W": 1.89,
+   "pA_W": 8.4
+  },
+  {
+   "state": "3 누르기 + X·Y 미리 이동",
+   "iB_typ": 0.66,
+   "iB_peak": 0.788,
+   "pB_W": 3.3,
+   "pA_W": 7.2
+  },
+  {
+   "state": "4 자세·흉부 촬영",
+   "iB_typ": 0.378,
+   "iB_peak": 0.378,
+   "pB_W": 1.89,
+   "pA_W": 8.4
+  },
+  {
+   "state": "5 찍기 (펜 서보)",
+   "iB_typ": 0.618,
+   "iB_peak": 1.018,
+   "pB_W": 3.09,
+   "pA_W": 7.2
+  },
+  {
+   "state": "6 급이·건조",
+   "iB_typ": 0.278,
+   "iB_peak": 0.278,
+   "pB_W": 1.39,
+   "pA_W": 5.7
+  },
+  {
+   "state": "7 방생 문 열고 기다림",
+   "iB_typ": 0.428,
+   "iB_peak": 0.978,
+   "pB_W": 2.14,
+   "pA_W": 7.2
+  },
+  {
+   "state": "8 격리 문 열고 기다림",
+   "iB_typ": 0.365,
+   "iB_peak": 0.915,
+   "pB_W": 1.82,
+   "pA_W": 7.2
+  },
+  {
+   "state": "밤 (Pi 꺼짐, UNO 꺼짐)",
+   "iB_typ": 0.028,
+   "iB_peak": 0.028,
+   "pB_W": 0.14,
+   "pA_W": 0.01
+  }
+ ],
+ "states_holdF1": [
+  {
+   "state": "0 켤 때 원점 찾기 (F → X·Y)",
+   "iB_typ": 0.557,
+   "iB_peak": 0.685,
+   "pB_W": 2.79,
+   "pA_W": 5.63
+  },
+  {
+   "state": "대기 (아래 조명 켬)",
+   "iB_typ": 0.405,
+   "iB_peak": 0.448,
+   "pB_W": 2.03,
+   "pA_W": 5.7
+  },
+  {
+   "state": "1 진입 → 입구 문 닫기 (0.2 s)",
+   "iB_typ": 0.596,
+   "iB_peak": 1.189,
+   "pB_W": 2.98,
+   "pA_W": 7.2
+  },
+  {
+   "state": "2 판별 (위 조명)",
+   "iB_typ": 0.505,
+   "iB_peak": 0.548,
+   "pB_W": 2.53,
+   "pA_W": 8.4
+  },
+  {
+   "state": "3 누르기 + X·Y 미리 이동",
+   "iB_typ": 0.66,
+   "iB_peak": 0.788,
+   "pB_W": 3.3,
+   "pA_W": 7.2
+  },
+  {
+   "state": "4 자세·흉부 촬영",
+   "iB_typ": 0.505,
+   "iB_peak": 0.548,
+   "pB_W": 2.53,
+   "pA_W": 8.4
+  },
+  {
+   "state": "5 찍기 (펜 서보)",
+   "iB_typ": 0.746,
+   "iB_peak": 1.188,
+   "pB_W": 3.73,
+   "pA_W": 7.2
+  },
+  {
+   "state": "6 급이·건조",
+   "iB_typ": 0.405,
+   "iB_peak": 0.448,
+   "pB_W": 2.03,
+   "pA_W": 5.7
+  },
+  {
+   "state": "7 방생 문 열고 기다림",
+   "iB_typ": 0.556,
+   "iB_peak": 1.148,
+   "pB_W": 2.78,
+   "pA_W": 7.2
+  },
+  {
+   "state": "8 격리 문 열고 기다림",
+   "iB_typ": 0.493,
+   "iB_peak": 1.085,
+   "pB_W": 2.46,
+   "pA_W": 7.2
+  },
+  {
+   "state": "밤 (Pi 꺼짐, UNO 꺼짐)",
+   "iB_typ": 0.028,
+   "iB_peak": 0.028,
+   "pB_W": 0.14,
+   "pA_W": 0.01
+  }
+ ],
+ "worst": {
+  "rule_kept_A": 1.8,
+  "boot_all_servos_A": 3.21,
+  "boot_staggered_A": 1.08,
+  "note": "규칙: 서보는 한 번에 하나 (문 3개·펜). 지금 펌웨어 setup()은 서보 4개를 한꺼번에 attach·write → 켤 때 위치가 다르면 4개가 동시에 움직임"
+ },
+ "fuse": {
+  "rating_A": 2.5,
+  "kind": "T (지연형) 5×20 유리관 또는 2.5 A 폴리퓨즈",
+  "why": "정상 최대 약 1.8 A × 1.4 ≈ 2.5 A. 3 A 어댑터는 과전류 때 스스로 전압을 떨어뜨리므로 3 A 퓨즈는 단락에서도 늦다 [가능성 높음]"
+ },
+ "harness": [
+  {
+   "name": "구동 전원 입력 → 단자대 (+5 V, GND)",
+   "frm": "DCIN",
+   "to": "TB",
+   "wires": 2,
+   "awg": 20,
+   "len_mm": 198,
+   "stock_mm": null,
+   "extension_mm": 198,
+   "moving": false,
+   "drop_V": 0.033
+  },
+  {
+   "name": "단자대 → ULN2003 F (+5 V, GND)",
+   "frm": "TB",
+   "to": "ULN_F",
+   "wires": 2,
+   "awg": 22,
+   "len_mm": 180,
+   "stock_mm": null,
+   "extension_mm": 180,
+   "moving": false,
+   "drop_V": 0.003
+  },
+  {
+   "name": "단자대 → ULN2003 X·Y (+5 V, GND, 둘이 함께)",
+   "frm": "TB",
+   "to": "ULN_X",
+   "wires": 2,
+   "awg": 22,
+   "len_mm": 594,
+   "stock_mm": null,
+   "extension_mm": 594,
+   "moving": false,
+   "drop_V": 0.021
+  },
+  {
+   "name": "UNO 1 → ULN2003 F (IN1~4)",
+   "frm": "UNO1",
+   "to": "ULN_F",
+   "wires": 4,
+   "awg": 26,
+   "len_mm": 203,
+   "stock_mm": null,
+   "extension_mm": 203,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 1 → ULN2003 X (IN1~4)",
+   "frm": "UNO1",
+   "to": "ULN_X",
+   "wires": 4,
+   "awg": 26,
+   "len_mm": 607,
+   "stock_mm": null,
+   "extension_mm": 607,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 1 → ULN2003 Y (IN1~4)",
+   "frm": "UNO1",
+   "to": "ULN_Y",
+   "wires": 4,
+   "awg": 26,
+   "len_mm": 643,
+   "stock_mm": null,
+   "extension_mm": 643,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "ULN2003 F → 바닥 모터 153",
+   "frm": "ULN_F",
+   "to": "M_F",
+   "wires": 5,
+   "awg": 26,
+   "len_mm": 110,
+   "stock_mm": 240,
+   "extension_mm": 0,
+   "moving": false,
+   "drop_V": 0.005
+  },
+  {
+   "name": "ULN2003 X → X 모터 215",
+   "frm": "ULN_X",
+   "to": "M_X",
+   "wires": 5,
+   "awg": 26,
+   "len_mm": 126,
+   "stock_mm": 240,
+   "extension_mm": 0,
+   "moving": false,
+   "drop_V": 0.006
+  },
+  {
+   "name": "ULN2003 Y → Y 모터 209 (X로 움직임)",
+   "frm": "ULN_Y",
+   "to": "M_Y",
+   "wires": 5,
+   "awg": 26,
+   "len_mm": 333,
+   "stock_mm": 240,
+   "extension_mm": 93,
+   "moving": true,
+   "drop_V": 0.015
+  },
+  {
+   "name": "UNO 1 → 펜 서보 205 (신호 + 레일 전원, X·Y로 움직임)",
+   "frm": "UNO1",
+   "to": "PEN",
+   "wires": 3,
+   "awg": 26,
+   "len_mm": 711,
+   "stock_mm": 250,
+   "extension_mm": 461,
+   "moving": true,
+   "drop_V": 0.124
+  },
+  {
+   "name": "HX711 → 로드셀 148 (바닥과 함께 움직임)",
+   "frm": "HX711",
+   "to": "LC",
+   "wires": 4,
+   "awg": 28,
+   "len_mm": 271,
+   "stock_mm": null,
+   "extension_mm": 271,
+   "moving": true,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 1 → HX711 (5V, GND, DT, SCK)",
+   "frm": "UNO1",
+   "to": "HX711",
+   "wires": 4,
+   "awg": 26,
+   "len_mm": 289,
+   "stock_mm": null,
+   "extension_mm": 289,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 1 → 원점 F",
+   "frm": "UNO1",
+   "to": "SW_F",
+   "wires": 2,
+   "awg": 28,
+   "len_mm": 292,
+   "stock_mm": null,
+   "extension_mm": 292,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 1 → 원점 X",
+   "frm": "UNO1",
+   "to": "SW_X",
+   "wires": 2,
+   "awg": 28,
+   "len_mm": 492,
+   "stock_mm": null,
+   "extension_mm": 492,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 1 → 원점 Y (빔과 함께 움직임)",
+   "frm": "UNO1",
+   "to": "SW_Y",
+   "wires": 2,
+   "awg": 28,
+   "len_mm": 654,
+   "stock_mm": null,
+   "extension_mm": 654,
+   "moving": true,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 입구 문 서보 112",
+   "frm": "UNO2",
+   "to": "D_IN",
+   "wires": 3,
+   "awg": 26,
+   "len_mm": 340,
+   "stock_mm": 250,
+   "extension_mm": 90,
+   "moving": false,
+   "drop_V": 0.068
+  },
+  {
+   "name": "UNO 2 → 격리 문 서보 170",
+   "frm": "UNO2",
+   "to": "D_CAP",
+   "wires": 3,
+   "awg": 26,
+   "len_mm": 373,
+   "stock_mm": 250,
+   "extension_mm": 123,
+   "moving": false,
+   "drop_V": 0.075
+  },
+  {
+   "name": "UNO 2 → 방생 문 서보 176",
+   "frm": "UNO2",
+   "to": "D_REL",
+   "wires": 3,
+   "awg": 26,
+   "len_mm": 443,
+   "stock_mm": 250,
+   "extension_mm": 193,
+   "moving": false,
+   "drop_V": 0.089
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G1 (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G1",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 244,
+   "stock_mm": 230,
+   "extension_mm": 14,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G2 (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G2",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 359,
+   "stock_mm": 230,
+   "extension_mm": 129,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G3 (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G3",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 392,
+   "stock_mm": 230,
+   "extension_mm": 162,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G4 (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G4",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 598,
+   "stock_mm": 230,
+   "extension_mm": 368,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G5 (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G5",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 474,
+   "stock_mm": 230,
+   "extension_mm": 244,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G6 (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G6",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 504,
+   "stock_mm": 230,
+   "extension_mm": 274,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → MOSFET → 위 조명 182",
+   "frm": "UNO2",
+   "to": "L_TOP",
+   "wires": 2,
+   "awg": 24,
+   "len_mm": 685,
+   "stock_mm": null,
+   "extension_mm": 685,
+   "moving": false,
+   "drop_V": 0.023
+  },
+  {
+   "name": "UNO 2 → MOSFET → 아래 조명",
+   "frm": "UNO2",
+   "to": "L_BOT",
+   "wires": 2,
+   "awg": 24,
+   "len_mm": 397,
+   "stock_mm": null,
+   "extension_mm": 397,
+   "moving": false,
+   "drop_V": 0.007
+  },
+  {
+   "name": "UNO 2 → MOSFET → 출구 조명",
+   "frm": "UNO2",
+   "to": "L_EXIT",
+   "wires": 2,
+   "awg": 24,
+   "len_mm": 526,
+   "stock_mm": null,
+   "extension_mm": 526,
+   "moving": false,
+   "drop_V": 0.005
+  }
+ ],
+ "csi": {
+  "PI_A": {
+   "len_mm": 682,
+   "cable": 1000
+  },
+  "PI_B": {
+   "len_mm": 293,
+   "cable": 300
+  }
+ },
+ "hold": {
+  "F_N": 0.5,
+  "T_back_Nmm": 0.637,
+  "T_friction_Nmm": [
+   58.8,
+   117.7
+  ],
+  "T_self_Nmm": 34.3,
+  "margin_friction": [
+   92,
+   185
+  ],
+  "margin_self": 54,
+  "coil_heat_W": [
+   0.34,
+   0.67
+  ],
+  "rail_W": [
+   0.41,
+   0.82
+  ],
+  "wasted_Wh_per_9h": [
+   3.7,
+   7.4
+  ]
+ },
+ "daily": [
+  {
+   "visits": 20,
+   "hours_on": 24,
+   "hold_f": true,
+   "cam_always": true,
+   "bot_idle": true,
+   "idle_W": 7.73,
+   "load_Wh": 185.5,
+   "wall_Wh": 218.2
+  },
+  {
+   "visits": 20,
+   "hours_on": 9,
+   "hold_f": true,
+   "cam_always": true,
+   "bot_idle": true,
+   "idle_W": 7.73,
+   "load_Wh": 73.3,
+   "wall_Wh": 86.2
+  },
+  {
+   "visits": 20,
+   "hours_on": 9,
+   "hold_f": false,
+   "cam_always": true,
+   "bot_idle": true,
+   "idle_W": 7.09,
+   "load_Wh": 67.6,
+   "wall_Wh": 79.5
+  },
+  {
+   "visits": 20,
+   "hours_on": 9,
+   "hold_f": false,
+   "cam_always": false,
+   "bot_idle": false,
+   "idle_W": 5.0,
+   "load_Wh": 48.8,
+   "wall_Wh": 57.4
+  },
+  {
+   "visits": 100,
+   "hours_on": 9,
+   "hold_f": false,
+   "cam_always": true,
+   "bot_idle": true,
+   "idle_W": 7.09,
+   "load_Wh": 67.6,
+   "wall_Wh": 79.5
+  }
+ ],
+ "battery": {
+  "name": "보조배터리 20,000 mAh (3.7 V 셀)",
+  "Wh_cell": 74.0,
+  "eff": 0.85,
+  "note": "5 V 출력 쪽 쓸 수 있는 양 ≈ 74 × 0.85 = 63 Wh [가능성 높음]. Pi 5는 5 V 3 A 전원이면 USB 전류를 600 mA로 묶고 경고를 띄움 — UNO 2개(0.1 A)는 괜찮음 [가능성 높음]"
+ },
+ "harness_total_m": 37.4
+}

@@ -1,0 +1,67 @@
+sequenceDiagram
+  participant U1 as UNO 1 (움직임)
+  participant Pi as Pi 5 (상태 머신)
+  participant U2 as UNO 2 (문·게이트·조명)
+  U2-->>Pi: 0.0 s  EVT GATE 1 BLOCK 60003
+  U2-->>Pi: 1.4 s  EVT GATE 1 CLEAR 61403
+  U2-->>Pi: 6.4 s  EVT GATE 2 BLOCK 66403
+  Note over Pi: 6.4 s 촬영 0.6 s — 대기 점검
+  U2-->>Pi: 6.7 s  EVT GATE 2 CLEAR 66703
+  Note over Pi: 7.0 s 촬영 0.6 s — 진입 확인
+  Pi->>U2: 7.6 s  DOOR IN CLOSE
+  U2-->>Pi: 7.8 s  EVT DOOR IN CLOSED 67806
+  Note over Pi: 7.8 s 촬영 0.6 s — 닫은 뒤 마릿수
+  Pi->>U2: 8.4 s  LIGHT BOT 0 · TOP 255
+  Note over Pi: 8.4 s 촬영 0.6 s — 판별: 종·여왕벌·표식
+  Pi->>U1: 9.0 s  PEN UP
+  U1-->>Pi: 9.2 s  DONE PEN UP
+  Pi->>U2: 9.2 s  LIGHT TOP 0 · BOT 255
+  Pi->>U1: 9.2 s  MOVE X 55
+  Pi->>U1: 9.2 s  MOVE Y 0
+  Pi->>U1: 9.2 s  PRESS 51
+  U1-->>Pi: 14.3 s  DONE MOVE X 55.000
+  U1-->>Pi: 24.1 s  DONE PRESS 29.300 53.0
+  U1-->>Pi: 29.6 s  DONE MOVE Y 0.000
+  Pi->>U2: 29.6 s  LIGHT BOT 0 · TOP 255
+  Note over Pi: 29.6 s 촬영 0.6 s — 자세·흉부
+  Pi->>U1: 30.2 s  MOVE X 55
+  U1-->>Pi: 30.2 s  DONE MOVE X 55.000
+  Pi->>U1: 30.2 s  MOVE Y 0
+  U1-->>Pi: 30.2 s  DONE MOVE Y 0.000
+  Pi->>U1: 30.2 s  PEN DOWN
+  U1-->>Pi: 30.5 s  DONE PEN DOWN
+  Pi->>U1: 30.8 s  PEN UP
+  U1-->>Pi: 30.9 s  DONE PEN UP
+  Pi->>U1: 30.9 s  PEN DOWN
+  U1-->>Pi: 31.2 s  DONE PEN DOWN
+  Pi->>U1: 31.5 s  PEN UP
+  U1-->>Pi: 31.7 s  DONE PEN UP
+  Pi->>U1: 31.7 s  MOVE X 65
+  Pi->>U1: 31.7 s  MOVE Y -40
+  U1-->>Pi: 36.8 s  DONE MOVE X 65.000
+  U1-->>Pi: 52.1 s  DONE MOVE Y -40.000
+  Note over Pi: 52.1 s 촬영 0.6 s — 찍은 점 확인
+  Pi->>U1: 52.7 s  PEN DOWN
+  U1-->>Pi: 53.0 s  DONE PEN DOWN
+  Pi->>U2: 53.0 s  LIGHT TOP 0 · BOT 255
+  Pi->>U1: 53.0 s  MOVE F 10
+  U1-->>Pi: 62.8 s  DONE MOVE F 10.000
+  Pi->>U2: 122.8 s  LIGHT TOP 0 · BOT 0 · EXIT 255
+  Pi->>U2: 122.8 s  DOOR REL OPEN
+  U2-->>Pi: 123.0 s  EVT DOOR REL OPEN 183030
+  U2-->>Pi: 143.1 s  EVT GATE 5 BLOCK 203102
+  U2-->>Pi: 144.5 s  EVT GATE 5 CLEAR 204502
+  U2-->>Pi: 148.5 s  EVT GATE 6 BLOCK 208502
+  U2-->>Pi: 149.9 s  EVT GATE 6 CLEAR 209902
+  Note over Pi: 149.9 s 촬영 0.6 s — 빈방 확인
+  Pi->>U2: 150.5 s  DOOR REL CLOSE
+  U2-->>Pi: 150.7 s  EVT DOOR REL CLOSED 210706
+  Pi->>U1: 150.7 s  MOVE F 0
+  U1-->>Pi: 155.8 s  DONE MOVE F 0.000
+  Pi->>U2: 155.8 s  LIGHT TOP 0 · EXIT 0 · BOT 255
+  Pi->>U2: 155.8 s  DOOR CAP CLOSE
+  U2-->>Pi: 155.8 s  EVT DOOR CAP CLOSED 215829
+  Pi->>U2: 155.8 s  DOOR REL CLOSE
+  U2-->>Pi: 155.8 s  EVT DOOR REL CLOSED 215833
+  Pi->>U2: 155.8 s  DOOR IN OPEN
+  U2-->>Pi: 156.0 s  EVT DOOR IN OPEN 216037

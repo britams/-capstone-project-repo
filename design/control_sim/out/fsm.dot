@@ -1,0 +1,50 @@
+
+digraph fsm {
+  graph [rankdir=TB, fontname="Noto Sans CJK JP", bgcolor="#fcfcfb", pad=0.3, nodesep=0.45, ranksep=0.42,
+         label="Pi 상태 머신 (참고 구현 trap_sim.py, D5e) — 굵은 선 = 보통 순서, 점선 = 예외", labelloc=t, fontsize=17];
+  node  [shape=box, style="rounded,filled", fontname="Noto Sans CJK JP", fontsize=12, fillcolor="#eef4fc", color="#2a78d6", penwidth=1.4];
+  edge  [fontname="Noto Sans CJK JP", fontsize=10, color="#52514e"];
+  BOOT  [label="BOOT\nUNO 2 감시·SELFTEST\n문 3개 닫기(문틈 규칙)"];
+  HOME  [label="HOME\n펜 들기 → 원점 F → X·Y\n한계·대기 자리·펜 캡 컵"];
+  RESUME[label="마킹실 확인\n(카메라)", fillcolor="#f3f0fb", color="#6250d6"];
+  IDLE  [label="IDLE 대기\n입구 열림·격리/방생 닫힘\n아래 조명"];
+  ENTRY [label="ENTRY\nG2 통과(장부) + 카메라 1마리\n→ 입구 닫기(문틈 규칙)"];
+  IDENT [label="IDENTIFY\n위 조명·촬영\n종·여왕벌·표식"];
+  PRESS [label="PRESS\n펜 들기·X·Y 미리 이동\n바닥 51 g까지"];
+  POSE  [label="POSE\n등 위? 흉부 확률 ≥ 0.6"];
+  MARK  [label="MARK\n펜 2단계 내리기 ×2"];
+  VERIFY[label="VERIFY\n대기 자리에서 점 확인"];
+  FEED  [label="FEED 급이·건조\n바닥 10 mm, 60 s"];
+  REL   [label="RELEASE\n출구 조명·방생 문 열기\nG5 → G6 + 카메라 0 → 닫기", fillcolor="#eef8ef", color="#008300"];
+  ISO   [label="ISOLATE\n바닥 내림·격리 문 열기\nG3 → G4 + 카메라 0 → 닫기", fillcolor="#fbeeee", color="#e34948"];
+  FAULT [label="FAULT_WAIT\n문은 그대로 · 장치 READY 기다림\n안 돌아오면 격리·입구 문 열어\n상용 트랩처럼 (passthrough)", fillcolor="#fff6e0", color="#eda100"];
+
+  BOOT -> HOME -> RESUME [penwidth=2.2];
+  RESUME -> IDLE [label=" 비었음", penwidth=2.2];
+  RESUME -> IDENT [label=" 말벌 있음", style=dashed];
+  IDLE -> ENTRY [label=" G2 통과\n 또는 카메라", penwidth=2.2];
+  ENTRY -> IDLE [label=" 카메라 0 (10 s)\n 되돌아감", style=dashed];
+  ENTRY -> IDENT [label=" 1마리", penwidth=2.2];
+  ENTRY -> ISO [label=" 2마리 이상", style=dashed];
+  IDENT -> PRESS [label=" 일벌·표식 없음", penwidth=2.2];
+  IDENT -> FEED [label=" 이미 표식\n (재방문 기록)", style=dashed];
+  IDENT -> ISO [label=" 여왕벌·다른 종\n 방제 모드·불확실", style=dashed];
+  PRESS -> POSE [label=" DONE PRESS", penwidth=2.2];
+  PRESS -> PRESS [label=" LIMIT(하중 없음)\n 바닥 내렸다 다시", style=dashed];
+  POSE -> MARK [label=" 등 위", penwidth=2.2];
+  POSE -> PRESS [label=" 뒤집힘: 10 mm 내리고\n 2 s 뒤 다시 (≤ 3번)", style=dashed];
+  POSE -> FEED [label=" 3번 실패\n (표식 없이)", style=dashed];
+  MARK -> VERIFY [penwidth=2.2];
+  VERIFY -> MARK [label=" 점 안 보임\n (1번 더)", style=dashed];
+  VERIFY -> FEED [label=" 점 확인\n (또는 기록)", penwidth=2.2];
+  FEED -> REL [penwidth=2.2];
+  REL -> IDLE [label=" 닫힘·바닥 내림", penwidth=2.2];
+  ISO -> IDLE [label=" 닫힘", style=dashed];
+  REL -> REL [label=" 60 s 조명 바꿈\n 120 s 알림\n 300 s 격리 문도 엶", style=dashed];
+  FAULT -> HOME [label=" UNO 1 READY", style=dashed];
+  FAULT -> RESUME [label=" UNO 2 READY", style=dashed];
+  {rank=same; IDENT; ISO;}
+  {rank=same; FEED; FAULT;}
+  ANY [shape=plaintext, style="", label="어느 상태에서나:\n하트비트 1.5 s 끊김 · 명령 무응답·ERR\n문 3번 막힘 · 자가 시험 실패", fontsize=10, fontcolor="#52514e"];
+  ANY -> FAULT [style=dotted, color="#eda100", penwidth=1.6];
+}
