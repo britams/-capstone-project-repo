@@ -1,0 +1,1152 @@
+{
+ "static": {
+  "overlap": [],
+  "floating": [],
+  "not_connected": []
+ },
+ "joints": [
+  {
+   "id": "F1a",
+   "desc": "바닥 모터 귀 ↔ 모터판 (M4 나사)",
+   "a": "153_floor_stepper_28BYJ48",
+   "b": "152_motor_plate",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø3.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "F1b",
+   "desc": "바닥 모터 귀 ↔ 모터판 (M4 나사)",
+   "a": "153_floor_stepper_28BYJ48",
+   "b": "152_motor_plate",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø3.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "F2",
+   "desc": "바닥 모터 축 ↔ 커플링 (5 mm 쪽)",
+   "a": "153r_floor_motor_shaft",
+   "b": "154_coupling",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 6.7,
+   "ok": true,
+   "need": "끼움 ≥ 6.0 mm, 겹침 0"
+  },
+  {
+   "id": "F3",
+   "desc": "T8 나사 ↔ 커플링 (8 mm 쪽)",
+   "a": "155_lead_screw_T8",
+   "b": "154_coupling",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 11.9,
+   "ok": true,
+   "need": "끼움 ≥ 10.0 mm, 겹침 0"
+  },
+  {
+   "id": "F4a",
+   "desc": "T8 나사 ↔ 바닥 너트 (내림)",
+   "a": "155_lead_screw_T8",
+   "b": "159_floor_nut_T8",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 15.0,
+   "ok": true,
+   "need": "끼움 ≥ 14.9 mm, 겹침 0"
+  },
+  {
+   "id": "F4b",
+   "desc": "T8 나사 ↔ 바닥 너트 (올림 36.5)",
+   "a": "155_lead_screw_T8",
+   "b": "159_floor_nut_T8",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 15.0,
+   "ok": true,
+   "need": "끼움 ≥ 14.9 mm, 겹침 0"
+  },
+  {
+   "id": "F5",
+   "desc": "바닥 너트 플랜지 ↔ 캐리지 (M3 ×4)",
+   "a": "159_floor_nut_T8",
+   "b": "158_carriage",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø2.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "F6a",
+   "desc": "가이드봉 ↔ 모터판 (끼움)",
+   "a": "157_guide_rod",
+   "b": "152_motor_plate",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 3.0,
+   "ok": true,
+   "need": "끼움 ≥ 2.9 mm, 겹침 0"
+  },
+  {
+   "id": "F6b",
+   "desc": "가이드봉 ↔ 바닥판 121 (끼움)",
+   "a": "157_guide_rod",
+   "b": "121_chamber_base",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 3.0,
+   "ok": true,
+   "need": "끼움 ≥ 2.9 mm, 겹침 0"
+  },
+  {
+   "id": "F6c",
+   "desc": "가이드봉 ↔ 캐리지 (미끄럼, 돌림 막이)",
+   "a": "157_guide_rod",
+   "b": "158_carriage",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.2,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "F7a",
+   "desc": "캐리지 ↔ 로드셀",
+   "a": "158_carriage",
+   "b": "148_load_cell",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "F7b",
+   "desc": "로드셀 ↔ 스프링 146",
+   "a": "148_load_cell",
+   "b": "146_spring",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "F7c",
+   "desc": "스프링 146 ↔ 밀대 턱 (힘이 스프링을 지남)",
+   "a": "146_spring",
+   "b": "147_push_rod",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "F7d",
+   "desc": "밀대 ↔ 승강 바닥 (끼움 3)",
+   "a": "147_push_rod",
+   "b": "140_lift_floor",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 3.0,
+   "ok": true,
+   "need": "끼움 ≥ 2.9 mm, 겹침 0"
+  },
+  {
+   "id": "F7e",
+   "desc": "밀대 ↔ 바닥판 구멍 (미끄럼)",
+   "a": "147_push_rod",
+   "b": "121_chamber_base",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.5,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "F8a",
+   "desc": "모터판 ↔ 옆판 L",
+   "a": "152_motor_plate",
+   "b": "151_drive_side_L",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "F8b",
+   "desc": "옆판 L ↔ 받침판 101",
+   "a": "151_drive_side_L",
+   "b": "101_deck",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "F8c",
+   "desc": "옆판 L ↔ 바닥판 121",
+   "a": "151_drive_side_L",
+   "b": "121_chamber_base",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "112_entry_gate-1",
+   "desc": "문 서보 귀 ↔ 기둥 1",
+   "a": "112_entry_gate_servo_MG90S",
+   "b": "112_entry_gate_post1",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "112_entry_gate-2",
+   "desc": "기둥 1 ↔ 하우징",
+   "a": "112_entry_gate_post1",
+   "b": "112_entry_gate_housing",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "112_entry_gate-3",
+   "desc": "서보 스플라인 ↔ 혼 허브",
+   "a": "112_entry_gate_servo_spline",
+   "b": "112_entry_gate_horn",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 2.2,
+   "ok": true,
+   "need": "끼움 ≥ 2.0 mm, 겹침 0"
+  },
+  {
+   "id": "112_entry_gate-4닫힘",
+   "desc": "혼 핀 ↔ 문판 홈 (닫힘)",
+   "a": "112_entry_gate_horn",
+   "b": "112_entry_gate_flap",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "112_entry_gate-5닫힘",
+   "desc": "문판 ↔ 하우징 슬롯 (닫힘)",
+   "a": "112_entry_gate_flap",
+   "b": "112_entry_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "112_entry_gate-6닫힘",
+   "desc": "혼 ↔ 하우징 (닫힘)",
+   "a": "112_entry_gate_horn",
+   "b": "112_entry_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.25,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "112_entry_gate-4열림",
+   "desc": "혼 핀 ↔ 문판 홈 (열림)",
+   "a": "112_entry_gate_horn",
+   "b": "112_entry_gate_flap",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "112_entry_gate-5열림",
+   "desc": "문판 ↔ 하우징 슬롯 (열림)",
+   "a": "112_entry_gate_flap",
+   "b": "112_entry_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "112_entry_gate-6열림",
+   "desc": "혼 ↔ 하우징 (열림)",
+   "a": "112_entry_gate_horn",
+   "b": "112_entry_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.25,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "112_entry_gate-7",
+   "desc": "하우징 ↔ 마킹실 벽",
+   "a": "112_entry_gate_housing",
+   "b": "120_chamber_walls",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "170_isolation_gate-1",
+   "desc": "문 서보 귀 ↔ 기둥 1",
+   "a": "170_isolation_gate_servo_MG90S",
+   "b": "170_isolation_gate_post1",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "170_isolation_gate-2",
+   "desc": "기둥 1 ↔ 하우징",
+   "a": "170_isolation_gate_post1",
+   "b": "170_isolation_gate_housing",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "170_isolation_gate-3",
+   "desc": "서보 스플라인 ↔ 혼 허브",
+   "a": "170_isolation_gate_servo_spline",
+   "b": "170_isolation_gate_horn",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 2.2,
+   "ok": true,
+   "need": "끼움 ≥ 2.0 mm, 겹침 0"
+  },
+  {
+   "id": "170_isolation_gate-4닫힘",
+   "desc": "혼 핀 ↔ 문판 홈 (닫힘)",
+   "a": "170_isolation_gate_horn",
+   "b": "170_isolation_gate_flap",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "170_isolation_gate-5닫힘",
+   "desc": "문판 ↔ 하우징 슬롯 (닫힘)",
+   "a": "170_isolation_gate_flap",
+   "b": "170_isolation_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "170_isolation_gate-6닫힘",
+   "desc": "혼 ↔ 하우징 (닫힘)",
+   "a": "170_isolation_gate_horn",
+   "b": "170_isolation_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.25,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "170_isolation_gate-4열림",
+   "desc": "혼 핀 ↔ 문판 홈 (열림)",
+   "a": "170_isolation_gate_horn",
+   "b": "170_isolation_gate_flap",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "170_isolation_gate-5열림",
+   "desc": "문판 ↔ 하우징 슬롯 (열림)",
+   "a": "170_isolation_gate_flap",
+   "b": "170_isolation_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "170_isolation_gate-6열림",
+   "desc": "혼 ↔ 하우징 (열림)",
+   "a": "170_isolation_gate_horn",
+   "b": "170_isolation_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.25,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "170_isolation_gate-7",
+   "desc": "하우징 ↔ 마킹실 벽",
+   "a": "170_isolation_gate_housing",
+   "b": "120_chamber_walls",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "176_release_gate-1",
+   "desc": "문 서보 귀 ↔ 기둥 1",
+   "a": "176_release_gate_servo_MG90S",
+   "b": "176_release_gate_post1",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "176_release_gate-2",
+   "desc": "기둥 1 ↔ 하우징",
+   "a": "176_release_gate_post1",
+   "b": "176_release_gate_housing",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "176_release_gate-3",
+   "desc": "서보 스플라인 ↔ 혼 허브",
+   "a": "176_release_gate_servo_spline",
+   "b": "176_release_gate_horn",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 2.2,
+   "ok": true,
+   "need": "끼움 ≥ 2.0 mm, 겹침 0"
+  },
+  {
+   "id": "176_release_gate-4닫힘",
+   "desc": "혼 핀 ↔ 문판 홈 (닫힘)",
+   "a": "176_release_gate_horn",
+   "b": "176_release_gate_flap",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "176_release_gate-5닫힘",
+   "desc": "문판 ↔ 하우징 슬롯 (닫힘)",
+   "a": "176_release_gate_flap",
+   "b": "176_release_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "176_release_gate-6닫힘",
+   "desc": "혼 ↔ 하우징 (닫힘)",
+   "a": "176_release_gate_horn",
+   "b": "176_release_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.25,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "176_release_gate-4열림",
+   "desc": "혼 핀 ↔ 문판 홈 (열림)",
+   "a": "176_release_gate_horn",
+   "b": "176_release_gate_flap",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "176_release_gate-5열림",
+   "desc": "문판 ↔ 하우징 슬롯 (열림)",
+   "a": "176_release_gate_flap",
+   "b": "176_release_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "176_release_gate-6열림",
+   "desc": "혼 ↔ 하우징 (열림)",
+   "a": "176_release_gate_horn",
+   "b": "176_release_gate_housing",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.25,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "176_release_gate-7",
+   "desc": "하우징 ↔ 마킹실 벽",
+   "a": "176_release_gate_housing",
+   "b": "120_chamber_walls",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z1",
+   "desc": "SG90 귀 ↔ 캐리지 기둥",
+   "a": "205_z_servo_SG90",
+   "b": "206_y_carriage",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z2",
+   "desc": "SG90 스플라인 ↔ 혼 허브",
+   "a": "205s_z_servo_spline",
+   "b": "205h_z_servo_horn",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 2.7,
+   "ok": true,
+   "need": "끼움 ≥ 2.4 mm, 겹침 0"
+  },
+  {
+   "id": "Z3",
+   "desc": "혼 끝 ↔ 홀더 탭 (밂, 혼 30°)",
+   "a": "205h_z_servo_horn",
+   "b": "202_marker_holder_vblock",
+   "kind": "push",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "혼 끝이 탭을 밂 (거리 0)"
+  },
+  {
+   "id": "Z4",
+   "desc": "혼 ↔ 홀더 (내림 −20°, 안 닿음)",
+   "a": "205h_z_servo_horn",
+   "b": "202_marker_holder_vblock",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 1.5,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "Z5a",
+   "desc": "안내 핀 ↔ 홀더 슬리브 (내림)",
+   "a": "223_holder_guide_pins",
+   "b": "202_marker_holder_vblock",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "Z5b",
+   "desc": "안내 핀 ↔ 홀더 슬리브 (10 mm 들림)",
+   "a": "223_holder_guide_pins",
+   "b": "202_marker_holder_vblock",
+   "kind": "slide",
+   "overlap_mm3": 0.0,
+   "value": 0.1,
+   "ok": true,
+   "need": "겹침 0 (미끄럼·회전 틈)"
+  },
+  {
+   "id": "Z6",
+   "desc": "안내 핀 ↔ 캐리지 (끼움 아래 4 + 위 8)",
+   "a": "223_holder_guide_pins",
+   "b": "206_y_carriage",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 138.0,
+   "ok": true,
+   "need": "끼움 ≥ 23.5 mm, 겹침 0"
+  },
+  {
+   "id": "Z7a",
+   "desc": "스프링 204 ↔ 홀더 윗면",
+   "a": "204_holder_spring",
+   "b": "202_marker_holder_vblock",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z7b",
+   "desc": "스프링 204 ↔ 멈춤 탭",
+   "a": "204_holder_spring",
+   "b": "206_y_carriage",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z8a",
+   "desc": "마커 ↔ V홈 홀더",
+   "a": "201_marker",
+   "b": "202_marker_holder_vblock",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z8b",
+   "desc": "마커 ↔ 조임 띠",
+   "a": "201_marker",
+   "b": "203_clamp_strap",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z8c",
+   "desc": "조임 띠 ↔ 홀더 (M2 나사)",
+   "a": "203_clamp_strap",
+   "b": "202_marker_holder_vblock",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Z9",
+   "desc": "대기: 마커 원뿔 ↔ 캡 컵",
+   "a": "201_marker",
+   "b": "219_cap_cup",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Y1",
+   "desc": "Y 너트 ↔ 캐리지 (M3 ×4)",
+   "a": "224_y_nut_T8",
+   "b": "206_y_carriage",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø2.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "Y2@-40",
+   "desc": "Y 나사 ↔ Y 너트 (ym -40)",
+   "a": "208_y_lead_screw_T8",
+   "b": "224_y_nut_T8",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 15.0,
+   "ok": true,
+   "need": "끼움 ≥ 14.9 mm, 겹침 0"
+  },
+  {
+   "id": "Y2@18",
+   "desc": "Y 나사 ↔ Y 너트 (ym 18)",
+   "a": "208_y_lead_screw_T8",
+   "b": "224_y_nut_T8",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 15.0,
+   "ok": true,
+   "need": "끼움 ≥ 14.9 mm, 겹침 0"
+  },
+  {
+   "id": "Y3",
+   "desc": "LM6UU ↔ 캐리지 구멍",
+   "a": "221_y_bearings_LM6UU",
+   "b": "206_y_carriage",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "Y4",
+   "desc": "Y 봉 ↔ LM6UU (끼워 지나감)",
+   "a": "207_y_rods",
+   "b": "221_y_bearings_LM6UU",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 38.0,
+   "ok": true,
+   "need": "끼움 ≥ 37.9 mm, 겹침 0"
+  },
+  {
+   "id": "Y5",
+   "desc": "Y 봉 ↔ 끝 블록 (양쪽 10 mm씩)",
+   "a": "207_y_rods",
+   "b": "212_beam_end_blocks",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 248.0,
+   "ok": true,
+   "need": "끼움 ≥ 39.9 mm, 겹침 0"
+  },
+  {
+   "id": "Y6",
+   "desc": "Y 모터 축 ↔ 커플링",
+   "a": "209r_y_motor_shaft",
+   "b": "210_y_coupling",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 6.7,
+   "ok": true,
+   "need": "끼움 ≥ 6.0 mm, 겹침 0"
+  },
+  {
+   "id": "Y7",
+   "desc": "Y 나사 ↔ 커플링",
+   "a": "208_y_lead_screw_T8",
+   "b": "210_y_coupling",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 11.7,
+   "ok": true,
+   "need": "끼움 ≥ 10.0 mm, 겹침 0"
+  },
+  {
+   "id": "Y8a",
+   "desc": "Y 모터 귀 ↔ 모터 브래킷 (M4)",
+   "a": "209_y_stepper_28BYJ48",
+   "b": "211_y_motor_bracket",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø3.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "Y8b",
+   "desc": "Y 모터 귀 ↔ 모터 브래킷 (M4)",
+   "a": "209_y_stepper_28BYJ48",
+   "b": "211_y_motor_bracket",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø3.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "Y9",
+   "desc": "Y 모터 브래킷 ↔ 끝 블록 A",
+   "a": "211_y_motor_bracket",
+   "b": "212_beam_end_blocks",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "X1",
+   "desc": "X 너트 ↔ 끝 블록 A (M3 ×4)",
+   "a": "225_x_nut_T8",
+   "b": "212_beam_end_blocks",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø2.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "X2@37",
+   "desc": "X 나사 ↔ X 너트 (xm 37)",
+   "a": "214_x_lead_screw_T8",
+   "b": "225_x_nut_T8",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 15.0,
+   "ok": true,
+   "need": "끼움 ≥ 14.9 mm, 겹침 0"
+  },
+  {
+   "id": "X2@73",
+   "desc": "X 나사 ↔ X 너트 (xm 73)",
+   "a": "214_x_lead_screw_T8",
+   "b": "225_x_nut_T8",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 15.0,
+   "ok": true,
+   "need": "끼움 ≥ 14.9 mm, 겹침 0"
+  },
+  {
+   "id": "X3",
+   "desc": "LM8UU ↔ 끝 블록 구멍",
+   "a": "222_x_bearings_LM8UU",
+   "b": "212_beam_end_blocks",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "X4",
+   "desc": "X 봉 ↔ LM8UU",
+   "a": "213_x_rods",
+   "b": "222_x_bearings_LM8UU",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 48.0,
+   "ok": true,
+   "need": "끼움 ≥ 47.9 mm, 겹침 0"
+  },
+  {
+   "id": "X5",
+   "desc": "X 봉 ↔ 봉 받침 (양 끝 12 mm)",
+   "a": "213_x_rods",
+   "b": "218_rod_supports",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 326.0,
+   "ok": true,
+   "need": "끼움 ≥ 47.9 mm, 겹침 0"
+  },
+  {
+   "id": "X6",
+   "desc": "봉 받침 ↔ 갠트리 레일",
+   "a": "218_rod_supports",
+   "b": "100_frame",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "X7a",
+   "desc": "X 모터 귀 ↔ 모터판 217 (M4)",
+   "a": "215_x_stepper_28BYJ48",
+   "b": "217_x_motor_plate",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø3.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "X7b",
+   "desc": "X 모터 귀 ↔ 모터판 217 (M4)",
+   "a": "215_x_stepper_28BYJ48",
+   "b": "217_x_motor_plate",
+   "kind": "screw",
+   "overlap_mm3": 0.0,
+   "value": [
+    0.0,
+    0.0
+   ],
+   "ok": true,
+   "need": "구멍이 한 줄 (탐침 Ø3.8가 두 부품 재료에 안 닿음) + 면 접촉"
+  },
+  {
+   "id": "X8",
+   "desc": "모터판 217 ↔ 갠트리 레일 (아래 면)",
+   "a": "217_x_motor_plate",
+   "b": "100_frame",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "X9",
+   "desc": "X 모터 축 ↔ 커플링",
+   "a": "215r_x_motor_shaft",
+   "b": "216_x_coupling",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 6.7,
+   "ok": true,
+   "need": "끼움 ≥ 6.0 mm, 겹침 0"
+  },
+  {
+   "id": "X10",
+   "desc": "X 나사 ↔ 커플링",
+   "a": "214_x_lead_screw_T8",
+   "b": "216_x_coupling",
+   "kind": "insert",
+   "overlap_mm3": 0.0,
+   "value": 11.7,
+   "ok": true,
+   "need": "끼움 ≥ 10.0 mm, 겹침 0"
+  },
+  {
+   "id": "C1",
+   "desc": "캡 컵 ↔ 컵 받침",
+   "a": "219_cap_cup",
+   "b": "220_cup_bracket",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  },
+  {
+   "id": "C2",
+   "desc": "컵 받침 ↔ 마킹실 벽",
+   "a": "220_cup_bracket",
+   "b": "120_chamber_walls",
+   "kind": "contact",
+   "overlap_mm3": 0.0,
+   "value": 0.0,
+   "ok": true,
+   "need": "면 접촉 (거리 0, 겹침 0)"
+  }
+ ],
+ "sweep": [
+  {
+   "pose": "대기 펜 올림",
+   "J": {
+    "horn": 45.6
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (65.0, 18.0) 바닥 올림",
+   "J": {
+    "xm": 65,
+    "ym": 18,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (37.4, -40.0) 바닥 올림",
+   "J": {
+    "xm": 37.4,
+    "ym": -40,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (72.6, -40.0) 바닥 올림",
+   "J": {
+    "xm": 72.6,
+    "ym": -40,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (37.4, -17.6) 바닥 올림",
+   "J": {
+    "xm": 37.4,
+    "ym": -17.6,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (37.4, 17.6) 바닥 올림",
+   "J": {
+    "xm": 37.4,
+    "ym": 17.6,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (72.6, -17.6) 바닥 올림",
+   "J": {
+    "xm": 72.6,
+    "ym": -17.6,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (72.6, 17.6) 바닥 올림",
+   "J": {
+    "xm": 72.6,
+    "ym": 17.6,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "이동 펜 올림 (55.0, 0.0) 바닥 올림",
+   "J": {
+    "xm": 55,
+    "ym": 0,
+    "horn": 45.6,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "찍기 (37.4, -17.6)",
+   "J": {
+    "xm": 37.4,
+    "ym": -17.6,
+    "horn": -20.0,
+    "support": 0.5555555555555429,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "찍기 (37.4, 17.6)",
+   "J": {
+    "xm": 37.4,
+    "ym": 17.6,
+    "horn": -20.0,
+    "support": 0.5555555555555429,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "찍기 (72.6, -17.6)",
+   "J": {
+    "xm": 72.6,
+    "ym": -17.6,
+    "horn": -20.0,
+    "support": 0.5555555555555429,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "찍기 (72.6, 17.6)",
+   "J": {
+    "xm": 72.6,
+    "ym": 17.6,
+    "horn": -20.0,
+    "support": 0.5555555555555429,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "찍기 (59.4, 0.0)",
+   "J": {
+    "xm": 59.4,
+    "ym": 0,
+    "horn": -20.0,
+    "support": 0.5555555555555429,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "문 3개 열림, 바닥 내림",
+   "J": {
+    "door_entry": -60,
+    "door_iso": -60,
+    "door_rel": -60
+   },
+   "collisions": []
+  },
+  {
+   "pose": "문 3개 열림, 바닥 올림",
+   "J": {
+    "door_entry": -60,
+    "door_iso": -60,
+    "door_rel": -60,
+    "floor": 36.5
+   },
+   "collisions": []
+  },
+  {
+   "pose": "바닥 중간",
+   "J": {
+    "floor": 18.0
+   },
+   "collisions": []
+  }
+ ]
+}

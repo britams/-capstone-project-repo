@@ -135,11 +135,8 @@ def render(doc, out_dir, f0=0, f1=None, views=None, W=1280, H=720):
         doc.recompute()
         byl["REF_mark_dot"].ViewObject.Visibility = bool(J["dot"]) and bool(J["hornet_visible"])
         byl["REF_hornet"].ViewObject.Visibility = bool(J["hornet_visible"])
-        for vname, (rot, cam_pos, height) in (views or {}).items():
-            cam = v.getCameraNode()
-            v.setCameraOrientation(rot)
-            cam.position.setValue(*cam_pos)
-            cam.height.setValue(height)
+        for vname, cam_str in (views or {}).items():       # views: 이름 → v.getCamera() 문자열
+            v.setCamera(cam_str)
             ww, hh = (W, H) if vname == "main" else (560, 420)
             v.saveImage(os.path.join(out_dir, "%s_%04d.png" % (vname, i)), ww, hh, "White")
         name, real = step_at(t)
@@ -147,3 +144,57 @@ def render(doc, out_dir, f0=0, f1=None, views=None, W=1280, H=720):
     with open(os.path.join(out_dir, "frames_%04d_%04d.json" % (f0, f0 + len(meta))), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False)
     return len(meta)
+
+
+HIDE = {"100_frame", "190_pi5_aihat", "191_arduino_uno", "180_camera", "181_camera_bracket", "182_light_ring", "105_top_plate",
+        "104_dome_coupling", "173_isolation_funnel", "REF_camera_view", "102_collar", "101_deck", "111_entry_funnel", "FitBox", "P204a", "P204b"}
+TRANSP = {"172_isolation_duct": 45, "110_entry_duct": 45, "174_release_duct": 45, "120_chamber_walls": 72, "130_grid": 55,
+          "112_entry_gate_housing": 45, "170_isolation_gate_housing": 45, "176_release_gate_housing": 45, "175_release_oneway": 30}
+
+
+def setup_visibility(doc):
+    for o in doc.Objects:
+        if o.TypeId == "Spreadsheet::Sheet" or not hasattr(o, "ViewObject") or o.ViewObject is None:
+            continue
+        hide = o.Label in HIDE or o.Name in HIDE or o.Label.startswith("REF_trap")
+        o.ViewObject.Visibility = not hide
+        if o.Label in TRANSP:
+            o.ViewObject.Transparency = TRANSP[o.Label]
+        if o.Label == "130_grid":
+            o.ViewObject.ShapeColor = (0.3, 0.3, 0.3)
+        if o.Label == "REF_hornet":
+            o.ViewObject.ShapeColor = (0.80, 0.42, 0.08)     # 잘 보이게 주황 (실물은 검은 갈색 + 주황 띠)
+        if o.Label == "REF_mark_dot":
+            o.ViewObject.ShapeColor = (1.0, 0.95, 0.0)
+
+
+def make_views(doc):
+    """전체(main)와 마킹실 확대(inset) 카메라 문자열"""
+    import FreeCAD as App
+    import FreeCADGui as Gui
+    import Part
+    V = App.Vector
+    v = Gui.getDocument(doc.Name).ActiveView
+
+    def cam_rot(d):
+        d = V(*d).normalize()
+        zc = d * -1
+        up = V(0, 0, 1)
+        yc = (up - zc * up.dot(zc)).normalize()
+        return App.Rotation(yc.cross(zc), yc, zc, "ZYX")
+
+    fb = doc.getObject("FitBox") or doc.addObject("Part::Feature", "FitBox")
+    out = {}
+    for name, box, d in (("main", (-20, 165, -115, 55, 250, 495), (1.0, 1.6, -1.1)),
+                         ("inset", (26, 84, -26, 26, 336, 404), (0.45, 1.6, -0.32))):
+        for o in doc.Objects:
+            if hasattr(o, "ViewObject") and o.ViewObject is not None:
+                o.ViewObject.Visibility = False
+        fb.Shape = Part.makeBox(box[1] - box[0], box[3] - box[2], box[5] - box[4], V(box[0], box[2], box[4]))
+        fb.ViewObject.Visibility = True
+        v.setCameraType("Orthographic")
+        v.setCameraOrientation(cam_rot(d))
+        v.fitAll()
+        out[name] = v.getCamera()
+    setup_visibility(doc)
+    return out
