@@ -2,7 +2,13 @@
 # Uses the J1 install (Documents\capstone_vespai) made by 1_install_vespai.bat (Seungjun's j1_vespai_windows.ps1).
 # No argument = webcam. A video file or a folder of pictures as argument = file mode (5 conditions, table).
 $ErrorActionPreference = 'Continue'
-$Base = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'capstone_vespai'
+# Where the J1 install is: next to this kit folder (..\capstone_vespai) first, then Documents\capstone_vespai
+$Base = $null
+foreach ($c in @((Join-Path (Split-Path $PSScriptRoot -Parent) 'capstone_vespai'), (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'capstone_vespai'))) {
+    if (Test-Path (Join-Path $c 'venv\Scripts\python.exe')) { $Base = $c; break }
+}
+if (-not $Base) { Write-Host 'capstone_vespai folder not found (looked next to this folder and in Documents). Run 1_install_vespai.bat first.' -ForegroundColor Red; exit 1 }
+Write-Host "Using $Base"
 $Py   = Join-Path $Base 'venv\Scripts\python.exe'
 $Yolo = Join-Path $Base 'yolov5'
 $W    = Join-Path $Base 'vespai\models\yolov5-params\yolov5s-all-data.pt'
