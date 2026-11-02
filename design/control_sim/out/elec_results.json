@@ -96,165 +96,165 @@
  "states_holdF0": [
   {
    "state": "0 켤 때 원점 찾기 (F → X·Y)",
-   "iB_typ": 0.43,
-   "iB_peak": 0.515,
-   "pB_W": 2.15,
+   "iB_typ": 0.496,
+   "iB_peak": 0.581,
+   "pB_W": 2.48,
    "pA_W": 5.63
   },
   {
    "state": "대기 (아래 조명 켬)",
-   "iB_typ": 0.278,
-   "iB_peak": 0.278,
-   "pB_W": 1.39,
+   "iB_typ": 0.344,
+   "iB_peak": 0.344,
+   "pB_W": 1.72,
    "pA_W": 5.7
   },
   {
    "state": "1 진입 → 입구 문 닫기 (0.2 s)",
-   "iB_typ": 0.469,
-   "iB_peak": 1.019,
-   "pB_W": 2.34,
+   "iB_typ": 0.535,
+   "iB_peak": 1.085,
+   "pB_W": 2.67,
    "pA_W": 7.2
   },
   {
    "state": "2 판별 (위 조명)",
-   "iB_typ": 0.378,
-   "iB_peak": 0.378,
-   "pB_W": 1.89,
+   "iB_typ": 0.444,
+   "iB_peak": 0.444,
+   "pB_W": 2.22,
    "pA_W": 8.4
   },
   {
    "state": "3 누르기 + X·Y 미리 이동",
-   "iB_typ": 0.66,
-   "iB_peak": 0.788,
-   "pB_W": 3.3,
+   "iB_typ": 0.727,
+   "iB_peak": 0.854,
+   "pB_W": 3.63,
    "pA_W": 7.2
   },
   {
    "state": "4 자세·흉부 촬영",
-   "iB_typ": 0.378,
-   "iB_peak": 0.378,
-   "pB_W": 1.89,
+   "iB_typ": 0.444,
+   "iB_peak": 0.444,
+   "pB_W": 2.22,
    "pA_W": 8.4
   },
   {
    "state": "5 찍기 (펜 서보)",
-   "iB_typ": 0.618,
-   "iB_peak": 1.018,
-   "pB_W": 3.09,
+   "iB_typ": 0.684,
+   "iB_peak": 1.084,
+   "pB_W": 3.42,
    "pA_W": 7.2
   },
   {
    "state": "6 급이·건조",
-   "iB_typ": 0.278,
-   "iB_peak": 0.278,
-   "pB_W": 1.39,
+   "iB_typ": 0.344,
+   "iB_peak": 0.344,
+   "pB_W": 1.72,
    "pA_W": 5.7
   },
   {
    "state": "7 방생 문 열고 기다림",
-   "iB_typ": 0.428,
-   "iB_peak": 0.978,
-   "pB_W": 2.14,
+   "iB_typ": 0.494,
+   "iB_peak": 1.044,
+   "pB_W": 2.47,
    "pA_W": 7.2
   },
   {
    "state": "8 격리 문 열고 기다림",
-   "iB_typ": 0.365,
-   "iB_peak": 0.915,
-   "pB_W": 1.82,
+   "iB_typ": 0.431,
+   "iB_peak": 0.981,
+   "pB_W": 2.16,
    "pA_W": 7.2
   },
   {
    "state": "밤 (Pi 꺼짐, UNO 꺼짐)",
-   "iB_typ": 0.028,
-   "iB_peak": 0.028,
-   "pB_W": 0.14,
+   "iB_typ": 0.034,
+   "iB_peak": 0.034,
+   "pB_W": 0.17,
    "pA_W": 0.01
   }
  ],
  "states_holdF1": [
   {
    "state": "0 켤 때 원점 찾기 (F → X·Y)",
-   "iB_typ": 0.557,
-   "iB_peak": 0.685,
-   "pB_W": 2.79,
+   "iB_typ": 0.624,
+   "iB_peak": 0.751,
+   "pB_W": 3.12,
    "pA_W": 5.63
   },
   {
    "state": "대기 (아래 조명 켬)",
-   "iB_typ": 0.405,
-   "iB_peak": 0.448,
-   "pB_W": 2.03,
+   "iB_typ": 0.472,
+   "iB_peak": 0.514,
+   "pB_W": 2.36,
    "pA_W": 5.7
   },
   {
    "state": "1 진입 → 입구 문 닫기 (0.2 s)",
-   "iB_typ": 0.596,
-   "iB_peak": 1.189,
-   "pB_W": 2.98,
+   "iB_typ": 0.662,
+   "iB_peak": 1.254,
+   "pB_W": 3.31,
    "pA_W": 7.2
   },
   {
    "state": "2 판별 (위 조명)",
-   "iB_typ": 0.505,
-   "iB_peak": 0.548,
-   "pB_W": 2.53,
+   "iB_typ": 0.572,
+   "iB_peak": 0.614,
+   "pB_W": 2.86,
    "pA_W": 8.4
   },
   {
    "state": "3 누르기 + X·Y 미리 이동",
-   "iB_typ": 0.66,
-   "iB_peak": 0.788,
-   "pB_W": 3.3,
+   "iB_typ": 0.727,
+   "iB_peak": 0.854,
+   "pB_W": 3.63,
    "pA_W": 7.2
   },
   {
    "state": "4 자세·흉부 촬영",
-   "iB_typ": 0.505,
-   "iB_peak": 0.548,
-   "pB_W": 2.53,
+   "iB_typ": 0.572,
+   "iB_peak": 0.614,
+   "pB_W": 2.86,
    "pA_W": 8.4
   },
   {
    "state": "5 찍기 (펜 서보)",
-   "iB_typ": 0.746,
-   "iB_peak": 1.188,
-   "pB_W": 3.73,
+   "iB_typ": 0.811,
+   "iB_peak": 1.254,
+   "pB_W": 4.06,
    "pA_W": 7.2
   },
   {
    "state": "6 급이·건조",
-   "iB_typ": 0.405,
-   "iB_peak": 0.448,
-   "pB_W": 2.03,
+   "iB_typ": 0.472,
+   "iB_peak": 0.514,
+   "pB_W": 2.36,
    "pA_W": 5.7
   },
   {
    "state": "7 방생 문 열고 기다림",
-   "iB_typ": 0.556,
-   "iB_peak": 1.148,
-   "pB_W": 2.78,
+   "iB_typ": 0.622,
+   "iB_peak": 1.214,
+   "pB_W": 3.11,
    "pA_W": 7.2
   },
   {
    "state": "8 격리 문 열고 기다림",
-   "iB_typ": 0.493,
-   "iB_peak": 1.085,
-   "pB_W": 2.46,
+   "iB_typ": 0.559,
+   "iB_peak": 1.151,
+   "pB_W": 2.79,
    "pA_W": 7.2
   },
   {
    "state": "밤 (Pi 꺼짐, UNO 꺼짐)",
-   "iB_typ": 0.028,
-   "iB_peak": 0.028,
-   "pB_W": 0.14,
+   "iB_typ": 0.034,
+   "iB_peak": 0.034,
+   "pB_W": 0.17,
    "pA_W": 0.01
   }
  ],
  "worst": {
-  "rule_kept_A": 1.8,
-  "boot_all_servos_A": 3.21,
-  "boot_staggered_A": 1.08,
+  "rule_kept_A": 1.86,
+  "boot_all_servos_A": 3.27,
+  "boot_staggered_A": 1.15,
   "note": "규칙: 서보는 한 번에 하나 (문 3개·펜). 지금 펌웨어 setup()은 서보 4개를 한꺼번에 attach·write → 켤 때 위치가 다르면 4개가 동시에 움직임"
  },
  "fuse": {
@@ -497,9 +497,21 @@
    "to": "G2",
    "wires": 5,
    "awg": 28,
-   "len_mm": 359,
+   "len_mm": 361,
    "stock_mm": 230,
-   "extension_mm": 129,
+   "extension_mm": 131,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G2b (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G2b",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 366,
+   "stock_mm": 230,
+   "extension_mm": 136,
    "moving": false,
    "drop_V": null
   },
@@ -509,9 +521,21 @@
    "to": "G3",
    "wires": 5,
    "awg": 28,
-   "len_mm": 392,
+   "len_mm": 400,
    "stock_mm": 230,
-   "extension_mm": 162,
+   "extension_mm": 170,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G3b (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G3b",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 395,
+   "stock_mm": 230,
+   "extension_mm": 165,
    "moving": false,
    "drop_V": null
   },
@@ -533,9 +557,21 @@
    "to": "G5",
    "wires": 5,
    "awg": 28,
-   "len_mm": 474,
+   "len_mm": 464,
    "stock_mm": 230,
-   "extension_mm": 244,
+   "extension_mm": 234,
+   "moving": false,
+   "drop_V": null
+  },
+  {
+   "name": "UNO 2 → 빛 게이트 G5b (송신 2선 + 수신 3선)",
+   "frm": "UNO2",
+   "to": "G5b",
+   "wires": 5,
+   "awg": 28,
+   "len_mm": 469,
+   "stock_mm": 230,
+   "extension_mm": 239,
    "moving": false,
    "drop_V": null
   },
@@ -631,9 +667,9 @@
    "hold_f": true,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.73,
-   "load_Wh": 185.5,
-   "wall_Wh": 218.2
+   "idle_W": 8.06,
+   "load_Wh": 193.4,
+   "wall_Wh": 227.5
   },
   {
    "visits": 20,
@@ -641,9 +677,9 @@
    "hold_f": true,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.73,
-   "load_Wh": 73.3,
-   "wall_Wh": 86.2
+   "idle_W": 8.06,
+   "load_Wh": 76.7,
+   "wall_Wh": 90.3
   },
   {
    "visits": 20,
@@ -651,9 +687,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.09,
-   "load_Wh": 67.6,
-   "wall_Wh": 79.5
+   "idle_W": 7.42,
+   "load_Wh": 71.0,
+   "wall_Wh": 83.5
   },
   {
    "visits": 20,
@@ -661,9 +697,9 @@
    "hold_f": false,
    "cam_always": false,
    "bot_idle": false,
-   "idle_W": 5.0,
-   "load_Wh": 48.8,
-   "wall_Wh": 57.4
+   "idle_W": 5.33,
+   "load_Wh": 52.2,
+   "wall_Wh": 61.4
   },
   {
    "visits": 100,
@@ -671,9 +707,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.09,
-   "load_Wh": 67.6,
-   "wall_Wh": 79.5
+   "idle_W": 7.42,
+   "load_Wh": 71.0,
+   "wall_Wh": 83.5
   }
  ],
  "battery": {
@@ -682,5 +718,49 @@
   "eff": 0.85,
   "note": "5 V 출력 쪽 쓸 수 있는 양 ≈ 74 × 0.85 = 63 Wh [가능성 높음]. Pi 5는 5 V 3 A 전원이면 USB 전류를 600 mA로 묶고 경고를 띄움 — UNO 2개(0.1 A)는 괜찮음 [가능성 높음]"
  },
- "harness_total_m": 37.4
+ "battery_box": [
+  {
+   "mode": "보통 (카메라 늘 켬, 대기 조명)",
+   "Ah": 6,
+   "Wh": 77,
+   "need_Wh_day": 81.1,
+   "days": 0.85
+  },
+  {
+   "mode": "보통 (카메라 늘 켬, 대기 조명)",
+   "Ah": 12,
+   "Wh": 154,
+   "need_Wh_day": 81.1,
+   "days": 1.7
+  },
+  {
+   "mode": "보통 (카메라 늘 켬, 대기 조명)",
+   "Ah": 20,
+   "Wh": 256,
+   "need_Wh_day": 81.1,
+   "days": 2.84
+  },
+  {
+   "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
+   "Ah": 6,
+   "Wh": 77,
+   "need_Wh_day": 60.3,
+   "days": 1.15
+  },
+  {
+   "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
+   "Ah": 12,
+   "Wh": 154,
+   "need_Wh_day": 60.3,
+   "days": 2.29
+  },
+  {
+   "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
+   "Ah": 20,
+   "Wh": 256,
+   "need_Wh_day": 60.3,
+   "days": 3.82
+  }
+ ],
+ "harness_total_m": 43.5
 }

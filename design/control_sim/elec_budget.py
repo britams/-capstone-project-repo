@@ -63,7 +63,10 @@ LOADS = {
 }
 
 
-def rail_b(stepper_move=0, stepper_hold=0, pen="idle", doors=("idle", "idle", "idle"), emit=6, rx=6, blocked=0,
+N_GATE = 9   # G1, 문마다 2개(G2·G2b, G3·G3b, G5·G5b), G4, G6 — 서현 11/02 결정 (원래 6)
+
+
+def rail_b(stepper_move=0, stepper_hold=0, pen="idle", doors=("idle", "idle", "idle"), emit=N_GATE, rx=N_GATE, blocked=0,
            top=0, bot=0, exit_=0, peak=False):
     """구동 레일 B 전류 (A). peak=True면 스테핑은 2상, 서보 move는 막힘값으로 본다."""
     st = LOADS["stepper"]
@@ -101,7 +104,7 @@ def state_table(hold_f):
         ("6 급이·건조", dict(stepper_hold=hf, bot=1), dict(pi="idle", cam="run", hat="idle")),
         ("7 방생 문 열고 기다림", dict(stepper_hold=hf, exit_=1, doors=("idle", "idle", "move")), dict(pi="active", cam="run", hat="idle")),
         ("8 격리 문 열고 기다림", dict(stepper_hold=hf, doors=("idle", "move", "idle")), dict(pi="active", cam="run", hat="idle")),
-        ("밤 (Pi 꺼짐, UNO 꺼짐)", dict(emit=0, rx=6, pen="detached", doors=("detached",) * 3), dict(pi="halt", cam="off", hat="off")),
+        ("밤 (Pi 꺼짐, UNO 꺼짐)", dict(emit=0, rx=N_GATE, pen="detached", doors=("detached",) * 3), dict(pi="halt", cam="off", hat="off")),
     ]
     out = []
     for name, b, a in rows:
@@ -117,7 +120,7 @@ def state_table(hold_f):
 # 3) 최대 전류
 # ---------------------------------------------------------------------------
 def worst_cases():
-    rule = rail_b(stepper_move=3, doors=("move", "idle", "idle"), pen="idle", top=1, bot=1, exit_=1, blocked=6, peak=True)
+    rule = rail_b(stepper_move=3, doors=("move", "idle", "idle"), pen="idle", top=1, bot=1, exit_=1, blocked=N_GATE, peak=True)
     boot_all = rail_b(stepper_hold=1, pen="move", doors=("move", "move", "move"), blocked=0, peak=True)
     boot_seq = rail_b(stepper_hold=1, pen="idle", doors=("move", "idle", "idle"), peak=True)
     return dict(
@@ -163,7 +166,9 @@ P = {
     "M_Y":  (91, -77, 453), "ULN_Y": (160, -10, 440), "SW_Y": (91, -56, 470),
     "PEN":  (97, -19, 418),             # 펜 서보: 캐리지 위 (대기 자리 기준)
     "D_IN": (26, -20, 349), "D_CAP": (26, -20, 377), "D_REL": (84, -20, 377),
-    "G1": (0, 0, 275), "G2": (22, 0, 349), "G3": (22, 0, 377), "G4": (0, 0, 570), "G5": (90, 0, 377), "G6": (115, 0, 377),
+    "G1": (0, 0, 275), "G4": (0, 0, 570), "G6": (115, 0, 377),
+    # 문 빔 2개: 문판 평면(입구·격리 x ≈ 26, 방생 x ≈ 84) 앞뒤 각 2 mm
+    "G2": (24, 0, 349), "G2b": (28, 0, 349), "G3": (28, 0, 377), "G3b": (24, 0, 377), "G5": (82, 0, 377), "G5b": (86, 0, 377),
     "CAM": (55, 0, 600), "L_TOP": (55, 0, 588), "L_BOT": (55, 15, 333), "L_EXIT": (115, 0, 395),
 }
 MOVE = {   # 움직이는 끝: 움직임 길이 (mm) → 휨 고리 = 1.5 × 움직임 + 40
@@ -194,7 +199,8 @@ HARNESS = [
     ("UNO 2 → 입구 문 서보 112", "UNO2", "D_IN", 3, 26, 0.75, "servo"),
     ("UNO 2 → 격리 문 서보 170", "UNO2", "D_CAP", 3, 26, 0.75, "servo"),
     ("UNO 2 → 방생 문 서보 176", "UNO2", "D_REL", 3, 26, 0.75, "servo"),
-] + [("UNO 2 → 빛 게이트 G%d (송신 2선 + 수신 3선)" % k, "UNO2", "G%d" % k, 5, 28, 0.02, "ir") for k in range(1, 7)] + [
+] + [("UNO 2 → 빛 게이트 %s (송신 2선 + 수신 3선)" % g, "UNO2", g, 5, 28, 0.02, "ir")
+      for g in ("G1", "G2", "G2b", "G3", "G3b", "G4", "G5", "G5b", "G6")] + [
     ("UNO 2 → MOSFET → 위 조명 182", "UNO2", "L_TOP", 2, 24, 0.20, None),
     ("UNO 2 → MOSFET → 아래 조명", "UNO2", "L_BOT", 2, 24, 0.10, None),
     ("UNO 2 → MOSFET → 출구 조명", "UNO2", "L_EXIT", 2, 24, 0.06, None),
@@ -240,11 +246,38 @@ def daily(visits, hours_on=9.0, hold_f=False, cam_always=True, bot_idle=True, pe
     idle_A = rail_a(pi="idle", cam="run" if cam_always else "standby", hat="idle")
     idle_B = rail_b(stepper_hold=1 if hold_f else 0, bot=1 if bot_idle else 0) * V_B
     night_A = LOADS["pi5"]["halt"]
-    night_B = rail_b(emit=0, rx=6, pen="detached", doors=("detached",) * 3) * V_B + 0.1   # 어댑터 무부하 0.1 W [추측]
+    night_B = rail_b(emit=0, rx=N_GATE, pen="detached", doors=("detached",) * 3) * V_B + 0.1   # 어댑터 무부하 0.1 W [추측]
     extra = visits * (per_visit_Wh if per_visit_Wh is not None else 0.0)
     load = hours_on * (idle_A + idle_B) + (24 - hours_on) * (night_A + night_B) + extra
     return dict(visits=visits, hours_on=hours_on, hold_f=hold_f, cam_always=cam_always, bot_idle=bot_idle,
                 idle_W=round(idle_A + idle_B, 2), load_Wh=round(load, 1), wall_Wh=round(load / ETA_ADAPTER, 1))
+
+
+# ---------------------------------------------------------------------------
+# 6-1) 콘센트 기본 + 배터리 겸용 (서현 11/02: "콘센트로 하는데 배터리도 가능하게")
+#   본체 입력은 그대로 2개: Pi = USB-C (27 W 어댑터), 구동 레일 = DC 5.5×2.1 배럴 5 V (3 A 어댑터).
+#   배터리 상자 = LiFePO4 12.8 V + 강압 2개(5.1 V 5 A → USB-C, 5 V 3 A → 배럴) + INA226(I2C → Pi). 같은 플러그로 꽂음.
+# ---------------------------------------------------------------------------
+ETA_BUCK = 0.90            # 강압 효율 [가능성 높음 — 동기 정류형 1~2 A]
+BUCK_IQ_W = 0.05           # 강압 2개 무부하 (밤) [추측]
+LFP_USABLE = 0.90          # LiFePO4 쓸 수 있는 몫 (BMS 차단 전) [가능성 높음]
+
+
+def battery_days(load_day_Wh, night_W, hours_on, Ah, V=12.8):
+    """load_day_Wh: 하루 부하(낮 운용 + 밤) Wh. 배터리 쪽 에너지 = 부하/강압 효율 + 강압 무부하."""
+    need = load_day_Wh / ETA_BUCK + BUCK_IQ_W * 24
+    cap = Ah * V * LFP_USABLE
+    return round(cap / need, 2), round(need, 1)
+
+
+def battery_table(per_visit_Wh=0.047, visits=20):
+    rows = []
+    for mode, cam, bot in (("보통 (카메라 늘 켬, 대기 조명)", True, True), ("절약 (카메라 G1 때만, 대기 조명 끔)", False, False)):
+        d = daily(visits, 9.0, False, cam, bot, per_visit_Wh=per_visit_Wh)
+        for Ah in (6, 12, 20):
+            days, need = battery_days(d["load_Wh"], 0, 9.0, Ah)
+            rows.append(dict(mode=mode, Ah=Ah, Wh=round(Ah * 12.8), need_Wh_day=need, days=days))
+    return rows
 
 
 BATTERY = dict(name="보조배터리 20,000 mAh (3.7 V 셀)", Wh_cell=74.0, eff=0.85,
@@ -280,6 +313,7 @@ def main():
             (20, 24, True, True, True), (20, 9, True, True, True), (20, 9, False, True, True),
             (20, 9, False, False, False), (100, 9, False, True, True))],
         battery=BATTERY,
+        battery_box=battery_table(),
     )
     with open(os.path.join(OUT, "elec_results.json"), "w", encoding="utf-8") as f:
         json.dump(res, f, ensure_ascii=False, indent=1)
@@ -298,6 +332,9 @@ def main():
     res["harness_total_m"] = round(tot / 1000, 1)
     print("\nCSI:", res["csi"])
     print("\nHOLD:", res["hold"])
+    print("\n배터리 상자:")
+    for r in res["battery_box"]:
+        print("  ", r)
     print("\n하루:")
     for d in res["daily"]:
         print("  ", d)

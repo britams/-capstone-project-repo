@@ -5,14 +5,14 @@
 | 파일 | 하는 일 |
 |---|---|
 | `elec_budget.py` | 부품 전류표(근거 표시), 상태별 전류·전력, 최대 전류·퓨즈, 전선 강하, D5e 좌표로 배선 길이, 하루 에너지, `HOLD F` 검토 → `out/elec_results.json` |
-| `trap_sim.py` | Pi 상태 머신 참고 구현(`PiFSM`) + 가짜 UNO 1·UNO 2·카메라·말벌. 시나리오 17개와 안전 규칙 5개 검사 → `out/sim_results.json`, `out/S1_timeline.json` |
+| `trap_sim.py` | Pi 상태 머신 참고 구현(`PiFSM`) + 가짜 UNO 1·UNO 2·카메라·말벌. 시나리오 19개와 안전 규칙 5개 검사 + 빔 하나 비교 → `out/sim_results.json`, `out/S1_timeline.json` |
 | `make_figs.py` | 그림 4장 → `design/img/control/` (배선도, S1 시간표, 상태도, 메시지 순서) |
 
 실행 순서 (Python 3.10 이상, matplotlib; 상태도는 graphviz `dot`, 메시지 순서는 `mmdc`가 있어야 함):
 
 ```
 python design/control_sim/elec_budget.py
-python design/control_sim/trap_sim.py            # 17개 모두
+python design/control_sim/trap_sim.py            # 19개 모두 + 빔 하나 비교
 python design/control_sim/trap_sim.py S1_nominal # 하나만 + 메시지 기록
 python design/control_sim/make_figs.py
 ```

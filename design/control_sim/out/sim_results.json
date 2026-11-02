@@ -38,7 +38,12 @@
   "hb_period_s": 0.5,
   "hb_timeout_s": 1.5,
   "uno_watchdog_s": 2.0,
-  "other_species": "isolate",
+  "door_beams": 2,
+  "classes": [
+   "velutina",
+   "crabro"
+  ],
+  "crabro_action": "isolate",
   "control_mode": false
  },
  "results": [
@@ -101,7 +106,7 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 112.96,
+     "t": 114.06,
      "kind": "mark_result",
      "ok": true
     }
@@ -114,7 +119,7 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6903,
+   "E_A_Wh": 0.6904,
    "E_B_Wh": 0.1627,
    "final_doors": {
     "IN": "open",
@@ -122,14 +127,14 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 156.0,
+   "cycle_s": 157.4,
    "pass": true,
    "fails": [],
    "per_hornet": {
-    "cycle_s": 156.0,
-    "E_cycle_Wh": 0.3541,
-    "E_extra_Wh": 0.0469,
-    "idle_W": 7.09
+    "cycle_s": 157.4,
+    "E_cycle_Wh": 0.3569,
+    "E_extra_Wh": 0.0325,
+    "idle_W": 7.42
    }
   },
   {
@@ -152,12 +157,12 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 112.96,
+     "t": 114.06,
      "kind": "mark_result",
      "ok": true
     },
     {
-     "t": 262.36,
+     "t": 265.16,
      "kind": "mark_result",
      "ok": true
     }
@@ -170,15 +175,15 @@
     "peak_iB": 1.007,
     "crush": 0
    },
-   "E_A_Wh": 1.3667,
-   "E_B_Wh": 0.3238,
+   "E_A_Wh": 1.367,
+   "E_B_Wh": 0.3237,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 156.0,
+   "cycle_s": 157.4,
    "pass": true,
    "fails": []
   },
@@ -202,12 +207,12 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 68.31,
+     "t": 70.11,
      "kind": "mismatch",
-     "what": "ledger 0, camera 2"
+     "what": "ledger 1, camera 2"
     },
     {
-     "t": 68.31,
+     "t": 70.11,
      "kind": "decision",
      "what": "two_or_more → isolate"
     }
@@ -220,7 +225,7 @@
     "peak_iB": 1.012,
     "crush": 0
    },
-   "E_A_Wh": 0.6741,
+   "E_A_Wh": 0.6745,
    "E_B_Wh": 0.1421,
    "final_doors": {
     "IN": "open",
@@ -228,7 +233,7 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 38.9,
+   "cycle_s": 41.3,
    "pass": true,
    "fails": []
   },
@@ -248,7 +253,7 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 69.02,
+     "t": 70.12,
      "kind": "decision",
      "what": "isolate (velutina queen)"
     }
@@ -261,7 +266,7 @@
     "peak_iB": 1.012,
     "crush": 0
    },
-   "E_A_Wh": 0.5124,
+   "E_A_Wh": 0.5123,
    "E_B_Wh": 0.1063,
    "final_doors": {
     "IN": "open",
@@ -269,13 +274,13 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 38.1,
+   "cycle_s": 39.5,
    "pass": true,
    "fails": []
   },
   {
-   "name": "S5_other_species",
-   "desc": "유럽말벌 → 격리 (지금 규칙)",
+   "name": "S5_crabro",
+   "desc": "유럽말벌 → 격리 (지금 규칙, 서현 확인 대기)",
    "hornets": {
     "h0": {
      "zone": "captured",
@@ -289,7 +294,7 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 69.02,
+     "t": 70.12,
      "kind": "decision",
      "what": "isolate (crabro worker)"
     }
@@ -302,7 +307,7 @@
     "peak_iB": 1.012,
     "crush": 0
    },
-   "E_A_Wh": 0.5124,
+   "E_A_Wh": 0.5123,
    "E_B_Wh": 0.1063,
    "final_doors": {
     "IN": "open",
@@ -310,7 +315,48 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 38.1,
+   "cycle_s": 39.5,
+   "pass": true,
+   "fails": []
+  },
+  {
+   "name": "S5b_other_insect",
+   "desc": "2종이 아닌 곤충(장수말벌·꿀벌 등) → 분류기 불확실 → 격리",
+   "hornets": {
+    "h0": {
+     "zone": "captured",
+     "marked": false
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 70.12,
+     "kind": "decision",
+     "what": "isolate (2종 아님·불확실)"
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.012,
+    "crush": 0
+   },
+   "E_A_Wh": 0.5123,
+   "E_B_Wh": 0.1063,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "closed",
+    "REL": "closed"
+   },
+   "fsm_end": "IDLE",
+   "cycle_s": 39.5,
    "pass": true,
    "fails": []
   },
@@ -330,7 +376,7 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 69.02,
+     "t": 70.12,
      "kind": "decision",
      "what": "revisit (already marked)"
     }
@@ -343,7 +389,7 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.5115,
+   "E_A_Wh": 0.5116,
    "E_B_Wh": 0.1104,
    "final_doors": {
     "IN": "open",
@@ -351,7 +397,7 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 107.3,
+   "cycle_s": 108.7,
    "pass": true,
    "fails": []
   },
@@ -371,17 +417,17 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 112.96,
+     "t": 114.06,
      "kind": "mark_result",
      "ok": true
     },
     {
-     "t": 248.03,
+     "t": 249.13,
      "kind": "nudge",
      "t_wait": 65
     },
     {
-     "t": 304.04,
+     "t": 305.14,
      "kind": "alert",
      "what": "RELEASE 120 s"
     }
@@ -402,13 +448,13 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 286.0,
+   "cycle_s": 287.4,
    "pass": true,
    "fails": []
   },
   {
    "name": "S8a_gap_return",
-   "desc": "입구 문이 닫히기 시작할 때 문틈으로 되돌아옴(2 s) → 바로 다시 열고, 비면 닫기",
+   "desc": "입구 문이 닫히기 시작할 때 마킹실 쪽에서 머리만 문틈에 넣음(2 s, 안쪽 빔만 막힘) → 바로 다시 열고, 비면 닫기",
    "hornets": {
     "h0": {
      "zone": "outside",
@@ -422,19 +468,14 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 70.62,
-     "kind": "mismatch",
-     "what": "ledger 0, camera 1"
-    },
-    {
-     "t": 115.16,
+     "t": 116.26,
      "kind": "mark_result",
      "ok": true
     }
    ],
    "events": [
     {
-     "t": 67.613,
+     "t": 68.713,
      "kind": "door_reverse",
      "door": "IN"
     }
@@ -443,10 +484,10 @@
     "max_servo_moving": 1,
     "xy_move_pen_not_up": 0.0,
     "mark_door_open": 0.0,
-    "peak_iB": 1.007,
+    "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6912,
+   "E_A_Wh": 0.6913,
    "E_B_Wh": 0.1628,
    "final_doors": {
     "IN": "open",
@@ -454,7 +495,7 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 158.2,
+   "cycle_s": 159.6,
    "pass": true,
    "fails": []
   },
@@ -474,35 +515,30 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 70.04,
+     "t": 71.14,
      "kind": "door_blocked",
      "door": "IN",
      "try_": 1
     },
     {
-     "t": 75.84,
-     "kind": "mismatch",
-     "what": "ledger 0, camera 1"
-    },
-    {
-     "t": 120.39,
+     "t": 121.49,
      "kind": "mark_result",
      "ok": true
     }
    ],
    "events": [
     {
-     "t": 67.613,
+     "t": 68.713,
      "kind": "door_reverse",
      "door": "IN"
     },
     {
-     "t": 68.823,
+     "t": 69.923,
      "kind": "door_reverse",
      "door": "IN"
     },
     {
-     "t": 70.033,
+     "t": 71.133,
      "kind": "door_reverse",
      "door": "IN"
     }
@@ -511,10 +547,10 @@
     "max_servo_moving": 1,
     "xy_move_pen_not_up": 0.0,
     "mark_door_open": 0.0,
-    "peak_iB": 1.007,
+    "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6932,
+   "E_A_Wh": 0.6933,
    "E_B_Wh": 0.1629,
    "final_doors": {
     "IN": "open",
@@ -522,7 +558,7 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 163.5,
+   "cycle_s": 164.9,
    "pass": true,
    "fails": []
   },
@@ -542,13 +578,13 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 90.2,
+     "t": 91.3,
      "kind": "pose_retry",
      "attempt": 1,
      "pose": "ventral"
     },
     {
-     "t": 125.95,
+     "t": 127.05,
      "kind": "mark_result",
      "ok": true
     }
@@ -561,7 +597,7 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6955,
+   "E_A_Wh": 0.6956,
    "E_B_Wh": 0.1657,
    "final_doors": {
     "IN": "open",
@@ -569,7 +605,7 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 169.0,
+   "cycle_s": 170.4,
    "pass": true,
    "fails": []
   },
@@ -589,17 +625,17 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 112.68,
+     "t": 113.78,
      "kind": "mark_unverified",
      "try_": 1
     },
     {
-     "t": 155.57,
+     "t": 156.67,
      "kind": "mark_unverified",
      "try_": 2
     },
     {
-     "t": 155.85,
+     "t": 156.95,
      "kind": "mark_result",
      "ok": false
     }
@@ -612,7 +648,7 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.8689,
+   "E_A_Wh": 0.8688,
    "E_B_Wh": 0.2141,
    "final_doors": {
     "IN": "open",
@@ -620,7 +656,7 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 198.9,
+   "cycle_s": 200.3,
    "pass": true,
    "fails": []
   },
@@ -640,7 +676,7 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 116.16,
+     "t": 118.86,
      "kind": "mark_result",
      "ok": true
     }
@@ -653,7 +689,7 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.692,
+   "E_A_Wh": 0.6928,
    "E_B_Wh": 0.1627,
    "final_doors": {
     "IN": "open",
@@ -661,13 +697,13 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 159.2,
+   "cycle_s": 162.2,
    "pass": true,
    "fails": []
   },
   {
    "name": "S11b_gate_dead",
-   "desc": "G3 수신부 고장(늘 '안 끊김') → 켤 때 자가 시험에서 잡음 → 격리·입구 문 열어 상용 트랩처럼",
+   "desc": "격리 문 G3 수신부 고장(늘 '안 끊김') → 켤 때 자가 시험에서 잡음 → 격리·입구 문 열어 상용 트랩처럼",
    "hornets": {
     "h0": {
      "zone": "captured",
@@ -726,29 +762,29 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 77.0,
+     "t": 78.0,
      "kind": "fault",
      "reason": "HEARTBEAT U1"
     },
     {
-     "t": 83.32,
+     "t": 84.42,
      "kind": "recovered",
      "dev": "U1"
     },
     {
-     "t": 113.96,
+     "t": 115.06,
      "kind": "resume_with_hornet",
      "n": 1
     },
     {
-     "t": 158.52,
+     "t": 159.62,
      "kind": "mark_result",
      "ok": true
     }
    ],
    "events": [
     {
-     "t": 75.017,
+     "t": 76.117,
      "kind": "pen_drop",
      "over_chamber": false,
      "pinned": false
@@ -761,15 +797,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 1.0293,
-   "E_B_Wh": 0.244,
+   "E_A_Wh": 1.0294,
+   "E_B_Wh": 0.2439,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 201.5,
+   "cycle_s": 202.9,
    "pass": true,
    "fails": []
   },
@@ -789,104 +825,104 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 110.25,
+     "t": 111.35,
      "kind": "pi_restart"
     },
     {
-     "t": 110.56,
+     "t": 111.66,
      "kind": "selftest",
      "reply": "OK SELFTEST"
     },
     {
-     "t": 156.59,
+     "t": 157.69,
      "kind": "resume_with_hornet",
      "n": 1
     },
     {
-     "t": 157.21,
+     "t": 158.31,
      "kind": "decision",
      "what": "revisit (already marked)"
     }
    ],
    "events": [
     {
-     "t": 90.253,
+     "t": 91.353,
      "kind": "pi_crash"
     },
     {
-     "t": 92.1,
+     "t": 93.1,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 92.3,
+     "t": 93.4,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 94.2,
+     "t": 95.2,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 94.4,
+     "t": 95.5,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 96.3,
+     "t": 97.3,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 96.5,
+     "t": 97.6,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 98.4,
+     "t": 99.4,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 98.6,
+     "t": 99.7,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 100.5,
+     "t": 101.5,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 100.7,
+     "t": 101.8,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 102.6,
+     "t": 103.6,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 102.8,
+     "t": 103.9,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 104.7,
+     "t": 105.7,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 104.9,
+     "t": 106.0,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 106.8,
+     "t": 107.8,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 107.0,
+     "t": 108.1,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 108.9,
+     "t": 109.9,
      "kind": "uno2_watchdog"
     },
     {
-     "t": 109.1,
+     "t": 110.2,
      "kind": "uno1_watchdog"
     },
     {
-     "t": 110.253,
+     "t": 111.353,
      "kind": "pen_drop",
      "over_chamber": true,
      "pinned": false
@@ -899,7 +935,7 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.9915,
+   "E_A_Wh": 0.9916,
    "E_B_Wh": 0.2348,
    "final_doors": {
     "IN": "open",
@@ -907,7 +943,61 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 195.5,
+   "cycle_s": 196.9,
+   "pass": true,
+   "fails": []
+  },
+  {
+   "name": "S14_battery_low",
+   "desc": "배터리로 운용 중 누르는 동안 배터리 부족 → 이 말벌은 끝까지 처리 → 격리·입구 문 열고 Pi 끔 → 뒤에 온 말벌은 포획통으로",
+   "hornets": {
+    "h0": {
+     "zone": "outside",
+     "marked": true
+    },
+    "h1": {
+     "zone": "captured",
+     "marked": false
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 73.5,
+     "kind": "battery_low"
+    },
+    {
+     "t": 114.06,
+     "kind": "mark_result",
+     "ok": true
+    },
+    {
+     "t": 217.64,
+     "kind": "shutdown",
+     "what": "passthrough 후 Pi 끔"
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.006,
+    "crush": 0
+   },
+   "E_A_Wh": 0.3982,
+   "E_B_Wh": 0.108,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "open",
+    "REL": "closed"
+   },
+   "fsm_end": "OFF",
+   "cycle_s": null,
    "pass": true,
    "fails": []
   },
@@ -927,7 +1017,7 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 83.16,
+     "t": 84.56,
      "kind": "mark_result",
      "ok": true
     }
@@ -940,7 +1030,7 @@
     "peak_iB": 1.007,
     "crush": 0
    },
-   "E_A_Wh": 0.6905,
+   "E_A_Wh": 0.6904,
    "E_B_Wh": 0.1628,
    "final_doors": {
     "IN": "open",
@@ -948,16 +1038,16 @@
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 181.2,
+   "cycle_s": 182.9,
    "pass": true,
    "fails": []
   }
  ],
  "per_hornet": {
-  "cycle_s": 156.0,
-  "E_cycle_Wh": 0.3541,
-  "E_extra_Wh": 0.0469,
-  "idle_W": 7.09
+  "cycle_s": 157.4,
+  "E_cycle_Wh": 0.3569,
+  "E_extra_Wh": 0.0325,
+  "idle_W": 7.42
  },
  "daily": [
   {
@@ -966,9 +1056,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.09,
-   "load_Wh": 67.6,
-   "wall_Wh": 79.5
+   "idle_W": 7.42,
+   "load_Wh": 71.0,
+   "wall_Wh": 83.5
   },
   {
    "visits": 20,
@@ -976,9 +1066,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.09,
-   "load_Wh": 68.5,
-   "wall_Wh": 80.6
+   "idle_W": 7.42,
+   "load_Wh": 71.6,
+   "wall_Wh": 84.3
   },
   {
    "visits": 100,
@@ -986,9 +1076,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.09,
-   "load_Wh": 72.2,
-   "wall_Wh": 85.0
+   "idle_W": 7.42,
+   "load_Wh": 74.2,
+   "wall_Wh": 87.3
   },
   {
    "visits": 20,
@@ -996,9 +1086,9 @@
    "hold_f": true,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.73,
-   "load_Wh": 186.4,
-   "wall_Wh": 219.3
+   "idle_W": 8.06,
+   "load_Wh": 194.0,
+   "wall_Wh": 228.3
   },
   {
    "visits": 20,
@@ -1006,9 +1096,19 @@
    "hold_f": false,
    "cam_always": false,
    "bot_idle": false,
-   "idle_W": 5.0,
-   "load_Wh": 49.7,
-   "wall_Wh": 58.5
+   "idle_W": 5.33,
+   "load_Wh": 52.9,
+   "wall_Wh": 62.2
   }
- ]
+ ],
+ "single_beam_compare": {
+  "S8a_gap_return": {
+   "crush": 1,
+   "pass_": false
+  },
+  "S8b_gap_dart": {
+   "crush": 1,
+   "pass_": false
+  }
+ }
 }

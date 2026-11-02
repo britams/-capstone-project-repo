@@ -54,14 +54,14 @@ def wiring():
     ax.set_xlim(0, 17)
     ax.set_ylim(0, 11.5)
     ax.axis("off")
-    ax.text(0.2, 11.3, "전기 배선도 (D5e + 11/02 제안) — 구동 레일 5 V는 Pi 전원과 따로, GND만 한 점에서 묶음", fontsize=14, fontweight="bold", va="top")
+    ax.text(0.2, 11.3, "전기 배선도 (D5e + 11/02 결정) — 구동 레일 5 V는 Pi 전원과 따로, GND만 한 점에서 묶음", fontsize=14, fontweight="bold", va="top")
     ax.text(0.2, 10.9, "굵은 빨강 = 구동 레일 +5 V (단자대에서 나눔)  ·  굵은 검정 = GND  ·  파랑 = UNO 1 신호  ·  초록 = UNO 2 신호  ·  보라 = USB / CSI",
             fontsize=9.5, color=INK2, va="top")
     U1C, U2C, USBC = C[0], C[5], C[6]
 
     # 전원 ①: Pi
-    blk(ax, 0.2, 8.2, 2.5, 1.9, "전원 ① 27 W USB-C", ["5.1 V 5 A (보유)", "· Pi 5 + AI HAT+ + AI 카메라", "· 대기 약 5.7 W, 판별 약 8.4 W", "· 밤: 꺼짐 0.01 W (EEPROM 설정)"], fc="#fbf3ec", ec=C[1])
-    blk(ax, 3.3, 6.9, 3.0, 2.8, "Raspberry Pi 5 (+ AI HAT+)", ["판단·AI·상태 머신·기록", "· USB-A ×2 → UNO 1, UNO 2", "  (/dev/serial/by-id 로 구분,", "   EVT READY uno1/uno2 확인)", "· CSI → AI 카메라 IMX500", "· 0.5 s마다 PING (하트비트)", "· 위판 아래로 옮기면 CSI 300 mm"], fc="#f3f0fb", ec=USBC)
+    blk(ax, 0.2, 8.2, 2.5, 1.9, "전원 ① 27 W USB-C", ["5.1 V 5 A (보유) — 콘센트", "· Pi 5 + AI HAT+ + AI 카메라", "· 대기 약 5.7 W, 판별 약 8.4 W", "· 밤: 꺼짐 0.01 W (EEPROM 설정)"], fc="#fbf3ec", ec=C[1])
+    blk(ax, 3.3, 6.55, 3.0, 3.15, "Raspberry Pi 5 (+ AI HAT+)", ["판단·AI·상태 머신·기록", "· USB-A ×2 → UNO 1, UNO 2", "  (/dev/serial/by-id 로 구분,", "   EVT READY uno1/uno2 확인)", "· CSI → AI 카메라 IMX500", "· 0.5 s마다 PING (하트비트)", "· 자리: 위판 아래 (CSI 300 mm)", "· I2C ← INA226 (배터리일 때)"], fc="#f3f0fb", ec=USBC, lh=0.31)
     ln(ax, [(2.7, 9.2), (3.3, 9.2)], C[1], lw=3)
     blk(ax, 3.3, 10.0, 3.0, 0.5, "AI 카메라 IMX500 (격자 위 200 mm)", [], fc="#f3f0fb", ec=USBC, tfs=9.5)
     ln(ax, [(4.8, 9.7), (4.8, 10.0)], USBC, lw=2.2)
@@ -76,16 +76,26 @@ def wiring():
     # UNO 2
     u2 = (7.2, 0.5, 3.1, 4.7)
     blk(ax, *u2, "UNO 2 — 문·게이트·조명", [
-        "D9/D10/D11 MG90S 입구/격리/방생", "A0~A5   게이트 G1~G6 수신", "        (외부 10 kΩ → 레일 +5 V)",
+        "D9/D10/D11 MG90S 입구/격리/방생", "A0~A5   G1 G2 G2b G3 G3b G4 수신", "D7 D8 D12  G5 G5b G6 수신 (10 kΩ)",
         "D2      레일 감지 (10 kΩ, INT0)", "D3/D5/D6 MOSFET 위/아래/출구 조명", "        (PWM 되는 핀)", "D4      MOSFET 송신 켜기 EMIT_EN",
-        "D7 D8 D12  문틈 둘째 빔 (D5f 제안)", "· 문틈 규칙·서보 하나씩 스스로", "· 켤 때 서보 안 붙임 (문 그대로)", "· Pi 2 s 침묵 → 닫던 문 다시 엶"], fc="#eef8ef", ec=U2C, fs=8.4, lh=0.34)
+        "D13     예비", "· 문틈 규칙(빔 2개)·서보 하나씩", "· 켤 때 서보 안 붙임 (문 그대로)", "· Pi 2 s 침묵 → 닫던 문 다시 엶"], fc="#eef8ef", ec=U2C, fs=8.4, lh=0.34)
     ln(ax, [(6.3, 8.4), (7.2, 8.4)], USBC, lw=2.2)
     tag(ax, 6.75, 8.6, "USB", c=USBC)
-    ln(ax, [(6.0, 6.9), (6.0, 3.0), (7.2, 3.0)], USBC, lw=2.2)
+    ln(ax, [(6.0, 6.55), (6.0, 3.0), (7.2, 3.0)], USBC, lw=2.2)
     tag(ax, 6.0, 5.0, "USB (전원 + 115200)", c=USBC, rot=90)
 
     # 전원 ②
-    blk(ax, 0.2, 4.3, 2.5, 1.5, "전원 ② 5 V 3 A 어댑터", ["구동 레일 전용 (보유)", "· 정상 최대 약 1.8 A", "· 켤 때 서보 4개 동시면 3.2 A"], fc="#fbeeee", ec=RED)
+    blk(ax, 0.2, 4.3, 2.5, 1.5, "전원 ② 5 V 3 A 어댑터", ["구동 레일 전용 — 콘센트", "· 정상 최대 약 1.9 A", "· 켤 때 서보 4개 동시면 3.3 A"], fc="#fbeeee", ec=RED)
+    # 배터리 상자 (선택) — 같은 플러그로 전원 ①·② 자리를 대신함
+    ax.add_patch(FancyBboxPatch((0.2, 6.05), 2.5, 1.9, boxstyle="round,pad=0.02,rounding_size=0.12", fc="#f4f4f1", ec=INK2, lw=1.4, ls=(0, (4, 2)), zorder=3))
+    ax.text(0.32, 7.83, "배터리 상자 (선택)", fontsize=11, fontweight="bold", va="top", zorder=4)
+    for i, t in enumerate(["LiFePO4 12.8 V 12 Ah (약 1.7일)", "· 강압 5.1 V 5 A → USB-C (①)", "· 강압 5 V 3 A → 배럴 (②)", "· 퓨즈 5 A + INA226 → Pi I2C", "· 부족하면 처리 끝내고 Pi 끔"]):
+        ax.text(0.32, 7.45 - i * 0.3, t, fontsize=8.2, va="top", color=INK if i == 0 else INK2, zorder=4)
+    ln(ax, [(2.7, 7.6), (2.95, 7.6), (2.95, 8.6), (2.7, 8.6)], INK2, lw=1.3, ls=(0, (4, 2)))
+    ln(ax, [(2.7, 6.4), (2.95, 6.4), (2.95, 5.3), (2.7, 5.3)], INK2, lw=1.3, ls=(0, (4, 2)))
+    ln(ax, [(2.95, 7.0), (3.3, 7.0)], USBC, lw=1.3, ls=(0, (4, 2)))
+    tag(ax, 2.95, 8.05, "또는", c=INK2, fs=7.5)
+    tag(ax, 2.95, 5.85, "또는", c=INK2, fs=7.5)
     blk(ax, 0.2, 2.6, 2.5, 1.2, "퓨즈 T2.5A (지연형)", ["3 A 어댑터는 스스로 전류를", "묶어 3 A 퓨즈는 거의 안 끊김"], fc="#fbeeee", ec=RED, fs=8)
     blk(ax, 0.2, 1.0, 2.5, 1.1, "비상 정지 (NC 버섯)", ["레일만 끊음 → UNO 2 D2가 감지", "→ 다시 켜면 원점부터"], fc="#fbeeee", ec=RED, fs=8)
     blk(ax, 3.3, 0.5, 3.0, 2.3, "단자대 (데크 위)", ["+5 V 줄 / GND 줄", "· 1000 µF + 0.1 µF (서보 옆)", "· GND 한 점 → UNO 1·2 GND", "· UNO 5V 핀과 레일 +5 V는", "  잇지 않음 (USB 역류 방지)"], fc="#fbeeee", ec=RED, fs=8.4)
@@ -121,8 +131,8 @@ def wiring():
     # UNO 2 쪽
     devs2 = [
         (4.8, "MG90S ×3 문 112·170·176", "이동 0.2 A, 막힘 0.75 A · 한 번에 하나 · 멈추고 0.5 s 뒤 신호 끊기", "D9~D11"),
-        (3.8, "빛 게이트 수신 ×6 (Adafruit 2167)", "열린 컬렉터: 끊기면 LOW · 10 kΩ 풀업은 레일 +5 V로", "A0~A5"),
-        (2.8, "빛 게이트 송신 ×6 (20 mA씩)", "EMIT_EN MOSFET 하나로 120 mA · 켤 때 끄고 켜서 자가 시험", "D4"),
+        (3.8, "빛 게이트 수신 ×9 (문마다 2개 + G1·G4·G6)", "열린 컬렉터: 끊기면 LOW · 10 kΩ 풀업은 레일 +5 V로", "A0~5 +3"),
+        (2.8, "빛 게이트 송신 ×9 (20 mA씩)", "EMIT_EN MOSFET 하나로 180 mA · 켤 때 끄고 켜서 자가 시험", "D4"),
         (1.8, "조명 3 (위 링 182 · 아래 · 출구)", "로직 레벨 MOSFET 모듈 · 0.2/0.1/0.06 A [추측]", "D3 D5 D6"),
         (0.85, "레일 감지 (10 kΩ 직렬)", "레일 끊김 → EVT RAIL OFF → Pi는 원점부터", "D2"),
     ]
@@ -164,7 +174,8 @@ def timing():
     t0, t1 = d["t_g1"] - 3, d["t_end"] + 3
     T = lambda t: t - d["t_g1"]
     rows = [
-        ("상태", None), ("G1 입구 세로관", ("gate_G1", 1)), ("G2 입구 문틈", ("gate_G2", 1)), ("G5 방생 문틈", ("gate_G5", 1)), ("G6 방생 출구", ("gate_G6", 1)),
+        ("상태", None), ("G1 입구 세로관", ("gate_G1", 1)), ("G2 입구 문 바깥", ("gate_G2", 1)), ("G2b 입구 문 안", ("gate_G2b", 1)),
+        ("G5 방생 문 안", ("gate_G5", 1)), ("G5b 방생 문 바깥", ("gate_G5b", 1)), ("G6 방생 출구", ("gate_G6", 1)),
         ("입구 문 열림", ("door_IN", "open")), ("방생 문 열림", ("door_REL", "open")),
         ("바닥 F 움직임", ("ax_F", "move")), ("마커 X 움직임", ("ax_X", "move")), ("마커 Y 움직임", ("ax_Y", "move")),
         ("펜 내림", ("pen_pos", "down")), ("위 조명", ("L_TOP", "on")), ("아래 조명", ("L_BOT", "on")), ("출구 조명", ("L_EXIT", "on")),

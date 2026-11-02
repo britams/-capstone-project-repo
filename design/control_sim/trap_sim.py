@@ -44,11 +44,15 @@ PRM = dict(
     thorax_p_min=0.6, pose_retry_max=3, mark_retry_max=1,
     T_enter_s=60.0, T_light_s=60.0, T_alert_s=120.0, T_fallback_s=300.0,
     hb_period_s=0.5, hb_timeout_s=1.5, uno_watchdog_s=2.0,
-    other_species="isolate",   # 다른 종(유럽말벌 등): 지금 문서 규칙 = 격리 [서현 결정 필요]
+    door_beams=2,         # 문틈 빔 수 (비교용: 1이면 옛 설계 — 통로 쪽 빔 하나만 봄)
+    classes=("velutina", "crabro"),   # 분류는 등검은말벌·유럽말벌 2종만 (서현 11/02 09:25) — VespAI와 같은 2종
+    crabro_action="isolate",   # 유럽말벌로 판별되면: 지금 문서 규칙 = 격리 [서현 확인 대기 — 격리/방생]
     control_mode=False,        # 방제 모드 (등검은말벌 일벌도 격리)
 )
 CONTACT_F = PRM["F_max"] - PRM["hornet_h"]      # 바닥이 말벌 등에 닿는 높이 29.0 mm (격자 아래 면 기준)
-GAP = {"IN": "G2", "CAP": "G3", "REL": "G5"}
+GAP = {"IN": ("G2", "G2b"), "CAP": ("G3", "G3b"), "REL": ("G5", "G5b")}   # 문마다 빔 2개 (지나가는 방향 순서: 앞, 뒤) — 서현 11/02 결정
+GATES = ("G1", "G2", "G2b", "G3", "G3b", "G4", "G5", "G5b", "G6")
+PAIR = {g: (d, i) for d, pr in GAP.items() for i, g in enumerate(pr)}
 WALK = dict(gate=1.4, tube_in=5.0, tube_cap=10.0, tube_rel=4.0)   # 몸길이 25 mm + 빔 3 mm ÷ 20 mm/s, 통로 걷기 [추측]
 
 
@@ -161,7 +165,9 @@ class Hornet:
 class World:
     def __init__(self, sim, rec, gate_fault=None):
         self.sim, self.rec = sim, rec
-        self.blk = {g: set() for g in ("G1", "G2", "G3", "G4", "G5", "G6")}
+        self.blk = {g: set() for g in GATES}
+        self.gap_occ = {d: set() for d in GAP}      # 문판 평면에 몸이 걸쳐 있는 말벌 (끼임 판정)
+        self.batt_low = False
         self.gate_fault = gate_fault or {}
         self.hornets, self.uno1, self.uno2, self.pi = [], None, None, None
         for g in self.blk:
@@ -196,6 +202,21 @@ class World:
         yield ("sleep", WALK["gate"] if dwell is None else dwell)
         self.block(g, h, False)
 
+    def cross_door(self, h, d, forward=True, both=0.3):
+        """문 빔 두 개를 차례로 지남: 앞 빔 → (둘 다) → 뒤 빔. 문판 평면은 두 빔 사이 (각 2 mm)."""
+        a, b = GAP[d] if forward else GAP[d][::-1]
+        self.block(a, h, True)
+        yield ("sleep", 0.15)
+        self.gap_occ[d].add(h.id)
+        yield ("sleep", 0.2)
+        self.block(b, h, True)
+        yield ("sleep", 0.7 + both)
+        self.block(a, h, False)
+        yield ("sleep", 0.15)
+        self.gap_occ[d].discard(h.id)
+        yield ("sleep", 0.2)
+        self.block(b, h, False)
+
     def hornet_proc(self, h):
         u2 = self.uno2
         yield ("sleep", h.t_arrive)
@@ -208,20 +229,30 @@ class World:
             self.rec.ev("hornet", id=h.id, what="turned_back")
             return
         h.zone = "at_G2"
-        self.block("G2", h, True)
+        self.block("G2", h, True)                  # 닫힌 입구 문 앞에서는 바깥 빔 G2를 막고 기다림
         while u2.door["IN"]["pos"] != "open":
             yield ("sleep", 0.1)
-        yield ("sleep", h.gap_dwell)
+        yield ("sleep", 0.15)
+        self.gap_occ["IN"].add(h.id)
+        yield ("sleep", 0.2)
+        self.block("G2b", h, True)
+        yield ("sleep", 0.7 + h.gap_dwell)
         self.block("G2", h, False)
+        yield ("sleep", 0.15)
+        self.gap_occ["IN"].discard(h.id)
+        yield ("sleep", 0.2)
+        self.block("G2b", h, False)
         h.zone, h.t_chamber = "chamber", self.sim.t
-        for dur in h.gap_returns:      # 문이 닫히기 시작할 때마다 문틈으로 되돌아감 (dur 초 머묾)
+        for dur in h.gap_returns:      # 문이 닫히기 시작할 때마다 마킹실 쪽에서 머리만 문틈에 넣음 (안쪽 빔 G2b만 막힘)
             t0 = self.sim.t
             while u2.door["IN"]["pos"] != "closing" and self.sim.t - t0 < 60:
                 yield ("sleep", 0.01)
             h.zone = "at_G2"
-            self.block("G2", h, True)
+            self.gap_occ["IN"].add(h.id)
+            self.block("G2b", h, True)
             yield ("sleep", dur)
-            self.block("G2", h, False)
+            self.block("G2b", h, False)
+            self.gap_occ["IN"].discard(h.id)
             h.zone = "chamber"
         # 마킹실: 나갈 길을 기다림
         while True:
@@ -230,14 +261,14 @@ class World:
                 continue
             rel, cap = u2.door["REL"], u2.door["CAP"]
             if rel["pos"] == "open" and self.sim.t - rel["t_open"] >= h.leave_s:
-                yield from self.cross(h, "G5")
+                yield from self.cross_door(h, "REL")
                 h.zone = "tube_rel"
                 yield ("sleep", WALK["tube_rel"])
                 yield from self.cross(h, "G6")
                 h.zone = "outside"
                 return
             if cap["pos"] == "open" and self.sim.t - cap["t_open"] >= min(h.leave_s, 15.0) + 5.0 * self.order(h):
-                yield from self.cross(h, "G3")
+                yield from self.cross_door(h, "CAP")
                 h.zone = "tube_cap"
                 yield ("sleep", WALK["tube_cap"])
                 yield from self.cross(h, "G4")
@@ -254,7 +285,8 @@ class World:
         out = []
         for h in seen:
             pose = h.poses[min(max(h.press_n - 1, 0), len(h.poses) - 1)] if h.pinned else "free"
-            out.append(dict(id=h.id, species=h.species, caste=h.caste, marked=h.marked or h.marked_now,
+            sp = h.species if h.species in PRM["classes"] else "uncertain"     # 2종 분류기: 다른 곤충은 낮은 신뢰도
+            out.append(dict(id=h.id, species=sp, caste=h.caste, marked=h.marked or h.marked_now,
                             pose=pose, p=0.9 if pose in ("dorsal", "free") else 0.1))
         return out
 
@@ -492,10 +524,10 @@ class Uno2:
     def gate_change(self, g, blocked):
         if not blocked:
             self.clear_since[g] = self.sim.t
-        self.send("EVT GATE %s %s %d" % (g[1], "BLOCK" if blocked else "CLEAR", self.ms()))
-        for d, gg in GAP.items():
+        self.send("EVT GATE %s %s %d" % (g[1:], "BLOCK" if blocked else "CLEAR", self.ms()))
+        for d, pr in GAP.items():
             st = self.door[d]
-            if gg == g and blocked and st["pos"] == "closing":      # 닫는 중 막힘 → 바로 다시 열기
+            if g in pr[:PRM["door_beams"]] and blocked and st["pos"] == "closing":      # 닫는 중 두 빔 중 하나라도 막힘 → 바로 다시 열기
                 self.rec.ev("door_reverse", door=d)
                 self._go(d, "open", reason="reverse")
                 st["retry"] += 1
@@ -549,8 +581,7 @@ class Uno2:
         st = self.door[d]
         if not self.alive or st["want"] != "closed" or tok != st["tok"]:
             return
-        g = GAP[d]
-        if self.w.raw(g) or self.sim.t - self.clear_since[g] < PRM["gap_clear_s"] or self._busy(d):
+        if any(self.w.raw(g) or self.sim.t - self.clear_since[g] < PRM["gap_clear_s"] for g in GAP[d][:PRM["door_beams"]]) or self._busy(d):
             self.sim.at(0.01, self._try_close, d, tok)
             return
         self._go(d, "closed")
@@ -580,13 +611,22 @@ class Uno2:
         self.rec.set("srv_" + d, "idle")
         self.sim.at(0.5, self._detach, d, tok)
         if target == "closed":
-            if self.w.blk[GAP[d]]:
+            if self.w.gap_occ[d]:
                 self.rec.ev("crush", door=d)
             st["want"] = None
             self.send("EVT DOOR %s CLOSED %d" % (d, self.ms()))
         else:
             st["t_open"] = self.sim.t
             self.send("EVT DOOR %s OPEN %d" % (d, self.ms()))
+
+    def power_off(self):
+        """Pi가 꺼지면 USB 전원이 끊겨 UNO 2도 꺼짐: 서보 신호 없음(문은 그 자리), 송신·조명 꺼짐."""
+        self.alive = False
+        for d in GAP:
+            self.rec.set("srv_" + d, "detached")
+        for k in ("TOP", "BOT", "EXIT"):
+            self.rec.set("L_" + k, 0)
+        self.rec.set("emit", 0)
 
     def _detach(self, d, tok):
         if self.alive and self.door[d]["tok"] == tok:
@@ -608,40 +648,64 @@ class Uno2:
 # Pi 상태 머신 (참고 구현)
 # ---------------------------------------------------------------------------
 class Ledger:
-    """게이트 '막힘 → 풀림' = 한 번 지나감. 통로마다 들어감 − 나감."""
+    """통로마다 들어감 − 나감. 문은 빔 2개의 순서로 방향을 앎 (앞 → 뒤 = 정방향, 뒤 → 앞 = 역방향, 같은 빔으로 빠지면 되돌아감)."""
 
     def __init__(self):
         self.n = dict(tube_in=0, chamber=0, tube_cap=0, tube_rel=0, captured=0, released=0)
-        self.blocked = {}
+        self.on = set()
+        self.pair = {d: dict(on=set(), first=None) for d in GAP}
+        self.out_pending = 0
 
-    def passed(self, g):
+    def gate(self, g, blocked):
+        """빔 사건 하나 → 장부가 바뀌었으면 True."""
+        if g in PAIR:
+            d, i = PAIR[g]
+            st = self.pair[d]
+            if blocked:
+                if not st["on"]:
+                    st["first"] = i
+                st["on"].add(i)
+                return False
+            st["on"].discard(i)
+            if st["on"] or st["first"] is None:
+                return False
+            first, st["first"] = st["first"], None
+            if first == i:
+                return False                       # 같은 쪽으로 빠짐 = 문틈에 들어왔다 되돌아감
+            return self.door_pass(d, forward=(first == 0))
+        if blocked:
+            self.on.add(g)
+            return False
+        if g not in self.on:
+            return False
+        self.on.discard(g)
         n = self.n
         if g == "G1":
-            if n["tube_in"] > 0 and getattr(self, "_out_pending", 0) > 0:
+            if self.out_pending > 0 and n["tube_in"] > 0:
                 n["tube_in"] -= 1
-                self._out_pending -= 1
+                self.out_pending -= 1
             else:
                 n["tube_in"] += 1
-        elif g == "G2":
-            if n["tube_in"] > 0 and getattr(self, "_out_pending", 0) == 0:
-                n["tube_in"] -= 1
-                n["chamber"] += 1
-            elif n["chamber"] > 0:
-                n["chamber"] -= 1
-                n["tube_in"] += 1
-                self._out_pending = getattr(self, "_out_pending", 0) + 1
-        elif g == "G3" and n["chamber"] > 0:
-            n["chamber"] -= 1
-            n["tube_cap"] += 1
         elif g == "G4" and n["tube_cap"] > 0:
             n["tube_cap"] -= 1
             n["captured"] += 1
-        elif g == "G5" and n["chamber"] > 0:
-            n["chamber"] -= 1
-            n["tube_rel"] += 1
         elif g == "G6" and n["tube_rel"] > 0:
             n["tube_rel"] -= 1
             n["released"] += 1
+        else:
+            return False
+        return True
+
+    def door_pass(self, d, forward):
+        n = self.n
+        src, dst = {"IN": ("tube_in", "chamber"), "CAP": ("chamber", "tube_cap"), "REL": ("chamber", "tube_rel")}[d]
+        if not forward:
+            src, dst = dst, src
+        n[src] = max(0, n[src] - 1)
+        n[dst] += 1
+        if d == "IN" and not forward:
+            self.out_pending += 1
+        return True
 
 
 class PiFSM:
@@ -691,13 +755,8 @@ class PiFSM:
             self.last_pong[src] = self.sim.t
         if tk[0] == "EVT" and tk[1] == "GATE":
             g = "G" + tk[2]
-            if tk[3] == "BLOCK":
-                self.ledger.blocked[g] = True
-            elif self.ledger.blocked.pop(g, False):
-                before = dict(self.ledger.n)
-                self.ledger.passed(g)
-                if self.ledger.n != before:
-                    self._deliver(("PI", "LEDGER %s" % g))
+            if self.ledger.gate(g, tk[3] == "BLOCK"):
+                self._deliver(("PI", "LEDGER %s" % g))
         self._deliver((src, line))
 
     def _deliver(self, msg):
@@ -753,7 +812,11 @@ class PiFSM:
         return d / PRM["v_mm_s"] + 5.0
 
     def heartbeat(self):
+        self.batt_low = False
         while self.alive:
+            if self.w.batt_low and not self.batt_low:     # INA226 (배터리 상자) — 남은 에너지가 기준 아래
+                self.batt_low = True
+                self.note("battery_low")
             for u in ("U1", "U2"):
                 self.send(u, "PING")
             yield ("sleep", PRM["hb_period_s"])
@@ -826,6 +889,8 @@ class PiFSM:
 
     def loop(self):
         while True:
+            if self.batt_low:
+                return (yield from self.shutdown_safe())
             yield from self.to_idle()
             n = yield from self.wait_entry()
             if n:
@@ -859,6 +924,8 @@ class PiFSM:
             if self.ledger.n["chamber"] > 0:
                 break
             m = yield from self.wait(lambda x: x[1].startswith("LEDGER"), 5.0)
+            if m is None and self.batt_low and self.ledger.n["chamber"] == 0:
+                return 0
             if m is None:
                 obs = yield from self.look("idle_check")
                 if self.ledger.n["chamber"] > 0:
@@ -881,9 +948,8 @@ class PiFSM:
         obs = yield from self.look("after_close")
         if len(obs) != self.ledger.n["chamber"]:
             self.note("mismatch", what="ledger %d, camera %d" % (self.ledger.n["chamber"], len(obs)))
-            if len(obs) > self.ledger.n["chamber"] and getattr(self.ledger, "_out_pending", 0):
-                # 빔 하나로는 방향을 모름: 문틈에 들어갔다 마킹실로 돌아온 것을 '나감'으로 셌던 것 → 되돌림
-                self.ledger._out_pending -= 1
+            if len(obs) > self.ledger.n["chamber"] and self.ledger.out_pending:
+                self.ledger.out_pending -= 1
                 self.ledger.n["tube_in"] = max(0, self.ledger.n["tube_in"] - 1)
             self.ledger.n["chamber"] = len(obs)
         return len(obs)
@@ -899,11 +965,14 @@ class PiFSM:
         if not obs:
             return (yield from self.isolate())
         h = obs[0]
-        if PRM["control_mode"] or h["caste"] == "queen" or (h["species"] != "velutina" and PRM["other_species"] == "isolate"):
+        if h["species"] == "uncertain":            # 2종 분류기가 둘 다 아니라고 봄 (다른 곤충) → 안전한 쪽
+            self.note("decision", what="isolate (2종 아님·불확실)")
+            return (yield from self.isolate())
+        if PRM["control_mode"] or h["caste"] == "queen" or (h["species"] == "crabro" and PRM["crabro_action"] == "isolate"):
             self.note("decision", what="isolate (%s %s)" % (h["species"], h["caste"]))
             return (yield from self.isolate())
-        if h["species"] != "velutina":
-            self.note("decision", what="release other species")
+        if h["species"] == "crabro":
+            self.note("decision", what="release crabro")
             return (yield from self.release())
         if h["marked"]:
             self.note("decision", what="revisit (already marked)")
@@ -1035,6 +1104,27 @@ class PiFSM:
         yield from self.cmd("U2", "LIGHT BOT 0")
         yield from self.leave("CAP", ("G3", "G4"), "ISOLATE")
 
+    def shutdown_safe(self):
+        """배터리 부족: 처리 중이던 말벌은 끝낸 뒤, 상용 트랩처럼 지나가게 열어 두고 Pi를 끔."""
+        self.state("SHUTDOWN")
+        yield from self.cmd("U2", "LIGHT TOP 0")
+        yield from self.cmd("U2", "LIGHT BOT 0")
+        yield from self.cmd("U2", "LIGHT EXIT 0")
+        self.flush()
+        yield from self.cmd("U2", "DOOR CAP OPEN")
+        yield from self.done(["EVT DOOR CAP OPEN"], 3)
+        yield from self.cmd("U2", "DOOR IN OPEN")
+        yield from self.done(["EVT DOOR IN OPEN"], 3)
+        self.note("shutdown", what="passthrough 후 Pi 끔")
+        yield ("sleep", 1.0)
+        self.alive = False
+        self.hb.kill()
+        self.rec.set("fsm", "OFF")
+        self.rec.set("pi", "halt")
+        self.rec.set("cam", "off")
+        self.w.uno1.power_off()
+        self.w.uno2.power_off()
+
     def passthrough(self):
         """멈출 때: 격리 문·입구 문을 열어 상용 트랩처럼 지나가게 함 (마킹실에 갇혀 죽지 않게). UNO 2가 살아 있을 때만."""
         if self.ready["U2"]:
@@ -1101,6 +1191,9 @@ def build(sc):
 
 def inject(w, what, log):
     sim = w.sim
+    if what == "battery_low":
+        w.batt_low = True
+        return
     if what == "uno1_off":
         w.uno1.power_off()
         sim.at(8.0, inject, w, "uno1_on", log)              # 8 s 뒤 전원 돌아옴
@@ -1142,12 +1235,14 @@ def scenarios():
         "S3_two_together":     dict(desc="두 마리가 문 닫기 전에 함께 들어옴 → 카메라 2마리 → 둘 다 격리", hornets=[H(0), H(1, t=60.6)], until=400,
                                     expect=dict(h0="captured", h1="captured")),
         "S4_queen":            dict(desc="여왕벌 → 격리", hornets=[H(0, caste="queen")], until=300, expect=dict(h0="captured")),
-        "S5_other_species":    dict(desc="유럽말벌 → 격리 (지금 규칙)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
+        "S5_crabro":           dict(desc="유럽말벌 → 격리 (지금 규칙, 서현 확인 대기)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
+        "S5b_other_insect":    dict(desc="2종이 아닌 곤충(장수말벌·꿀벌 등) → 분류기 불확실 → 격리", hornets=[H(0, species="other")], until=300,
+                                    expect=dict(h0="captured")),
         "S6_already_marked":   dict(desc="이미 표식 있음 → 재방문 기록, 급이 후 방생", hornets=[H(0, marked=True)], until=300,
                                     expect=dict(h0="outside", notes=["decision"])),
         "S7_wont_leave":       dict(desc="방생 문을 열어도 150 s 안 나감 → 60 s 조명 바꿈, 120 s 알림", hornets=[H(0, leave_s=150)], until=700,
                                     expect=dict(h0="outside", h0_marked=True, notes=["nudge", "alert"])),
-        "S8a_gap_return":      dict(desc="입구 문이 닫히기 시작할 때 문틈으로 되돌아옴(2 s) → 바로 다시 열고, 비면 닫기", hornets=[H(0, gap_returns=(2.0,))], until=400,
+        "S8a_gap_return":      dict(desc="입구 문이 닫히기 시작할 때 마킹실 쪽에서 머리만 문틈에 넣음(2 s, 안쪽 빔만 막힘) → 바로 다시 열고, 비면 닫기", hornets=[H(0, gap_returns=(2.0,))], until=400,
                                     expect=dict(h0="outside", h0_marked=True, events=["door_reverse"])),
         "S8b_gap_dart":        dict(desc="닫힐 때마다 문틈으로 들어옴 3번 → BLOCKED → Pi가 5 s 뒤 다시 명령", hornets=[H(0, gap_returns=(0.5, 0.5, 0.5))], until=400,
                                     expect=dict(h0="outside", h0_marked=True, notes=["door_blocked"], events=["door_reverse"])),
@@ -1157,12 +1252,15 @@ def scenarios():
                                     expect=dict(h0="outside", h0_marked=False, notes=["mark_unverified"])),
         "S11a_camera_miss":    dict(desc="들어왔는데 카메라가 4 s 동안 못 봄 → 기다렸다 확인 후 닫기", hornets=[H(0, cam_miss_s=4.0)], until=400,
                                     expect=dict(h0="outside", h0_marked=True)),
-        "S11b_gate_dead":      dict(desc="G3 수신부 고장(늘 '안 끊김') → 켤 때 자가 시험에서 잡음 → 격리·입구 문 열어 상용 트랩처럼", hornets=[H(0)], until=300,
+        "S11b_gate_dead":      dict(desc="격리 문 G3 수신부 고장(늘 '안 끊김') → 켤 때 자가 시험에서 잡음 → 격리·입구 문 열어 상용 트랩처럼", hornets=[H(0)], until=300,
                                     gate_fault=dict(G3="stuck_clear"), expect=dict(h0="captured", notes=["halt", "passthrough"])),
         "S12a_uno1_power_loss": dict(desc="누르는 중 UNO 1 전원 끊김 8 s → 하트비트로 잡고, 돌아오면 원점부터 다시", hornets=[H(0)], until=600,
                                      events=[("on", "PRESS", 6.0, "uno1_off")], expect=dict(h0="outside", h0_marked=True, notes=["fault", "recovered"])),
         "S12b_pi_crash":       dict(desc="찍는 중 Pi 멈춤 20 s → UNO 감시가 멈춤·펜 들기, Pi 재시작 후 이어서", hornets=[H(0)], until=600,
                                     events=[("on", "MARK", 0.05, "pi_crash")], expect=dict(h0="outside", h0_marked=True, events=["uno1_watchdog"])),
+        "S14_battery_low":     dict(desc="배터리로 운용 중 누르는 동안 배터리 부족 → 이 말벌은 끝까지 처리 → 격리·입구 문 열고 Pi 끔 → 뒤에 온 말벌은 포획통으로",
+                                    hornets=[H(0), H(1, t=300)], until=500, events=[("on", "PRESS", 3.0, "battery_low")],
+                                    expect=dict(h0="outside", h0_marked=True, h1="captured", notes=["battery_low", "shutdown"])),
         "S13_arrive_at_boot":  dict(desc="켜는 중(원점 찾기 35 s)에 도착 → 닫힌 입구 문 앞에서 기다림 → 준비 뒤 처리", hornets=[H(0, t=5.0)], until=400,
                                     expect=dict(h0="outside", h0_marked=True)),
     }
@@ -1300,13 +1398,21 @@ def main(argv):
                 json.dump(dict(changes=rec.ch, events=rec.events, log=[l for l in log if "PING" not in l[3] and "PONG" not in l[3]],
                                t_g1=t_g1, t_end=t_end, power=[(t0, t1, iB, pA) for iB, iBp, pA, t0, t1 in per]), f, ensure_ascii=False)
     if len(names) > 1:
+        # 비교: 옛 설계(문틈 빔 하나, 통로 쪽)로 S8a·S8b를 돌리면?
+        PRM["door_beams"] = 1
+        cmp_ = {}
+        for n in ("S8a_gap_return", "S8b_gap_dart"):
+            r1 = run_one(n, scs[n])[0]
+            cmp_[n] = dict(crush=r1["invariants"]["crush"], pass_=r1["pass"])
+            print("  [빔 하나 비교] %-16s 끼임 %d  %s" % (n, r1["invariants"]["crush"], "통과" if r1["pass"] else "실패"))
+        PRM["door_beams"] = 2
         s1 = next(r for r in allres if r["name"] == "S1_nominal")
         ph = s1["per_hornet"]
         daily = [EB.daily(v, 9.0, False, True, True, per_visit_Wh=ph["E_extra_Wh"]) for v in (0, 20, 100)]
         daily += [EB.daily(20, 24.0, True, True, True, per_visit_Wh=ph["E_extra_Wh"]),
                   EB.daily(20, 9.0, False, False, False, per_visit_Wh=ph["E_extra_Wh"])]
         with open(os.path.join(OUT, "sim_results.json"), "w", encoding="utf-8") as f:
-            json.dump(dict(params=PRM, results=allres, per_hornet=ph, daily=daily), f, ensure_ascii=False, indent=1)
+            json.dump(dict(params=PRM, results=allres, per_hornet=ph, daily=daily, single_beam_compare=cmp_), f, ensure_ascii=False, indent=1)
         print("\n한 마리:", ph)
         for d in daily:
             print("하루:", d)
