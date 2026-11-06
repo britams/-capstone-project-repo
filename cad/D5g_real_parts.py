@@ -396,8 +396,7 @@ def ada2167(face_center, inward, long_axis):
     m.A13, m.A23, m.A33 = -n.x, -n.y, -n.z
     body = Part.makeBox(a["L"], a["W"], a["H"], V(-a["L"] / 2, -a["W"] / 2, 0))
     lens = Part.makeCylinder(a["lens_r"], a["lens_h"], V(0, 0, -a["lens_h"]))
-    cable = Part.makeCylinder(1.5, 6, V(a["L"] / 2, 0, a["H"] / 2), V(1, 0, 0))
-    s = body.fuse(lens).fuse(cable).transformGeometry(m)
+    s = body.fuse(lens).transformGeometry(m)          # 선(230 mm)은 휘는 전선이라 그리지 않음
     s.translate(V(*face_center))
     return s
 
@@ -435,7 +434,7 @@ def ir_pair_2167(doc):
         o.Label = o.Label.split(" ")[0] + " (Adafruit 2167 20 × 10 × 8)"
         d = V(0, 0, 0)
         setattr(d, "xyz"[ax], 1)
-        beams[o.Label[:10]] = (c0, c1, d)
+        beams[o.Label] = (c0, c1, d)
         out.append(o.Label)
     holes = []
     for c0, c1, d in beams.values():
@@ -451,23 +450,39 @@ def ir_pair_2167(doc):
 
 
 def estop(doc):
-    """194 비상 정지: 데크 구멍 Ø22.5, 판 앞 머리 Ø40 × 18 + 목 Ø29 × 13, 판 뒤 몸통 Ø28 × 15 + 접점 블록 30 × 40 × 26"""
+    """194 비상 정지: 데크 아래는 상용 트랩 차양막(지름 260, z 145~180)이 전부 덮어 데크 구멍 방식 불가 [확실 — 모델]
+    → 데크 높이 2020 레일(x −170 쪽, 바깥 면 x −180) 바깥에 3D 프린트 판 194b (4 mm, Ø22.5 구멍, M5 × 8 + T너트 2)를 달고
+      버섯 머리는 프레임 밖(−x)을 보게: 밖에서 누르기 쉬움. 판 뒤 몸통은 레일 위 (z 205~245), UNO와 7 mm 띄움."""
     old = [o for o in doc.Objects if o.Label.startswith("194_estop")]
     if not old:
         return None
-    c = old[0].Shape.BoundBox.Center
-    deck = old[0].Shape.BoundBox.ZMin
-    x, y = c.x, c.y
-    neck = Part.makeCylinder(14.5, 13, V(x, y, deck))
-    head = Part.makeCylinder(20, 18, V(x, y, deck + 13))
-    head = head.fuse(Part.makeSphere(20, V(x, y, deck + 13 + 18 - 14)).common(Part.makeCylinder(20, 4, V(x, y, deck + 31))))
-    body = Part.makeCylinder(11.0, 20, V(x, y, deck - 5 - 15))          # 데크 5 안에 나사 목 + 판 뒤 몸통
-    block = Part.makeBox(30, 40, 26, V(x - 15, y - 20, deck - 5 - 15 - 26))
-    old[0].Shape = Part.makeCompound([neck.fuse(head), body, block])
-    old[0].Label = "194_estop (22 mm 버섯형 NC, 머리 Ø40, 깊이 72, 데크 구멍 Ø22.5)"
+    import D5e_module_kinematic as K
+    c, s = K.FR["c"], 20.0
+    xf = -c - s / 2                     # 레일 바깥 면 −180
+    zr = K.FR["deck_z"]                 # 레일 z 180~200
+    yc, zc = 0.0, zr + s + 25.0         # 버튼 중심 z 225
+    t = 4.0
+    plate = Part.makeBox(t, 50, 70, V(xf - t, yc - 25, zr + 2))
+    plate = plate.cut(Part.makeCylinder(11.25, 10, V(xf - t - 1, yc, zc), V(1, 0, 0)))
+    for dy in (-15, 15):
+        plate = plate.cut(Part.makeCylinder(2.75, 10, V(xf - t - 1, yc + dy, zr + s / 2), V(1, 0, 0)))
+    head = Part.makeCylinder(14.5, 13, V(xf - t, yc, zc), V(-1, 0, 0)).fuse(
+        Part.makeCylinder(20, 18, V(xf - t - 13, yc, zc), V(-1, 0, 0)))
+    body = Part.makeCylinder(11.0, 15, V(xf, yc, zc), V(1, 0, 0))
+    block = Part.makeBox(26, 40, 30, V(xf + 15, yc - 20, zc - 15))
+    old[0].Shape = Part.makeCompound([head, body, block])
+    old[0].Label = "194_estop (22 mm 버섯형 NC, 머리 Ø40, 깊이 72 — 프레임 바깥을 봄)"
+    pl = [o for o in doc.Objects if o.Label.startswith("194b_")]
+    pl = pl[0] if pl else doc.addObject("Part::Feature", "SJ_estop_plate")
+    pl.Label = "194b_estop_plate (3D 프린트 4 mm, 레일에 M5 × 8 + T너트 2)"
+    pl.Shape = plate.removeSplitter()
+    # 앞 버전에서 데크에 뚫었던 Ø22.5 구멍 메움
     for o in doc.Objects:
         if o.Label.startswith("101_deck"):
-            o.Shape = o.Shape.cut(Part.makeCylinder(11.25, 20, V(x, y, deck - 10))).removeSplitter()
+            b = o.Shape.BoundBox
+            fill = Part.makeCylinder(11.25, b.ZLength, V(-100, 45, b.ZMin))
+            if o.Shape.common(fill).Volume < fill.Volume * 0.99:
+                o.Shape = o.Shape.fuse(fill).removeSplitter()
     return old[0]
 
 
