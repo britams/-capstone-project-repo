@@ -9,8 +9,8 @@
   T  쓸 수 있는 길이  L0 − Ls ≥ (1 + ξ)·y_max, ξ 0.15     (Shigley 식 10-17, y_max = 바닥 무게 + h_max 8.5 mm)
   S  밀착 안전율   ns = Ssy / τ(밀착) ≥ 1.2                (Shigley 식 10-21, Ssy = 0.45 Sut)
   F  피로          nf ≥ 1.2 (Zimmerli, Goodman)
-  O  바깥지름      OD ≤ 9 mm (D5e 스프링 자리)
-  R  안내 봉       ID − 봉 지름 ≥ 0.3 mm 인 봉이 1.5 / 2 / 3 / 4 mm 중에 있음 (좌굴 안내, Shigley 10-1 (g))
+  O  바깥지름      OD ≤ 4.1 mm — D5f (11/06 18:38) 스프링은 캐리지 아래 컵의 Ø4.4 구멍 안 (Shigley 그림 10-3 '구멍 안')
+  R  안내·받침     OD ≥ 2.8 (구멍과 틈 ≤ 1.6 → 좌굴 안내) 그리고 평균 지름 D ≤ 3.6 (Ø4 축 끝면이 코일을 누름)
   H  서지          지금 반걸음 1000 Hz가 서지 주파수의 ±15 % 밖이면 OK (아니면 펌웨어 반걸음 간격을 바꿈 — 금지 대역 = 서지 ±15 %)
   C  스프링 지수    정보만 (기성품은 이미 감겨 있어 감기 어려움은 제조사 몫)
 사용: python3 design/calc/spring146_catalog_check.py  (아래 CANDIDATES에 카탈로그 값을 넣음)
@@ -26,8 +26,8 @@ RODS = (1.5, 2.0, 3.0, 4.0)
 
 # 이름, 바깥지름 mm, 선 지름 mm, 자유 길이 mm, 강성 N/mm, 밀착 길이 mm(없으면 None), 유효 감김(없으면 None), 출처
 CANDIDATES = [
-    ("목표 (2차 사양, 기성품 아님)", 2.858, 0.229, 14.73, 0.1036, 3.89, 15, "spring146_calc2.py"),
-    ("차선 (1차 사양, 기성품 아님)", 7.90, 0.40, 14.04, 0.1045, 3.20, 6, "1차 문서"),
+    ("목표 (2차 사양, 기성품 아님)", 2.858, 0.229, 15.75, 0.1036, 3.89, 15, "spring146_calc2.py"),
+    ("1차 사양 (D5f 컵에 안 들어감)", 7.90, 0.40, 15.04, 0.1045, 3.20, 6, "1차 문서"),
 ]
 
 
@@ -55,13 +55,15 @@ def check(name, OD, d, L0, k_Nmm, Ls=None, Na=None, src=""):
     Wsp = math.pi ** 2 * (d * 1e-3) ** 2 * (D * 1e-3) * Na * IN["gamma"] / 4
     surge = 0.5 * math.sqrt(k * g / Wsp)
     ID = D - d
-    rod = max([r for r in RODS if ID - r >= 0.3], default=None)
-    res = dict(K=94 <= k <= 118, T=(L0 - Ls) >= 1.15 * y_max - 0.02, S=Tau_ok(Ssy, tau), F=nf >= 1.2, O=OD <= 9.0, R=rod is not None,
+    rod = None
+    res = dict(K=94 <= k <= 118, T=(L0 - Ls) >= 1.15 * y_max - 0.02, S=Tau_ok(Ssy, tau), F=nf >= 1.2, O=OD <= 4.1, R=(OD >= 2.8 and D <= 3.6),
                H=abs(IN["step_rate"] - surge) / surge >= 0.15)
     print("%s  [%s]" % (name, src))
     print("   k %.1f N/m, OD %.2f, ID %.2f, d %.3f, C %.1f, Na %.1f, L0 %.2f, Ls %.2f, 쓸 수 있는 길이 %.2f (필요 %.2f)" %
           (k, OD, ID, d, C, Na, L0, Ls, L0 - Ls, 1.15 * y_max))
-    print("   ns %.2f, nf %.2f, 서지 %.0f Hz (반걸음 금지 %.0f~%.0f Hz), 안내 봉 %s mm" % (Ssy / tau, nf, surge, surge * 0.85, surge * 1.15, rod))
+    L_inst = L0 - W / k * 1e3
+    print("   ns %.2f, nf %.2f, 서지 %.0f Hz (반걸음 금지 %.0f~%.0f Hz), 설치 길이 %.2f → 축 길이 %.1f mm (CAD 14 mm일 때 80)" %
+          (Ssy / tau, nf, surge, surge * 0.85, surge * 1.15, L_inst, 80 + 14 - L_inst))
     print("   " + "  ".join("%s %s" % (key, "OK" if v else "✗") for key, v in res.items()) + ("   → 통과" if all(res.values()) else "   → 불합격"))
     return all(res.values())
 

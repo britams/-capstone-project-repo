@@ -18,7 +18,8 @@ g = 9.81
 IN = dict(
     F_p=0.5, F_safe=1.0, v=1.96e-3, h_min=6.5e-3, h_max=8.5e-3, margin=1.0e-3,
     k_c=(300.0, 3000.0),                         # [추측] 말벌 + 접촉 강성, R7 전
-    m_floor=(9.0883 + 0.7677) * 1e-3,            # [가능성 높음] CAD
+    m_floor=(9.0883 * 1.24 + 1.0053 * 7.85) * 1e-3,   # [가능성 높음] D5f (11/06 18:38): 바닥판 9.09 cm³ × PLA 1.24 + 강철 축 Ø4×80 1.005 cm³ × 7.85 = 19.2 g
+                                                      #   (1차·2차 초판은 9.86 g — CAD 부피를 g로 읽은 값 + PLA 밀대)
     # A 정역학
     e_max=20e-3,                                 # [확실 — 모델] 바닥 39 × 39의 가운데에서 말벌 중심까지 최대 (모서리 몸통 중심)
     L_guide_now=5e-3, clear_now=1.0e-3,          # [확실 — D5e] 바닥판 121 구멍 Ø5 × 5 mm, 밀대 Ø4
@@ -67,6 +68,11 @@ def statics():
                 rows.append(dict(guide=name, mu=mu, e_mm=e * 1e3, friction_ratio=round(r, 3),
                                  N_h_at_stop_N=round(IN["F_p"] / (1 + r), 3), pct_of_Fp=round(100 / (1 + r), 1)))
     out["rows"] = rows
+    # D5f (11/06 18:38): 축 (65, 4)이 바닥 가운데 (55, 0)에서 벗어남 → 말벌 중심까지 최대 거리가 커짐
+    e_new = math.hypot(65 - (55 - 19.5 + 2), 4 - (-19.5 + 2))       # 바닥 모서리에서 2 mm 안 (말벌 몸 반폭 약 2 mm 이상)
+    out["d5f_axis_e_max_mm"] = round(e_new * 1e3 / 1e3, 1)
+    out["d5f_rows"] = [dict(mu=mu, e_mm=round(e, 1), pct_of_Fp=round(100 / (1 + 2 * mu * e * 1e-3 / IN["L_lm4"]), 1))
+                       for mu in IN["mu_lm"] for e in (0.0, 10.0, 20.0, e_new)]
     # 0.8 F_p 이상 (말벌을 붙잡는 힘) 이 되려면 2μe/L ≤ 0.25 → L ≥ 8μe
     out["L_needed_for_0.8Fp_mm"] = {str(mu): round(8 * mu * IN["e_max"] * 1e3, 1) for mu in IN["mu_pla"] + IN["mu_lm"]}
     return out

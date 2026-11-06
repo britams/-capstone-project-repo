@@ -8,6 +8,12 @@
 - 204 펜 홀더 스프링 지움 (11/02 결정, 승준 Issue #7)
 - 28BYJ-48 고정은 M4 × 2 (귀 구멍 Ø4.2) — 볼트 수량은 승준 목록
 - 196 빛 게이트 9쌍: 문마다 2개(문판 앞·뒤 각 2 mm) + G1·G4·G6 — 송신·수신 블록과 빔(빨간 선)
+- (11/06 18:38, CAP-AI-27) 바닥 안내 바꿈 — 서현 "최대한 기성품으로, 바꿔":
+  밀대(147)를 Ø4 × 80 경화 직선 축(기성품)으로, 안내를 LM4UU(기성품, Ø4/Ø8 × 12)로. LM4UU는 캐리지(158, 두께 12)에 끼움.
+  로드셀(148)·스프링(146)은 캐리지 아래 컵(158에 한 몸으로 출력) 안으로: 컵 바닥 → 로드셀(버튼 위) → 스프링(구멍 Ø4.4 안내) → 축 아래 끝.
+  축 자리는 (65, 4): 나사 축 커플링·너트 플랜지·가이드봉을 피하는 자리. 바닥판 121은 Ø6 비접촉 구멍, 가운데 Ø5 구멍은 막음.
+  → 말벌이 벗어나 생기는 모멘트는 캐리지 안내(너트·가이드봉)가 받고, 힘 측정 길(축-LM4UU)에는 볼 마찰만 남음
+     (역학계산 2차 A: 98 % 이상, design/2026-11-06_S4_스프링146_역학계산_2차_서현.md)
 모양은 '자리 표시'다 (블록). 브래킷·구멍 모양은 D5f 다음 단계에서 설계한다.
 
 실행 (FreeCAD GUI):
@@ -36,6 +42,89 @@ DOOR_BEAMS = {  # 하우징 이름: (zp, [(게이트, x)])
     "170_isolation_gate_housing": (377, [("G3", 29), ("G3b", 23)]),
     "176_release_gate_housing": (377, [("G5", 81), ("G5b", 87)]),
 }
+
+
+# 바닥 안내 (11/06 18:38) — 기성품: 축 Ø4 × 80 (경화, h6), LM4UU, 스프링(카탈로그, 바깥 ≤ 4.1), 버튼 로드셀
+FG = dict(x=65.0, y=4.0, zc=262.0, zf=335.0, shaft_r=2.0, shaft_len=80.0, lm_r=4.0, lm_ri=2.0, lm_len=12.0,
+          cup_r=7.5, cup_bot=236.0, lc_r=6.0, lc_h=6.0, lc_pocket_r=6.2, bore_r=2.2,
+          sp_ro=1.43, sp_ri=1.20, base_clear_r=3.0, insert=3.0, stroke=36.5)
+FLOOR_GROUP = ("140_", "146_", "147_", "148_", "149_", "158_", "159_")   # 바닥과 같이 오르내리는 부품
+
+
+def cylz(r, h, x, y, z):
+    return Part.makeCylinder(r, h, V(x, y, z))
+
+
+def floor_guide(doc):
+    """D5e의 146·147·148을 지우고 기성품 안내로 바꿈 (자세: 대기, 캐리지 아래 면 zc 262)"""
+    f = FG
+    x, y = f["x"], f["y"]
+    z_lc = f["cup_bot"] + 2.0                               # 로드셀 아래 면 238
+    z_sp = z_lc + f["lc_h"]                                 # 스프링 아래 끝 244
+    z_sh = f["zf"] + f["insert"] - f["shaft_len"]           # 축 아래 끝 258
+    for o in list(doc.Objects):
+        if o.Label.split(" ")[0] in ("146_spring", "147_push_rod", "148_load_cell"):
+            doc.removeObject(o.Name)
+    for o in doc.Objects:
+        lab = o.Label.split(" ")[0]
+        if lab == "158_carriage":
+            sh = o.Shape.cut(cylz(f["lm_r"], f["lm_len"] + 2, x, y, f["zc"] - 1))                 # LM4UU 자리
+            cup = cylz(f["cup_r"], f["zc"] - f["cup_bot"], x, y, f["cup_bot"])
+            cup = cup.cut(cylz(f["lc_pocket_r"], f["lc_h"] + 0.5, x, y, z_lc))                       # 로드셀 자리
+            cup = cup.cut(cylz(f["bore_r"], f["zc"] - z_sp + 1, x, y, z_sp))                         # 스프링 구멍 Ø4.4
+            cup = cup.cut(Part.makeBox(9, 3, 4, V(x, y - 1.5, z_lc)))                               # 로드셀 선 구멍 (+x)
+            o.Shape = sh.fuse(cup).removeSplitter()
+            o.Label = "158_carriage (D5f: LM4UU 자리 + 아래 컵)"
+        elif lab == "121_chamber_base":
+            sh = o.Shape.fuse(cylz(2.5, 5, 55, 0, 330)).cut(cylz(f["base_clear_r"], 12, x, y, 325))
+            o.Shape = sh.removeSplitter()
+            o.Label = "121_chamber_base (D5f: 가운데 구멍 막음, Ø6 비접촉 구멍)"
+        elif lab == "140_lift_floor":
+            sh = o.Shape.fuse(cylz(2.0, 3, 55, 0, f["zf"])).cut(cylz(f["shaft_r"], f["insert"], x, y, f["zf"]))
+            o.Shape = sh.removeSplitter()
+            o.Label = "140_lift_floor (D5f: 축 자리 (65, 4))"
+    new = {
+        "147_shaft_D4x80 (기성품 경화 축)": (cylz(f["shaft_r"], f["shaft_len"], x, y, z_sh), (0.75, 0.75, 0.78)),
+        "149_LM4UU (기성품 볼 부싱)": (cylz(f["lm_r"], f["lm_len"], x, y, f["zc"]).cut(cylz(f["lm_ri"], f["lm_len"] + 2, x, y, f["zc"] - 1)), (0.55, 0.55, 0.6)),
+        "146_spring (기성품, 바깥 2.86 자리)": (cylz(f["sp_ro"], z_sh - z_sp, x, y, z_sp).cut(cylz(f["sp_ri"], z_sh - z_sp + 2, x, y, z_sp - 1)), (0.85, 0.65, 0.1)),
+        "148_load_cell (기성품 버튼형)": (cylz(f["lc_r"], f["lc_h"], x, y, z_lc), (0.3, 0.3, 0.3)),
+    }
+    grp = doc.addObject("App::DocumentObjectGroup", "G14x_floor_guide")
+    grp.Label = "14x 바닥 안내 (D5f, 기성품)"
+    for i, (nm, (shp, col)) in enumerate(new.items()):
+        o = doc.addObject("Part::Feature", "FG%02d" % i)
+        o.Label = nm
+        o.Shape = shp
+        grp.addObject(o)
+        if App.GuiUp:
+            o.ViewObject.ShapeColor = col
+    doc.recompute()
+
+
+def check_floor(doc, lift=(0.0, 18.25, 36.5)):
+    """바닥 무리를 0 / 중간 / 끝까지 올려 고정 부품과 겹침 (부피 > 0.5 mm³). 모터 축 회전 부품(153r·154·155)은 고정으로 봄"""
+    move = [o for o in doc.Objects if o.TypeId == "Part::Feature" and o.Label.startswith(FLOOR_GROUP)]
+    fixed = [o for o in doc.Objects if o.TypeId == "Part::Feature" and o not in move and o.Shape.Volume > 0
+             and not o.Label.startswith(("REF", "100_", "190_", "FitBox")) and "beam" not in o.Label]
+    hits = []
+    for dz in lift:
+        for a in move:
+            sa = a.Shape.copy()
+            sa.translate(V(0, 0, dz))
+            for b in fixed:
+                if sa.BoundBox.intersect(b.Shape.BoundBox):
+                    v = sa.common(b.Shape).Volume
+                    if v > 0.5:
+                        hits.append((dz, a.Label, b.Label, round(v, 1)))
+        # 바닥 무리끼리 (스프링·축·컵·LM4UU)
+    inner = []
+    for i, a in enumerate(move):
+        for b in move[i + 1:]:
+            if a.Shape.BoundBox.intersect(b.Shape.BoundBox):
+                v = a.Shape.common(b.Shape).Volume
+                if v > 0.5:
+                    inner.append((a.Label, b.Label, round(v, 1)))
+    return hits, inner
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -94,6 +183,7 @@ def make():
                 sh = sh.cut(Part.makeCylinder(2.1, 30, V(x, 0, zp - 16)))
             o.Shape = sh.removeSplitter()
             o.Label = o.Label + " (D5f 빔 구멍)"
+    floor_guide(doc)
     grp = doc.addObject("App::DocumentObjectGroup", "G19x_electrical")
     grp.Label = "19x 전기 배치 (D5f, 자리 표시)"
     for i, (nm, (shp, col)) in enumerate(parts().items()):
@@ -110,6 +200,7 @@ def make():
 VIEWS = [
     ("전기배치_등각", "iso", (-140, 190, -110, 110, 190, 620), ("REF_trap_container", "REF_trap_cap", "REF_trap_silicone_star", "105_top_plate", "104_dome_coupling")),
     ("전기배치_정면", "front", (-140, 190, -110, 110, 190, 620), ("REF_trap_container", "REF_trap_cap", "REF_trap_silicone_star", "105_top_plate", "104_dome_coupling")),
+    ("바닥안내_정면", "front", (25, 85, -30, 30, 225, 345), ("REF_trap_container", "REF_trap_cap", "REF_trap_silicone_star", "105_top_plate", "104_dome_coupling", "120_chamber_walls", "151_drive_side_L", "151_drive_side_R")),
     ("문빔_위", "top", (-20, 130, -40, 40, 330, 400), ("REF_trap_container", "REF_trap_cap", "REF_trap_silicone_star", "105_top_plate", "104_dome_coupling")),
 ]
 
