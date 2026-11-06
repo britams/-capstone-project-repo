@@ -210,7 +210,8 @@ COLOR = {"A": (0.62, 0.66, 0.72), "B": (0.95, 0.55, 0.15), "C": (0.40, 0.75, 0.3
 
 def category(label):
     for head, cat in CATEGORY:
-        if head in label:
+        # 숫자로 시작하는 머리말은 이름 앞에서만 비교 (설명 글 속 '100d' 같은 글자에 걸리지 않게, SJ-49)
+        if (label.startswith(head) if head[:1].isdigit() else head in label):
             return cat
     return "B"
 
