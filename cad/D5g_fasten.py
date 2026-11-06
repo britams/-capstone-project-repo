@@ -57,7 +57,7 @@ def fasten(doc, G):
         if x0 < b.XMin - 0.01:                                           # 늘린 부분만 붙임 (봉 구멍은 그대로)
             s = s.fuse(Part.makeBox(b.XMin - x0 + 0.5, b.YLength, b.ZLength, V(x0, b.YMin, b.ZMin)))
         if x1 > b.XMax + 0.01:
-            s = s.fuse(Part.makeBox(x1 - b.XMax + 0.5, b.YLength, b.ZLength, V(b.XMax - 0.5, b.YMin, b.ZMin)))
+            s = s.fuse(Part.makeBox(x1 - b.XMax, b.YLength, b.ZLength, V(b.XMax, b.YMin, b.ZMin)))   # 봉 끝(x 172) 바로 뒤부터
         if xr > 0:
             # 둘레 레일 쪽은 X 봉(Ø8)이 x 172까지 받침 가운데를 지나 세로 볼트 자리가 없음 [확실 — 겹침 검사]
             # → 바깥쪽(ULN 받침 197 반대쪽)으로 귀(두께 8)를 내고 M5 × 12 한 개 + 바닥 키(홈 폭 5.6, 깊이 0.5)로 돌지 않게

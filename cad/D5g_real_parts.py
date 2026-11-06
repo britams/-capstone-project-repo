@@ -524,7 +524,7 @@ def ir_pair_door(doc):
                 zs = z_end if sgn > 0 else z_end - st
                 if st > 0:
                     legs.append(Part.makeBox(0.5, 0.5, st, V(x - 0.25, c.y - 0.25, zs)))
-                zb_ = z_end + sgn * st - (0.5 if sgn > 0 else 0.0)
+                zb_ = z_end + sgn * st - (0.5 if sgn < 0 else 0.0)          # 꺾인 다리 두께 0.5는 몸통 반대쪽으로
                 y0 = c.y - 0.25 if side > 0 else c.y + 0.25 - LEAD["bend"]
                 legs.append(Part.makeBox(0.5, LEAD["bend"], 0.5, V(x - 0.25, y0, zb_)))
         o.Shape = Part.makeCompound([up, dn] + legs)
