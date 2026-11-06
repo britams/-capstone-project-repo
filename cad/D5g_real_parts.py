@@ -220,6 +220,7 @@ def apply(doc):
             out.append("Pi 5 STEP 실패: %s" % e)
     apply_wago(doc)
     apply_uno(doc)
+    apply_gates_estop(doc)
     doc.recompute()
     return out
 
@@ -349,3 +350,131 @@ def apply_uno(doc):
     o.Shape = Part.makeCompound(st)
     doc.recompute()
     return [b1[0]] + b2 + [o]
+
+
+# ---------------- (11/06 20:35) 빛 게이트·비상 정지 — 자리 상자 → 실제 모양 ----------------
+# 문 게이트 6쌍 (G2·G2b·G3·G3b·G5·G5b): 하우징 위·아래 벽 Ø4.2 구멍에 3 mm 적외선 LED / 3 mm 수광 소자 낱개를 꽂음.
+#   [확실 — 모델] 입구·격리 문 하우징 사이 틈 5 mm → Adafruit 2167 몸통(20 × 10 × 8)은 안 들어감.
+#   모양: KiCad LED_D3.0mm STEP (렌즈 지름 3, 테 3.8 < 구멍 4.2) — 렌즈 끝이 빔 쪽 벽 안 면에 오게.
+# 통로 게이트 3쌍 (G1·G4·G6): Adafruit 2167 송신기·수신기 각 20 × 10 × 8 [가능성 높음 — 판매처 표기], 렌즈 Ø3 돌기,
+#   선 230 mm. 빔이 지나는 통로 벽·받침에 Ø3.2 구멍.
+# 비상 정지: 22 mm 버섯형 (XB7NS8442 같은 것) — 머리 Ø40, 전체 깊이 72 [가능성 높음 — 판매처 표기], 데크 구멍 Ø22.5.
+#   판 앞 31 (머리 18 + 목 13) / 판 뒤 41 (몸통 + 접점 블록)으로 나눔 → 판 앞·뒤 나눔은 실물로 확인.
+ADA2167 = dict(L=20.0, W=10.0, H=8.0, lens_r=1.5, lens_h=2.0)
+
+
+def ir_pair_door(doc):
+    """196_gate_G2~G5b_led (원기둥 2개) → KiCad 3 mm LED 모양 2개 (위: 렌즈 아래로, 아래: 렌즈 위로)"""
+    led = load("led3")
+    out = []
+    for o in [x for x in doc.Objects if x.Label.startswith("196_gate_G") and "_led" in x.Label]:
+        sol = sorted(o.Shape.Solids, key=lambda s: s.BoundBox.ZMin)
+        lo, hi = sol[0].BoundBox, sol[-1].BoundBox
+        z_beam_lo, z_beam_hi = lo.ZMax, hi.ZMin          # 빔 쪽 끝 (벽 안 면)
+        up = led.copy()
+        b = up.BoundBox
+        up.translate(V(lo.Center.x - b.Center.x, lo.Center.y - b.Center.y, z_beam_lo - b.ZMax))     # 아래 소자: 렌즈가 위
+        dn = led.copy()
+        dn.rotate(V(0, 0, 0), V(1, 0, 0), 180)
+        b = dn.BoundBox
+        dn.translate(V(hi.Center.x - b.Center.x, hi.Center.y - b.Center.y, z_beam_hi - b.ZMin))     # 위 소자: 렌즈가 아래
+        o.Shape = Part.makeCompound([up, dn])
+        o.Label = o.Label.split(" ")[0].replace("_led", "_ir_pair") + " (3 mm 적외선 LED + 3 mm 수광, KiCad STEP)"
+        out.append(o.Label)
+    return out
+
+
+def ada2167(face_center, inward, long_axis):
+    """face_center: 렌즈 쪽 면 가운데, inward: 빔 쪽 단위 벡터, long_axis: 20 방향 단위 벡터"""
+    a = ADA2167
+    n = V(*inward)
+    l = V(*long_axis)
+    w = n.cross(l)
+    m = App.Matrix()
+    m.A11, m.A21, m.A31 = l.x, l.y, l.z
+    m.A12, m.A22, m.A32 = w.x, w.y, w.z
+    m.A13, m.A23, m.A33 = -n.x, -n.y, -n.z
+    body = Part.makeBox(a["L"], a["W"], a["H"], V(-a["L"] / 2, -a["W"] / 2, 0))
+    lens = Part.makeCylinder(a["lens_r"], a["lens_h"], V(0, 0, -a["lens_h"]))
+    cable = Part.makeCylinder(1.5, 6, V(a["L"] / 2, 0, a["H"] / 2), V(1, 0, 0))
+    s = body.fuse(lens).fuse(cable).transformGeometry(m)
+    s.translate(V(*face_center))
+    return s
+
+
+def ir_pair_2167(doc):
+    """196_gate_G4·G6_tx_rx 상자, 114_entry_sensor_tx·rx 상자 → 2167. 빔이 지나는 통로·받침에 Ø3.2 구멍"""
+    out = []
+    jobs = []
+    for o in doc.Objects:
+        if o.Label.startswith(("196_gate_G4_tx_rx", "196_gate_G6_tx_rx", "114_entry_sensor_tx", "114_entry_sensor_rx")):
+            jobs.append(o)
+    beams = {}
+    for o in jobs:
+        sols = o.Shape.Solids
+        cs = [s.BoundBox.Center for s in sols]
+        if len(sols) == 2:
+            c0, c1 = cs
+        else:
+            pair = [x for x in jobs if x is not o and x.Label[:18] == o.Label[:18]] or [x for x in jobs if x is not o and "114_entry_sensor" in x.Label and "114" in o.Label]
+            c0, c1 = cs[0], pair[0].Shape.BoundBox.Center
+        ax = max(range(3), key=lambda i: abs([c1.x - c0.x, c1.y - c0.y, c1.z - c0.z][i]))
+        mid = (c0 + c1) * 0.5
+        parts = []
+        for s in sols:
+            b = s.BoundBox
+            c = b.Center
+            sign = 1 if [c.x, c.y, c.z][ax] < [mid.x, mid.y, mid.z][ax] else -1
+            inward = [0, 0, 0]
+            inward[ax] = sign
+            fc = [c.x, c.y, c.z]
+            fc[ax] = ([b.XMax, b.YMax, b.ZMax][ax] if sign > 0 else [b.XMin, b.YMin, b.ZMin][ax])
+            long_axis = [0, 0, 1] if ax != 2 else [1, 0, 0]
+            parts.append(ada2167(fc, inward, long_axis))
+        o.Shape = Part.makeCompound(parts)
+        o.Label = o.Label.split(" ")[0] + " (Adafruit 2167 20 × 10 × 8)"
+        d = V(0, 0, 0)
+        setattr(d, "xyz"[ax], 1)
+        beams[o.Label[:10]] = (c0, c1, d)
+        out.append(o.Label)
+    holes = []
+    for c0, c1, d in beams.values():
+        L = abs((c1 - c0).dot(d)) + 4
+        start = (c0 if (c1 - c0).dot(d) > 0 else c1) - d * 2
+        holes.append(Part.makeCylinder(1.6, L, start, d))
+    hole = Part.makeCompound(holes)
+    for o in doc.Objects:
+        if hasattr(o, "Shape") and o.Label.startswith(("110_", "172_", "174_", "199b_", "199c_")) and o.Shape.BoundBox.intersect(hole.BoundBox):
+            if o.Shape.common(hole).Volume > 0.01:
+                o.Shape = o.Shape.cut(hole).removeSplitter()
+    return out
+
+
+def estop(doc):
+    """194 비상 정지: 데크 구멍 Ø22.5, 판 앞 머리 Ø40 × 18 + 목 Ø29 × 13, 판 뒤 몸통 Ø28 × 15 + 접점 블록 30 × 40 × 26"""
+    old = [o for o in doc.Objects if o.Label.startswith("194_estop")]
+    if not old:
+        return None
+    c = old[0].Shape.BoundBox.Center
+    deck = old[0].Shape.BoundBox.ZMin
+    x, y = c.x, c.y
+    neck = Part.makeCylinder(14.5, 13, V(x, y, deck))
+    head = Part.makeCylinder(20, 18, V(x, y, deck + 13))
+    head = head.fuse(Part.makeSphere(20, V(x, y, deck + 13 + 18 - 14)).common(Part.makeCylinder(20, 4, V(x, y, deck + 31))))
+    body = Part.makeCylinder(11.0, 20, V(x, y, deck - 5 - 15))          # 데크 5 안에 나사 목 + 판 뒤 몸통
+    block = Part.makeBox(30, 40, 26, V(x - 15, y - 20, deck - 5 - 15 - 26))
+    old[0].Shape = Part.makeCompound([neck.fuse(head), body, block])
+    old[0].Label = "194_estop (22 mm 버섯형 NC, 머리 Ø40, 깊이 72, 데크 구멍 Ø22.5)"
+    for o in doc.Objects:
+        if o.Label.startswith("101_deck"):
+            o.Shape = o.Shape.cut(Part.makeCylinder(11.25, 20, V(x, y, deck - 10))).removeSplitter()
+    return old[0]
+
+
+def apply_gates_estop(doc):
+    out = ir_pair_door(doc) + ir_pair_2167(doc)
+    e = estop(doc)
+    if e:
+        out.append(e.Label)
+    doc.recompute()
+    return out
