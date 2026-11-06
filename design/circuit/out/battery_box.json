@@ -1,0 +1,148 @@
+{
+ "parts": {
+  "BAT": "LiFePO4 12.8 V 20 Ah (BMS 들어 있음, 연속 10 A 이상)",
+  "F2": "퓨즈홀더 F-520 + 5×20 5 A",
+  "INA": "INA226 모듈 — 분류 저항 R010 (0.01 Ω)",
+  "J_CHG": "충전 단자 XT60 암 (LiFePO4 전용 충전기 14.6 V)",
+  "SW_M": "주 스위치 (로커/토글, DC 12 V 10 A 이상)",
+  "BK_A": "강압 모듈 A (입력 8~36 V, 출력 조정 CV/CC, 5 A급) → 5.15 V",
+  "BK_B": "강압 모듈 B (같은 것) → 5.0 V",
+  "J_PI": "USB-C 수 플러그 꼬리선 (전원 전용, 20 AWG)",
+  "J_DRV": "DC 5.5×2.1 수 플러그 꼬리선 (18 AWG)",
+  "J_I2C": "4핀 커넥터 + 4심 선 1 m (본체 J_I2C와 짝)"
+ },
+ "nets": {
+  "BAT+": [
+   "BAT.+",
+   "F2.1"
+  ],
+  "VF2": [
+   "F2.2",
+   "INA.IN+"
+  ],
+  "VBOX": [
+   "INA.IN-",
+   "INA.VBUS",
+   "J_CHG.+",
+   "SW_M.1"
+  ],
+  "VSW": [
+   "SW_M.2",
+   "BK_A.VIN+",
+   "BK_B.VIN+"
+  ],
+  "GND_BOX": [
+   "BAT.-",
+   "J_CHG.-",
+   "BK_A.VIN-",
+   "BK_B.VIN-",
+   "BK_A.OUT-",
+   "BK_B.OUT-",
+   "J_PI.GND",
+   "J_DRV.-",
+   "INA.GND"
+  ],
+  "5V1_PI": [
+   "BK_A.OUT+",
+   "J_PI.VBUS"
+  ],
+  "5V_DRV": [
+   "BK_B.OUT+",
+   "J_DRV.+"
+  ],
+  "I2C_SDA": [
+   "INA.SDA",
+   "J_I2C.SDA"
+  ],
+  "I2C_SCL": [
+   "INA.SCL",
+   "J_I2C.SCL"
+  ],
+  "I2C_VCC": [
+   "INA.VS",
+   "J_I2C.VCC"
+  ],
+  "I2C_GND": [
+   "INA.GND",
+   "J_I2C.GND"
+  ]
+ },
+ "check": "통과",
+ "calc": {
+  "P_pi_typ_W": 5.7,
+  "P_pi_peak_W": 12.7,
+  "I_pi_peak_A": 2.47,
+  "I_bat": {
+   "대기 (공칭 12.8 V)": 0.64,
+   "규칙 최대 (12.0 V, 부족 직전)": 2.01,
+   "설계 최악 (10.0 V BMS 직전, 본체 퓨즈 3 A 직전)": 3.08
+  },
+  "fuse_ok": true,
+  "fuse_margin": 1.62,
+  "ina226": {
+   "R100 (흔한 모듈 0.1 Ω)": {
+    "full_scale_A": 0.82,
+    "ok": false,
+    "shunt_W_at_worst": 0.949,
+    "drop_mV_at_worst": 308.0,
+    "resolution_mA": 0.025
+   },
+   "R010 (0.01 Ω, 고름)": {
+    "full_scale_A": 8.19,
+    "ok": true,
+    "shunt_W_at_worst": 0.095,
+    "drop_mV_at_worst": 30.8,
+    "resolution_mA": 0.25
+   },
+   "설정": {
+    "R_shunt": 0.01,
+    "current_LSB_A": 0.0002,
+    "CAL": 2560,
+    "power_LSB_W": 0.005,
+    "config": "평균 16회, 변환 1.1 ms (0x4527) → 약 35 ms마다 새 값, Pi는 0.5 s마다 읽음",
+    "addr": "0x40 (A0·A1 = GND)",
+    "i2c": "100 kHz, 선 1 m — 모듈 풀업 10 kΩ + Pi 1.8 kΩ [가능성 높음]"
+   }
+  },
+  "drop": {
+   "pi_V": 0.156,
+   "pi_at_board_V": 4.99,
+   "pi_undervolt_V": 4.63,
+   "drv_V": 0.112,
+   "drv_at_jack_V": 4.89
+  },
+  "night": {
+   "W": 0.25,
+   "Wh_15h": 3.75,
+   "mA_bat": 19.5,
+   "note": "INA226은 적산을 안 함(INA228은 함). Pi가 켜져 있는 동안 P를 더하고, 밤 몫은 '밤 W × 꺼진 시간'으로 더함"
+  },
+  "days": [
+   2.88,
+   80.1
+  ]
+ },
+ "ground_loop": {
+  "배럴 꼬리선 20 AWG 1.5 m (흔한 어댑터 선)": {
+   "R_barrel_mOhm": 80,
+   "R_usb_path_mOhm": 118,
+   "share_usb": 0.4,
+   "I_through_usb_A": 0.73,
+   "I_per_uno_cable_A": 0.36,
+   "offset_mV": 42
+  },
+  "배럴 꼬리선 18 AWG 1.0 m (고름)": {
+   "R_barrel_mOhm": 51,
+   "R_usb_path_mOhm": 118,
+   "share_usb": 0.3,
+   "I_through_usb_A": 0.54,
+   "I_per_uno_cable_A": 0.27,
+   "offset_mV": 32
+  },
+  "판단": "UNO USB는 풀 스피드(12 Mbps)라 GND가 수십 mV 어긋나도 신호 문턱(0.8/2.0 V)에 한참 못 미친다 [가능성 높음]. 그래도 스테핑 전류가 펄스로 흘러 잡음이 될 수 있어 ① 배럴 꼬리선 18 AWG 1.0 m ② GND는 배터리 −에서 별 모양 ③ 브링업 B6에서 'UNO GND ↔ Pi GND 전압 < 50 mV, 1시간 시리얼 오류 0'을 확인. 넘으면 강압 B를 절연형 Mean Well SD-15A-5 (9.2~18 V → 5 V 3 A, 절연 2 kV)로 바꾼다",
+  "SD-15A-5로 바꾸면": {
+   "extra_Wh_day": 5.6,
+   "note": "무부하 전류는 공개값 못 찾음 → 밤 손실은 실측 [추측]"
+  }
+ }
+}
