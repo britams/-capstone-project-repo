@@ -389,9 +389,9 @@
    "to": "LC",
    "wires": 4,
    "awg": 28,
-   "len_mm": 271,
+   "len_mm": 221,
    "stock_mm": null,
-   "extension_mm": 271,
+   "extension_mm": 221,
    "moving": true,
    "drop_V": null
   },
@@ -735,6 +735,13 @@
   },
   {
    "mode": "보통 (카메라 늘 켬, 대기 조명)",
+   "Ah": 15,
+   "Wh": 192,
+   "need_Wh_day": 81.1,
+   "days": 2.13
+  },
+  {
+   "mode": "보통 (카메라 늘 켬, 대기 조명)",
    "Ah": 20,
    "Wh": 256,
    "need_Wh_day": 81.1,
@@ -756,11 +763,18 @@
   },
   {
    "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
+   "Ah": 15,
+   "Wh": 192,
+   "need_Wh_day": 60.3,
+   "days": 2.87
+  },
+  {
+   "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
    "Ah": 20,
    "Wh": 256,
    "need_Wh_day": 60.3,
    "days": 3.82
   }
  ],
- "harness_total_m": 43.5
+ "harness_total_m": 43.3
 }
