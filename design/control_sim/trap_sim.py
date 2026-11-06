@@ -50,6 +50,8 @@ PRM = dict(
     other_action="isolate",    # 2종 아님·신뢰도 낮음 → 격리 (서현 결정 11/06 17:05)
     gyne_mw_mm=4.4,            # 중순판 폭(날개 뿌리 사이) ≥ 4.4 mm → 여왕벌(gyne)로 보고 격리. 논문 경계 4.5, 불확실 띠 4.4~4.58의 아래 끝
                                #   (Pérez-de-Heredia et al. 2017, J Hymenopt Res 60:119) — (AI 판단, 서현 위임) CAP-AI-24
+    month=7,                   # 오늘 달 (Pi 시계). 폭을 못 재면 계절 규칙 (서현 결정 11/06 18:32)
+    season_queen_months=(3, 4, 5, 9, 10, 11),   # 3~5월 창업 여왕만 다님, 9~11월 신여왕 나옴 → 못 재면 여왕으로 봄. 6~8월 → 일벌
     control_mode=False,        # 방제 모드 (등검은말벌 일벌도 격리)
 )
 CONTACT_F = PRM["F_max"] - PRM["hornet_h"]      # 바닥이 말벌 등에 닿는 높이 29.0 mm (격자 아래 면 기준)
@@ -158,7 +160,8 @@ class Hornet:
     def __init__(self, hid, t=60.0, species="velutina", caste="worker", marked=False, poses=("dorsal",), dots=(True,),
                  gap_dwell=0.3, gap_returns=(), turn_back=False, leave_s=20.0, cam_miss_s=0.0, mw_mm=None):
         self.id, self.t_arrive, self.species, self.caste, self.marked = hid, t, species, caste, marked
-        self.mw_mm = mw_mm if mw_mm is not None else (4.7 if caste == "queen" else 4.0)   # 중순판 폭 (카메라가 잼)
+        self.mw_mm = 4.0 if mw_mm == "fail" else mw_mm if mw_mm is not None else (4.7 if caste == "queen" else 4.0)   # 중순판 폭 (카메라가 잼)
+        self.mw_measurable = mw_mm != "fail"                                                # False면 격자에 가려 못 잼
         self.poses, self.dots, self.gap_dwell, self.gap_returns, self.turn_back = list(poses), list(dots), gap_dwell, list(gap_returns), turn_back
         self.leave_s, self.cam_miss_s = leave_s, cam_miss_s
         self.zone, self.press_n, self.mark_n, self.t_chamber = "trap", 0, 0, None
@@ -290,7 +293,10 @@ class World:
         for h in seen:
             pose = h.poses[min(max(h.press_n - 1, 0), len(h.poses) - 1)] if h.pinned else "free"
             sp = h.species if h.species in PRM["classes"] else "uncertain"     # 2종 분류기: 다른 곤충은 낮은 신뢰도
-            caste = "queen" if h.mw_mm >= PRM["gyne_mw_mm"] else "worker"   # 카메라는 크기로만 가름
+            if not h.mw_measurable:                                          # 못 잼 → 계절 규칙 (서현 11/06)
+                caste = "queen" if PRM["month"] in PRM["season_queen_months"] else "worker"
+            else:
+                caste = "queen" if h.mw_mm >= PRM["gyne_mw_mm"] else "worker"   # 카메라는 크기로만 가름
             out.append(dict(id=h.id, species=sp, caste=caste, mw_mm=h.mw_mm, marked=h.marked or h.marked_now,
                             pose=pose, p=0.9 if pose in ("dorsal", "free") else 0.1))
         return out
@@ -1243,6 +1249,10 @@ def scenarios():
         "S4b_gyne_border":     dict(desc="중순판 폭 4.45 mm (경계 띠) → 여왕벌 쪽으로 보고 격리, 4.35 mm → 일벌로 찍고 방생",
                                     hornets=[H(0, mw_mm=4.45), H(1, t=400, mw_mm=4.35)], until=900,
                                     expect=dict(h0="captured", h1="outside", h1_marked=True)),
+        "S4c_mw_fail_summer":  dict(desc="폭 못 잼, 7월 → 일벌로 보고 찍고 방생 (계절 규칙)", hornets=[H(0, mw_mm="fail")], until=400,
+                                    expect=dict(h0="outside", h0_marked=True), prm=dict(month=7)),
+        "S4d_mw_fail_autumn":  dict(desc="폭 못 잼, 10월 → 여왕으로 보고 격리 (계절 규칙)", hornets=[H(0, mw_mm="fail")], until=300,
+                                    expect=dict(h0="captured"), prm=dict(month=10)),
         "S5_crabro":           dict(desc="유럽말벌 → 격리 (서현 결정 11/06)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
         "S5b_other_insect":    dict(desc="2종이 아닌 곤충(장수말벌·꿀벌 등) → 분류기 불확실 → 격리", hornets=[H(0, species="other")], until=300,
                                     expect=dict(h0="captured")),
@@ -1330,8 +1340,13 @@ def check(rec, t_end):
 
 
 def run_one(name, sc, verbose=False):
-    sim, rec, w, log = build(sc)
-    sim.run(sc["until"])
+    saved = {k: PRM[k] for k in sc.get("prm", {})}
+    PRM.update(sc.get("prm", {}))                     # 시나리오별 값 (예: 달)
+    try:
+        sim, rec, w, log = build(sc)
+        sim.run(sc["until"])
+    finally:
+        PRM.update(saved)
     pi = w.pi
     ok_inv, inv, E_A, E_B, segs = check(rec, sc["until"])
     res = dict(name=name, desc=sc["desc"], hornets={h.id: dict(zone=h.zone, marked=h.marked_now) for h in w.hornets},

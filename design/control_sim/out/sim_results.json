@@ -46,6 +46,15 @@
   "crabro_action": "isolate",
   "other_action": "isolate",
   "gyne_mw_mm": 4.4,
+  "month": 7,
+  "season_queen_months": [
+   3,
+   4,
+   5,
+   9,
+   10,
+   11
+  ],
   "control_mode": false
  },
  "results": [
@@ -320,6 +329,88 @@
    },
    "E_A_Wh": 1.5127,
    "E_B_Wh": 0.3394,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "closed",
+    "REL": "closed"
+   },
+   "fsm_end": "IDLE",
+   "cycle_s": 39.5,
+   "pass": true,
+   "fails": []
+  },
+  {
+   "name": "S4c_mw_fail_summer",
+   "desc": "폭 못 잼, 7월 → 일벌로 보고 찍고 방생 (계절 규칙)",
+   "hornets": {
+    "h0": {
+     "zone": "outside",
+     "marked": true
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 114.06,
+     "kind": "mark_result",
+     "ok": true
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.006,
+    "crush": 0
+   },
+   "E_A_Wh": 0.6904,
+   "E_B_Wh": 0.1627,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "closed",
+    "REL": "closed"
+   },
+   "fsm_end": "IDLE",
+   "cycle_s": 157.4,
+   "pass": true,
+   "fails": []
+  },
+  {
+   "name": "S4d_mw_fail_autumn",
+   "desc": "폭 못 잼, 10월 → 여왕으로 보고 격리 (계절 규칙)",
+   "hornets": {
+    "h0": {
+     "zone": "captured",
+     "marked": false
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 70.12,
+     "kind": "decision",
+     "what": "isolate (velutina queen)"
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.012,
+    "crush": 0
+   },
+   "E_A_Wh": 0.5123,
+   "E_B_Wh": 0.1063,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
