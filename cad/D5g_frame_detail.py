@@ -234,6 +234,8 @@ def make():
     import sys
     FU.make_into(doc, sys.modules[__name__])
     FU.support_fixes(doc)
+    FU.release_exit_fix(doc)
+    _lid = doc.addObject('Part::Feature', 'SJ_lid'); _lid.Label = '143l_feed_trough_lid (뚜껑, 3D 프린트 PETG — 벌레 막기)'; _lid.Shape = FU.trough_lid()
     import D5g_real_parts as RP                      # 전기 부품 실제 CAD (KiCad STEP·Pi 5 공식 STEP, 인터넷 필요)
     try:
         RP.apply(doc)

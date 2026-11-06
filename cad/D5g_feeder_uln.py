@@ -263,3 +263,40 @@ def support_fixes(doc):
         objs.append(o)
     doc.recompute()
     return objs
+
+
+# ---------------- (11/06 20시) 벌레 막기 뚜껑 + 방생 출구 일자 ----------------
+def trough_lid():
+    """143l: 물길·그릇 뚜껑 (3D 프린트). 설탕물이 밖으로 드러나지 않게 덮음.
+    튜브 둘레 틈 0.4 mm가 숨구멍(공기만 드나듦) → 그릇 물 표면은 바깥 공기와 이어져 '거꾸로 병' 원리 그대로"""
+    f = FD
+    x0, x1 = f["x"] - f["ch_w"] / 2 - f["ch_t"], f["x"] + f["ch_w"] / 2 + f["ch_t"]
+    ro = f["bowl_ri"] + f["bowl_t"]
+    lid = box(x0, x1, f["ch_y0"], f["tube_y"], f["wall_top"], f["wall_top"] + 2)
+    lid = lid.cut(Part.makeCylinder(ro, 10, V(f["x"], f["tube_y"], f["wall_top"] - 1)))
+    ring = Part.makeCylinder(ro, 2, V(f["x"], f["tube_y"], f["bowl_top"])).cut(
+        Part.makeCylinder(f["tube_r"] + 0.4, 4, V(f["x"], f["tube_y"], f["bowl_top"] - 1)))
+    # 물길 뚜껑과 그릇 고리를 잇는 경사 다리 2개
+    bridge = box(x0, x1, f["tube_y"] - ro - 6, f["tube_y"] - ro + 1, f["wall_top"], f["bowl_top"] + 2).cut(
+        Part.makeCylinder(ro, 30, V(f["x"], f["tube_y"], f["wall_top"] - 5)))
+    return lid.fuse(ring).fuse(bridge).removeSplitter()
+
+
+def release_exit_fix(doc):
+    """175 출구 원뿔(끝 안지름 3 mm, 말벌 못 나감) → 곧은 관(안 12, 길이 15) + 위 비 가림 갓"""
+    import D5e_module_kinematic as K
+    old = [o for o in doc.Objects if o.Label.startswith("175_release_oneway")]
+    if not old:
+        return None
+    b = old[0].Shape.BoundBox
+    x0, z = b.XMin, K.z_upper
+    pipe = Part.makeCylinder(K.DUCT_R, 15, V(x0, 0, z), V(1, 0, 0)).cut(Part.makeCylinder(K.PORT_R, 17, V(x0 - 1, 0, z), V(1, 0, 0)))
+    hood = Part.makeCylinder(K.DUCT_R + 4, 12, V(x0 + 10, 0, z), V(1, 0, 0)).cut(
+        Part.makeCylinder(K.DUCT_R + 2.5, 14, V(x0 + 9, 0, z), V(1, 0, 0)))
+    hood = hood.common(box(x0, x0 + 30, -20, 20, z, z + 20))          # 위 반쪽만
+    hood = hood.fuse(box(x0 + 10, x0 + 13, -K.DUCT_R - 4, K.DUCT_R + 4, z + K.DUCT_R - 0.5, z + K.DUCT_R + 4).common(
+        Part.makeCylinder(K.DUCT_R + 4, 3, V(x0 + 10, 0, z), V(1, 0, 0))))   # 관과 갓을 잇는 턱
+    old[0].Shape = pipe.fuse(hood).removeSplitter()
+    old[0].Label = "175_release_exit (곧은 관 안지름 12 + 비 가림 갓, 11/06 승준)"
+    doc.recompute()
+    return old[0]
