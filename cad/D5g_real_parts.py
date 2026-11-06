@@ -296,7 +296,7 @@ def apply_wago(doc):
 UNO = dict(L=68.58, W=53.34, t=1.6, hole=3.2,
            holes=((13.97, 2.54), (15.24, 50.8), (66.04, 7.62), (66.04, 35.56)),
            heads=(("sock10", 17.53, 50.8, 10), ("sock8", 44.45, 50.8, 8), ("sock8", 26.67, 2.54, 8), ("sock6", 49.53, 2.54, 6)))
-UNO_STAND_LOW, UNO_STAND_GAP = 5.0, 12.0
+UNO_STAND_LOW, UNO_STAND_GAP = 5.0, 15.0     # 사이 15: 12면 위 UNO 핀 끝이 아래 UNO 부품에 닿음 (공식 STEP 겹침 0.36 mm³)
 UNO_ORIGIN = (-125.0, -75.0, 205.0)          # D5f 191 상자: x −125~−56.4, y −75~−21.6, 데크 윗면 205     # 데크 → UNO 1, UNO 1 → UNO 2 (M3 황동 기둥)
 
 
@@ -355,10 +355,11 @@ def apply_uno(doc):
         if (hx, hy) == (15.24, 50.8):      # 헤더 소켓과 1.0 mm → 기둥 못 세움 (실물도 같음) → 3점 받침 [확실 — 모델 겹침]
             continue
         st.append(Part.makeCylinder(2.75, UNO_STAND_LOW, V(x0 + hx, y0 + hy, deck)))
-        st.append(Part.makeCylinder(2.75, UNO_STAND_GAP, V(x0 + hx, y0 + hy, z1 + UNO["t"])))
+        r_up = 2.0 if (hx, hy) == (13.97, 2.54) else 2.75     # 왼쪽 아래 구멍 위: 옆 부품과 닿음 → 외경 4 이하 스페이서 [확실 — 공식 STEP 겹침]
+        st.append(Part.makeCylinder(r_up, UNO_STAND_GAP, V(x0 + hx, y0 + hy, z1 + UNO["t"])))
     o = [x for x in doc.Objects if x.Label.startswith("198u_")]
     o = o[0] if o else doc.addObject("Part::Feature", "SJ_uno_st")
-    o.Label = "198u_uno_standoff (M3 황동 기둥 5 × 3 + 12 × 3, 구매)"
+    o.Label = "198u_uno_standoff (M3 기둥: 아래 5 × 3, 사이 15 × 3 — 왼쪽 아래 구멍만 외경 4 이하)"
     o.Shape = Part.makeCompound(st)
     doc.recompute()
     return [b1[0]] + b2 + [o]
