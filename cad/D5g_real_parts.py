@@ -296,7 +296,8 @@ def apply_wago(doc):
 UNO = dict(L=68.58, W=53.34, t=1.6, hole=3.2,
            holes=((13.97, 2.54), (15.24, 50.8), (66.04, 7.62), (66.04, 35.56)),
            heads=(("sock10", 17.53, 50.8, 10), ("sock8", 44.45, 50.8, 8), ("sock8", 26.67, 2.54, 8), ("sock6", 49.53, 2.54, 6)))
-UNO_STAND_LOW, UNO_STAND_GAP = 5.0, 12.0     # 데크 → UNO 1, UNO 1 → UNO 2 (M3 황동 기둥)
+UNO_STAND_LOW, UNO_STAND_GAP = 5.0, 12.0
+UNO_ORIGIN = (-125.0, -75.0, 205.0)          # D5f 191 상자: x −125~−56.4, y −75~−21.6, 데크 윗면 205     # 데크 → UNO 1, UNO 1 → UNO 2 (M3 황동 기둥)
 
 
 def uno_board(x0, y0, zb):
@@ -329,14 +330,25 @@ def apply_uno(doc):
     b2 = [o for o in doc.Objects if o.Label.startswith("192_arduino_uno2")]
     if not b1:
         return []
-    bb = b1[0].Shape.BoundBox
-    x0, y0, deck = bb.XMin, bb.YMin, bb.ZMin
+    x0, y0, deck = UNO_ORIGIN       # D5f 자리 상자 모서리 = 기판 원점 (다시 돌려도 USB 튀어나온 만큼 밀리지 않게 고정)
     z1 = deck + UNO_STAND_LOW
     z2 = z1 + UNO["t"] + UNO_STAND_GAP
-    b1[0].Shape = uno_board(x0, y0, z1)
-    b1[0].Label = "191_arduino_uno (실제 모양: 공식 기판 규격 + KiCad STEP 부품)"
+    path = find_uno_step()
+    raw = None
+    if path:
+        raw = Part.Shape()
+        raw.read(path)
+    def board(z):
+        if raw is not None:
+            shp, hit, _ = uno_official(raw, x0, y0, z)
+            if hit == 4:
+                return shp, True
+        return uno_board(x0, y0, z), False
+    shp1, off1 = board(z1)
+    b1[0].Shape = shp1
+    b1[0].Label = "191_arduino_uno (" + ("Arduino 공식 STEP A000066, 구멍 4개 맞춤" if off1 else "공식 기판 규격 + KiCad STEP 부품") + ")"
     if b2:
-        b2[0].Shape = uno_board(x0, y0, z2)
+        b2[0].Shape = board(z2)[0]
         b2[0].Label = "192_arduino_uno2 (실제 모양, UNO 1 위 M3 × 12 기둥)"
     st = []
     for hx, hy in UNO["holes"]:
@@ -525,7 +537,9 @@ def _holes_xy(s, rmin=1.4, rmax=1.75):
 
 
 def uno_official(raw, x0, y0, zb):
-    """raw: 읽은 STEP. 기판 왼쪽 아래 모서리 (x0, y0) = UNO 규격 원점, 기판 아래 면 zb. 반환 (shape, 맞춘 구멍 수, 회전)"""
+    """raw: 읽은 STEP. 기판 왼쪽 아래 모서리 (x0, y0) = UNO 규격 원점, 기판 아래 면 zb. 반환 (shape, 맞춘 구멍 수, (뒤집기, 회전))
+    11/06 결과: A000066.STEP 은 얇은 y를 z로 눕힌 뒤 x축 180° 뒤집기 + 회전 0°에서 4/4 맞음"""
+    import math
     s = raw.copy()
     b = s.BoundBox
     dims = [b.XLength, b.YLength, b.ZLength]
@@ -534,25 +548,23 @@ def uno_official(raw, x0, y0, zb):
         s.rotate(b.Center, V(1, 0, 0), -90)
     elif i == 0:
         s.rotate(b.Center, V(0, 1, 0), 90)
+    hs = _holes_xy(s)
     want = UNO["holes"]
     best = None
     for flip in (False, True):
         for rot in (0, 90, 180, 270):
-            t = s.copy()
-            if flip:
-                t.rotate(t.BoundBox.Center, V(1, 0, 0), 180)
-            t.rotate(t.BoundBox.Center, V(0, 0, 1), rot)
-            hs = _holes_xy(t)
-            for hx, hy in hs:                         # 이 구멍을 (13.97, 2.54)로 놓아 봄
-                ox, oy = hx - want[0][0], hy - want[0][1]
-                hit = sum(1 for wx, wy in want if any(abs(px - ox - wx) < 0.4 and abs(py - oy - wy) < 0.4 for px, py in hs))
+            a = math.radians(rot)
+            P = [((x * math.cos(a) - (-y if flip else y) * math.sin(a)), (x * math.sin(a) + (-y if flip else y) * math.cos(a))) for x, y in hs]
+            for px, py in P:
+                ox, oy = px - want[0][0], py - want[0][1]
+                hit = sum(1 for wx, wy in want if any(abs(qx - ox - wx) < 0.4 and abs(qy - oy - wy) < 0.4 for qx, qy in P))
                 if best is None or hit > best[0]:
                     best = (hit, flip, rot, ox, oy)
     hit, flip, rot, ox, oy = best
     if flip:
-        s.rotate(s.BoundBox.Center, V(1, 0, 0), 180)
-    s.rotate(s.BoundBox.Center, V(0, 0, 1), rot)
-    # 기판 아래 면: 68.58 × 53.34 넓은 수평 면 중 아래쪽
+        s.rotate(V(0, 0, 0), V(1, 0, 0), 180)
+    if rot:
+        s.rotate(V(0, 0, 0), V(0, 0, 1), rot)
     flats = sorted([f for f in s.Faces if f.Surface.TypeId == "Part::GeomPlane" and abs(f.normalAt(0, 0).z) > 0.99 and f.Area > 2500],
                    key=lambda f: f.CenterOfMass.z)
     z_bot = flats[0].CenterOfMass.z if flats else s.BoundBox.ZMin
