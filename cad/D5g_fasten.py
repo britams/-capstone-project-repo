@@ -54,7 +54,10 @@ def fasten(doc, G):
             xr, x0, x1 = -18.0, -28.0, b.XMax
         else:                     # 둘레 레일 y+170 위 (x 160 ~ 180)
             xr, x0, x1 = 170.0, b.XMin, 180.0
-        s = s.fuse(Part.makeBox(x1 - x0, b.YLength, b.ZLength, V(x0, b.YMin, b.ZMin))) if (x0 < b.XMin or x1 > b.XMax) else s
+        if x0 < b.XMin - 0.01:                                           # 늘린 부분만 붙임 (봉 구멍은 그대로)
+            s = s.fuse(Part.makeBox(b.XMin - x0 + 0.5, b.YLength, b.ZLength, V(x0, b.YMin, b.ZMin)))
+        if x1 > b.XMax + 0.01:
+            s = s.fuse(Part.makeBox(x1 - b.XMax + 0.5, b.YLength, b.ZLength, V(b.XMax - 0.5, b.YMin, b.ZMin)))
         s = s.cut(Part.makeCylinder(2.75, 40, V(xr, yc, gz_top - 5)))
         s = s.cut(Part.makeCylinder(4.75, 20, V(xr, yc, gz_top + 6.0)))                       # 머리 자리 (위 6 mm 살 남김)
         new.append(s.removeSplitter())
@@ -125,13 +128,13 @@ def fasten(doc, G):
                 else:
                     sh = sh.fuse(Part.makeBox(3.0, 6.0, 8.0, V(x - 3.0, y - 3.0, dz)))
                 sh = sh.cut(Part.makeCylinder(2.0, 6.0, V(x, y, dz)))
-                ins.append(Part.makeCylinder(2.35, 4.3, V(x, y, dz)).cut(Part.makeCylinder(1.25, 5, V(x, y, dz - 0.5))))
+                ins.append(Part.makeCylinder(2.0, 4.3, V(x, y, dz)).cut(Part.makeCylinder(1.25, 5, V(x, y, dz - 0.5))))
                 m3.append(bolt_at((x, y, dz - 5.0), (0, 0, -1), 0.0, 10.0, 3.0, 5.5, 3.0))
             else:
                 zc = dz - 5.0                                            # 칼라 윗면 = 데크 아랫면 200
                 sh = sh.fuse(Part.makeCylinder(3.5, 15.0, V(x, y, zc - 15.0)))         # 칼라 고리(두께 3) 바깥에 보스 Ø7 (트랩 고리 r45 쪽은 안 건드림)
                 sh = sh.cut(Part.makeCylinder(2.0, 6.0, V(x, y, zc - 6.0)))
-                ins.append(Part.makeCylinder(2.35, 4.3, V(x, y, zc - 4.3)).cut(Part.makeCylinder(1.25, 5, V(x, y, zc - 4.8))))
+                ins.append(Part.makeCylinder(2.0, 4.3, V(x, y, zc - 4.3)).cut(Part.makeCylinder(1.25, 5, V(x, y, zc - 4.8))))
                 m3.append(bolt_at((x, y, zc), (0, 0, 1), 5.0, 10.0, 3.0, 5.5, 3.0))
             dsh = dsh.cut(Part.makeCylinder(1.7, 20, V(x, y, dz - 10)))
         o.Shape = sh.removeSplitter()

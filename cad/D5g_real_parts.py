@@ -481,7 +481,7 @@ def apply_uno(doc):
 # 비상 정지: 22 mm 버섯형 (XB7NS8442 같은 것) — 머리 Ø40, 전체 깊이 72 [가능성 높음 — 판매처 표기], 데크 구멍 Ø22.5.
 #   판 앞 31 (머리 18 + 목 13) / 판 뒤 41 (몸통 + 접점 블록)으로 나눔 → 판 앞·뒤 나눔은 실물로 확인.
 ADA2167 = dict(L=20.0, W=10.0, H=8.0, lens_r=1.5, lens_h=2.0)
-LEAD = dict(straight=2.5, bend=6.0)
+LEAD = dict(straight=0.0, bend=6.0)   # 문 틈 5 mm에 위·아래 소자 다리가 같은 x에서 마주봄 → 몸통 뒤 1.5에서 바로 꺾음 (2 × (1.5 + 0.5) = 4 < 5), 납땜은 꺾인 6 mm 위에서
 
 
 def ir_pair_door(doc):
@@ -503,19 +503,20 @@ def ir_pair_door(doc):
         keep = 7.0
         up = up.common(Part.makeBox(20, 20, keep, V(lo.Center.x - 10, lo.Center.y - 10, z_beam_lo - keep)))
         dn = dn.common(Part.makeBox(20, 20, keep, V(hi.Center.x - 10, hi.Center.y - 10, z_beam_hi)))
-        # (SJ-49, 서현 CAP-AI-34) 납땜 여유: 몸통 뒤 다리를 2.5 mm 더 곧게 → 90° 꺾어 옆(문 틈 방향)으로 6 mm. 다리 간격 2.54 (x)
+        # (SJ-49, 서현 CAP-AI-34) 납땜 여유: 다리를 90° 꺾어 옆으로 6 mm (G2 쪽 +y, G3 쪽 −y로 서로 반대) — 꺾인 부분에 선을 납땜. 다리 간격 2.54 (x)
         side = {"G2": 1, "G2b": 1, "G3": -1, "G3b": -1, "G5": 1, "G5b": 1}.get(o.Label.split("_")[2], 1)
         legs = []
         for c, z_end, sgn in ((lo.Center, z_beam_lo - keep, -1), (hi.Center, z_beam_hi + keep, 1)):
             for dx in (-1.27, 1.27):
                 x = c.x + dx
                 zs = z_end if sgn > 0 else z_end - LEAD["straight"]
-                legs.append(Part.makeBox(0.5, 0.5, LEAD["straight"], V(x - 0.25, c.y - 0.25, zs)))
+                if LEAD["straight"] > 0:
+                    legs.append(Part.makeBox(0.5, 0.5, LEAD["straight"], V(x - 0.25, c.y - 0.25, zs)))
                 zb_ = z_end + sgn * LEAD["straight"] - (0.5 if sgn > 0 else 0.0)
                 y0 = c.y - 0.25 if side > 0 else c.y + 0.25 - LEAD["bend"]
                 legs.append(Part.makeBox(0.5, LEAD["bend"], 0.5, V(x - 0.25, y0, zb_)))
         o.Shape = Part.makeCompound([up, dn] + legs)
-        o.Label = o.Label.split(" ")[0].replace("_led", "_ir_pair") + " (3 mm 적외선 LED + 3 mm 수광, KiCad STEP — 다리 2.5 곧게 후 옆으로 꺾음, 긴 다리 A·짧은 다리 K, 수광 렌즈가 LED를 마주봄)"
+        o.Label = o.Label.split(" ")[0].replace("_led", "_ir_pair") + " (3 mm 적외선 LED + 3 mm 수광, KiCad STEP — 다리를 몸통 뒤 1.5에서 옆으로 6 mm 꺾음(납땜 자리), 긴 다리 A·짧은 다리 K, 수광 렌즈가 LED를 마주봄)"
         out.append(o.Label)
     return out
 

@@ -403,7 +403,7 @@ def feeder_detail_shapes(chamber_shape):
         boss = Part.makeCylinder(INS["boss_r"], e["ear_y0"] - 23.0, V(cx, 23.0 - 0.2, e["ear_z"]), V(0, 1, 0))
         wall = wall.fuse(boss)
         wall = wall.cut(Part.makeCylinder(INS["hole"] / 2, INS["depth"], V(cx, e["ear_y0"] - INS["depth"], e["ear_z"]), V(0, 1, 0)))
-        ins.append(Part.makeCylinder(INS["hole"] / 2 + 0.35, INS["L"], V(cx, e["ear_y0"] - INS["L"], e["ear_z"]), V(0, 1, 0)).cut(
+        ins.append(Part.makeCylinder(INS["hole"] / 2, INS["L"], V(cx, e["ear_y0"] - INS["L"], e["ear_z"]), V(0, 1, 0)).cut(
             Part.makeCylinder(1.25, 10, V(cx, e["ear_y0"] - 6, e["ear_z"]), V(0, 1, 0))))
         x_in = ch_x0 if sx < 0 else ch_x1
         ear = box(min(x_in, cx - 5), max(x_in, cx + 5), e["ear_y0"], e["ear_y0"] + e["ear_t"], e["ear_z"] - 5, e["ear_z"] + 5)
@@ -417,7 +417,7 @@ def feeder_detail_shapes(chamber_shape):
             col = Part.makeCylinder(INS["boss_r"], f["wall_top"] - f["floor_z"], V(cx, cy, f["floor_z"]))
             trough = trough.fuse(col)
             trough = trough.cut(Part.makeCylinder(INS["hole"] / 2, INS["depth"], V(cx, cy, f["wall_top"] - INS["depth"])))
-            ins.append(Part.makeCylinder(INS["hole"] / 2 + 0.35, INS["L"], V(cx, cy, f["wall_top"] - INS["L"])).cut(
+            ins.append(Part.makeCylinder(INS["hole"] / 2, INS["L"], V(cx, cy, f["wall_top"] - INS["L"])).cut(
                 Part.makeCylinder(1.25, 10, V(cx, cy, f["wall_top"] - 6))))
     trough = trough.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] - 1, f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
     # 3) 튜브 집게
@@ -510,11 +510,11 @@ def loadcell_parts(carriage_shape):
     ytop = c["z_bot"] + c["a"]                                       # 242
     # 1) 캐리지: D5f 아래 컵 지움 (축·스프링 자리는 그대로 비움)
     car = carriage_shape.cut(Part.makeCylinder(7.6, 262.0 - 230.0 - 0.01, V(65.0, 4.0, 230.0)))
-    # 2) 팔 158a: 캐리지 +y 면(y 20) → y 77.5, 아래 면은 막대 위 1 mm (고정 끝 25 mm만 막대에 닿음)
+    # 2) 팔 158a: 캐리지 +y 면(y 20) → y 77.5, 아래 면 z 249 (고정 끝 25 mm만 막대 윗면 242까지 내려와 닿음)
     yf = c["y_free"] + c["L"]                                        # 77.5
     y_fix0 = yf - 25.0
-    arm = box(x0, x1, 19.0, yf, ytop + c["arm_gap"], 274.0)
-    arm = arm.fuse(box(x0, x1, y_fix0, yf, ytop, ytop + c["arm_gap"]))
+    arm = box(x0, x1, 19.0, yf, ytop + c["seat_t"] + 5.0, 274.0)                    # 자유 끝 위는 받침판·M4 머리(244~248) 위로 1 mm
+    arm = arm.fuse(box(x0, x1, y_fix0, yf, ytop, ytop + c["seat_t"] + 5.0))
     bolts5 = []
     for e in c["hole_e"]:
         yy = yf - e
