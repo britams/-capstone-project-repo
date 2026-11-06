@@ -119,7 +119,7 @@ def tnut_local(on="rail"):
     """슬라이드 T너트: 목은 홈 입구, 날개는 언더컷 안. 레일 따라 길이 L."""
     tn = TNUT
     lip = P["lip"]
-    neck = Part.makeBox(tn["L"], tn["neck_w"], tn["neck_h"], V(-tn["L"] / 2, -tn["neck_w"] / 2, -lip))
+    neck = Part.makeBox(tn["L"], tn["neck_w"], tn["neck_h"] + 0.1, V(-tn["L"] / 2, -tn["neck_w"] / 2, -lip - 0.1))   # 날개와 붙음 → 한 덩어리
     wing = Part.makeBox(tn["L"], tn["wing_w"], tn["wing_h"], V(-tn["L"] / 2, -tn["wing_w"] / 2, -lip - 0.1 - tn["wing_h"]))
     s = neck.fuse(wing).cut(Part.makeCylinder(BOLT["d"] / 2, 10, V(0, 0, -6)))
     if on == "rail":
