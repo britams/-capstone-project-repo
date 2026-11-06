@@ -904,6 +904,9 @@ class PiFSM:
         while True:
             if self.batt_low:
                 return (yield from self.shutdown_safe())
+            if not self.daylight():
+                yield from self.night()
+                continue
             yield from self.to_idle()
             n = yield from self.wait_entry()
             if n:
@@ -1105,20 +1108,28 @@ class PiFSM:
         h = (PRM["clock_start_h"] + self.sim.t / 3600.0) % 24
         return PRM["sunrise_h"] + 0.5 <= h <= PRM["sunset_h"] - 0.5
 
-    def night_hold(self):
-        """밤: 굴뚝이 어두워 말벌이 안 나감 → 300 s 뒤 격리 문 규칙에 걸려 찍은 말벌을 잃음 (SJ-45 질문 3).
-        그래서 급이 자리 그대로(먹이 있음, 불 끔) 아침까지 마킹실에서 기다림. 입구 문은 닫힌 채."""
-        self.state("NIGHT_HOLD")
-        self.note("night_hold", what="해 진 뒤 → 아침까지 마킹실")
+    def night(self):
+        """밤 (승준 결정 11/06 20:23, SJ-46 control/pi/daynight.py): 처리·방생 안 함, 상용 트랩처럼 전부 포획통으로.
+        방생 문 닫힘, 입구·격리 문 엶, 조명 끔(포획통 쪽 위가 더 밝음). 해 뜬 뒤 30분에 격리 문 닫고 다시 처리."""
+        self.state("NIGHT")
+        self.note("night", what="해 짐 - 30분 → 전부 포획통으로")
         yield from self.cmd("U2", "LIGHT TOP 0")
         yield from self.cmd("U2", "LIGHT BOT 0")
+        yield from self.close_door("REL")
+        self.flush()
+        yield from self.cmd("U2", "DOOR CAP OPEN")
+        yield from self.done(["EVT DOOR CAP OPEN"], 3)
+        yield from self.cmd("U2", "DOOR IN OPEN")
+        yield from self.done(["EVT DOOR IN OPEN"], 3)
         while not self.daylight():
             yield ("sleep", 600.0)
-        self.note("morning", what="해 뜬 뒤 30분 → 방생")
+        self.note("morning", what="해 뜸 + 30분 → 처리 시작")
+        yield from self.close_door("CAP")
 
     def release(self):
-        if not self.daylight():
-            yield from self.night_hold()
+        if not self.daylight():                      # 처리 중에 해가 졌으면 (드묾 — 처리는 30분 여유 안에서 시작) → 가둠 (SJ-46)
+            self.note("decision", what="dusk → isolate")
+            return (yield from self.isolate())
         yield from self.cmd("U2", "LIGHT TOP 0")
         yield from self.cmd("U2", "LIGHT BOT 0")
         yield from self.leave("REL", ("G5", "G6"), "RELEASE")
@@ -1268,9 +1279,11 @@ def scenarios():
                                     expect=dict(h0="outside", h0_marked=True), prm=dict(month=7)),
         "S4d_mw_fail_autumn":  dict(desc="폭 못 잼, 10월 → 여왕으로 보고 격리 (계절 규칙)", hornets=[H(0, mw_mm="fail")], until=300,
                                     expect=dict(h0="captured"), prm=dict(month=10)),
-"S15_night_hold":      dict(desc="해 진 뒤(17:10 도착) 찍은 말벌 → 아침까지 마킹실, 7:30 지나 방생 (출구 조명 없음, SJ-45)",
-                                    hornets=[H(0, t=18600.0)], until=80000, expect=dict(h0="outside", h0_marked=True)),
-                "S5_crabro":           dict(desc="유럽말벌 → 격리 (서현 결정 11/06)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
+        "S15_night":           dict(desc="밤 20:00 도착 → 처리 없이 상용 트랩처럼 포획통으로 (승준 SJ-46)",
+                                    hornets=[H(0, t=28800.0)], until=40000, expect=dict(h0="captured")),
+        "S16_before_dusk":     dict(desc="16:50 도착 (처리 시간 끝 17:00 전) → 그대로 찍고 방생", hornets=[H(0, t=17400.0)],
+                                    until=18200, expect=dict(h0="outside", h0_marked=True)),
+        "S5_crabro":           dict(desc="유럽말벌 → 격리 (서현 결정 11/06)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
         "S5b_other_insect":    dict(desc="2종이 아닌 곤충(장수말벌·꿀벌 등) → 분류기 불확실 → 격리", hornets=[H(0, species="other")], until=300,
                                     expect=dict(h0="captured")),
         "S6_already_marked":   dict(desc="이미 표식 있음 → 재방문 기록, 급이 후 방생", hornets=[H(0, marked=True)], until=300,

@@ -425,8 +425,59 @@
    "fails": []
   },
   {
-   "name": "S15_night_hold",
-   "desc": "해 진 뒤(17:10 도착) 찍은 말벌 → 아침까지 마킹실, 7:30 지나 방생 (출구 조명 없음, SJ-45)",
+   "name": "S15_night",
+   "desc": "밤 20:00 도착 → 처리 없이 상용 트랩처럼 포획통으로 (승준 SJ-46)",
+   "hornets": {
+    "h0": {
+     "zone": "captured",
+     "marked": true
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 28854.06,
+     "kind": "mark_result",
+     "ok": true
+    },
+    {
+     "t": 28923.92,
+     "kind": "decision",
+     "what": "dusk → isolate"
+    },
+    {
+     "t": 28958.21,
+     "kind": "night",
+     "what": "해 짐 - 30분 → 전부 포획통으로"
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.006,
+    "crush": 0
+   },
+   "E_A_Wh": 69.0116,
+   "E_B_Wh": 12.8809,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "open",
+    "REL": "closed"
+   },
+   "fsm_end": "NIGHT",
+   "cycle_s": null,
+   "pass": true,
+   "fails": []
+  },
+  {
+   "name": "S16_before_dusk",
+   "desc": "16:50 도착 (처리 시간 끝 17:00 전) → 그대로 찍고 방생",
    "hornets": {
     "h0": {
      "zone": "outside",
@@ -440,19 +491,9 @@
      "reply": "OK SELFTEST"
     },
     {
-     "t": 18654.06,
+     "t": 17454.06,
      "kind": "mark_result",
      "ok": true
-    },
-    {
-     "t": 18723.92,
-     "kind": "night_hold",
-     "what": "해 진 뒤 → 아침까지 마킹실"
-    },
-    {
-     "t": 70323.92,
-     "kind": "morning",
-     "what": "해 뜬 뒤 30분 → 방생"
     }
    ],
    "events": [],
@@ -463,15 +504,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 149.2238,
-   "E_B_Wh": 21.5226,
+   "E_A_Wh": 29.5094,
+   "E_B_Wh": 6.5876,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 51757.4,
+   "cycle_s": 157.4,
    "pass": true,
    "fails": []
   },
