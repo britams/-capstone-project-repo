@@ -339,11 +339,13 @@ def apply_uno(doc):
         b2[0].Label = "192_arduino_uno2 (실제 모양, UNO 1 위 M3 × 12 기둥)"
     st = []
     for hx, hy in UNO["holes"]:
+        if (hx, hy) == (15.24, 50.8):      # 헤더 소켓과 1.0 mm → 기둥 못 세움 (실물도 같음) → 3점 받침 [확실 — 모델 겹침]
+            continue
         st.append(Part.makeCylinder(2.75, UNO_STAND_LOW, V(x0 + hx, y0 + hy, deck)))
         st.append(Part.makeCylinder(2.75, UNO_STAND_GAP, V(x0 + hx, y0 + hy, z1 + UNO["t"])))
     o = [x for x in doc.Objects if x.Label.startswith("198u_")]
     o = o[0] if o else doc.addObject("Part::Feature", "SJ_uno_st")
-    o.Label = "198u_uno_standoff (M3 황동 기둥 5 × 4 + 12 × 4, 구매)"
+    o.Label = "198u_uno_standoff (M3 황동 기둥 5 × 3 + 12 × 3, 구매)"
     o.Shape = Part.makeCompound(st)
     doc.recompute()
     return [b1[0]] + b2 + [o]
