@@ -192,3 +192,60 @@ def floating(doc, tol=0.3):
         if not ok:
             out.append(o.Label)
     return out
+
+
+# ---------------- 떠 있던 부품 받침 (floating 검사에서 나온 것) ----------------
+PI = dict(L=85.0, W=56.0, hx=58.0, hy=49.0, off=3.5, hole=2.7, h=35.0)   # Pi 5 + AI HAT+ (라즈베리파이 B 폼팩터: 구멍 58 × 49, 모서리 3.5) [확실 — 공식 기계 도면 규격]
+
+
+def support_fixes(doc):
+    """190 Pi 5 + AI HAT+ 를 위 가로대(y +80) 안쪽 면에 거는 선반(199a)에 얹고, G4·G6 빛 게이트 송수신기를 덕트에 붙이는 받침(199b·c)"""
+    import D5e_module_kinematic as K
+    out = []
+    pi = [o for o in doc.Objects if o.Label.startswith("190_pi5_aihat (위판 아래")][0]
+    b = pi.Shape.BoundBox
+    x0, x1, z0 = b.XMin, b.XMax, b.ZMin
+    rail_y = K.FR["cross_y"] - 10.0                 # 위 가로대 안쪽 면 (y 70)
+    rail_z0 = K.FR["top_z"]
+    y0 = rail_y - 3.0 - PI["W"]
+    # Pi를 판매품 크기(85 × 56)로, 선반 쪽에 붙여 다시 놓음 (구멍 4개 표시)
+    board = box(x0, x0 + PI["L"], y0, y0 + PI["W"], z0, z0 + PI["h"])
+    for sx in (0, PI["hx"]):
+        for sy in (0, PI["hy"]):
+            board = board.cut(Part.makeCylinder(PI["hole"] / 2, PI["h"] + 2, V(x0 + PI["off"] + sx, y0 + PI["off"] + sy, z0 - 1)))
+    pi.Shape = board
+    pi.Label = "190_pi5_aihat (85 × 56 판매품 외곽, 선반 199a 위)"
+    shelf = box(x0 - 2, x0 + PI["L"] + 2, y0 - 2, rail_y, z0 - 3, z0)
+    wall = box(x0 + 10, x0 + PI["L"] - 10, rail_y - 3, rail_y, z0 - 3, rail_z0 + 20)
+    shp = shelf.fuse(wall)
+    for sx in (x0 + 20, x0 + PI["L"] - 20):
+        shp = shp.cut(Part.makeCylinder(2.75, 10, V(sx, rail_y - 5, rail_z0 + 10), V(0, 1, 0)))
+    for sx in (0, PI["hx"]):
+        for sy in (0, PI["hy"]):
+            shp = shp.cut(Part.makeCylinder(1.1, 5, V(x0 + PI["off"] + sx, y0 + PI["off"] + sy, z0 - 4)))   # M2.5 셀프 탭 구멍
+    out.append(("199a_pi_shelf (3D 프린트, 위 가로대 y+80에 M5 × 8 2개)", shp.removeSplitter()))
+    for lab, nm in (("196_gate_G4_tx_rx", "199b_gate_holder_G4 (3D 프린트, 덕트 172에 끼움)"), ("196_gate_G6_tx_rx", "199c_gate_holder_G6 (3D 프린트, 덕트 174에 끼움)")):
+        g = [o for o in doc.Objects if o.Label == lab][0]
+        duct = [o for o in doc.Objects if o.Label.startswith("172_" if "G4" in lab else "174_")][0]
+        pieces = []
+        for s in g.Shape.Solids:
+            d, pts, _ = s.distToShape(duct.Shape)
+            p_s, p_d = pts[0]
+            sb = s.BoundBox
+            # 송수신기 면 → 덕트 면 사이를 송수신기 단면 크기로 채우는 받침
+            lo = V(min(p_s.x, p_d.x), min(p_s.y, p_d.y), min(p_s.z, p_d.z))
+            hi = V(max(p_s.x, p_d.x), max(p_s.y, p_d.y), max(p_s.z, p_d.z))
+            for ax in ("x", "y", "z"):
+                if getattr(hi, ax) - getattr(lo, ax) < 0.01:
+                    setattr(lo, ax, getattr(sb, ax.upper() + "Min"))
+                    setattr(hi, ax, getattr(sb, ax.upper() + "Max"))
+            pieces.append(box(lo.x, hi.x, lo.y, hi.y, lo.z, hi.z))
+        out.append((nm, Part.makeCompound(pieces)))
+    objs = []
+    for nm, shp in out:
+        o = doc.addObject("Part::Feature", "SJF%d" % len(objs))
+        o.Label = nm
+        o.Shape = shp
+        objs.append(o)
+    doc.recompute()
+    return objs

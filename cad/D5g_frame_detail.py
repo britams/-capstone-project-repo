@@ -233,6 +233,7 @@ def make():
     import D5g_feeder_uln as FU                      # 설탕물 급이 방 + ULN2003 실제 보드 (CAP-AI-SJ-40)
     import sys
     FU.make_into(doc, sys.modules[__name__])
+    FU.support_fixes(doc)
     for o in list(doc.Objects):        # D5f에서 스프링 204 뺀 뒤 남은 바탕 원기둥
         if o.Label in ("P204a", "P204b"):
             doc.removeObject(o.Name)
