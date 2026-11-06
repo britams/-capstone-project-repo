@@ -470,7 +470,7 @@ b.w{color:var(--water)} b.r{color:var(--danger)} b.g{color:var(--ok)}
     <p>말벌은 기어가는 것보다 <b>위로 날아오르는 걸</b> 좋아해요. 그래서 긴 통로를 없애고, 문 바로 옆에 <b>위가 뻥 뚫린 넓은 굴뚝</b>을 세웠어요.</p>
     <figure>
       <div class="svgwrap">
-      <svg viewBox="0 0 720 420" role="img" aria-label="옆에서 본 새 방생부: 마킹실, 방생 문, 짧은 목 30 mm, 위가 열린 굴뚝 안지름 50 mm, 꼭대기 출구 조명, 말벌이 위로 날아 나가는 화살표, 바닥 빗물 구멍">
+      <svg viewBox="0 0 720 420" role="img" aria-label="옆에서 본 새 방생부: 마킹실, 방생 문, 짧은 목 30 mm, 위가 하늘로 열린 굴뚝 안지름 50 mm, 말벌이 위로 날아 나가는 화살표, 바닥 빗물 구멍">
         <!-- 마커 갠트리 금지 구역 -->
         <rect x="40" y="40" width="300" height="120" style="fill:var(--danger);opacity:.08"/>
         <text x="50" y="62" class="tr">마커 기계가 오가는 곳</text>
@@ -500,11 +500,12 @@ b.w{color:var(--water)} b.r{color:var(--danger)} b.g{color:var(--ok)}
         <path d="M410 366 V396" class="arr"/><path d="M480 366 V396" class="arr"/>
         <text x="560" y="372" class="tw">빗물 구멍</text>
         <text x="560" y="392" class="ts">비가 와도 여기로 빠져요</text>
-        <!-- 출구 조명 -->
-        <circle cx="349" cy="146" r="7" style="fill:var(--sugar)"/><circle cx="539" cy="146" r="7" style="fill:var(--sugar)"/>
-        <path d="M349 146 l-14 -14 M349 146 l-18 0 M539 146 l14 -14 M539 146 l18 0" style="stroke:var(--sugar);stroke-width:2"/>
-        <text x="570" y="140" class="t">출구 조명</text>
-        <text x="570" y="160" class="ts">위쪽이 밝아서 위로 가요</text>
+        <!-- 햇빛 -->
+        <circle cx="640" cy="40" r="16" style="fill:var(--sugar)"/>
+        <path d="M640 64 L560 140" style="stroke:var(--sugar);stroke-width:2;stroke-dasharray:5 4"/>
+        <path d="M620 62 L520 140" style="stroke:var(--sugar);stroke-width:2;stroke-dasharray:5 4"/>
+        <text x="570" y="170" class="t">위가 하늘이라 밝아요</text>
+        <text x="570" y="190" class="ts">조명 없이도 위로 가요</text>
         <!-- 말벌 경로 -->
         <path d="M150 262 H330 C380 262, 420 250, 440 220" class="arrg"/>
         <g transform="translate(440 210) rotate(-70)">
@@ -513,12 +514,13 @@ b.w{color:var(--water)} b.r{color:var(--danger)} b.g{color:var(--ok)}
           <ellipse cx="-2" cy="12" rx="14" ry="5" style="fill:var(--water-bg);stroke:var(--soft);stroke-width:1"/>
         </g>
         <path d="M450 180 C460 140, 460 110, 470 60" class="arrg"/>
-        <text x="480" y="80" class="tg">위로 날아서 밖으로!</text>
+        <text x="455" y="80" text-anchor="end" class="tg">위로 날아서 밖으로!</text>
         <text x="444" y="312" text-anchor="middle" class="ts">날개를 펼 수 있게 넓어요</text>
+        <text x="120" y="305" text-anchor="middle" class="ts">방생할 땐 불을 꺼서 어둡게</text>
       </svg>
       </div>
       <figcaption>
-        말벌은 <b>방생 문 → 짧은 목(30 mm)만 기어서</b> 굴뚝에 들어가요. 굴뚝은 위가 열려 있고 꼭대기가 밝아서, 그대로 <b>위로 날아 나가요</b>.
+        말벌은 <b>방생 문 → 짧은 목(30 mm)만 기어서</b> 굴뚝에 들어가요. 굴뚝은 위가 하늘로 열려 있어서 밝아요. 방생할 때 마킹실 불을 끄면 굴뚝 쪽이 더 밝으니, 그대로 <b>위로 날아 나가요</b>. 출구에 따로 조명은 달지 않아요.
         출구 빛 게이트(빛줄기)는 목 위에 옮겨 달아서 나간 걸 세요.
       </figcaption>
     </figure>

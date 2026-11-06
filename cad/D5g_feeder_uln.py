@@ -347,12 +347,11 @@ def release_shaft_apply(doc):
         elif o.Label.startswith("175_release"):
             o.Shape = shaft
             o.Label = "175_release_shaft (위로 열린 굴뚝 안지름 50, 꼭대기 z 430, 빗물 구멍 4)"
-    old = [o for o in doc.Objects if o.Label.startswith("184_exit_light")]
-    for o in old:
+    # (11/06 20:13 승준 결정) 출구 조명 LED 뺌: 굴뚝 위가 하늘로 열려 낮에는 이미 밝음, 방생 때 마킹실 조명만 끄면 굴뚝 쪽이 더 밝음.
+    #   밤 LED는 나방 등 다른 벌레를 부름. 상용 트랩도 조명 없이 씀.
+    for o in [o for o in doc.Objects if o.Label.startswith("184_exit_light")]:
         doc.removeObject(o.Name)
-    o = doc.addObject("Part::Feature", "SJ_exitled")
-    o.Label = "184_exit_light (LED Ø5 × 3, 굴뚝 꼭대기 — 출구 조명)"
-    o.Shape = leds
+    o = None
     dx = 108.0 - 120.0
     for g in doc.Objects:
         if g.Label.startswith(("196_gate_G6", "199c_gate_holder_G6")) and hasattr(g, "Shape"):
