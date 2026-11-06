@@ -598,4 +598,71 @@ b.w{color:var(--water)} b.r{color:var(--danger)} b.g{color:var(--ok)}
       <figcaption><b>추천: ② 와고 레버 커넥터 + 줄 퓨즈.</b> 전기를 나누는 일은 똑같이 하면서, 기판과 3D 프린트 받침이 필요 없어서 더 간단해요. 다만 이건 서현이 정한 회로 목록이라 서현과 같이 정해요.</figcaption>
     </figure>
   </section>
+
+  <!-- 7. 빛 게이트 -->
+  <section>
+    <h2><span class="tag">7</span>빛 게이트는 "보이지 않는 줄넘기 줄"이에요</h2>
+    <p>한쪽에서 <b>눈에 안 보이는 빛(적외선)</b>을 쏘고, 맞은편에서 그 빛을 받아요. 말벌이 지나가면 빛이 <b>잠깐 가려져서</b> "방금 누가 지나갔다!"를 알아채요. 마트 자동문이나 엘리베이터 문에 있는 센서와 같아요.</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 260" role="img" aria-label="빛 게이트 원리: 송신기에서 수신기로 빛이 가다가 말벌이 지나가면 가려져서 신호가 바뀌는 그림">
+        <g>
+          <text x="170" y="28" text-anchor="middle" class="tb">아무도 없을 때</text>
+          <rect x="40" y="80" width="40" height="60" rx="6" class="box"/><text x="60" y="165" text-anchor="middle" class="ts">쏘는 쪽</text>
+          <rect x="260" y="80" width="40" height="60" rx="6" class="box"/><text x="280" y="165" text-anchor="middle" class="ts">받는 쪽</text>
+          <path d="M82 110 H252" style="stroke:var(--danger);stroke-width:3;stroke-dasharray:8 5"/>
+          <path d="M240 110 h10" class="arrr"/>
+          <text x="170" y="210" text-anchor="middle" class="tg">빛이 잘 옴 → "비었다"</text>
+        </g>
+        <g>
+          <text x="530" y="28" text-anchor="middle" class="tb">말벌이 지나갈 때</text>
+          <rect x="400" y="80" width="40" height="60" rx="6" class="box"/><text x="420" y="165" text-anchor="middle" class="ts">쏘는 쪽</text>
+          <rect x="620" y="80" width="40" height="60" rx="6" class="box"/><text x="640" y="165" text-anchor="middle" class="ts">받는 쪽</text>
+          <path d="M442 110 H505" style="stroke:var(--danger);stroke-width:3;stroke-dasharray:8 5"/>
+          <ellipse cx="530" cy="110" rx="28" ry="10" class="wasp"/><rect x="518" y="100" width="6" height="20" class="band"/><rect x="532" y="100" width="6" height="20" class="band"/>
+          <path d="M540 70 L620 70" class="arrk"/>
+          <text x="530" y="210" text-anchor="middle" class="tr">빛이 가려짐 → "누가 지나간다!"</text>
+        </g>
+      </svg>
+      </div>
+    </figure>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 300" role="img" aria-label="빛 게이트 9쌍이 하는 일: 입구 G1, 문 세 곳의 앞뒤 G2 G3 G5, 포획통 가는 길 G4, 나가는 길 G6">
+        <rect x="250" y="110" width="200" height="110" class="printsoft"/>
+        <text x="350" y="170" text-anchor="middle" class="tb">마킹실</text>
+        <!-- 입구 -->
+        <rect x="60" y="150" width="190" height="20" class="print"/>
+        <path d="M70 160 H240" class="arrg"/>
+        <circle cx="110" cy="160" r="9" style="fill:none;stroke:var(--danger);stroke-width:2.5"/><text x="110" y="196" text-anchor="middle" class="t">G1</text>
+        <text x="110" y="216" text-anchor="middle" class="ts">"손님 왔다"</text>
+        <!-- 입구 문 -->
+        <rect x="236" y="140" width="14" height="40" style="fill:var(--ink)"/>
+        <circle cx="228" cy="128" r="6" style="fill:none;stroke:var(--danger);stroke-width:2.5"/><circle cx="258" cy="128" r="6" style="fill:none;stroke:var(--danger);stroke-width:2.5"/>
+        <text x="243" y="150" text-anchor="end" class="t" dx="-20">G2 · G2b</text>
+        <!-- 격리 -->
+        <rect x="290" y="40" width="20" height="70" class="print"/>
+        <path d="M300 105 V20" class="arrr"/>
+        <rect x="282" y="104" width="36" height="8" style="fill:var(--ink)"/>
+        <text x="280" y="96" text-anchor="end" class="t">G3 · G3b (격리 문)</text>
+        <circle cx="300" cy="50" r="9" style="fill:none;stroke:var(--danger);stroke-width:2.5"/><text x="326" y="44" class="t">G4</text>
+        <text x="340" y="30" class="ts">"포획통으로 갔다"</text>
+        <!-- 방생 -->
+        <rect x="450" y="150" width="170" height="20" class="print"/>
+        <rect x="450" y="140" width="14" height="40" style="fill:var(--ink)"/>
+        <path d="M470 160 H640" class="arrg"/>
+        <text x="460" y="128" text-anchor="middle" class="t">G5 · G5b</text>
+        <circle cx="560" cy="160" r="9" style="fill:none;stroke:var(--danger);stroke-width:2.5"/><text x="560" y="196" text-anchor="middle" class="t">G6</text>
+        <text x="560" y="216" text-anchor="middle" class="ts">"밖으로 나갔다"</text>
+        <text x="360" y="262" text-anchor="middle" class="t">문마다 앞·뒤 2줄: 문을 닫기 전에 <tspan class="tr">말벌이 문 사이에 끼어 있지 않은지</tspan> 확인해요</text>
+        <text x="360" y="286" text-anchor="middle" class="ts">(엘리베이터 문이 사람이 있으면 다시 열리는 것과 같아요)</text>
+      </svg>
+      </div>
+      <figcaption>
+        카메라만으로는 말벌이 <b>문 바로 아래에 있는지</b> 잘 안 보여요. 그런데 그대로 문을 닫으면 말벌이 끼어서 다쳐요. 그래서 문마다 빛줄 두 개를 걸어, 둘 다 비었을 때만 닫아요.
+        또 <b>몇 마리가 들어오고, 나가고, 갇혔는지</b>를 세서 기록해요.
+      </figcaption>
+    </figure>
+    <div class="say"><b>모양:</b> 문 6쌍은 틈이 좁아서 손톱보다 작은 <b>3 mm LED 낱개</b>를 벽 구멍에 꽂고, 넓은 통로 3쌍(G1·G4·G6)은 작은 상자 모양 센서(Adafruit 2167, 20 × 10 × 8 mm)를 붙여요.</div>
+  </section>
 </main>
