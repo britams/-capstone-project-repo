@@ -12,7 +12,8 @@ D5f 전체 조립(cad/D5f_electrical_layout.py)을 그대로 만든 뒤 두 가�
    - 브래킷: 다이캐스트 2020 L 브래킷 — 다리 20 × 20, 폭 18, 두께 3.5, 양옆 리브 2, 홈 키(5.6 × 1.0), 구멍 Ø5.5 (모서리에서 12)
      [가능성 높음 — 국내 판매 '2020 코너 브래킷' 대표 치수, 실물로 확인]
    - 체결: 브래킷 1개당 M5 × 8 육각 구멍붙이 볼트(ISO 4762, 미스미 짝 E-GSCB5-8) 2 + 2020용 M5 슬라이드 T너트 2
-     T너트: 목 5.8 × 1.5, 날개 10.4 × 2.0, 길이 10 [추측 — 실물 캘리퍼로 확인]
+     T너트: 길이 10 × 폭 9.5 × 두께 4.5 (판매품 'M5 sliding T-nut 2020, 6 mm slot' 표기값) — 목 5.8 × 1.3, 날개 9.5 × 2.0,
+            아래 경사 1.2 (언더컷 사다리꼴에 맞춤) [가능성 높음 — 판매처 표기, 목·경사 나눔은 단면에 맞춘 값]
 2) 모든 부품을 4가지로 나눠 묶고 색칠 (모델 트리에서 바로 구분)
    A 구매품(실제 제품) — 은색·회색 계열 / B 우리가 설계할 것(3D 프린트·가공) — 주황 /
    C 참고: 상용 트랩·말벌 — 반투명 초록 / D 자리 표시(전기 블록·빔) — 보라
@@ -83,9 +84,9 @@ def member(p0, p1):
 # ---------------- 브래킷·볼트·T너트 (브래킷 지역 좌표) ----------------
 # 지역 좌표: 원점 = 기둥 면·레일 중심선·레일 면이 만나는 점 (D5e A.bracket 과 같음)
 #   x: 레일 따라 (기둥에서 멀어짐), z: 레일 면에서 바깥(브래킷 쪽), y: 폭 방향. 레일은 z<0, 기둥은 x<0.
-BR = dict(leg=20.0, w=18.0, t=3.5, rib=2.0, key_w=5.6, key_d=1.0, hole=5.5, hole_at=12.0)
+BR = dict(leg=20.0, w=18.0, t=3.5, rib=2.0, key_w=5.6, key_d=0.5, hole=5.5, hole_at=12.0)
 BOLT = dict(d=5.0, L=8.0, head_d=8.5, head_h=5.0)
-TNUT = dict(neck_w=5.8, neck_h=1.5, wing_w=10.4, wing_h=2.0, L=10.0)
+TNUT = dict(neck_w=5.8, top=-0.5, wing_w=9.5, wing_h=2.0, taper_h=1.2, taper_w=6.0, L=10.0)   # 두께 0.5→5.0 = 4.5
 
 
 def bracket_local():
@@ -116,15 +117,18 @@ def bolt_local(on="rail"):
 
 
 def tnut_local(on="rail"):
-    """슬라이드 T너트: 목은 홈 입구, 날개는 언더컷 안. 레일 따라 길이 L."""
+    """슬라이드 T너트 (판매품 10 × 9.5 × 4.5): 목은 홈 입구(면에서 0.5 아래부터), 날개는 언더컷 안, 아래는 경사"""
     tn = TNUT
     lip = P["lip"]
-    neck = Part.makeBox(tn["L"], tn["neck_w"], tn["neck_h"] + 0.1, V(-tn["L"] / 2, -tn["neck_w"] / 2, -lip - 0.1))   # 날개와 붙음 → 한 덩어리
-    wing = Part.makeBox(tn["L"], tn["wing_w"], tn["wing_h"], V(-tn["L"] / 2, -tn["wing_w"] / 2, -lip - 0.1 - tn["wing_h"]))
-    s = neck.fuse(wing).cut(Part.makeCylinder(BOLT["d"] / 2, 10, V(0, 0, -6)))
+    y0 = -lip - tn["wing_h"]
+    pts = [(-tn["neck_w"] / 2, tn["top"]), (tn["neck_w"] / 2, tn["top"]), (tn["neck_w"] / 2, -lip), (tn["wing_w"] / 2, -lip),
+           (tn["wing_w"] / 2, y0), (tn["taper_w"] / 2, y0 - tn["taper_h"]), (-tn["taper_w"] / 2, y0 - tn["taper_h"]),
+           (-tn["wing_w"] / 2, y0), (-tn["wing_w"] / 2, -lip), (-tn["neck_w"] / 2, -lip), (-tn["neck_w"] / 2, tn["top"])]
+    face = Part.Face(Part.makePolygon([V(-tn["L"] / 2, y, z) for y, z in pts]))
+    s = face.extrude(V(tn["L"], 0, 0)).cut(Part.makeCylinder(BOLT["d"] / 2, 12, V(0, 0, -8)))
     if on == "rail":
         s.translate(V(BR["hole_at"], 0, 0))
-    else:      # 기둥 면: 지역 x<0 이 기둥 안, 기둥 따라(z) 길이
+    else:
         s.rotate(V(0, 0, 0), V(0, 1, 0), 90)      # 지역 z<0(면 안) → x<0(기둥 안), 길이 x → z
         s.translate(V(0, 0, BR["hole_at"]))
     return s
@@ -162,7 +166,8 @@ def bracket_places():
 CATEGORY = [
     ("REF_camera_view", "X"), ("P204", "X"), ("190_pi5_aihat (D5e", "X"),
     ("REF_", "C"),
-    ("193_", "D"), ("194_", "D"), ("195_", "D"), ("196_", "D"),
+    ("195p_", "A"), ("198_", "A"), ("142n_", "A"), ("144n_", "A"), ("100h_", "A"), ("100i_", "A"),
+    ("193_", "D"), ("194_", "D"), ("196_", "D"),
     ("100", "A"), ("153_", "A"), ("153r_", "A"), ("209_", "A"), ("209r_", "A"), ("215_", "A"), ("215r_", "A"),
     ("154_", "A"), ("210_", "A"), ("216_", "A"), ("155_", "A"), ("208_", "A"), ("214_", "A"),
     ("159_", "A"), ("224_", "A"), ("225_", "A"), ("157_", "A"), ("207_", "A"), ("213_", "A"), ("223_", "A"),
@@ -225,6 +230,9 @@ def make():
         o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
         o.Label = nm
         o.Shape = Part.makeCompound(lst)
+    import D5g_feeder_uln as FU                      # 설탕물 급이 방 + ULN2003 실제 보드 (CAP-AI-SJ-40)
+    import sys
+    FU.make_into(doc, sys.modules[__name__])
     for o in list(doc.Objects):        # D5f에서 스프링 204 뺀 뒤 남은 바탕 원기둥
         if o.Label in ("P204a", "P204b"):
             doc.removeObject(o.Name)
