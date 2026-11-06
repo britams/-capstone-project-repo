@@ -193,22 +193,22 @@ def sheets():
     # --- 1장: 전원 ---
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_1_전원.png"), show=False, dpi=150) as d:
         d += elm.Label().label("회로도 1/3 — 전원 (콘센트 기본, 같은 플러그로 배터리 상자)", fontsize=14).at((0, 4.2))
-        jb = elm.Ic(pins=[P("+", "right", "pin1"), P("−", "right", "pin2")], edgepadW=1.2, label="DC 잭\n5 V 3 A\n(또는 배터리\n상자 5 V 3 A)").at((0, 0))
+        jb = elm.Ic(pins=[P("−", "right", "pin2"), P("+", "right", "pin1")], edgepadW=1.2, label="DC 잭\n5 V 3 A\n(또는 배터리\n상자 5 V 3 A)").at((0, 0))
         d += jb
         d += elm.Line().right(0.8).at(jb.pin1)
-        d += (f := elm.Fuse().right().label("F1\nT2.5A", loc="top"))
+        d += (f := elm.Fuse().right().label("F1\n5×20 3 A", loc="top"))
         d += (sw := elm.Switch(nc=True).right().label("비상 정지\n(NC)", loc="top"))
         d += (n1 := elm.Dot())
         d += elm.Line().right(1.5)
-        d += (tb := elm.Dot().label("+5V_B (와고 묶음)", loc="bottom"))
-        d += elm.Capacitor(polar=True).down(2).at(n1.center).label("C1\n1000 µF", loc="bottom")
+        d += (tb := elm.Dot().label("+5V_B\n(와고 묶음)", loc="top"))
+        d += elm.Capacitor(polar=True).down(2).at(n1.center).label("C1 1000 µF\n(서보 허브)", loc="top")
         d += (g1 := elm.Dot())
         d += elm.Capacitor().down(2).at((n1.center[0] + 1.5, n1.center[1])).label("C2 0.1 µF", loc="bottom")
         d += elm.Line().left(1.5)
-        d += elm.Wire("-|").at(jb.pin2).to((g1.center[0] - 0.6, g1.center[1]))
+        d += elm.Wire("-|").at(jb.pin2).to((g1.center[0] - 2.8, g1.center[1]))
         d += elm.Line().tox(g1.center)
         d += elm.Ground().at(g1.center)
-        d += elm.Resistor().right(2.5).at(tb.center).label("R_RS 10 kΩ", loc="top")
+        d += elm.Resistor().right(2.5).at(tb.center).label("R_RS 10 kΩ", loc="bottom")
         d += elm.Label().label("→ UNO 2 D2 (레일 감지)", loc="right")
         d += elm.Label().label("GND 한 점 (와고 GND 묶음) ← UNO 1 GND, UNO 2 GND, 서보·게이트·ULN2003 GND", fontsize=10, halign="left").at((-1, -3.8))
         d += elm.Label().label("+5V_B → ULN2003 ×3, SG90, MG90S ×3, 게이트 수신·송신 ×9, 풀업 10 kΩ ×9, 조명 ×2", fontsize=10, halign="left").at((-1, -4.4))
@@ -239,14 +239,20 @@ def sheets():
         u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p) for p in left[::-1]],
                    edgepadH=0.5, pinspacing=0.6, edgepadW=2.0, label="UNO 1").at((0, 0))
         d += u
+        # 11/06 다듬기: 선을 한 줄로 모으면 모든 핀이 이어진 것처럼 보임 → 같은 이름표(넷 라벨)끼리 이어진 것으로 그림
         for k, ax in enumerate("FXY"):
             ul = elm.Ic(pins=[P("IN%d" % i, "left") for i in range(4, 0, -1)] + [P("XH5", "right")],
-                        pinspacing=0.6, edgepadW=1.2, label="ULN2003 %s" % ax).at((7.5, 4.6 - k * 2.9))
+                        pinspacing=0.6, edgepadW=1.6, label="").at((9.5, 5.2 - k * 3.5))
             d += ul
+            d += elm.Label().label("ULN2003 %s" % ax, fontsize=11).at((ul.center[0], ul.center[1] + 1.75))
             for i in range(4):
                 a = getattr(u, right[k * 4 + i])
                 b = getattr(ul, "IN%d" % (i + 1))
-                d += elm.Wire("-|").at(a).to(b).color("#2a78d6")
+                net = "%s_IN%d" % (ax, i + 1)
+                d += elm.Line().right(0.9).at(a).color("#2a78d6")
+                d += elm.Label().label(net, loc="right", fontsize=9).color("#2a78d6")
+                d += elm.Line().left(0.9).at(b).color("#2a78d6")
+                d += elm.Label().label(net, loc="left", fontsize=9).color("#2a78d6")
             d += elm.Line().right(1.2).at(ul.XH5)
             d += elm.Label().label("28BYJ-48 %s\n(+5V_B, GND)" % {"F": "바닥", "X": "마커 X", "Y": "마커 Y"}[ax], loc="right")
         for p, txt in (("A0", "SG90 펜 신호 (전원 +5V_B)"), ("A1", "HX711 DT"), ("A2", "HX711 SCK  — HX711 VCC는 UNO 5V, RATE→5V (80 Hz)"),
@@ -256,7 +262,7 @@ def sheets():
         for p, ax in (("A3", "F"), ("A4", "X"), ("A5", "Y")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
             d += elm.Label().label("원점 %s 스위치 → GND (+100 nF)" % ax, loc="left")
-        d += elm.Label().label("원점은 내부 풀업 (눌리면 LOW) + 스위치 옆 100 nF", fontsize=10).at((-9, -6))
+        d += elm.Label().label("원점은 내부 풀업 (눌리면 LOW) + 스위치 옆 100 nF · 파란 이름표가 같은 선끼리 이어짐 (예: D2 = F_IN1 = ULN2003 F IN1)", fontsize=10, halign="left").at((-9, -6))
 
     # --- 3장: UNO 2 ---
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_3_UNO2_문게이트조명.png"), show=False, dpi=150) as d:
