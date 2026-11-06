@@ -25,11 +25,17 @@ DT = K.DECK_TOP          # 205
 
 # 빛 게이트: (이름, 중심 x, y, z, 빔 방향 'y' 또는 'x', 통로 반지름)
 GATES = [
-    ("G1", 0, 0, 275, "x", 6), ("G4", 0, 0, 570, "x", 6),
-    ("G2", 24, 0, 349, "y", 6), ("G2b", 28, 0, 349, "y", 6),
-    ("G3", 28, 0, 377, "y", 6), ("G3b", 24, 0, 377, "y", 6),
-    ("G5", 82, 0, 377, "y", 6), ("G5b", 86, 0, 377, "y", 6), ("G6", 115, 0, 377, "y", 6),
+    ("G4", 0, 0, 570, "x", 6),                       # G1은 D5e 114_entry_sensor 그대로
+    ("G6", 120, 0, 377, "z", 8),                      # 방생 서보(−y)를 피해 위아래로
 ]
+# 문 빔 (11/06): 문판 슬롯 면에서 2 mm 바깥, 통로 가운데(y 0)를 위아래(z)로 지나감.
+# 하우징 위·아래 벽에 Ø4.2 구멍 → 3 mm IR LED(몸통 Ø4 × 8 [추측 — 실물 확인]) 를 끼움
+#   입구 문 위 LED는 입구 하우징 윗벽(3 mm) + 격리 하우징과의 틈(5 mm)에, 격리 문 아래 LED는 격리 하우징 아랫벽(8 mm)에 → 겹치지 않음
+DOOR_BEAMS = {  # 하우징 이름: (zp, [(게이트, x)])
+    "112_entry_gate_housing": (349, [("G2", 23), ("G2b", 29)]),
+    "170_isolation_gate_housing": (377, [("G3", 29), ("G3b", 23)]),
+    "176_release_gate_housing": (377, [("G5", 81), ("G5b", 87)]),
+}
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -43,14 +49,24 @@ def parts():
     p["193_terminal_fuse"] = (box(-50, -10, -72, -58, DT, DT + 14), (0.85, 0.20, 0.20))
     p["194_estop"] = (Part.makeCylinder(15, 30, V(-100, 45, DT)), (0.90, 0.10, 0.10))
     p["195_uln2003_F"] = (box(37.5, 72.5, -66, -34, DT, DT + 6), (0.10, 0.60, 0.20))
-    p["195_uln2003_X"] = (box(150, 170, -46, -14, 415, 450), (0.10, 0.60, 0.20))
-    p["195_uln2003_Y"] = (box(150, 170, 0, 32, 430, 465), (0.10, 0.60, 0.20))
+    # ULN2003 X·Y: 갠트리 쪽 2020 기둥(x 160~180) 바깥면에 세워 붙임 (모터 선 240 mm 안)
+    p["195_uln2003_X"] = (box(181, 187, -46, -14, 415, 450), (0.10, 0.60, 0.20))
+    p["195_uln2003_Y"] = (box(181, 187, 0, 32, 430, 465), (0.10, 0.60, 0.20))
+    for hname, (zp, beams) in DOOR_BEAMS.items():
+        for g, x in beams:
+            led = Part.makeCylinder(2.0, 8, V(x, 0, zp - 14)).fuse(Part.makeCylinder(2.0, 8, V(x, 0, zp + 6)))
+            p["196_gate_%s_led (위·아래)" % g] = (led, (0.25, 0.25, 0.25))
+            p["196_gate_%s_beam" % g] = (Part.makeCylinder(0.6, 12, V(x, 0, zp - 6)), (1.0, 0.0, 0.0))
     for g, x, y, z, ax, r in GATES:
         d = r + 4
         if ax == "y":
             tx = box(x - 2.5, x + 2.5, -d - 6, -d, z - 3, z + 3)
             rx = box(x - 2.5, x + 2.5, d, d + 6, z - 3, z + 3)
             beam = Part.makeCylinder(0.6, 2 * d, V(x, -d, z), V(0, 1, 0))
+        elif ax == "z":
+            tx = box(x - 2.5, x + 2.5, y - 3, y + 3, z + d, z + d + 6)
+            rx = box(x - 2.5, x + 2.5, y - 3, y + 3, z - d - 6, z - d)
+            beam = Part.makeCylinder(0.6, 2 * d, V(x, y, z - d), V(0, 0, 1))
         else:
             tx = box(-d - 6, -d, y - 2.5, y + 2.5, z - 3, z + 3)
             rx = box(d, d + 6, y - 2.5, y + 2.5, z - 3, z + 3)
@@ -70,6 +86,14 @@ def make():
     for o in list(doc.Objects):                     # 11/02 결정: 펜 홀더 스프링 204 뺌 (승준 Issue #7-4)
         if o.Label.startswith("204_"):
             doc.removeObject(o.Name)
+    for o in doc.Objects:                           # 문 하우징 위·아래 벽에 빔 구멍
+        if o.Label in DOOR_BEAMS:
+            zp, beams = DOOR_BEAMS[o.Label]
+            sh = o.Shape
+            for g, x in beams:
+                sh = sh.cut(Part.makeCylinder(2.1, 30, V(x, 0, zp - 16)))
+            o.Shape = sh.removeSplitter()
+            o.Label = o.Label + " (D5f 빔 구멍)"
     grp = doc.addObject("App::DocumentObjectGroup", "G19x_electrical")
     grp.Label = "19x 전기 배치 (D5f, 자리 표시)"
     for i, (nm, (shp, col)) in enumerate(parts().items()):
@@ -105,3 +129,20 @@ def render_all(doc, out_dir):
         out.append(np_)
     doc.saveAs("%s/%s.FCStd" % (out_dir, DOC))
     return out
+
+
+def check(doc):
+    """새 블록·LED가 모듈 부품과 겹치는지 (부피 > 0.5 mm³). 프레임·트랩은 뺌."""
+    ours = [o for o in doc.Objects if o.Name.startswith("E") and o.TypeId == "Part::Feature"]
+    others = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Name.startswith("E") and o.Shape.Volume > 0
+              and not o.Label.startswith(("REF", "100_", "190_"))]
+    hits = []
+    for a in ours:
+        if "beam" in a.Label:
+            continue
+        for b in others:
+            if a.Shape.BoundBox.intersect(b.Shape.BoundBox):
+                v = a.Shape.common(b.Shape).Volume
+                if v > 0.5:
+                    hits.append((a.Label, b.Label, round(v, 1)))
+    return hits
