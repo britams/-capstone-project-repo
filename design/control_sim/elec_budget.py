@@ -44,7 +44,7 @@ LOADS = {
                          src="SG90 움직일 때 약 0.25 A, 막힘 약 0.65 A [가능성 높음 — 흔한 측정값, 실측 필요]"),
     "mg90s_door":   dict(rail="B", detached=0.004, idle=0.010, move=0.20, stall=0.75,
                          src="MG90S 무부하 90 mA, 막힘 750 mA @4.8 V [확실 — 판매처 사양] / 미닫이 이동 평균 0.2 A [추측]"),
-    "ir_emitter":   dict(rail="B", on=0.020, src="Adafruit 2167 송신 20 mA @5 V [확실 — 제조사]"),
+    "ir_emitter":   dict(rail="B", on=0.020, src="Adafruit 2167 송신 20 mA @5 V [확실 — 제조사]; 문 빔 낱개 LED는 220 Ω → 17 mA (11/06 21시) — 20 mA로 보수적으로 둠"),
     "ir_receiver":  dict(rail="B", on=0.002, src="수신부 자체 전류 (공개값 없음) [추측]"),
     "pullup":       dict(rail="B", on=V_B / 10e3, src="10 kΩ 풀업, 빔이 끊겼을 때(LOW)만 0.5 mA [확실 계산]"),
     "light_top":    dict(rail="B", on=0.20, src="위 링 조명 182 [추측 — 보유 조명 실측 필요]"),

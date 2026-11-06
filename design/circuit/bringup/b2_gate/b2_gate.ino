@@ -1,7 +1,7 @@
 // 2단계 시험 — UNO 2 + 빛 게이트 1쌍 (회로 시험용, 펌웨어 아님) — 서현 CAP-AI-33, 2026-11-06
-// 연결: 게이트 허브 → 수신 흰 선(+10k 풀업) → A0 (G1),  송신 검정 → MOSFET Q4 OUT-, Q4 TRIG ← D4,  레일 감지 D2 (10k 직렬)
+// 연결: 게이트 허브 → 통로 게이트 G1 (Adafruit 2167) 수신 흰 선(+10k 풀업) → D7 (11/06 21시 핀 바뀜: 문 빔이 A0~A5),  송신 검정 → MOSFET Q4 OUT-, Q4 TRIG ← D4,  레일 감지 D2 (10k 직렬)
 // 확인: ① 손으로 빛을 가리면 "BLOCK" ② 's' 입력 → 자가 시험: 송신 끔 → LOW여야, 켬 → HIGH여야 ③ 비상 정지 누르면 RAIL=0
-const int PIN_GATE = A0;   // G1
+const int PIN_GATE = 7;    // G1 (통로 게이트, 디지털)
 const int PIN_EMIT = 4;    // EMIT_EN (HIGH = 송신 켬)
 const int PIN_RAIL = 2;    // 힘 전기 감지
 

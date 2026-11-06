@@ -14,43 +14,37 @@
 +5V_B,R_G1.2,28,
 +5V_B,RX_G1.V+,28,
 +5V_B,TX_G1.V+,28,
-+5V_B,R_G2.2,28,
-+5V_B,RX_G2.V+,28,
-+5V_B,TX_G2.V+,28,
-+5V_B,R_G2b.2,28,
-+5V_B,RX_G2b.V+,28,
-+5V_B,TX_G2b.V+,28,
-+5V_B,R_G3.2,28,
-+5V_B,RX_G3.V+,28,
-+5V_B,TX_G3.V+,28,
-+5V_B,R_G3b.2,28,
-+5V_B,RX_G3b.V+,28,
-+5V_B,TX_G3b.V+,28,
 +5V_B,R_G4.2,28,
 +5V_B,RX_G4.V+,28,
 +5V_B,TX_G4.V+,28,
-+5V_B,R_G5.2,28,
-+5V_B,RX_G5.V+,28,
-+5V_B,TX_G5.V+,28,
-+5V_B,R_G5b.2,28,
-+5V_B,RX_G5b.V+,28,
-+5V_B,TX_G5b.V+,28,
 +5V_B,R_G6.2,28,
 +5V_B,RX_G6.V+,28,
 +5V_B,TX_G6.V+,28,
++5V_B,RLED_G2.1,28,
++5V_B,PT_G2.C,28,포토TR 컬렉터
++5V_B,RLED_G2b.1,28,
++5V_B,PT_G2b.C,28,포토TR 컬렉터
++5V_B,RLED_G3.1,28,
++5V_B,PT_G3.C,28,포토TR 컬렉터
++5V_B,RLED_G3b.1,28,
++5V_B,PT_G3b.C,28,포토TR 컬렉터
++5V_B,RLED_G5.1,28,
++5V_B,PT_G5.C,28,포토TR 컬렉터
++5V_B,RLED_G5b.1,28,
++5V_B,PT_G5b.C,28,포토TR 컬렉터
 +5V_B,L_TOP.V+,24,
 +5V_B,L_BOT.V+,24,
 CSI,PI.CAM0,,Pi 5 22핀 ↔ 15핀 300 mm
 CSI,CAM.CSI,,Pi 5 22핀 ↔ 15핀 300 mm
 EMIT_LO,TX_G1.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G2.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G2b.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G3.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G3b.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
 EMIT_LO,TX_G4.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G5.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G5b.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
 EMIT_LO,TX_G6.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,LED_G2.K,28,LED 짧은 다리(K) → Q4
+EMIT_LO,LED_G2b.K,28,LED 짧은 다리(K) → Q4
+EMIT_LO,LED_G3.K,28,LED 짧은 다리(K) → Q4
+EMIT_LO,LED_G3b.K,28,LED 짧은 다리(K) → Q4
+EMIT_LO,LED_G5.K,28,LED 짧은 다리(K) → Q4
+EMIT_LO,LED_G5b.K,28,LED 짧은 다리(K) → Q4
 EMIT_LO,Q4.OUT-,24,
 GND,J_B.-,20,GND 한 점 (와고 GND 묶음)
 GND,TB.GND,20,GND 한 점 (와고 GND 묶음)
@@ -73,14 +67,14 @@ GND,MG_IN.GND,26,
 GND,MG_CAP.GND,26,
 GND,MG_REL.GND,26,
 GND,RX_G1.GND,28,
-GND,RX_G2.GND,28,
-GND,RX_G2b.GND,28,
-GND,RX_G3.GND,28,
-GND,RX_G3b.GND,28,
 GND,RX_G4.GND,28,
-GND,RX_G5.GND,28,
-GND,RX_G5b.GND,28,
 GND,RX_G6.GND,28,
+GND,RL_G2.2,28,
+GND,RL_G2b.2,28,
+GND,RL_G3.2,28,
+GND,RL_G3b.2,28,
+GND,RL_G5.2,28,
+GND,RL_G5b.2,28,
 GND,Q4.GND,24,
 GND,Q1.GND,24,
 GND,Q2.GND,24,
@@ -98,6 +92,18 @@ LC_E+,HX711.E+,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
 LC_E+,LC.빨강,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
 LC_E-,HX711.E-,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
 LC_E-,LC.검정,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LEDA_G2,RLED_G2.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G2,LED_G2.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G2b,RLED_G2b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G2b,LED_G2b.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G3,RLED_G3.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G3,LED_G3.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G3b,RLED_G3b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G3b,LED_G3b.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G5,RLED_G5.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G5,LED_G5.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G5b,RLED_G5b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
+LEDA_G5b,LED_G5b.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
 L_BOT_LO,L_BOT.V-,24,
 L_BOT_LO,Q2.OUT-,24,
 L_TOP_LO,L_TOP.V-,24,
@@ -161,30 +167,30 @@ U2_DOOR_REL,U2.D11,26,주황
 U2_DOOR_REL,MG_REL.SIG,26,주황
 U2_EMIT,U2.D4,26,HIGH = 송신 켬 (자가 시험 때 끔)
 U2_EMIT,Q4.TRIG,26,HIGH = 송신 켬 (자가 시험 때 끔)
-U2_G1,U2.A0,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G1,U2.D7,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G1,RX_G1.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G1,R_G1.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2,U2.A1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2,RX_G2.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2,R_G2.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2b,U2.A2,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2b,RX_G2b.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2b,R_G2b.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G3,U2.A3,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G3,RX_G3.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G3,R_G3.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G3b,U2.A4,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G3b,RX_G3b.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G3b,R_G3b.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G4,U2.A5,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2,U2.A0,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G2,PT_G2.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G2,RL_G2.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G2b,U2.A1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G2b,PT_G2b.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G2b,RL_G2b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G3,U2.A2,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G3,PT_G3.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G3,RL_G3.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G3b,U2.A3,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G3b,PT_G3b.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G3b,RL_G3b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G4,U2.D8,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G4,RX_G4.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G4,R_G4.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5,U2.D7,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5,RX_G5.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5,R_G5.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5b,U2.D8,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5b,RX_G5b.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5b,R_G5b.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5,U2.A4,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G5,PT_G5.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G5,RL_G5.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G5b,U2.A5,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G5b,PT_G5b.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
+U2_G5b,RL_G5b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
 U2_G6,U2.D12,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G6,RX_G6.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G6,R_G6.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"

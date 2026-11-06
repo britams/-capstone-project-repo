@@ -22,7 +22,11 @@ os.makedirs(OUT, exist_ok=True)
 os.makedirs(IMG, exist_ok=True)
 
 GATES = ["G1", "G2", "G2b", "G3", "G3b", "G4", "G5", "G5b", "G6"]
-GATE_PIN = dict(zip(GATES, ["A0", "A1", "A2", "A3", "A4", "A5", "D7", "D8", "D12"]))
+# 11/06 21시 (CAP-AI-34): 문 빔 6쌍은 3 mm 적외선 LED + 3 mm 포토트랜지스터 낱개 (승준 SJ-47: 문 하우징 틈 5 mm에 Adafruit 2167 몸통이 안 들어감)
+#   → 아날로그로 읽어야 해서(문턱값을 자가 시험 때 정함) A0~A5로, 통로 게이트 3쌍(Adafruit 2167, 디지털)은 D7·D8·D12로 옮김
+DOOR_GATES = ["G2", "G2b", "G3", "G3b", "G5", "G5b"]
+PASS_GATES = ["G1", "G4", "G6"]
+GATE_PIN = {"G2": "A0", "G2b": "A1", "G3": "A2", "G3b": "A3", "G5": "A4", "G5b": "A5", "G1": "D7", "G4": "D8", "G6": "D12"}
 GATE_WHERE = {"G1": "입구 세로관", "G2": "입구 문 바깥", "G2b": "입구 문 안", "G3": "격리 문 안", "G3b": "격리 문 바깥",
               "G4": "격리 통로 끝", "G5": "방생 문 안", "G5b": "방생 문 바깥", "G6": "방생 출구"}
 
@@ -83,12 +87,20 @@ for d, p in (("IN", "D9"), ("CAP", "D10"), ("REL", "D11")):
     con("U2_DOOR_%s" % d, "U2.%s" % p, "MG_%s.SIG" % d, awg=26, note="주황")
     con("+5V_B", "MG_%s.V+" % d, awg=26)
     con("GND", "MG_%s.GND" % d, awg=26)
-# 빛 게이트 9쌍
-for g in GATES:
+# 통로 빛 게이트 3쌍 (Adafruit 2167, 열린 컬렉터)
+for g in PASS_GATES:
     con("U2_%s" % g, "U2.%s" % GATE_PIN[g], "RX_%s.OUT" % g, "R_%s.1" % g, awg=28, note="흰 선, 10 kΩ 풀업, 끊기면 LOW")
     con("+5V_B", "R_%s.2" % g, "RX_%s.V+" % g, "TX_%s.V+" % g, awg=28)
     con("GND", "RX_%s.GND" % g, awg=28)
     con("EMIT_LO", "TX_%s.GND" % g, awg=28, note="송신 검정 → MOSFET Q4 (낮은 쪽 스위치)")
+# 문 빛 게이트 6쌍 (낱개): +5V_B → 220 Ω → IR LED → EMIT_LO (Q4)  /  +5V_B → 포토TR C, E → U2 아날로그 + 10 kΩ → GND (이미터 팔로어: 빛 받으면 HIGH, 끊기면 LOW)
+for g in DOOR_GATES:
+    con("+5V_B", "RLED_%s.1" % g, awg=28)
+    con("LEDA_%s" % g, "RLED_%s.2" % g, "LED_%s.A" % g, awg=28, note="220 Ω → 약 17 mA ((5 − 1.2) / 220)")
+    con("EMIT_LO", "LED_%s.K" % g, awg=28, note="LED 짧은 다리(K) → Q4")
+    con("+5V_B", "PT_%s.C" % g, awg=28, note="포토TR 컬렉터")
+    con("U2_%s" % g, "U2.%s" % GATE_PIN[g], "PT_%s.E" % g, "RL_%s.1" % g, awg=28, note="아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2")
+    con("GND", "RL_%s.2" % g, awg=28)
 con("EMIT_LO", "Q4.OUT-", awg=24)
 con("GND", "Q4.GND", awg=24)
 con("U2_EMIT", "U2.D4", "Q4.TRIG", awg=26, note="HIGH = 송신 켬 (자가 시험 때 끔)")
@@ -116,9 +128,12 @@ BOM = [
     ("HX711 + 막대형 로드셀 500 g~1 kg", 1, "누르는 힘 — 버튼형(145,200원) 대신 막대형(6,710원), 11/06 CAP-AI-31. 캐리지 아래 외팔보로 (승준 CAD)", "**살 것** (구매확정표 E11·E12)"),
     ("Pi 5 RTC 배터리 (공식 충전식 ML-2020, J5 BAT 단자)", 1, "전원이 끊겨도 날짜 유지 → 여왕벌 계절 규칙 (11/06)", "**추가**"),
     ("마이크로 스위치 KW11-3Z 레버형 (원점)", 3, "F, X, Y — 외형 20×10.2×6.4, 승준 라이브러리 SJ-38", "추가"),
-    ("빛 게이트 Adafruit 2167 (3 mm)", 9, "G1·G2·G2b·G3·G3b·G4·G5·G5b·G6", "**살 것 9쌍** (보유 0, 국내 판매처 확인 — 11/06 고침)"),
+    ("빛 게이트 Adafruit 2167 (3 mm)", 3, "통로 G1·G4·G6 (11/06 21시: 문 빔은 낱개로 — 승준 SJ-47)", "**살 것 3 (+1)**"),
+    ("적외선 LED 3 mm 940 nm", 6, "문 빔 송신 G2·G2b·G3·G3b·G5·G5b (Ø4.2 구멍에 꽂음)", "**살 것 6 (+4)**"),
+    ("포토트랜지스터 3 mm 940 nm (검은 몸통, 햇빛 거름)", 6, "문 빔 수신, 이미터 팔로어 (빛 받으면 HIGH)", "**살 것 6 (+4)**"),
+    ("저항 220 Ω", 6, "적외선 LED 전류 약 17 mA", "키트 저항 세트 [실물 확인]"),
     ("로직 레벨 MOSFET 모듈 (D4184 등)", 3, "조명 2 (위·아래) + 송신 켜기 1 — 출구 조명 없앰 (SJ-45)", "살 것 (시험 단계는 보유 릴레이 모듈로 대신 — 켜고 끄기만)"),
-    ("저항 10 kΩ", 10, "게이트 풀업 9 + 레일 감지 1", "학습 키트 저항 세트에서 [실물 확인]"),
+    ("저항 10 kΩ", 10, "통로 게이트 풀업 3 + 문 빔 포토TR 부하 6 + 레일 감지 1", "학습 키트 저항 세트에서 [실물 확인]"),
     ("커패시터 100 nF", 4, "원점 3 + 단자대 1", "키트 커패시터 세트에서 [실물 확인]"),
     ("전해 커패시터 1000 µF 10 V", 1, "서보 옆 단자대", "추가"),
     ("5 V 3 A 어댑터 + DC 잭 5.5×2.1", 1, "구동 레일", "구매 목록 G2"),
@@ -154,7 +169,7 @@ def check():
             errs.append("%s 쓴 핀 %s, 계획 %s" % (u, sorted(used), sorted(RESERVED[u])))
     # 서보·게이트 V+ 가 모두 구동 레일인지
     plus = {n for n, _, _ in NETS["+5V_B"]}
-    for need in ["SG90.V+", "MG_IN.V+", "MG_CAP.V+", "MG_REL.V+"] + ["RX_%s.V+" % g for g in GATES] + ["R_%s.2" % g for g in GATES]:
+    for need in ["SG90.V+", "MG_IN.V+", "MG_CAP.V+", "MG_REL.V+"] + ["RX_%s.V+" % g for g in PASS_GATES] + ["R_%s.2" % g for g in PASS_GATES] + ["PT_%s.C" % g for g in DOOR_GATES] + ["RLED_%s.1" % g for g in DOOR_GATES]:
         if need not in plus:
             errs.append("%s가 구동 레일에 없음" % need)
     if any(n.startswith("U1.5V") or n.startswith("U2.5V") for n, _, _ in NETS["+5V_B"]):
@@ -277,11 +292,14 @@ def sheets():
             a = getattr(u, GATE_PIN[g])
             d += elm.Line().right(1.0).at(a)
             d += (n := elm.Dot())
-            d += elm.Label().label("10 kΩ → +5V_B", loc="top", fontsize=8).at((n.center[0], n.center[1] + 0.3))
+            door = g in DOOR_GATES
+            d += elm.Label().label("10 kΩ → GND" if door else "10 kΩ → +5V_B", loc="top", fontsize=8).at((n.center[0], n.center[1] + 0.3))
             d += elm.Line().right(1.4).at(n.center)
-            d += elm.Label().label("수신 %s 흰 선 (%s)" % (g, GATE_WHERE[g]), loc="right", fontsize=10)
-        d += elm.Label().label("수신 빨강 +5V_B / 검정 GND, 송신 빨강 +5V_B / 검정 → Q4", fontsize=10).at((3.2, -1.2))
-        for p, txt in (("D2", "R_RS 10 kΩ ← +5V_B (레일 감지)"), ("D3", "Q1 MOSFET → 위 링 조명 182"), ("D4", "Q4 MOSFET → 송신 9개 GND 쪽 (EMIT_EN)"),
+            txt = ("포토TR %s 이미터 (%s) · 아날로그" if door else "Adafruit 2167 수신 %s 흰 선 (%s)") % (g, GATE_WHERE[g])
+            d += elm.Label().label(txt, loc="right", fontsize=10)
+        d += elm.Label().label("문 빔 6쌍(A0~A5): +5V_B → 220 Ω → IR LED → Q4 / +5V_B → 포토TR C·E → 핀 + 10 kΩ → GND (빛 받으면 HIGH)", fontsize=10, halign="left").at((1.2, -1.2))
+        d += elm.Label().label("통로 3쌍(D7·D8·D12, Adafruit 2167): 수신 빨강 +5V_B / 검정 GND, 송신 빨강 +5V_B / 검정 → Q4", fontsize=10, halign="left").at((1.2, -1.8))
+        for p, txt in (("D2", "R_RS 10 kΩ ← +5V_B (레일 감지)"), ("D3", "Q1 MOSFET → 위 링 조명 182"), ("D4", "Q4 MOSFET → 송신 9개(LED 6 + 2167 3) GND 쪽 (EMIT_EN)"),
                        ("D5", "Q2 MOSFET → 아래 조명"), ("D6", "예비 (출구 조명 없앰, SJ-45)"),
                        ("D9", "MG90S 입구 문 112 (주황)"), ("D10", "MG90S 격리 문 170"), ("D11", "MG90S 방생 문 176")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
