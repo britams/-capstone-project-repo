@@ -333,6 +333,7 @@ def release_shaft():
         a = math.radians(90 + 120 * k)
         p = V(r["cx"] + (r["ri"] + r["t"] / 2) * math.cos(a), (r["ri"] + r["t"] / 2) * math.sin(a), r["z_top"])
         leds.append(Part.makeCylinder(r["led_r"], r["led_h"], p))
+    neck = neck.cut(shaft)                                                               # 이음매: 굴뚝 벽까지만 (한 덩어리로 출력)
     return neck.removeSplitter(), shaft.removeSplitter(), Part.makeCompound(leds)
 
 
@@ -342,7 +343,7 @@ def release_shaft_apply(doc):
     for o in doc.Objects:
         if o.Label.startswith("174_release_duct"):
             o.Shape = neck
-            o.Label = "174_release_neck (짧은 목 32 mm, 안지름 12)"
+            o.Label = "174_release_neck (짧은 목 30 mm, 안지름 12 — 굴뚝과 한 덩어리 출력)"
         elif o.Label.startswith("175_release"):
             o.Shape = shaft
             o.Label = "175_release_shaft (위로 열린 굴뚝 안지름 50, 꼭대기 z 430, 빗물 구멍 4)"
