@@ -35,6 +35,11 @@ SRC = {
     "tb4": KICAD + "TerminalBlock_Phoenix.3dshapes/TerminalBlock_Phoenix_PT-1,5-4-5.0-H_1x04_P5.00mm_Horizontal.step",
     "fuse": KICAD + "Fuse.3dshapes/Fuseholder_Cylinder-5x20mm_Bulgin_FX0457_Horizontal_Closed.step",
     "pi5zip": "https://datasheets.raspberrypi.com/rpi5/RaspberryPi5-step.zip",
+    "dip28": KICAD + "Package_DIP.3dshapes/DIP-28_W7.62mm.step",
+    "sock8": KICAD + "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x08_P2.54mm_Vertical.step",
+    "sock10": KICAD + "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x10_P2.54mm_Vertical.step",
+    "sock6": KICAD + "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x06_P2.54mm_Vertical.step",
+    "jack": KICAD + "Connector_BarrelJack.3dshapes/BarrelJack_CUI_PJ-063AH_Horizontal.step",
 }
 ULN = dict(L=35.0, W=31.9, t=1.6, hx=30.0, hy=26.5, hole=3.0)
 # 보드 중심 기준 배치 (x: 35 방향, y: 31.9 방향), 회전(도, z축)
@@ -214,6 +219,7 @@ def apply(doc):
         except Exception as e:
             out.append("Pi 5 STEP 실패: %s" % e)
     apply_wago(doc)
+    apply_uno(doc)
     doc.recompute()
     return out
 
@@ -278,3 +284,66 @@ def apply_wago(doc):
         out.append(o)
     doc.recompute()
     return out
+
+
+
+# ---------------- (11/06 20:30) 아두이노 UNO R3 — 자리 상자 → 실제 모양 ----------------
+# 공식 STEP은 받을 수 없음 (docs.arduino.cc 404, content.arduino.cc 403, SnapEDA 로그인) → 승준이 SnapEDA에서 받으면 바꿔 끼움.
+# 기판 68.58 × 53.34 × 1.6, 구멍 Ø3.2 4개 (13.97, 2.54) (15.24, 50.8) (66.04, 7.62) (66.04, 35.56) [확실 — UNO 공식 규격 도면 값]
+# 헤더 소켓: 위 1×10 (x 17.53부터) · 1×8 (x 44.45부터), 아래 1×8 전원 (x 26.67부터) · 1×6 아날로그 (x 49.53부터) [가능성 높음 — 실드 규격]
+# USB-B: 왼쪽 가장자리에서 6.35 튀어나옴, 입구 12.0 × 10.9, 깊이 16.3 [가능성 높음 — USB-B 외형], 전원 잭: KiCad PJ-063AH
+UNO = dict(L=68.58, W=53.34, t=1.6, hole=3.2,
+           holes=((13.97, 2.54), (15.24, 50.8), (66.04, 7.62), (66.04, 35.56)),
+           heads=(("sock10", 17.53, 50.8, 10), ("sock8", 44.45, 50.8, 8), ("sock8", 26.67, 2.54, 8), ("sock6", 49.53, 2.54, 6)))
+UNO_STAND_LOW, UNO_STAND_GAP = 5.0, 12.0     # 데크 → UNO 1, UNO 1 → UNO 2 (M3 황동 기둥)
+
+
+def uno_board(x0, y0, zb):
+    """(x0, y0) = 기판 왼쪽 아래 모서리 (USB 쪽이 x0), zb = 기판 아래 면"""
+    u = UNO
+    pcb = Part.makeBox(u["L"], u["W"], u["t"], V(x0, y0, zb))
+    for hx, hy in u["holes"]:
+        pcb = pcb.cut(Part.makeCylinder(u["hole"] / 2, 5, V(x0 + hx, y0 + hy, zb - 1)))
+    zt = zb + u["t"]
+    parts = [pcb]
+    for key, hx, hy, n in u["heads"]:
+        parts.append(place_xy(load(key), x0 + hx + 2.54 * (n - 1) / 2, y0 + hy, zt, 90))
+    parts.append(place_xy(load("dip28"), x0 + 49.0, y0 + 17.0, zt, 90))
+    usb = Part.makeBox(16.3, 12.0, 10.9, V(x0 - 6.35, y0 + 38.1 - 6.0, zt))
+    usb = usb.cut(Part.makeBox(9, 8.0, 7.3, V(x0 - 6.4, y0 + 38.1 - 4.0, zt + 1.8)))
+    parts.append(usb)
+    jk = load("jack")
+    b = jk.BoundBox
+    if b.YLength > b.XLength:
+        jk.rotate(V(0, 0, 0), V(0, 0, 1), 90)
+    b = jk.BoundBox
+    jk.translate(V(x0 - 1.9 - b.XMin, y0 + 7.6 - b.Center.y, zt))
+    parts.append(jk)
+    return Part.makeCompound(parts)
+
+
+def apply_uno(doc):
+    """191·192 상자 → UNO 실제 모양 2장 + M3 기둥 (데크 → UNO 1: 5, UNO 1 → UNO 2: 12)"""
+    b1 = [o for o in doc.Objects if o.Label.startswith("191_arduino_uno")]
+    b2 = [o for o in doc.Objects if o.Label.startswith("192_arduino_uno2")]
+    if not b1:
+        return []
+    bb = b1[0].Shape.BoundBox
+    x0, y0, deck = bb.XMin, bb.YMin, bb.ZMin
+    z1 = deck + UNO_STAND_LOW
+    z2 = z1 + UNO["t"] + UNO_STAND_GAP
+    b1[0].Shape = uno_board(x0, y0, z1)
+    b1[0].Label = "191_arduino_uno (실제 모양: 공식 기판 규격 + KiCad STEP 부품)"
+    if b2:
+        b2[0].Shape = uno_board(x0, y0, z2)
+        b2[0].Label = "192_arduino_uno2 (실제 모양, UNO 1 위 M3 × 12 기둥)"
+    st = []
+    for hx, hy in UNO["holes"]:
+        st.append(Part.makeCylinder(2.75, UNO_STAND_LOW, V(x0 + hx, y0 + hy, deck)))
+        st.append(Part.makeCylinder(2.75, UNO_STAND_GAP, V(x0 + hx, y0 + hy, z1 + UNO["t"])))
+    o = [x for x in doc.Objects if x.Label.startswith("198u_")]
+    o = o[0] if o else doc.addObject("Part::Feature", "SJ_uno_st")
+    o.Label = "198u_uno_standoff (M3 황동 기둥 5 × 4 + 12 × 4, 구매)"
+    o.Shape = Part.makeCompound(st)
+    doc.recompute()
+    return [b1[0]] + b2 + [o]
