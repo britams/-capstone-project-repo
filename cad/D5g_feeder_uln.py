@@ -404,7 +404,7 @@ def feeder_detail_shapes(chamber_shape):
         wall = wall.fuse(boss)
         wall = wall.cut(Part.makeCylinder(INS["hole"] / 2, INS["depth"], V(cx, e["ear_y0"] - INS["depth"], e["ear_z"]), V(0, 1, 0)))
         ins.append(Part.makeCylinder(INS["hole"] / 2, INS["L"], V(cx, e["ear_y0"] - INS["L"], e["ear_z"]), V(0, 1, 0)).cut(
-            Part.makeCylinder(1.25, 10, V(cx, e["ear_y0"] - 6, e["ear_z"]), V(0, 1, 0))))
+            Part.makeCylinder(1.5, 10, V(cx, e["ear_y0"] - 6, e["ear_z"]), V(0, 1, 0))))
         x_in = ch_x0 if sx < 0 else ch_x1
         ear = box(min(x_in, cx - 5), max(x_in, cx + 5), e["ear_y0"], e["ear_y0"] + e["ear_t"], e["ear_z"] - 5, e["ear_z"] + 5)
         ear = ear.cut(Part.makeCylinder(1.7, 10, V(cx, e["ear_y0"] - 1, e["ear_z"]), V(0, 1, 0)))
@@ -418,7 +418,7 @@ def feeder_detail_shapes(chamber_shape):
             trough = trough.fuse(col)
             trough = trough.cut(Part.makeCylinder(INS["hole"] / 2, INS["depth"], V(cx, cy, f["wall_top"] - INS["depth"])))
             ins.append(Part.makeCylinder(INS["hole"] / 2, INS["L"], V(cx, cy, f["wall_top"] - INS["L"])).cut(
-                Part.makeCylinder(1.25, 10, V(cx, cy, f["wall_top"] - 6))))
+                Part.makeCylinder(1.5, 10, V(cx, cy, f["wall_top"] - 6))))
     trough = trough.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] - 1, f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
     # 3) 튜브 집게
     ro = f["bowl_ri"] + f["bowl_t"]

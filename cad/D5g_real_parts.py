@@ -481,6 +481,7 @@ def apply_uno(doc):
 # 비상 정지: 22 mm 버섯형 (XB7NS8442 같은 것) — 머리 Ø40, 전체 깊이 72 [가능성 높음 — 판매처 표기], 데크 구멍 Ø22.5.
 #   판 앞 31 (머리 18 + 목 13) / 판 뒤 41 (몸통 + 접점 블록)으로 나눔 → 판 앞·뒤 나눔은 실물로 확인.
 ADA2167 = dict(L=20.0, W=10.0, H=8.0, lens_r=1.5, lens_h=2.0)
+LEAD_LOG = []
 LEAD = dict(straight=0.0, bend=6.0)   # 문 틈 5 mm에 위·아래 소자 다리가 같은 x에서 마주봄 → 몸통 뒤 1.5에서 바로 꺾음 (2 × (1.5 + 0.5) = 4 < 5), 납땜은 꺾인 6 mm 위에서
 
 
@@ -506,13 +507,24 @@ def ir_pair_door(doc):
         # (SJ-49, 서현 CAP-AI-34) 납땜 여유: 다리를 90° 꺾어 옆으로 6 mm (G2 쪽 +y, G3 쪽 −y로 서로 반대) — 꺾인 부분에 선을 납땜. 다리 간격 2.54 (x)
         side = {"G2": 1, "G2b": 1, "G3": -1, "G3b": -1, "G5": 1, "G5b": 1}.get(o.Label.split("_")[2], 1)
         legs = []
+        hous = [h for h in doc.Objects if h.Label.startswith(("112_entry_gate_housing", "170_isolation_gate_housing", "176_release_gate_housing"))]
         for c, z_end, sgn in ((lo.Center, z_beam_lo - keep, -1), (hi.Center, z_beam_hi + keep, 1)):
+            # 다리가 하우징 살 밖으로 나오는 곳까지 곧게 (구멍 안에서 꺾을 수 없음) → 나온 뒤 0.2 mm에서 꺾음
+            st = 0.0
+            def blocked(st_):
+                zz = z_end + sgn * (st_ + 0.25)
+                return any(h.Shape.isInside(V(c.x + dx_, c.y + side * k, zz), 0.01, True)
+                           for h in hous for dx_ in (-1.27, 1.27) for k in (0.5, 2.0, 3.5, 5.0, 5.9))
+            while st < 10.0 and blocked(st):
+                st += 0.1
+            st = round(st + 0.2, 1) if st > 0 else 0.0
+            LEAD_LOG.append((o.Label.split(" ")[0], sgn, st))
             for dx in (-1.27, 1.27):
                 x = c.x + dx
-                zs = z_end if sgn > 0 else z_end - LEAD["straight"]
-                if LEAD["straight"] > 0:
-                    legs.append(Part.makeBox(0.5, 0.5, LEAD["straight"], V(x - 0.25, c.y - 0.25, zs)))
-                zb_ = z_end + sgn * LEAD["straight"] - (0.5 if sgn > 0 else 0.0)
+                zs = z_end if sgn > 0 else z_end - st
+                if st > 0:
+                    legs.append(Part.makeBox(0.5, 0.5, st, V(x - 0.25, c.y - 0.25, zs)))
+                zb_ = z_end + sgn * st - (0.5 if sgn > 0 else 0.0)
                 y0 = c.y - 0.25 if side > 0 else c.y + 0.25 - LEAD["bend"]
                 legs.append(Part.makeBox(0.5, LEAD["bend"], 0.5, V(x - 0.25, y0, zb_)))
         o.Shape = Part.makeCompound([up, dn] + legs)
