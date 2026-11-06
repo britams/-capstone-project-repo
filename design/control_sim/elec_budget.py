@@ -274,7 +274,7 @@ def battery_table(per_visit_Wh=0.047, visits=20):
     rows = []
     for mode, cam, bot in (("보통 (카메라 늘 켬, 대기 조명)", True, True), ("절약 (카메라 G1 때만, 대기 조명 끔)", False, False)):
         d = daily(visits, 9.0, False, cam, bot, per_visit_Wh=per_visit_Wh)
-        for Ah in (6, 12, 20):
+        for Ah in (6, 12, 15, 20):
             days, need = battery_days(d["load_Wh"], 0, 9.0, Ah)
             rows.append(dict(mode=mode, Ah=Ah, Wh=round(Ah * 12.8), need_Wh_day=need, days=days))
     return rows

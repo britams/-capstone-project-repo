@@ -44,6 +44,8 @@
    "crabro"
   ],
   "crabro_action": "isolate",
+  "other_action": "isolate",
+  "gyne_mw_mm": 4.4,
   "control_mode": false
  },
  "results": [
@@ -279,8 +281,58 @@
    "fails": []
   },
   {
+   "name": "S4b_gyne_border",
+   "desc": "중순판 폭 4.45 mm (경계 띠) → 여왕벌 쪽으로 보고 격리, 4.35 mm → 일벌로 찍고 방생",
+   "hornets": {
+    "h0": {
+     "zone": "captured",
+     "marked": false
+    },
+    "h1": {
+     "zone": "outside",
+     "marked": true
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 70.12,
+     "kind": "decision",
+     "what": "isolate (velutina queen)"
+    },
+    {
+     "t": 454.06,
+     "kind": "mark_result",
+     "ok": true
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.012,
+    "crush": 0
+   },
+   "E_A_Wh": 1.5127,
+   "E_B_Wh": 0.3394,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "closed",
+    "REL": "closed"
+   },
+   "fsm_end": "IDLE",
+   "cycle_s": 39.5,
+   "pass": true,
+   "fails": []
+  },
+  {
    "name": "S5_crabro",
-   "desc": "유럽말벌 → 격리 (지금 규칙, 서현 확인 대기)",
+   "desc": "유럽말벌 → 격리 (서현 결정 11/06)",
    "hornets": {
     "h0": {
      "zone": "captured",

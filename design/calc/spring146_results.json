@@ -1,0 +1,150 @@
+{
+ "inputs": {
+  "F_p": 0.5,
+  "F_safe": 1.0,
+  "v": 0.00196,
+  "f_hx": [
+   10.0,
+   80.0
+  ],
+  "t_stop": 0.005,
+  "k_c": [
+   300.0,
+   3000.0
+  ],
+  "h_min": 0.0065,
+  "h_max": 0.0085,
+  "margin": 0.001,
+  "m_floor": 0.009856,
+  "G": 79300000000.0,
+  "Sut_04": 2300000000.0,
+  "env_OD": 0.009,
+  "env_ID_min": 0.005
+ },
+ "rigid_no_spring": [
+  {
+   "f_Hz": 10.0,
+   "k_c": 300.0,
+   "dF_N": 0.068,
+   "pct_of_Fp": 14
+  },
+  {
+   "f_Hz": 10.0,
+   "k_c": 3000.0,
+   "dF_N": 0.676,
+   "pct_of_Fp": 135
+  },
+  {
+   "f_Hz": 80.0,
+   "k_c": 300.0,
+   "dF_N": 0.011,
+   "pct_of_Fp": 2
+  },
+  {
+   "f_Hz": 80.0,
+   "k_c": 3000.0,
+   "dF_N": 0.11,
+   "pct_of_Fp": 22
+  }
+ ],
+ "window": {
+  "td10_s": 0.115,
+  "dx10_mm": 0.225,
+  "ks_C1_max": 520.7,
+  "ks_C2_min": 93.8,
+  "ks_C2b_min": 77.4,
+  "ks_C3_max": 117.6
+ },
+ "choice": {
+  "d_mm": 0.4,
+  "D_mm": 7.5,
+  "OD_mm": 7.9,
+  "ID_mm": 7.1,
+  "n": 6,
+  "L0_mm": 16.0,
+  "k_N_per_m": 100.3,
+  "k_N_per_mm": 0.1003,
+  "k_lbf_per_in": 0.572,
+  "C": 18.75,
+  "Kw": 1.075,
+  "Ls_mm": 3.2,
+  "x_pre_mm": 0.96,
+  "x_Fp_mm": 4.99,
+  "x_run_mm": 9.46,
+  "F_run_N": 0.949,
+  "L_run_mm": 6.54,
+  "solid_ok": true,
+  "tau_MPa": 304,
+  "tau_allow_MPa": 1035,
+  "tau_ok": true,
+  "L0_over_D": 2.13,
+  "buckle_ok": true,
+  "fn_Hz": 16.1,
+  "fit_ok": true
+ },
+ "overshoot": [
+  {
+   "f_Hz": 10.0,
+   "k_c": 300.0,
+   "k_eff": 75.2,
+   "dF_N": 0.0169,
+   "pct_of_Fp": 3.4
+  },
+  {
+   "f_Hz": 10.0,
+   "k_c": 3000.0,
+   "k_eff": 97.1,
+   "dF_N": 0.0219,
+   "pct_of_Fp": 4.4
+  },
+  {
+   "f_Hz": 80.0,
+   "k_c": 300.0,
+   "k_eff": 75.2,
+   "dF_N": 0.0028,
+   "pct_of_Fp": 0.6
+  },
+  {
+   "f_Hz": 80.0,
+   "k_c": 3000.0,
+   "k_eff": 97.1,
+   "dF_N": 0.0036,
+   "pct_of_Fp": 0.7
+  }
+ ],
+ "t_press_after_contact_s": 2.63,
+ "F_at_limit_soft_lowest_N": 0.489,
+ "sensitivity_F_safe": [
+  {
+   "F_safe_N": 0.7,
+   "ks_min": 93.8,
+   "ks_max": 82.4,
+   "ok": false
+  },
+  {
+   "F_safe_N": 0.8,
+   "ks_min": 93.8,
+   "ks_max": 94.1,
+   "ok": true
+  },
+  {
+   "F_safe_N": 1.0,
+   "ks_min": 93.8,
+   "ks_max": 117.6,
+   "ok": true
+  },
+  {
+   "F_safe_N": 1.5,
+   "ks_min": 93.8,
+   "ks_max": 176.5,
+   "ok": true
+  },
+  {
+   "F_safe_N": 2.0,
+   "ks_min": 93.8,
+   "ks_max": 235.3,
+   "ok": true
+  }
+ ],
+ "fig": "../img/calc/spring146_힘_거리.png"
+}
