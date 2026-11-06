@@ -1,0 +1,533 @@
+{
+ "rows": [
+  {
+   "problem": "T8 Riley 9-6",
+   "item": "미끄러지기 시작하는 힘 P",
+   "mine": 360.0,
+   "book": 360.0,
+   "unit": "N",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T8 Riley 9-6",
+   "item": "넘어지지 않는 최대 높이 h",
+   "mine": 0.66667,
+   "book": 0.667,
+   "unit": "m",
+   "rel_diff_pct": 0.05,
+   "ok": true,
+   "note": "교재는 240/360 = 0.667로 반올림"
+  },
+  {
+   "problem": "T8 Riley 9-6",
+   "item": "h 다른 방법 (0.4/μ)",
+   "mine": 0.66667,
+   "book": 0.667,
+   "unit": "m",
+   "rel_diff_pct": 0.05,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T9 Gere 2-1",
+   "item": "dD (기호식 같음)",
+   "mine": 1.33333,
+   "book": 1.3333333333333333,
+   "unit": "P/k 등 무차원",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T9 Gere 2-1",
+   "item": "dC (기호식 같음)",
+   "mine": 1.86667,
+   "book": 1.8666666666666667,
+   "unit": "P/k 등 무차원",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T9 Gere 2-1",
+   "item": "th (기호식 같음)",
+   "mine": 1.33333,
+   "book": 1.3333333333333333,
+   "unit": "P/k 등 무차원",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T9 Gere 2-1",
+   "item": "FB (기호식 같음)",
+   "mine": 0.93333,
+   "book": 0.9333333333333333,
+   "unit": "P/k 등 무차원",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T9 Gere 2-1",
+   "item": "FCD (기호식 같음)",
+   "mine": 0.53333,
+   "book": 0.5333333333333333,
+   "unit": "P/k 등 무차원",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T9 Gere 2-1",
+   "item": "ME (기호식 같음)",
+   "mine": 0.53333,
+   "book": 0.5333333333333333,
+   "unit": "P/k 등 무차원",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "정적 처짐 δst",
+   "mine": 39.24,
+   "book": 39.2,
+   "unit": "mm",
+   "rel_diff_pct": 0.102,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "ωn",
+   "mine": 15.81139,
+   "book": 15.81,
+   "unit": "rad/s",
+   "rel_diff_pct": 0.009,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "fn",
+   "mine": 2.51646,
+   "book": 2.52,
+   "unit": "Hz",
+   "rel_diff_pct": 0.14,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "주기 τ",
+   "mine": 0.39738,
+   "book": 0.397,
+   "unit": "s",
+   "rel_diff_pct": 0.097,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "진폭 x0'/ωn",
+   "mine": 31.62278,
+   "book": 31.6,
+   "unit": "mm",
+   "rel_diff_pct": 0.072,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "최대 속도",
+   "mine": 0.5,
+   "book": 0.5,
+   "unit": "m/s",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "최대 가속도",
+   "mine": 7.90569,
+   "book": 7.91,
+   "unit": "m/s²",
+   "rel_diff_pct": 0.054,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T10 Meriam 8/1",
+   "item": "진폭 (수치 적분)",
+   "mine": 31.62278,
+   "book": 31.6,
+   "unit": "mm",
+   "rel_diff_pct": 0.072,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "Sut",
+   "mine": 2230.9262,
+   "book": 2231,
+   "unit": "MPa",
+   "rel_diff_pct": 0.003,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "Ssy",
+   "mine": 1003.91679,
+   "book": 1004,
+   "unit": "MPa",
+   "rel_diff_pct": 0.008,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "C",
+   "mine": 10.82234,
+   "book": 10.8,
+   "unit": "",
+   "rel_diff_pct": 0.207,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "KB",
+   "mine": 1.1241,
+   "book": 1.124,
+   "unit": "",
+   "rel_diff_pct": 0.009,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "F (항복 하중)",
+   "mine": 28.63428,
+   "book": 28.26,
+   "unit": "N",
+   "rel_diff_pct": 1.324,
+   "ok": true,
+   "note": "교재 산술 오류: π(0.94³)(1004)/(8·1.124·10.1727) = 28.63 N. 교재 (d) y = 39.70 = 28.61/0.7207이라 뒤 계산은 28.6을 씀"
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "k",
+   "mine": 0.72129,
+   "book": 0.7207,
+   "unit": "N/mm",
+   "rel_diff_pct": 0.081,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "y",
+   "mine": 39.69897,
+   "book": 39.7,
+   "unit": "mm",
+   "rel_diff_pct": 0.003,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "Ls",
+   "mine": 12.69,
+   "book": 12.69,
+   "unit": "mm",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "L0",
+   "mine": 52.38897,
+   "book": 52.39,
+   "unit": "mm",
+   "rel_diff_pct": 0.002,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "(L0)cr",
+   "mine": 53.50998,
+   "book": 53.51,
+   "unit": "mm",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T11 Shigley 10-1",
+   "item": "피치 p",
+   "mine": 4.72085,
+   "book": 4.72,
+   "unit": "mm",
+   "rel_diff_pct": 0.018,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "Ssy",
+   "mine": 897.8718,
+   "book": 897.9,
+   "unit": "MPa",
+   "rel_diff_pct": 0.003,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "α",
+   "mine": 748.2265,
+   "book": 748.3,
+   "unit": "MPa",
+   "rel_diff_pct": 0.01,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "β",
+   "mine": 63.24641,
+   "book": 63.2,
+   "unit": "MPa",
+   "rel_diff_pct": 0.073,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "C",
+   "mine": 10.48403,
+   "book": 10.5,
+   "unit": "",
+   "rel_diff_pct": 0.152,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "D",
+   "mine": 21.28258,
+   "book": 21.3,
+   "unit": "mm",
+   "rel_diff_pct": 0.082,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "KB",
+   "mine": 1.12842,
+   "book": 1.128,
+   "unit": "",
+   "rel_diff_pct": 0.037,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "τs",
+   "mine": 748.2265,
+   "book": 748,
+   "unit": "MPa",
+   "rel_diff_pct": 0.03,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "ns",
+   "mine": 1.2,
+   "book": 1.2,
+   "unit": "",
+   "rel_diff_pct": 0.0,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "OD",
+   "mine": 23.31258,
+   "book": 23.3,
+   "unit": "mm",
+   "rel_diff_pct": 0.054,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "Na",
+   "mine": 10.18076,
+   "book": 10.16,
+   "unit": "회",
+   "rel_diff_pct": 0.204,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "Nt",
+   "mine": 12.18076,
+   "book": 12.16,
+   "unit": "회",
+   "rel_diff_pct": 0.171,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "Ls",
+   "mine": 24.72695,
+   "book": 24.3,
+   "unit": "mm",
+   "rel_diff_pct": 1.757,
+   "ok": true,
+   "note": "교재 산술 오류: 2.03 × 12.16 = 24.68 (교재 24.3). 그래서 교재 L0 82.7도 0.4 mm 작음 (맞는 값 83.1)"
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "L0",
+   "mine": 83.14695,
+   "book": 82.7,
+   "unit": "mm",
+   "rel_diff_pct": 0.54,
+   "ok": true,
+   "note": "위 Ls 오류가 이어짐"
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "(L0)cr",
+   "mine": 111.94635,
+   "book": 112,
+   "unit": "mm",
+   "rel_diff_pct": 0.048,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2",
+   "item": "Na (D=21.3 반올림 재현)",
+   "mine": 10.1558,
+   "book": 10.16,
+   "unit": "회",
+   "rel_diff_pct": 0.041,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=1.600 C",
+   "mine": 6.18487,
+   "book": 6.205,
+   "unit": "",
+   "rel_diff_pct": 0.324,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=1.600 D",
+   "mine": 9.8958,
+   "book": 9.931,
+   "unit": "mm",
+   "rel_diff_pct": 0.354,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=1.600 Na",
+   "mine": 39.4215,
+   "book": 39.1,
+   "unit": "회",
+   "rel_diff_pct": 0.822,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=1.905 C",
+   "mine": 9.15314,
+   "book": 9.178,
+   "unit": "",
+   "rel_diff_pct": 0.271,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=1.905 D",
+   "mine": 17.43674,
+   "book": 17.475,
+   "unit": "mm",
+   "rel_diff_pct": 0.219,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=1.905 Na",
+   "mine": 14.35665,
+   "book": 14.2,
+   "unit": "회",
+   "rel_diff_pct": 1.103,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=2.413 C",
+   "mine": 14.98596,
+   "book": 15.02,
+   "unit": "",
+   "rel_diff_pct": 0.227,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=2.413 D",
+   "mine": 36.16112,
+   "book": 36.245,
+   "unit": "mm",
+   "rel_diff_pct": 0.231,
+   "ok": true,
+   "note": ""
+  },
+  {
+   "problem": "T12 Shigley 10-2 표",
+   "item": "d=2.413 Na",
+   "mine": 4.14355,
+   "book": 4.1,
+   "unit": "회",
+   "rel_diff_pct": 1.062,
+   "ok": true,
+   "note": ""
+  }
+ ],
+ "n": 52,
+ "n_ok": 52,
+ "textbook_errata": [
+  "Shigley 10-2 표 아래 문장: 'diameters less than 0.203 mm'·'0.203 mm wire'는 2.03 mm의 SI 변환 오타 (표·본문 계산은 2.03)",
+  "Shigley 10-1 (b): F = 28.26 N은 산술 오류, 맞는 값 28.6 N (교재 (d)는 28.6으로 계산)",
+  "Shigley 10-2: Ls = 2.03(12.16) = 24.68 mm인데 교재 24.3 → L0도 82.7 대신 83.1 mm",
+  "Shigley 10-2 fom 식에 (25.4)^3 나눗셈 — 인치판 단위 환산 흔적, 비교용이라 결론에는 영향 없음",
+  "Shigley 10-4 (d): G 11.75(10^6)·중력 386 (in/s²)이 SI 식에 섞임 — 이번 유제에서는 쓰지 않음, 서지 주파수는 식 (10-25)를 SI로 직접 계산"
+ ]
+}
