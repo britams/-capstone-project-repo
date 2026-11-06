@@ -497,3 +497,64 @@ def apply_gates_estop(doc):
         out.append(e.Label)
     doc.recompute()
     return out
+
+
+# ---------------- (11/06 20:45) 아두이노 UNO 공식 STEP (승준이 SnapEDA에서 받음) ----------------
+# 파일: A000066.STEP ('ARDUINO UNO REV3', SolidWorks 2017) — 레포에는 안 올림 (SnapEDA 약관·16 MB). 승준 PC 다운로드 폴더에서 읽음.
+# 맞춤: 가장 얇은 방향을 z로 눕힌 뒤, z축으로 0/90/180/270° 돌려 보며 Ø3.2 구멍 4개가 UNO 공식 구멍 자리와 맞는 방향을 고름.
+UNO_STEP_GLOB = ("~/Downloads/A000066*.st*p", "~/Downloads/A000066*.ST*P")
+
+
+def find_uno_step():
+    import glob
+    for g in UNO_STEP_GLOB:
+        f = sorted(glob.glob(os.path.expanduser(g)), key=os.path.getmtime)
+        if f:
+            return f[-1]
+    return None
+
+
+def _holes_xy(s, rmin=1.4, rmax=1.75):
+    pts = []
+    for f in s.Faces:
+        if f.Surface.TypeId == "Part::GeomCylinder" and rmin <= f.Surface.Radius <= rmax and abs(f.Surface.Axis.z) > 0.99:
+            c = f.Surface.Center
+            if all(abs(c.x - p[0]) > 0.3 or abs(c.y - p[1]) > 0.3 for p in pts):
+                pts.append((c.x, c.y))
+    return pts
+
+
+def uno_official(raw, x0, y0, zb):
+    """raw: 읽은 STEP. 기판 왼쪽 아래 모서리 (x0, y0) = UNO 규격 원점, 기판 아래 면 zb. 반환 (shape, 맞춘 구멍 수, 회전)"""
+    s = raw.copy()
+    b = s.BoundBox
+    dims = [b.XLength, b.YLength, b.ZLength]
+    i = dims.index(min(dims))
+    if i == 1:
+        s.rotate(b.Center, V(1, 0, 0), -90)
+    elif i == 0:
+        s.rotate(b.Center, V(0, 1, 0), 90)
+    want = UNO["holes"]
+    best = None
+    for flip in (False, True):
+        for rot in (0, 90, 180, 270):
+            t = s.copy()
+            if flip:
+                t.rotate(t.BoundBox.Center, V(1, 0, 0), 180)
+            t.rotate(t.BoundBox.Center, V(0, 0, 1), rot)
+            hs = _holes_xy(t)
+            for hx, hy in hs:                         # 이 구멍을 (13.97, 2.54)로 놓아 봄
+                ox, oy = hx - want[0][0], hy - want[0][1]
+                hit = sum(1 for wx, wy in want if any(abs(px - ox - wx) < 0.4 and abs(py - oy - wy) < 0.4 for px, py in hs))
+                if best is None or hit > best[0]:
+                    best = (hit, flip, rot, ox, oy)
+    hit, flip, rot, ox, oy = best
+    if flip:
+        s.rotate(s.BoundBox.Center, V(1, 0, 0), 180)
+    s.rotate(s.BoundBox.Center, V(0, 0, 1), rot)
+    # 기판 아래 면: 68.58 × 53.34 넓은 수평 면 중 아래쪽
+    flats = sorted([f for f in s.Faces if f.Surface.TypeId == "Part::GeomPlane" and abs(f.normalAt(0, 0).z) > 0.99 and f.Area > 2500],
+                   key=lambda f: f.CenterOfMass.z)
+    z_bot = flats[0].CenterOfMass.z if flats else s.BoundBox.ZMin
+    s.translate(V(x0 - ox, y0 - oy, zb - z_bot))
+    return s, hit, (flip, rot)
