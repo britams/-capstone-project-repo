@@ -1,0 +1,212 @@
+﻿넷,끝,AWG,비고
++5V_B,SW_E.2,20,비상 정지 NC 뒤 = 구동 레일
++5V_B,TB.+5V,20,비상 정지 NC 뒤 = 구동 레일
++5V_B,C1.+,20,비상 정지 NC 뒤 = 구동 레일
++5V_B,C2.1,20,비상 정지 NC 뒤 = 구동 레일
++5V_B,R_RS.1,20,비상 정지 NC 뒤 = 구동 레일
++5V_B,ULN_F.VCC,22,
++5V_B,ULN_X.VCC,22,
++5V_B,ULN_Y.VCC,22,
++5V_B,SG90.V+,26,빨강 — 레일에서 (UNO 5V 아님)
++5V_B,MG_IN.V+,26,
++5V_B,MG_CAP.V+,26,
++5V_B,MG_REL.V+,26,
++5V_B,R_G1.2,28,
++5V_B,RX_G1.V+,28,
++5V_B,TX_G1.V+,28,
++5V_B,R_G2.2,28,
++5V_B,RX_G2.V+,28,
++5V_B,TX_G2.V+,28,
++5V_B,R_G2b.2,28,
++5V_B,RX_G2b.V+,28,
++5V_B,TX_G2b.V+,28,
++5V_B,R_G3.2,28,
++5V_B,RX_G3.V+,28,
++5V_B,TX_G3.V+,28,
++5V_B,R_G3b.2,28,
++5V_B,RX_G3b.V+,28,
++5V_B,TX_G3b.V+,28,
++5V_B,R_G4.2,28,
++5V_B,RX_G4.V+,28,
++5V_B,TX_G4.V+,28,
++5V_B,R_G5.2,28,
++5V_B,RX_G5.V+,28,
++5V_B,TX_G5.V+,28,
++5V_B,R_G5b.2,28,
++5V_B,RX_G5b.V+,28,
++5V_B,TX_G5b.V+,28,
++5V_B,R_G6.2,28,
++5V_B,RX_G6.V+,28,
++5V_B,TX_G6.V+,28,
++5V_B,L_TOP.V+,24,
++5V_B,L_BOT.V+,24,
++5V_B,L_EXIT.V+,24,
+CSI,PI.CAM0,,Pi 5 22핀 ↔ 15핀 300 mm
+CSI,CAM.CSI,,Pi 5 22핀 ↔ 15핀 300 mm
+EMIT_LO,TX_G1.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G2.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G2b.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G3.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G3b.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G4.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G5.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G5b.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,TX_G6.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
+EMIT_LO,Q4.OUT-,24,
+GND,J_B.-,20,GND 한 점 (단자대)
+GND,TB.GND,20,GND 한 점 (단자대)
+GND,C1.-,20,GND 한 점 (단자대)
+GND,C2.2,20,GND 한 점 (단자대)
+GND,U1.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
+GND,U2.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
+GND,ULN_F.GND,22,
+GND,ULN_X.GND,22,
+GND,ULN_Y.GND,22,
+GND,SG90.GND,26,갈색
+GND,HX711.GND,26,
+GND,SW_HF.COM,28,
+GND,C_HF.2,28,
+GND,SW_HX.COM,28,
+GND,C_HX.2,28,
+GND,SW_HY.COM,28,
+GND,C_HY.2,28,
+GND,MG_IN.GND,26,
+GND,MG_CAP.GND,26,
+GND,MG_REL.GND,26,
+GND,RX_G1.GND,28,
+GND,RX_G2.GND,28,
+GND,RX_G2b.GND,28,
+GND,RX_G3.GND,28,
+GND,RX_G3b.GND,28,
+GND,RX_G4.GND,28,
+GND,RX_G5.GND,28,
+GND,RX_G5b.GND,28,
+GND,RX_G6.GND,28,
+GND,Q4.GND,24,
+GND,Q1.GND,24,
+GND,Q2.GND,24,
+GND,Q3.GND,24,
+HX_RATE,HX711.RATE,,RATE를 5 V로 → 80 Hz (모듈 납땜 다리)
+HX_RATE,HX711.VCC_PAD,,RATE를 5 V로 → 80 Hz (모듈 납땜 다리)
+I2C_SCL,PI.GPIO3,28,
+I2C_SCL,J_I2C.SCL,28,
+I2C_SDA,PI.GPIO2,28,INA226 (배터리 상자)
+I2C_SDA,J_I2C.SDA,28,INA226 (배터리 상자)
+LC_A+,HX711.A+,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_A+,LC.초록,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_A-,HX711.A-,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_A-,LC.흰,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_E+,HX711.E+,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_E+,LC.빨강,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_E-,HX711.E-,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+LC_E-,LC.검정,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
+L_BOT_LO,L_BOT.V-,24,
+L_BOT_LO,Q2.OUT-,24,
+L_EXIT_LO,L_EXIT.V-,24,
+L_EXIT_LO,Q3.OUT-,24,
+L_TOP_LO,L_TOP.V-,24,
+L_TOP_LO,Q1.OUT-,24,
+M_F,ULN_F.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+M_F,M_F.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+M_X,ULN_X.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+M_X,M_X.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+M_Y,ULN_Y.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+M_Y,M_Y.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+PI_3V3,PI.3V3,28,
+PI_3V3,J_I2C.VCC,28,
+PI_GND,PI.GND,28,
+PI_GND,J_I2C.GND,28,
+U1_5V,U1.5V,26,HX711은 UNO 5 V (조용함)
+U1_5V,HX711.VCC,26,HX711은 UNO 5 V (조용함)
+U1_F_IN1,U1.D2,26,
+U1_F_IN1,ULN_F.IN1,26,
+U1_F_IN2,U1.D3,26,
+U1_F_IN2,ULN_F.IN2,26,
+U1_F_IN3,U1.D4,26,
+U1_F_IN3,ULN_F.IN3,26,
+U1_F_IN4,U1.D5,26,
+U1_F_IN4,ULN_F.IN4,26,
+U1_HOME_F,U1.A3,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_F,SW_HF.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_F,C_HF.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_X,U1.A4,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_X,SW_HX.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_X,C_HX.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_Y,U1.A5,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_Y,SW_HY.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HOME_Y,C_HY.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
+U1_HX_DT,U1.A1,26,
+U1_HX_DT,HX711.DT,26,
+U1_HX_SCK,U1.A2,26,
+U1_HX_SCK,HX711.SCK,26,
+U1_PEN,U1.A0,26,주황
+U1_PEN,SG90.SIG,26,주황
+U1_X_IN1,U1.D6,26,
+U1_X_IN1,ULN_X.IN1,26,
+U1_X_IN2,U1.D7,26,
+U1_X_IN2,ULN_X.IN2,26,
+U1_X_IN3,U1.D8,26,
+U1_X_IN3,ULN_X.IN3,26,
+U1_X_IN4,U1.D9,26,
+U1_X_IN4,ULN_X.IN4,26,
+U1_Y_IN1,U1.D10,26,
+U1_Y_IN1,ULN_Y.IN1,26,
+U1_Y_IN2,U1.D11,26,
+U1_Y_IN2,ULN_Y.IN2,26,
+U1_Y_IN3,U1.D12,26,
+U1_Y_IN3,ULN_Y.IN3,26,
+U1_Y_IN4,U1.D13,26,
+U1_Y_IN4,ULN_Y.IN4,26,
+U2_DOOR_CAP,U2.D10,26,주황
+U2_DOOR_CAP,MG_CAP.SIG,26,주황
+U2_DOOR_IN,U2.D9,26,주황
+U2_DOOR_IN,MG_IN.SIG,26,주황
+U2_DOOR_REL,U2.D11,26,주황
+U2_DOOR_REL,MG_REL.SIG,26,주황
+U2_EMIT,U2.D4,26,HIGH = 송신 켬 (자가 시험 때 끔)
+U2_EMIT,Q4.TRIG,26,HIGH = 송신 켬 (자가 시험 때 끔)
+U2_G1,U2.A0,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G1,RX_G1.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G1,R_G1.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2,U2.A1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2,RX_G2.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2,R_G2.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2b,U2.A2,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2b,RX_G2b.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G2b,R_G2b.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G3,U2.A3,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G3,RX_G3.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G3,R_G3.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G3b,U2.A4,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G3b,RX_G3b.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G3b,R_G3b.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G4,U2.A5,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G4,RX_G4.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G4,R_G4.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5,U2.D7,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5,RX_G5.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5,R_G5.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5b,U2.D8,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5b,RX_G5b.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G5b,R_G5b.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G6,U2.D12,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G6,RX_G6.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_G6,R_G6.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_Q1,U2.D3,26,PWM 되는 핀
+U2_Q1,Q1.TRIG,26,PWM 되는 핀
+U2_Q2,U2.D5,26,PWM 되는 핀
+U2_Q2,Q2.TRIG,26,PWM 되는 핀
+U2_Q3,U2.D6,26,PWM 되는 핀
+U2_Q3,Q3.TRIG,26,PWM 되는 핀
+U2_RAIL,U2.D2,28,"10 kΩ 직렬, 레일 있으면 HIGH (INT0)"
+U2_RAIL,R_RS.2,28,"10 kΩ 직렬, 레일 있으면 HIGH (INT0)"
+USB_PI,PSU_A.USBC,,27 W USB-C (또는 배터리 상자 5.1 V 5 A)
+USB_PI,PI.USBC,,27 W USB-C (또는 배터리 상자 5.1 V 5 A)
+USB_U1,PI.USB1,,"USB A-B 0.5 m, UNO 1 전원 + 115200"
+USB_U1,U1.USB,,"USB A-B 0.5 m, UNO 1 전원 + 115200"
+USB_U2,PI.USB2,,USB A-B 0.5 m
+USB_U2,U2.USB,,USB A-B 0.5 m
+VF_B,F1.2,20,퓨즈 T2.5A 지연형
+VF_B,SW_E.1,20,퓨즈 T2.5A 지연형
+VIN_B,J_B.+,20,배럴 5.5×2.1 (+ 가운데)
+VIN_B,F1.1,20,배럴 5.5×2.1 (+ 가운데)

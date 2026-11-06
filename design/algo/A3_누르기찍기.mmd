@@ -1,0 +1,12 @@
+flowchart TD
+  A[PEN UP 확인] --> B[동시에: MOVE X, MOVE Y 흉부 추정<br/>PRESS 51 g 바닥 올리기]
+  B --> C{DONE PRESS?}
+  C -->|LIMIT 하중 없음| D[바닥 0으로 → 다시 최대 3번]
+  C -->|51 g 도달| E[촬영: 등 위? 흉부 좌표]
+  E -->|뒤집힘| F[바닥 10 mm 내림, 2초] --> B
+  E -->|등 위| G[MOVE X,Y 흉부로]
+  G --> H[PEN DOWN 2단계<br/>빠르게 → 마지막 2 mm 60°/s 이하]
+  H --> I[0.3초 → PEN UP, 한 번 더]
+  I --> J[대기 자리로 비켜서 촬영]
+  J -->|점 있음| K[PEN DOWN = 캡 컵]
+  J -->|없음, 1번 더| G

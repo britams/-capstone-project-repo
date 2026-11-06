@@ -1,0 +1,11 @@
+flowchart TD
+  S[DOOR d CLOSE 받음] --> B{다른 문 서보<br/>움직이는 중?}
+  B -->|예| B
+  B -->|아니오| G{문 d 빔 2개 모두<br/>0.2초 이상 비었나?}
+  G -->|아니오| G
+  G -->|예| M[닫기 시작 0.2초<br/>1 ms마다 빔 읽기]
+  M -->|빔 하나라도 막힘| RV[바로 다시 열기<br/>재시도 k+1]
+  RV --> K{k = 3?}
+  K -->|아니오, 1초 뒤| G
+  K -->|예| BL[EVT DOOR d BLOCKED<br/>Pi가 5초 뒤 다시 명령]
+  M -->|끝까지 비어 있음| OK[EVT DOOR d CLOSED<br/>0.5초 뒤 서보 신호 끊기]
