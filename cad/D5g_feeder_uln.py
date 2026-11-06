@@ -8,7 +8,7 @@ D5g_frame_detail.make() 가 부른다. 좌표는 D5e 좌표계 (원점 격자 �
    구매품: 팰컨 50 mL 원뿔 튜브(코닝 352070: 바깥 Ø29.72, 길이 114.55, 원뿔 16) [확실 — 제조사 도면]
            치과용 코튼롤 2호 Ø10 × 38 [가능성 높음 — 판매처 여러 곳 같은 값]
    설계품(3D 프린트, PETG — 설탕물·세척): 143 급이 물길(벽 → 그릇) + 튜브 그릇 + 기둥 → 발은 데크 위, M5 × 12로 데크를 지나 아래 2020 가로대(y +80) T너트에
-   물 높이: 튜브 입구 z 374 → 물길 바닥 369, 코튼롤 아래 끝 373 → 롤이 1 mm 이상 잠김 (입구 높이를 받침 리브로 정함)
+   물 높이: 튜브 입구 z 369 (받침 리브 높이로 정함) — 벽 구멍 아래 끝 372.6보다 3.6 mm 낮음, 코튼롤 바깥 끝은 2 mm 잠김 (water_check())
    바뀐 곳: 144 먹이통·142 심지(자리 상자) 지움, 120 마킹실 벽 +y 쪽에 Ø10.6 구멍 (x 55, z 378)
    튜브 자리 y 95: 마커 X 빔(212, y −74~66)이 x로 지나가는 자리 밖이라 위로 길어도 안 부딪침
 2) ULN2003 드라이버 보드 — 판매품 35 × 31.9 × 11, M2.5 구멍 30 × 26.5 [가능성 높음 — 판매처 2곳 같은 값]
@@ -21,9 +21,12 @@ import Part
 
 V = App.Vector
 
-FD = dict(x=55.0, zc=378.0, roll_r=5.0, roll_y0=16.0, roll_L=38.0, wall_hole_r=5.3,
-          ch_w=12.0, ch_t=2.0, ch_y0=23.0, ch_y1=95.0, floor_z=366.0, floor_t=3.0, wall_top=388.0,
-          tube_y=95.0, tube_r=14.86, tube_L=114.55, cone_L=16.0, tip_r=3.1, mouth_z=374.0,
+# (11/06 밤 고침) 물 높이가 벽 구멍 아래 끝보다 높아 틈으로 새던 것 → 물 높이 369, 코튼롤을 바깥으로 10.6° 내려 바깥 끝만 잠김
+#   벽 구멍 아래 끝 372.6 − 물 높이 369 = 3.6 mm 여유 ≥ 낮 열팽창 최대 2.6 mm (튜브 공기 50 mL, +25 K) [확실 — 계산, 문서 3장]
+FD = dict(x=55.0, roll_r=5.0, tip_y=16.0, tip_z=379.0, end_y=54.0, end_z=372.0,      # 코튼롤: 안 끝(마킹실) → 바깥 끝(물길)
+          wall_hole_r=5.6, wall_hole_z=378.2,
+          ch_w=12.0, ch_t=2.0, ch_y0=23.0, ch_y1=95.0, floor_z=361.0, floor_t=3.0, wall_top=388.0,
+          tube_y=95.0, tube_r=14.86, tube_L=114.55, cone_L=16.0, tip_r=3.1, mouth_z=369.0,
           bowl_ri=17.5, bowl_t=2.5, bowl_top=400.0, post_y=80.0, post_w=12.0, post_foot_z=205.0)   # 발: 데크(101) 윗면 z 205, 아래 2020 가로대 y +80
 FOOT_DX = 12.0     # 발 볼트 x 간격 (머리 Ø8.5가 기둥 12 × 12에 안 닿게: 12 − 4.25 > 6)
 ULN = dict(L=35.0, W=31.9, t=1.6, hx=30.0, hy=26.5, hole=2.7, stand=5.0)
@@ -37,7 +40,9 @@ def box(x0, x1, y0, y1, z0, z1):
 # ---------------- 급이 방 ----------------
 def cotton_roll():
     f = FD
-    return Part.makeCylinder(f["roll_r"], f["roll_L"], V(f["x"], f["roll_y0"], f["zc"]), V(0, 1, 0))
+    p0 = V(f["x"], f["tip_y"], f["tip_z"])
+    d = V(0, f["end_y"] - f["tip_y"], f["end_z"] - f["tip_z"])
+    return Part.makeCylinder(f["roll_r"], d.Length, p0, d)
 
 
 def falcon_tube_inverted():
@@ -77,7 +82,16 @@ def feed_trough():
 
 def wall_hole():
     f = FD
-    return Part.makeCylinder(f["wall_hole_r"], 12, V(f["x"], 15.0, f["zc"]), V(0, 1, 0))
+    return Part.makeCylinder(f["wall_hole_r"], 12, V(f["x"], 15.0, f["wall_hole_z"]), V(0, 1, 0))
+
+
+def water_check():
+    """물 높이 여유: 벽 구멍 아래 끝 − 물 높이, 코튼롤 바깥 끝이 잠긴 깊이"""
+    f = FD
+    hole_bot = f["wall_hole_z"] - f["wall_hole_r"]
+    end_bot = f["end_z"] - f["roll_r"]
+    return dict(level=f["mouth_z"], hole_bottom=round(hole_bot, 2), margin=round(hole_bot - f["mouth_z"], 2),
+                roll_end_bottom=end_bot, immersed=round(f["mouth_z"] - end_bot, 2), floor_top=f["floor_z"] + f["floor_t"])
 
 
 # ---------------- ULN2003 보드 (판매품 외형) ----------------
