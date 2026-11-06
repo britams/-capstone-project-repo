@@ -166,7 +166,7 @@ def bracket_places():
 CATEGORY = [
     ("REF_camera_view", "X"), ("P204", "X"), ("190_pi5_aihat (D5e", "X"),
     ("REF_", "C"),
-    ("195p_", "A"), ("198_", "A"), ("142n_", "A"), ("144n_", "A"), ("100h_", "A"), ("100i_", "A"),
+    ("195p_", "A"), ("198_", "A"), ("198p_", "A"), ("190r_", "A"), ("193_terminal", "A"), ("142n_", "A"), ("144n_", "A"), ("100h_", "A"), ("100i_", "A"),
     ("193_", "D"), ("194_", "D"), ("196_", "D"),
     ("100", "A"), ("153_", "A"), ("153r_", "A"), ("209_", "A"), ("209r_", "A"), ("215_", "A"), ("215r_", "A"),
     ("154_", "A"), ("210_", "A"), ("216_", "A"), ("155_", "A"), ("208_", "A"), ("214_", "A"),
@@ -234,6 +234,11 @@ def make():
     import sys
     FU.make_into(doc, sys.modules[__name__])
     FU.support_fixes(doc)
+    import D5g_real_parts as RP                      # 전기 부품 실제 CAD (KiCad STEP·Pi 5 공식 STEP, 인터넷 필요)
+    try:
+        RP.apply(doc)
+    except Exception as e:
+        print('실제 부품 CAD 못 받음 (인터넷 확인):', e)
     for o in list(doc.Objects):        # D5f에서 스프링 204 뺀 뒤 남은 바탕 원기둥
         if o.Label in ("P204a", "P204b"):
             doc.removeObject(o.Name)
