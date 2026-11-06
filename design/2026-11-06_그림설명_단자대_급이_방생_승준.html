@@ -1,0 +1,415 @@
+<title>말벌 트랩 그림 설명</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* 레이아웃: 그림 한 장 + 짧은 말 세 줄씩, 위에서 아래로 차례대로 읽는 그림책 */
+:root{
+  --paper:#f3f6f8; --card:#ffffff; --ink:#1d2b3a; --soft:#5b6b7a; --line:#c9d3dc;
+  --water:#2f8fd8; --water-bg:#d7ebfa; --sugar:#e8a33a; --air:#9fb3c4;
+  --print:#e98a2c; --metal:#8a97a6; --danger:#d4433b; --ok:#2e9e5b; --wasp:#3a2a12; --waspband:#e9b93c;
+  --plus:#d4433b; --minus:#22303d; --blue-part:#2f6fd0;
+  --display:"Jua","Gowun Dodum",system-ui,sans-serif;
+  --body:"Gowun Dodum",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121a22; --card:#1a2530; --ink:#e7eef5; --soft:#a6b4c2; --line:#34445a;
+  --water:#5bb0f0; --water-bg:#1d3a52; --sugar:#f0b65a; --air:#7f93a6;
+  --print:#f09a45; --metal:#9aa7b6; --danger:#ef6b62; --ok:#4cc27e; --wasp:#d9c7a3; --waspband:#f0c75a;
+  --plus:#ef6b62; --minus:#c9d6e2; --blue-part:#5b93ea; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121a22; --card:#1a2530; --ink:#e7eef5; --soft:#a6b4c2; --line:#34445a;
+  --water:#5bb0f0; --water-bg:#1d3a52; --sugar:#f0b65a; --air:#7f93a6;
+  --print:#f09a45; --metal:#9aa7b6; --danger:#ef6b62; --ok:#4cc27e; --wasp:#d9c7a3; --waspband:#f0c75a;
+  --plus:#ef6b62; --minus:#c9d6e2; --blue-part:#5b93ea; color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+main{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1,h2{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:2rem;line-height:1.25}
+h2{font-size:1.45rem;line-height:1.3}
+h2 .tag{display:inline-block;font-size:.8rem;letter-spacing:.06em;color:var(--soft);font-family:var(--body);margin-right:8px;vertical-align:middle}
+p{margin:0}
+.lead{color:var(--soft)}
+section{display:flex;flex-direction:column;gap:14px}
+figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;width:100%;min-width:520px;height:auto}
+figcaption{font-size:.98rem;color:var(--ink)}
+ol.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.say{background:var(--water-bg);border-radius:10px;padding:10px 14px}
+.warn{border-left:4px solid var(--danger);padding:8px 12px;background:var(--card);border-radius:0 10px 10px 0}
+.good{border-left:4px solid var(--ok);padding:8px 12px;background:var(--card);border-radius:0 10px 10px 0}
+b.w{color:var(--water)} b.r{color:var(--danger)} b.g{color:var(--ok)}
+.num{font-variant-numeric:tabular-nums}
+/* SVG 색 — 전부 토큰에서 */
+.t{fill:var(--ink);font-family:var(--body);font-size:15px}
+.ts{fill:var(--soft);font-family:var(--body);font-size:13px}
+.tb{fill:var(--ink);font-family:var(--display);font-size:17px}
+.tr{fill:var(--danger);font-family:var(--display);font-size:16px}
+.tg{fill:var(--ok);font-family:var(--display);font-size:16px}
+.tw{fill:var(--water);font-family:var(--display);font-size:16px}
+.ink{stroke:var(--ink);fill:none;stroke-width:2}
+.ln{stroke:var(--line);fill:none;stroke-width:1.5}
+.water{fill:var(--water-bg);stroke:var(--water);stroke-width:1.5}
+.waterfill{fill:var(--water)}
+.tube{fill:none;stroke:var(--metal);stroke-width:3}
+.print{fill:var(--print);stroke:var(--ink);stroke-width:1.2}
+.printsoft{fill:var(--print);opacity:.25}
+.metal{fill:var(--metal);stroke:var(--ink);stroke-width:1}
+.cotton{fill:#f7f4ea;stroke:var(--soft);stroke-width:1.2}
+.cottonwet{fill:var(--water);opacity:.35}
+.bubble{fill:var(--card);stroke:var(--air);stroke-width:1.5}
+.arr{stroke:var(--water);stroke-width:3;fill:none;marker-end:url(#hw)}
+.arrk{stroke:var(--ink);stroke-width:2.5;fill:none;marker-end:url(#hk)}
+.arrr{stroke:var(--danger);stroke-width:3;fill:none;marker-end:url(#hr)}
+.arrg{stroke:var(--ok);stroke-width:3;fill:none;marker-end:url(#hg)}
+.arra{stroke:var(--air);stroke-width:3;fill:none;marker-end:url(#ha)}
+.dash{stroke:var(--danger);stroke-width:2;stroke-dasharray:6 4}
+.dashw{stroke:var(--water);stroke-width:2;stroke-dasharray:6 4}
+.blue{fill:var(--blue-part);stroke:var(--ink);stroke-width:1}
+.plusw{stroke:var(--plus);stroke-width:4;fill:none}
+.minusw{stroke:var(--minus);stroke-width:4;fill:none}
+.wasp{fill:var(--wasp)} .band{fill:var(--waspband)}
+.box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
+.xmark{stroke:var(--danger);stroke-width:4}
+@media (prefers-reduced-motion:no-preference){ .bob{animation:bob 2.4s ease-in-out infinite} @keyframes bob{50%{transform:translateY(-6px)}} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="hw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--water)"/></marker>
+    <marker id="hk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink)"/></marker>
+    <marker id="hr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--danger)"/></marker>
+    <marker id="hg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ok)"/></marker>
+    <marker id="ha" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--air)"/></marker>
+  </defs>
+</svg>
+
+<main>
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>말벌 트랩, 그림으로 보기</h1>
+    <p class="lead">파란 부품은 무엇인지, 말벌에게 설탕물을 어떻게 주는지, 말벌이 어디로 나가는지를 그림과 화살표로 설명해요.</p>
+  </header>
+
+  <!-- 1. 파란 부품 -->
+  <section>
+    <h2><span class="tag">1</span>파란 부품은 "전기 나눠 주는 곳"이에요</h2>
+    <p>집에 있는 <b>멀티탭</b>을 떠올려 보세요. 콘센트 하나에서 전기를 받아 여러 기계에 나눠 주지요. 파란 부품이 바로 그 일을 해요.</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 330" role="img" aria-label="어댑터에서 퓨즈를 지나 단자대 두 줄로 전기가 가고, 거기서 모터와 서보로 나눠 가는 그림">
+        <!-- 어댑터 -->
+        <rect x="20" y="120" width="96" height="70" rx="10" class="box"/>
+        <text x="68" y="150" text-anchor="middle" class="tb">어댑터</text>
+        <text x="68" y="172" text-anchor="middle" class="ts">5 V 3 A</text>
+        <text x="68" y="215" text-anchor="middle" class="ts">벽 콘센트에 꽂음</text>
+        <path d="M116 155 H170" class="arrr"/>
+        <!-- 퓨즈 -->
+        <rect x="176" y="128" width="150" height="54" rx="27" class="blue"/>
+        <rect x="196" y="140" width="110" height="30" rx="15" style="fill:var(--card);opacity:.85"/>
+        <path d="M206 155 C226 140, 236 170, 256 155 S286 140, 296 155" style="stroke:var(--sugar);stroke-width:3;fill:none"/>
+        <text x="251" y="112" text-anchor="middle" class="tb">퓨즈</text>
+        <text x="251" y="205" text-anchor="middle" class="ts">안에 가는 철사가 들어 있어요</text>
+        <text x="251" y="225" text-anchor="middle" class="tr">전기가 너무 많이 흐르면</text>
+        <text x="251" y="245" text-anchor="middle" class="tr">철사가 녹아 끊어져요 → 불 안 남</text>
+        <path d="M326 155 H380" class="arrr"/>
+        <!-- 단자대 두 줄 -->
+        <rect x="386" y="70" width="120" height="58" rx="6" class="blue"/>
+        <g style="fill:var(--card)"><circle cx="404" cy="99" r="9"/><circle cx="432" cy="99" r="9"/><circle cx="460" cy="99" r="9"/><circle cx="488" cy="99" r="9"/></g>
+        <text x="446" y="58" text-anchor="middle" class="tr">+ 줄 (빨강 전선)</text>
+        <rect x="386" y="190" width="120" height="58" rx="6" class="blue"/>
+        <g style="fill:var(--card)"><circle cx="404" cy="219" r="9"/><circle cx="432" cy="219" r="9"/><circle cx="460" cy="219" r="9"/><circle cx="488" cy="219" r="9"/></g>
+        <text x="446" y="272" text-anchor="middle" class="t">− 줄 (검정 전선)</text>
+        <text x="446" y="168" text-anchor="middle" class="ts">단자대: 나사로 전선을 꽉 물림</text>
+        <!-- 나눠 주기 -->
+        <path d="M506 90 C560 90, 570 60, 610 60" class="plusw"/>
+        <path d="M506 100 C560 100, 570 135, 610 135" class="plusw"/>
+        <path d="M506 110 C550 115, 560 205, 610 210" class="plusw"/>
+        <path d="M610 60 h6" class="arrr"/><path d="M610 135 h6" class="arrr"/><path d="M610 210 h6" class="arrr"/>
+        <rect x="622" y="40" width="88" height="40" rx="8" class="box"/><text x="666" y="66" text-anchor="middle" class="t">모터 3개</text>
+        <rect x="622" y="115" width="88" height="40" rx="8" class="box"/><text x="666" y="141" text-anchor="middle" class="t">문 서보 3개</text>
+        <rect x="622" y="190" width="88" height="40" rx="8" class="box"/><text x="666" y="216" text-anchor="middle" class="t">조명·센서</text>
+        <text x="360" y="316" text-anchor="middle" class="ts">− 줄도 같은 기계로 한 가닥씩 이어서 전기가 돌아오게 해요</text>
+      </svg>
+      </div>
+      <figcaption>빨간 화살표가 전기가 가는 길이에요. <b>어댑터 → 퓨즈 → 단자대 → 모터·서보</b> 순서예요.</figcaption>
+    </figure>
+    <ol class="steps">
+      <li><b>퓨즈</b> (파란 원통): 전기가 너무 세게 흐르면 안의 철사가 끊어져서 불이 나지 않게 막아요. 끊어지면 새 퓨즈로 갈아 끼워요.</li>
+      <li><b>단자대</b> (파란 나사 두 줄): 위 줄은 + (빨강), 아래 줄은 − (검정)이에요. 전선을 나사 구멍에 넣고 조이면, 여러 기계가 한꺼번에 전기를 받아요.</li>
+      <li><b>주황 받침</b>: 3D 프린터로 뽑아서 데크(바닥 판)에 나사로 붙여요.</li>
+    </ol>
+  </section>
+
+  <!-- 2. 설탕물 -->
+  <section>
+    <h2><span class="tag">2-1</span>설탕물 병을 거꾸로 세워도 안 쏟아지는 이유</h2>
+    <p><b>정수기 생수통</b>을 생각해 보세요. 커다란 물통이 거꾸로 꽂혀 있는데도 물이 왈칵 쏟아지지 않지요. 우리 장치도 같은 방법을 써요.</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 370" role="img" aria-label="거꾸로 세운 설탕물 튜브와 그릇. 바깥 공기가 그릇 물을 눌러서 튜브 속 물이 떨어지지 않는 그림">
+        <!-- 튜브 -->
+        <path d="M300 40 L300 230 L380 230 L380 40 L360 18 L320 18 Z" style="fill:var(--water-bg)"/>
+        <rect x="300" y="60" width="80" height="170" class="waterfill" style="opacity:.55"/>
+        <path d="M300 40 L320 18 L360 18 L380 40" class="ink"/>
+        <path d="M300 40 V236 M380 40 V236" class="ink"/>
+        <text x="340" y="52" text-anchor="middle" class="ts">공기 조금</text>
+        <text x="340" y="150" text-anchor="middle" class="tb" style="fill:var(--card)">설탕물</text>
+        <text x="420" y="34" class="tb">설탕물 튜브 (거꾸로)</text>
+        <!-- 그릇 -->
+        <path d="M230 200 V270 H450 V200" class="ink"/>
+        <rect x="231" y="226" width="218" height="43" class="water"/>
+        <path d="M231 226 H449" class="dashw"/>
+        <text x="470" y="230" class="tw">그릇 물 높이</text>
+        <text x="470" y="250" class="ts">= 튜브 입구 높이</text>
+        <rect x="292" y="236" width="8" height="34" class="print"/><rect x="380" y="236" width="8" height="34" class="print"/>
+        <text x="340" y="300" text-anchor="middle" class="ts">주황 받침 다리가 튜브 입구를 이 높이에 올려 줘요</text>
+        <!-- 공기 누름 화살표 -->
+        <path d="M150 120 V214" class="arra"/><path d="M200 120 V214" class="arra"/>
+        <path d="M480 120 V214" class="arra"/><path d="M530 120 V214" class="arra"/>
+        <text x="175" y="88" text-anchor="middle" class="t">바깥 공기가</text>
+        <text x="175" y="108" text-anchor="middle" class="t">그릇 물을 꾹</text>
+        <text x="505" y="105" text-anchor="middle" class="t">누르고 있어요</text>
+        <!-- 위로 받치는 화살표 -->
+        <path d="M340 262 V246" class="arrk"/>
+        <text x="360" y="330" text-anchor="middle" class="t">→ 그 힘이 튜브 속 물을 <tspan class="tw">위로 받쳐 줘서</tspan> 물이 안 떨어져요.</text><text x="360" y="356" text-anchor="middle" class="ts">(빨대 위를 손가락으로 막고 들어 올리면 물이 안 떨어지는 것과 같아요)</text>
+      </svg>
+      </div>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="tag">2-2</span>물이 줄면 저절로 다시 채워져요</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 300" role="img" aria-label="세 장면: 처음, 물이 줄어 입구가 드러남, 공기방울이 들어가고 물이 내려와 다시 채워짐">
+        <!-- 장면 1 -->
+        <g>
+          <text x="110" y="24" text-anchor="middle" class="tb">① 처음</text>
+          <path d="M80 40 V200 M140 40 V200" class="ink"/><path d="M80 40 H140" class="ink"/>
+          <rect x="81" y="60" width="58" height="140" class="waterfill" style="opacity:.55"/>
+          <path d="M40 180 V240 H180 V180" class="ink"/>
+          <rect x="41" y="196" width="138" height="43" class="water"/>
+          <path d="M41 196 H179" class="dashw"/>
+          <text x="110" y="270" text-anchor="middle" class="ts">물이 입구에 딱 닿아 있어요</text>
+        </g>
+        <path d="M200 140 H240" class="arrk"/>
+        <!-- 장면 2 -->
+        <g>
+          <text x="350" y="24" text-anchor="middle" class="tb">② 말벌이 마셔서 물이 줄어요</text>
+          <path d="M320 40 V200 M380 40 V200" class="ink"/><path d="M320 40 H380" class="ink"/>
+          <rect x="321" y="60" width="58" height="140" class="waterfill" style="opacity:.55"/>
+          <path d="M280 180 V240 H420 V180" class="ink"/>
+          <rect x="281" y="210" width="138" height="29" class="water"/>
+          <path d="M281 196 H419" class="dash"/>
+          <text x="430" y="200" class="ts" style="fill:var(--danger)">원래 높이</text>
+          <path d="M350 190 V206" class="arrr"/>
+          <text x="350" y="270" text-anchor="middle" class="t">입구 밑에 <tspan class="tr">틈</tspan>이 생겨요</text>
+        </g>
+        <path d="M440 140 H480" class="arrk"/>
+        <!-- 장면 3 -->
+        <g>
+          <text x="590" y="24" text-anchor="middle" class="tb">③ 꼴깍! 다시 채워짐</text>
+          <path d="M560 40 V200 M620 40 V200" class="ink"/><path d="M560 40 H620" class="ink"/>
+          <rect x="561" y="72" width="58" height="128" class="waterfill" style="opacity:.55"/>
+          <circle cx="590" cy="150" r="7" class="bubble bob"/><circle cx="580" cy="115" r="5" class="bubble bob"/><circle cx="598" cy="90" r="4" class="bubble"/>
+          <path d="M636 175 V100" class="arra"/>
+          <text x="644" y="140" class="ts">공기방울이</text><text x="644" y="158" class="ts">올라가요</text>
+          <path d="M540 120 V200" class="arr"/>
+          <text x="470" y="100" class="ts" style="fill:var(--water)">그만큼 물이</text><text x="470" y="118" class="ts" style="fill:var(--water)">내려와요</text>
+          <path d="M520 180 V240 H660 V180" class="ink"/>
+          <rect x="521" y="196" width="138" height="43" class="water"/>
+          <path d="M521 196 H659" class="dashw"/>
+          <text x="590" y="270" text-anchor="middle" class="t">다시 <tspan class="tw">입구 높이</tspan>까지 차요</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>그래서 사람이 안 맞춰도 <b>그릇 물은 늘 같은 높이(튜브 입구 높이)</b>예요. 튜브가 다 빌 때까지 이걸 계속 되풀이해요. 정수기에서 물을 따르면 통 속에서 "꿀렁" 공기방울이 올라가는 게 바로 이거예요.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="tag">2-3</span>솜이 물을 마킹실까지 날라 줘요</h2>
+    <p>휴지 끝을 물에 살짝 담그면 물이 휴지를 타고 <b>위로 스며 올라오지요</b>. 솜도 똑같아요. 그래서 그릇 물을 말벌이 있는 방까지 옮길 수 있어요.</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 390" role="img" aria-label="옆에서 본 그림: 마킹실 벽에 구멍이 있고, 기울어진 솜이 물길 속 물에 잠겨 있으며 물이 솜을 타고 벽 구멍 끝까지 올라가 말벌이 빠는 그림">
+        <!-- 마킹실 -->
+        <rect x="30" y="60" width="200" height="220" class="printsoft"/>
+        <path d="M30 60 H230" style="stroke:var(--metal);stroke-width:4;stroke-dasharray:4 3"/>
+        <text x="130" y="50" text-anchor="middle" class="ts">격자 (위 뚜껑)</text>
+        <text x="130" y="306" text-anchor="middle" class="tb">마킹실 (말벌 방)</text>
+        <rect x="218" y="60" width="16" height="220" class="print"/>
+        <text x="226" y="330" text-anchor="middle" class="ts">벽</text>
+        <!-- 바닥 + 말벌 -->
+        <rect x="40" y="168" width="170" height="10" class="print"/>
+        <text x="45" y="200" class="ts">바닥 (모터로 오르내림)</text>
+        <g transform="translate(150 150)">
+          <ellipse cx="0" cy="0" rx="30" ry="11" class="wasp"/>
+          <rect x="-12" y="-11" width="6" height="22" class="band"/><rect x="2" y="-11" width="6" height="22" class="band"/>
+          <circle cx="38" cy="-3" r="9" class="wasp"/>
+          <path d="M46 -3 L58 -5" style="stroke:var(--wasp);stroke-width:3"/>
+        </g>
+        <text x="40" y="90" class="t">말벌이 솜 끝을 빨아 먹어요</text><path d="M120 98 L150 135" class="arrk"/>
+        <!-- 솜 (기울어짐): 안 끝 (205,140) → 바깥 끝 (560,205) -->
+        <g transform="rotate(10.4 205 145)">
+          <rect x="205" y="132" width="360" height="28" rx="12" class="cotton"/>
+          <rect x="205" y="132" width="360" height="28" rx="12" class="cottonwet"/>
+        </g>
+        <text x="330" y="120" class="tb">솜 (치과용 코튼롤)</text>
+        <!-- 물길 + 그릇 -->
+        <path d="M250 205 V240 H640 V170" class="ink"/>
+        <rect x="251" y="216" width="388" height="23" class="water"/>
+        <path d="M251 216 H639" class="dashw"/>
+        <text x="600" y="262" text-anchor="end" class="tw">물길 속 설탕물</text>
+        <rect x="610" y="20" width="40" height="190" style="fill:var(--water-bg);stroke:var(--metal);stroke-width:2"/>
+        <text x="660" y="60" class="ts">튜브</text>
+        <!-- 물 이동 화살표 -->
+        <path d="M520 214 C500 200, 470 190, 440 186" class="arr"/>
+        <path d="M420 182 C380 172, 330 164, 290 156" class="arr"/>
+        <path d="M270 152 L236 146" class="arr"/>
+        <text x="380" y="290" text-anchor="middle" class="tw">물이 솜을 타고 벽 쪽으로 스며 와요</text>
+        <!-- 기울기 설명 -->
+        <text x="560" y="300" class="ts">바깥 끝: 물에 2 mm 잠김</text>
+        <text x="40" y="350" class="ts">솜을 바깥쪽으로 살짝 기울였어요 (10°).</text><text x="40" y="372" class="ts">그래서 바깥 끝만 물에 잠기고, 안쪽 끝은 물보다 높아요.</text>
+      </svg>
+      </div>
+      <figcaption>마킹실 안에는 <b>고인 물이 없어요</b>. 젖은 솜 끝만 나와 있어서 말벌이 물에 빠지거나 격자가 끈적해지지 않아요.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="tag">2-4</span>설탕물이 마킹실로 새지 않는 이유</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 300" role="img" aria-label="벽 구멍 아래 끝과 물 높이 사이에 3.6 mm 차이가 있고, 더울 때 물이 2.6 mm 올라와도 구멍까지 닿지 않는 그림">
+        <rect x="200" y="20" width="40" height="260" class="print"/>
+        <rect x="200" y="70" width="40" height="70" style="fill:var(--card);stroke:var(--ink);stroke-width:1.5"/>
+        <text x="190" y="110" text-anchor="end" class="t">벽 구멍</text>
+        <text x="270" y="40" class="t">손톱 두께가 약 0.5 mm예요. 3.6 mm는 손톱 7장 정도예요.</text>
+        <!-- 기준선 -->
+        <path d="M120 140 H580" class="dash"/>
+        <text x="590" y="145" class="tr">구멍 아래 끝</text>
+        <path d="M120 212 H580" class="dashw"/>
+        <text x="590" y="217" class="tw">평소 물 높이</text>
+        <rect x="250" y="212" width="330" height="60" class="water"/>
+        <!-- 3.6 mm -->
+        <path d="M330 208 V146" class="arrg"/><path d="M330 146 V208" class="arrg"/>
+        <text x="342" y="182" class="tg">3.6 mm 차이</text>
+        <!-- 더울 때 -->
+        <path d="M500 212 V172" class="arrr"/>
+        <path d="M460 172 H580" style="stroke:var(--sugar);stroke-width:2;stroke-dasharray:3 3"/>
+        <text x="580" y="163" text-anchor="end" class="ts" style="fill:var(--sugar)">가장 더울 때 여기까지 (2.6 mm)</text>
+        
+      </svg>
+      </div>
+      <figcaption>
+        한낮에 해가 비치면 튜브 속 <b>공기가 데워져 부풀어요</b>. 그러면 물을 조금 밀어내서 그릇 물이 올라와요. 튜브가 거의 비어 공기가 가장 많을 때도 <b>2.6 mm</b>만 올라와요. 구멍까지는 <b class="g">3.6 mm</b> 여유가 있어서 넘치지 않아요.
+      </figcaption>
+    </figure>
+    <p class="good">이번에 고친 점: 처음 그림은 물 높이가 구멍 아래 끝보다 <b>높았어요</b>. 그대로 만들었으면 솜 옆 틈으로 설탕물이 샜을 거예요. 물 높이를 낮추고 솜을 기울여서 고쳤어요.</p>
+  </section>
+
+  <section>
+    <h2><span class="tag">2-5</span>언제 먹게 하나요?</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 260" role="img" aria-label="세 장면: 찍기 전 바닥이 아래, 찍을 때 바닥이 위로 올라가 격자에 붙임, 먹을 때 바닥이 중간 높이로 와서 말벌 입이 솜 높이">
+        <g>
+          <text x="120" y="24" text-anchor="middle" class="tb">기다릴 때</text>
+          <rect x="50" y="40" width="140" height="170" class="printsoft"/><path d="M50 40 H190" style="stroke:var(--metal);stroke-width:4;stroke-dasharray:4 3"/>
+          <rect x="186" y="70" width="10" height="14" class="cotton"/>
+          <rect x="56" y="196" width="128" height="8" class="print"/>
+          <ellipse cx="110" cy="187" rx="22" ry="8" class="wasp"/><circle cx="136" cy="185" r="6" class="wasp"/>
+          <text x="120" y="236" text-anchor="middle" class="ts">바닥 맨 아래</text>
+        </g>
+        <g>
+          <text x="360" y="24" text-anchor="middle" class="tb">점 찍을 때</text>
+          <rect x="290" y="40" width="140" height="170" class="printsoft"/><path d="M290 40 H430" style="stroke:var(--metal);stroke-width:4;stroke-dasharray:4 3"/>
+          <rect x="426" y="70" width="10" height="14" class="cotton"/>
+          <rect x="296" y="60" width="128" height="8" class="print"/>
+          <ellipse cx="350" cy="50" rx="22" ry="8" class="wasp"/><circle cx="376" cy="48" r="6" class="wasp"/>
+          <path d="M360 110 V74" class="arrk"/>
+          <text x="360" y="236" text-anchor="middle" class="ts">바닥이 올라가 격자에 살짝 붙임</text>
+        </g>
+        <g>
+          <text x="600" y="24" text-anchor="middle" class="tb">먹을 때 (60초)</text>
+          <rect x="530" y="40" width="140" height="170" class="printsoft"/><path d="M530 40 H670" style="stroke:var(--metal);stroke-width:4;stroke-dasharray:4 3"/>
+          <rect x="666" y="70" width="10" height="14" class="cotton"/>
+          <rect x="536" y="94" width="128" height="8" class="print"/>
+          <ellipse cx="610" cy="85" rx="22" ry="8" class="wasp"/><circle cx="638" cy="80" r="6" class="wasp"/>
+          <path d="M646 80 L664 77" class="arr"/>
+          <text x="600" y="236" text-anchor="middle" class="ts">입이 솜 높이에 오게 바닥을 맞춤</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>먹는 때를 정하는 건 <b>원래 있던 바닥 모터</b>예요. 설탕물을 주려고 모터나 펌프를 새로 달지 않아요. 먹는 60초 동안 등에 찍은 잉크도 말라요.</figcaption>
+    </figure>
+    <div class="say">
+      <b>사람이 할 일:</b> 튜브에 설탕물을 채워 거꾸로 꽂기. 이틀마다 솜 갈기, 그릇 헹구기.<br>
+      <b>시험해 볼 일:</b> 물 높이가 그대로 있는지, 솜이 이틀 동안 젖어 있는지, 해 아래 두어도 안 넘치는지, 개미가 오르는지.
+    </div>
+  </section>
+
+  <!-- 3. 방생 -->
+  <section>
+    <h2><span class="tag">3</span>말벌은 어디로 나가나요? (방생부)</h2>
+    <p>마킹실의 <b>오른쪽 벽</b>(+x 쪽)에 나가는 문이 있어요. 위에서 내려다본 그림이에요.</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 300" role="img" aria-label="위에서 본 방생부: 마킹실, 서보가 여는 방생 문, 통로, 출구. 출구 구멍이 3 mm라 5 mm 말벌이 못 나가는 문제">
+        <rect x="30" y="80" width="170" height="140" class="printsoft"/>
+        <text x="115" y="155" text-anchor="middle" class="tb">마킹실</text>
+        <!-- 문 -->
+        <rect x="200" y="110" width="30" height="80" class="print"/>
+        <path d="M206 128 L226 172" style="stroke:var(--ink);stroke-width:4"/>
+        <rect x="205" y="196" width="26" height="40" class="metal"/>
+        <text x="215" y="260" text-anchor="middle" class="ts">서보 모터가</text><text x="215" y="278" text-anchor="middle" class="ts">문을 돌려 열어요</text>
+        <text x="215" y="98" text-anchor="middle" class="t">방생 문</text>
+        <!-- 통로 -->
+        <rect x="230" y="138" width="260" height="24" class="print"/>
+        <rect x="230" y="144" width="260" height="12" style="fill:var(--card)"/>
+        <text x="360" y="128" text-anchor="middle" class="t">통로 (구멍 지름 12 mm)</text>
+        <!-- 출구 원뿔 -->
+        <path d="M490 136 L560 146 L560 154 L490 164 Z" class="print"/>
+        <path d="M490 144 L560 149 L560 151 L490 156 Z" style="fill:var(--card)"/>
+        <text x="525" y="188" text-anchor="middle" class="t">출구</text>
+        <!-- 화살표 -->
+        <path d="M120 180 C170 175, 190 150, 260 150 H470" class="arrg"/>
+        <path d="M570 150 H690" class="arrg"/>
+        <text x="640" y="140" text-anchor="middle" class="tg">밖으로</text>
+        <!-- 빛 -->
+        <circle cx="610" cy="200" r="16" style="fill:var(--sugar);opacity:.85"/>
+        <text x="610" y="240" text-anchor="middle" class="ts">출구 쪽 불을 켜면</text><text x="610" y="258" text-anchor="middle" class="ts">말벌이 밝은 쪽으로 가요</text>
+        <!-- 문제 -->
+        <circle cx="560" cy="150" r="24" style="fill:none;stroke:var(--danger);stroke-width:3"/>
+        <text x="420" y="40" class="tr">문제: 출구 끝 구멍이 3 mm예요</text>
+        <text x="420" y="62" class="t">말벌 몸통 폭은 약 5 mm → 못 나가요</text>
+        <path d="M520 70 L552 128" class="arrr"/>
+      </svg>
+      </div>
+    </figure>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 200" role="img" aria-label="출구 구멍 크기 비교: 지금 3 mm 구멍과 5 mm 말벌, 고친 안 12 mm 구멍">
+        <text x="150" y="28" text-anchor="middle" class="tb">지금</text>
+        <circle cx="150" cy="100" r="9" style="fill:var(--card);stroke:var(--ink);stroke-width:2"/>
+        <text x="150" y="150" text-anchor="middle" class="ts">구멍 3 mm</text>
+        <ellipse cx="230" cy="100" rx="40" ry="15" class="wasp"/><rect x="214" y="85" width="7" height="30" class="band"/><rect x="232" y="85" width="7" height="30" class="band"/>
+        <text x="230" y="150" text-anchor="middle" class="ts">말벌 폭 5 mm</text>
+        <path d="M120 70 L180 130 M180 70 L120 130" class="xmark"/>
+        <text x="460" y="28" text-anchor="middle" class="tb">고칠 안 1 (추천)</text>
+        <rect x="380" y="70" width="200" height="60" class="print"/>
+        <rect x="380" y="82" width="200" height="36" style="fill:var(--card)"/>
+        <path d="M560 60 Q600 60 610 90" style="stroke:var(--ink);stroke-width:3;fill:none"/>
+        <text x="610" y="60" class="ts">비 가림 갓</text>
+        <ellipse cx="470" cy="100" rx="40" ry="14" class="wasp"/><rect x="455" y="86" width="7" height="28" class="band"/><rect x="472" y="86" width="7" height="28" class="band"/>
+        <path d="M520 100 H640" class="arrg"/>
+        <text x="460" y="160" text-anchor="middle" class="tg">곧은 관 12 mm → 그대로 날아 나가요</text>
+      </svg>
+      </div>
+      <figcaption>밖에 있는 말벌이 이 출구로 거꾸로 들어오는 건, 평소 닫혀 있는 <b>방생 문</b>이 막아 줘요. 그래서 출구를 좁게 만들 필요가 없어요.</figcaption>
+    </figure>
+    <p class="warn">정해 주세요: 출구를 <b>안 1</b>(곧은 관 12 mm + 비 가림 갓)로 바꿀까요? 아니면 <b>안 2</b>(끝 구멍 10 mm짜리 원뿔)로 할까요?</p>
+  </section>
+</main>
