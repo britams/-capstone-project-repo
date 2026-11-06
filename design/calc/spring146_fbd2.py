@@ -75,7 +75,7 @@ def dyn_fbd():
     spring_zigzag(ax, 0, 14.2, 18.2, w=0.6, n=4, c="#7a5c00")
     F.label(ax, (1.2, 16.2), "k_c, c (말벌)", fs=9, ha="left", box=False, c="#7a5c00")
     F.rect(ax, -4, 12.6, 8, 1.6)
-    F.label(ax, (4.6, 13.4), "바닥+밀대 m = 9.86 g", fs=9, ha="left", box=False)
+    F.label(ax, (4.6, 13.4), "바닥 + 강철 축 m = 19.2 g (D5f)", fs=9, ha="left", box=False)
     spring_zigzag(ax, 0, 6.6, 12.6, w=0.9, n=6)
     F.label(ax, (1.4, 9.6), "k_s", fs=10, ha="left", box=False)
     F.rect(ax, -4, 4.6, 8, 2.0, fc="#e8e8e8")
@@ -99,9 +99,9 @@ def dyn_fbd():
     F.note(ax, (-6.8, 3.6),
            "ΣF = 0 (달랑베르):  F_s − W − N_h − m a = 0\n"
            "닿는 순간 진폭 = v / ω2,  ω2 = √((k_s + k_c)/m)  (Meriam 8/1)\n"
-           "  k_c 3000: 3.5 µm → ΔN_h = 0.011 N (2.1 %)\n"
-           "멈출 때 진폭 0.12 µm → 0.0004 N\n"
-           "시간 적분 최대 넘침: 10 Hz 6.1 %, 80 Hz 3.6 % (감쇠 0)", fs=9.5, transform=ax.transData)
+           "  k_c 3000: 4.9 µm → ΔN_h = 0.015 N (2.9 %)\n"
+           "멈출 때 진폭 0.16 µm → 0.0005 N\n"
+           "시간 적분 최대 넘침: 10 Hz 5.3 %, 80 Hz 4.4 % (감쇠 0)", fs=9.5, transform=ax.transData)
     F.legend(ax, items=("given", "unk", "iner"), loc=(0.62, 0.86), fs=8.5)
     fig.suptitle("C 동역학 — 바닥 질량-스프링 (Meriam 8/1 방법)", fontsize=13, fontweight="bold")
     p = os.path.join(IMG, "spring146_FBD3_동역학.jpg")
@@ -144,7 +144,7 @@ def time_plot():
     ax.set_ylim(0, 0.6)
     ax.set_xlabel("닿은 뒤 시간 (s)")
     ax.set_ylabel("말벌을 누르는 힘 N_h (N)")
-    ax.set_title("시간 적분: k_s %.1f N/m, 단단한 말벌 k_c 3000 N/m, 감쇠 0 (가장 나쁜 경우)\n선 두께 = 닿을 때 생긴 89 Hz 진동 ±0.011 N (감쇠가 없어 줄지 않음)" % k_s, fontsize=10)
+    ax.set_title("시간 적분: k_s %.1f N/m, 단단한 말벌 k_c 3000 N/m, 감쇠 0 (가장 나쁜 경우)\n선 두께 = 닿을 때 생긴 64 Hz 진동 ±0.015 N (감쇠가 없어 줄지 않음)" % k_s, fontsize=10)
     ax.grid(color="#e5e5e5", lw=0.6)
     ax.legend(loc="lower right", frameon=False, fontsize=9)
     for s_ in ("top", "right"):
