@@ -5,6 +5,8 @@
 - 190 Pi 5 + AI HAT+: 데크 위 → 같은 x·y에서 위판 아래 (z 565~600) — 카메라 CSI 300 mm
 - 191 UNO 1 그대로 + 192 UNO 2를 15 mm 기둥 위에 겹침
 - 193 단자대 + 퓨즈, 194 비상 정지 버튼, 195 ULN2003 ×3
+- 204 펜 홀더 스프링 지움 (11/02 결정, 승준 Issue #7)
+- 28BYJ-48 고정은 M4 × 2 (귀 구멍 Ø4.2) — 볼트 수량은 승준 목록
 - 196 빛 게이트 9쌍: 문마다 2개(문판 앞·뒤 각 2 mm) + G1·G4·G6 — 송신·수신 블록과 빔(빨간 선)
 모양은 '자리 표시'다 (블록). 브래킷·구멍 모양은 D5f 다음 단계에서 설계한다.
 
@@ -65,6 +67,9 @@ def make():
         if o.Label == "190_pi5_aihat":
             o.ViewObject.Visibility = False        # 옛 자리 (데크 위) 숨김
             o.Label = "190_pi5_aihat (D5e 옛 자리, 숨김)"
+    for o in list(doc.Objects):                     # 11/02 결정: 펜 홀더 스프링 204 뺌 (승준 Issue #7-4)
+        if o.Label.startswith("204_"):
+            doc.removeObject(o.Name)
     grp = doc.addObject("App::DocumentObjectGroup", "G19x_electrical")
     grp.Label = "19x 전기 배치 (D5f, 자리 표시)"
     for i, (nm, (shp, col)) in enumerate(parts().items()):
