@@ -1,22 +1,22 @@
 ﻿id,harness,wire,color,awg,frm,frm_pin,frm_conn,to,to_pin,to_conn,route_mm,cut_mm,stock_mm,moving,drop_V
 P01,어댑터 DC 잭 → 퓨즈,+5V 들어옴,빨강,20,DCIN,잭 +,DC 잭 단자 납땜/나사,FUSE,퓨즈 1,퓨즈홀더 납땜,86,100,0,False,0.014
-P02,어댑터 DC 잭 GND → 와고 GND,GND,검정,20,DCIN,잭 −,DC 잭 단자 납땜/나사,WAGO,와고 GND 1번,와고 222-415 (선 끝 8 mm 벗김),198,220,0,False,0.033
+P02,어댑터 DC 잭 GND → 와고 GND,GND,검정,20,DCIN,잭 −,DC 잭 단자 납땜/나사,WAGO,와고 GND 1번,와고 221-415 (선 끝 8 mm 벗김),198,220,0,False,0.033
 P03,퓨즈 → 비상 정지,+5V 퓨즈 뒤,빨강,20,FUSE,퓨즈 2,퓨즈홀더 납땜,ESTOP,비상 정지 NC 1,비상 정지 나사 단자,220,250,0,False,0.037
-P04,비상 정지 → 와고 +5V,+5V_B,빨강,20,ESTOP,NC 2,비상 정지 나사 단자,WAGO,와고 +5V 1번,와고 222-415 (선 끝 8 mm 벗김),276,310,0,False,0.046
-P05,와고 → ULN2003 F,+5V_B,빨강,22,WAGO,와고 +5V,와고 222-415 (선 끝 8 mm 벗김),ULN_F,ULN + (5-12V),듀폰 암 (ULN 전원 핀),180,200,0,False,0.003
-P05,와고 → ULN2003 F,GND,검정,22,WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),ULN_F,ULN −,듀폰 암 (ULN 전원 핀),180,200,0,False,0.003
-P06,와고 → ULN2003 X,+5V_B,빨강,22,WAGO,와고 +5V,와고 222-415 (선 끝 8 mm 벗김),ULN_X,ULN +,듀폰 암 (ULN 전원 핀),594,660,0,False,0.01
-P06,와고 → ULN2003 X,GND,검정,22,WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),ULN_X,ULN −,듀폰 암 (ULN 전원 핀),594,660,0,False,0.01
-P07,와고 → ULN2003 Y,+5V_B,빨강,22,WAGO,와고 +5V,와고 222-415 (선 끝 8 mm 벗김),ULN_Y,ULN +,듀폰 암 (ULN 전원 핀),630,700,0,False,0.011
-P07,와고 → ULN2003 Y,GND,검정,22,WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),ULN_Y,ULN −,듀폰 암 (ULN 전원 핀),630,700,0,False,0.011
-P08,와고 → 서보 허브,+5V_B,빨강,20,WAGO,와고 +5V,와고 222-415 (선 끝 8 mm 벗김),SERVO_HUB,허브 +,허브 기판 납땜,72,80,0,False,0.01
-P08,와고 → 서보 허브,GND,검정,20,WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),SERVO_HUB,허브 −,허브 기판 납땜,72,80,0,False,0.01
-P09,와고 → 게이트 허브,+5V_B,빨강,22,WAGO,와고 +5V,와고 222-415 (선 끝 8 mm 벗김),GATE_HUB,허브 +,허브 기판 납땜,137,160,0,False,0.006
-P09,와고 → 게이트 허브,GND,검정,22,WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),GATE_HUB,허브 −,허브 기판 납땜,137,160,0,False,0.006
-P10,와고 → MOSFET 보드 (조명 전원),+5V_B,빨강,22,WAGO,와고 +5V,와고 222-415 (선 끝 8 mm 벗김),MOSFET,보드 V+,보드 나사 단자,114,130,0,False,0.006
-P10,와고 → MOSFET 보드 (조명 전원),GND,검정,22,WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),MOSFET,보드 GND,보드 나사 단자,114,130,0,False,0.006
-P11,UNO 1·2 GND → 와고 GND,GND U1,검정,22,UNO1,UNO 1 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),119,140,0,False,0.001
-P11,UNO 1·2 GND → 와고 GND,GND U2,검정,22,UNO1,UNO 2 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 222-415 (선 끝 8 mm 벗김),119,140,0,False,0.001
+P04,비상 정지 → 와고 +5V,+5V_B,빨강,20,ESTOP,NC 2,비상 정지 나사 단자,WAGO,와고 +5V 1번,와고 221-415 (선 끝 8 mm 벗김),276,310,0,False,0.046
+P05,와고 → ULN2003 F,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_F,ULN + (5-12V),듀폰 암 (ULN 전원 핀),180,200,0,False,0.003
+P05,와고 → ULN2003 F,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),ULN_F,ULN −,듀폰 암 (ULN 전원 핀),180,200,0,False,0.003
+P06,와고 → ULN2003 X,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_X,ULN +,듀폰 암 (ULN 전원 핀),594,660,0,False,0.01
+P06,와고 → ULN2003 X,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),ULN_X,ULN −,듀폰 암 (ULN 전원 핀),594,660,0,False,0.01
+P07,와고 → ULN2003 Y,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_Y,ULN +,듀폰 암 (ULN 전원 핀),630,700,0,False,0.011
+P07,와고 → ULN2003 Y,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),ULN_Y,ULN −,듀폰 암 (ULN 전원 핀),630,700,0,False,0.011
+P08,와고 → 서보 허브,+5V_B,빨강,20,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),SERVO_HUB,허브 +,허브 기판 납땜,72,80,0,False,0.01
+P08,와고 → 서보 허브,GND,검정,20,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),SERVO_HUB,허브 −,허브 기판 납땜,72,80,0,False,0.01
+P09,와고 → 게이트 허브,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),GATE_HUB,허브 +,허브 기판 납땜,137,160,0,False,0.006
+P09,와고 → 게이트 허브,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),GATE_HUB,허브 −,허브 기판 납땜,137,160,0,False,0.006
+P10,와고 → MOSFET 보드 (조명 전원),+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),MOSFET,보드 V+,보드 나사 단자,114,130,0,False,0.006
+P10,와고 → MOSFET 보드 (조명 전원),GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),MOSFET,보드 GND,보드 나사 단자,114,130,0,False,0.006
+P11,UNO 1·2 GND → 와고 GND,GND U1,검정,22,UNO1,UNO 1 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),119,140,0,False,0.001
+P11,UNO 1·2 GND → 와고 GND,GND U2,검정,22,UNO1,UNO 2 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),119,140,0,False,0.001
 P12,레일 감지 (+5V_B → 10 kΩ → UNO 2 D2),RAIL,주황,28,GATE_HUB,허브 10 kΩ 끝,허브 기판 납땜,UNO2,UNO 2 D2,듀폰 암 1핀 (UNO 헤더),116,130,0,False,
 S01,UNO 1 → ULN2003 F (IN1~4),IN1,파랑,26,UNO1,D2,듀폰 암 1핀 (UNO 헤더),ULN_F,IN1,듀폰 암 (ULN IN 핀),203,230,0,False,
 S01,UNO 1 → ULN2003 F (IN1~4),IN2,초록,26,UNO1,D3,듀폰 암 1핀 (UNO 헤더),ULN_F,IN2,듀폰 암 (ULN IN 핀),203,230,0,False,

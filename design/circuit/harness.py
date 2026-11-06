@@ -2,7 +2,7 @@
 """하네스 표 (선마다: 번호, 어디→어디, 핀, 색, 굵기, 자를 길이, 양 끝 커넥터) — 서현, 2026-11-06, CAP-AI-32
 
 바탕: design/circuit/circuit.py (연결), design/control_sim/elec_budget.py (좌표 P, 길이 route_len, 전압 강하 drop)
-11/06 바뀐 것 반영: 단자대 → 와고 222-415 (+5 V 묶음 / GND 묶음), 서보 허브·게이트 허브 만능기판, 출구 조명 없음, MOSFET 3채널 보드
+11/06 바뀐 것 반영: 단자대 → 와고 221-415 (+5 V 묶음 / GND 묶음), 서보 허브·게이트 허브 만능기판, 출구 조명 없음, MOSFET 3채널 보드
 좌표는 D5f 기준 [가능성 높음] — 승준 D5g 실제 배치가 끝나면 P_EXTRA·P 값만 고치고 다시 돌림.
 실행: python3 design/circuit/harness.py → design/circuit/out/harness.csv, 화면에 요약
 """
@@ -30,7 +30,7 @@ EB.P = P                        # route_len이 이 표를 쓰게
 # 커넥터 이름
 DUP_F = "듀폰 암 1핀 (UNO 헤더)"
 DUP_HDR = "듀폰 2.54 헤더 (허브 기판)"
-WAGO = "와고 222-415 (선 끝 8 mm 벗김)"
+WAGO = "와고 221-415 (선 끝 8 mm 벗김)"
 SOLDER = "허브 기판 납땜"
 
 # (번호 묶음, 이름, 시작, 끝, [(선 이름, 색, AWG, 시작 핀, 끝 핀)], 시작 커넥터, 끝 커넥터, 최대 전류 A, 기본 선 종류)
