@@ -25,6 +25,7 @@ FD = dict(x=55.0, zc=378.0, roll_r=5.0, roll_y0=16.0, roll_L=38.0, wall_hole_r=5
           ch_w=12.0, ch_t=2.0, ch_y0=23.0, ch_y1=95.0, floor_z=366.0, floor_t=3.0, wall_top=388.0,
           tube_y=95.0, tube_r=14.86, tube_L=114.55, cone_L=16.0, tip_r=3.1, mouth_z=374.0,
           bowl_ri=17.5, bowl_t=2.5, bowl_top=400.0, post_y=80.0, post_w=12.0, post_foot_z=205.0)   # 발: 데크(101) 윗면 z 205, 아래 2020 가로대 y +80
+FOOT_DX = 12.0     # 발 볼트 x 간격 (머리 Ø8.5가 기둥 12 × 12에 안 닿게: 12 − 4.25 > 6)
 ULN = dict(L=35.0, W=31.9, t=1.6, hx=30.0, hy=26.5, hole=2.7, stand=5.0)
 ULN_SPOTS = {"X": (170.0, -30.0, 472.0, "rail"), "Y": (170.0, 22.0, 472.0, "rail"), "F": (55.0, -50.0, 205.0, "deck")}
 
@@ -60,7 +61,7 @@ def feed_trough():
     bowl = Part.makeCylinder(ro, f["bowl_top"] - f["floor_z"], V(f["x"], f["tube_y"], f["floor_z"]))
     bowl = bowl.cut(Part.makeCylinder(f["bowl_ri"], f["bowl_top"], V(f["x"], f["tube_y"], f["floor_z"] + f["floor_t"])))
     shp = ch.fuse(bowl)
-    shp = shp.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y1"] - 20, f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
+    shp = shp.cut(Part.makeCylinder(f["bowl_ri"], f["bowl_top"], V(f["x"], f["tube_y"], f["floor_z"] + f["floor_t"])))   # 그릇 안에는 물길 벽 없음
     import math
     for k in range(3):        # 받침 리브: 튜브 입구를 z mouth_z 에 올림
         a = math.radians(90 + 120 * k)
@@ -68,9 +69,9 @@ def feed_trough():
         shp = shp.fuse(box(cx - 1.5, cx + 1.5, cy - 1.5, cy + 1.5, f["floor_z"] + f["floor_t"] - 0.01, f["mouth_z"]))
     pw = f["post_w"] / 2
     post = box(f["x"] - pw, f["x"] + pw, f["post_y"] - pw, f["post_y"] + pw, f["post_foot_z"] + 3, f["floor_z"] + 0.01)
-    foot = box(f["x"] - 15, f["x"] + 15, f["post_y"] - 10, f["post_y"] + 10, f["post_foot_z"], f["post_foot_z"] + 3)
-    foot = foot.cut(Part.makeCylinder(2.75, 10, V(f["x"] - 10, f["post_y"], f["post_foot_z"] - 2)))
-    foot = foot.cut(Part.makeCylinder(2.75, 10, V(f["x"] + 10, f["post_y"], f["post_foot_z"] - 2)))
+    foot = box(f["x"] - FOOT_DX - 6, f["x"] + FOOT_DX + 6, f["post_y"] - 10, f["post_y"] + 10, f["post_foot_z"], f["post_foot_z"] + 3)
+    for sx in (-FOOT_DX, FOOT_DX):
+        foot = foot.cut(Part.makeCylinder(2.75, 10, V(f["x"] + sx, f["post_y"], f["post_foot_z"] - 2)))
     return shp.fuse(post).fuse(foot).removeSplitter()
 
 
@@ -125,7 +126,7 @@ def make_into(doc, G):
     import D5e_module_kinematic as K
     rail_top = K.FR["deck_z"] + 20.0
     fb, ft = [], []
-    for sx in (-10, 10):
+    for sx in (-FOOT_DX, FOOT_DX):
         p = (f["x"] + sx, f["post_y"], f["post_foot_z"] + 3)
         fb.append(Part.makeCylinder(2.5, 12, V(*p), V(0, 0, -1)).fuse(Part.makeCylinder(4.25, 5, V(*p))))
         t = G.tnut_local("rail")
@@ -134,7 +135,7 @@ def make_into(doc, G):
     for o in doc.Objects:
         if o.Label.startswith("101_deck"):
             sh = o.Shape
-            for sx in (-10, 10):
+            for sx in (-FOOT_DX, FOOT_DX):
                 sh = sh.cut(Part.makeCylinder(2.75, 20, V(f["x"] + sx, f["post_y"], f["post_foot_z"] - 10)))
             for sx in (-1, 1):
                 for sy in (-1, 1):
