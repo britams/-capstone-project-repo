@@ -166,7 +166,7 @@ def bracket_places():
 CATEGORY = [
     ("REF_camera_view", "X"), ("P204", "X"), ("190_pi5_aihat (D5e", "X"),
     ("REF_", "C"),
-    ("195p_", "A"), ("198_", "A"), ("198p_", "A"), ("190r_", "A"), ("193_terminal", "A"), ("142n_", "A"), ("144n_", "A"), ("100h_", "A"), ("100i_", "A"),
+    ("184_exit_light", "A"), ("195p_", "A"), ("198_", "A"), ("198p_", "A"), ("190r_", "A"), ("193_terminal", "A"), ("142n_", "A"), ("144n_", "A"), ("100h_", "A"), ("100i_", "A"),
     ("193_", "D"), ("194_", "D"), ("196_", "D"),
     ("100", "A"), ("153_", "A"), ("153r_", "A"), ("209_", "A"), ("209r_", "A"), ("215_", "A"), ("215r_", "A"),
     ("154_", "A"), ("210_", "A"), ("216_", "A"), ("155_", "A"), ("208_", "A"), ("214_", "A"),
@@ -235,6 +235,7 @@ def make():
     FU.make_into(doc, sys.modules[__name__])
     FU.support_fixes(doc)
     FU.release_exit_fix(doc)
+    FU.release_shaft_apply(doc)
     _lid = doc.addObject('Part::Feature', 'SJ_lid'); _lid.Label = '143l_feed_trough_lid (뚜껑, 3D 프린트 PETG — 벌레 막기)'; _lid.Shape = FU.trough_lid()
     import D5g_real_parts as RP                      # 전기 부품 실제 CAD (KiCad STEP·Pi 5 공식 STEP, 인터넷 필요)
     try:

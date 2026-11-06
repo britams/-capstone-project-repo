@@ -300,3 +300,64 @@ def release_exit_fix(doc):
     old[0].Label = "175_release_exit (곧은 관 안지름 12 + 비 가림 갓, 11/06 승준)"
     doc.recompute()
     return old[0]
+
+
+# ---------------- (11/06 20시) 방생: 짧게 기어 나와 위로 날아 나가는 굴뚝 ----------------
+# 승준 지적: 통로가 길 필요 없음, 말벌은 기어가기보다 위로 날아오르기(상승 비행)를 좋아함.
+#   한 번에 한 마리씩 내보내므로 따라갈 정찰벌이 없음 → 혼자서도 바로 찾게: 짧은 목 + 위가 밝게 열린 넓은 굴뚝.
+# 자리 제약 [확실 — 모델 측정]: 마커 갠트리(206·212)가 x ≤ 118, z ≥ 396 을 오감 / 방생 서보 y −41.6 ~ −9.1, x ≤ 116.5
+#   / 2020 레일(갠트리 둘레, x 160~180) 아래 면 z 452 → 굴뚝은 x 120~174, 꼭대기 z 430.
+RS = dict(neck_x0=90.0, neck_x1=122.0, cx=147.0, ri=25.0, t=2.0, z_bot=355.0, z_top=430.0, floor_t=3.0,
+          drain_r=1.5, led_r=2.5, led_h=8.6)
+
+
+def release_shaft():
+    """(174 목, 175 굴뚝, 184 출구 조명 자리) 형상. 목: 방생 문 하우징 면 x 90 → 굴뚝 벽 안 (안지름 12)"""
+    import D5e_module_kinematic as K
+    r, z = RS, K.z_upper
+    neck = Part.makeCylinder(K.DUCT_R, r["neck_x1"] - r["neck_x0"], V(r["neck_x0"], 0, z), V(1, 0, 0)).cut(
+        Part.makeCylinder(K.PORT_R, r["neck_x1"] - r["neck_x0"] + 10, V(r["neck_x0"] - 1, 0, z), V(1, 0, 0)))
+    ro = r["ri"] + r["t"]
+    H = r["z_top"] - r["z_bot"]
+    shaft = Part.makeCylinder(ro, H, V(r["cx"], 0, r["z_bot"])).cut(
+        Part.makeCylinder(r["ri"], H + 2, V(r["cx"], 0, r["z_bot"] + r["floor_t"])))
+    shaft = shaft.cut(Part.makeCylinder(K.PORT_R, 2 * ro, V(r["cx"] - ro - 5, 0, z), V(1, 0, 0)).common(
+        box(r["cx"] - ro - 6, r["cx"], -20, 20, z - 10, z + 10)))                      # 목이 들어오는 옆 구멍
+    neck = neck.cut(Part.makeCylinder(r["ri"], H + 2, V(r["cx"], 0, r["z_bot"] + r["floor_t"])))
+    import math
+    for k in range(4):                                                                   # 빗물 빠지는 구멍 4 (Ø3, 말벌 못 지나감)
+        a = math.radians(45 + 90 * k)
+        shaft = shaft.cut(Part.makeCylinder(r["drain_r"], 10, V(r["cx"] + 12 * math.cos(a), 12 * math.sin(a), r["z_bot"] - 2)))
+    leds = []
+    for k in range(3):                                                                   # 출구 조명 LED 3개: 꼭대기 테두리, 안쪽 위를 비춤
+        a = math.radians(90 + 120 * k)
+        p = V(r["cx"] + (r["ri"] + r["t"] / 2) * math.cos(a), (r["ri"] + r["t"] / 2) * math.sin(a), r["z_top"])
+        leds.append(Part.makeCylinder(r["led_r"], r["led_h"], p))
+    return neck.removeSplitter(), shaft.removeSplitter(), Part.makeCompound(leds)
+
+
+def release_shaft_apply(doc):
+    """174·175를 바꾸고, 출구 빛 게이트 G6(·받침)을 목 위로 옮김 (x 120 → 108)"""
+    neck, shaft, leds = release_shaft()
+    for o in doc.Objects:
+        if o.Label.startswith("174_release_duct"):
+            o.Shape = neck
+            o.Label = "174_release_neck (짧은 목 32 mm, 안지름 12)"
+        elif o.Label.startswith("175_release"):
+            o.Shape = shaft
+            o.Label = "175_release_shaft (위로 열린 굴뚝 안지름 50, 꼭대기 z 430, 빗물 구멍 4)"
+    old = [o for o in doc.Objects if o.Label.startswith("184_exit_light")]
+    for o in old:
+        doc.removeObject(o.Name)
+    o = doc.addObject("Part::Feature", "SJ_exitled")
+    o.Label = "184_exit_light (LED Ø5 × 3, 굴뚝 꼭대기 — 출구 조명)"
+    o.Shape = leds
+    dx = 108.0 - 120.0
+    for g in doc.Objects:
+        if g.Label.startswith(("196_gate_G6", "199c_gate_holder_G6")) and hasattr(g, "Shape"):
+            if abs(g.Shape.BoundBox.Center.x - 120.0) < 1.0:
+                s = g.Shape.copy()
+                s.translate(V(dx, 0, 0))
+                g.Shape = s
+    doc.recompute()
+    return o
