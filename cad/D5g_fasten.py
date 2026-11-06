@@ -58,14 +58,27 @@ def fasten(doc, G):
             s = s.fuse(Part.makeBox(b.XMin - x0 + 0.5, b.YLength, b.ZLength, V(x0, b.YMin, b.ZMin)))
         if x1 > b.XMax + 0.01:
             s = s.fuse(Part.makeBox(x1 - b.XMax + 0.5, b.YLength, b.ZLength, V(b.XMax - 0.5, b.YMin, b.ZMin)))
+        if xr > 0:
+            # 둘레 레일 쪽은 X 봉(Ø8)이 x 172까지 받침 가운데를 지나 세로 볼트 자리가 없음 [확실 — 겹침 검사]
+            # → 바깥쪽(ULN 받침 197 반대쪽)으로 귀(두께 8)를 내고 M5 × 12 한 개 + 바닥 키(홈 폭 5.6, 깊이 0.5)로 돌지 않게
+            sy = 1 if yc > 0 else -1
+            yb = yc + sy * (b.YLength / 2 + 4.5)
+            ear = Part.makeBox(x1 - x0, 9.5, 8.0, V(x0, yc + sy * b.YLength / 2 - (0 if sy > 0 else 9.5), gz_top))
+            s = s.fuse(ear)
+            s = s.fuse(Part.makeBox(5.6, b.YLength + 9.5, 0.5, V(xr - 2.8, min(b.YMin, yb - 4.75), gz_top - 0.5)))
+            s = s.cut(Part.makeCylinder(2.75, 40, V(xr, yb, gz_top - 5)))
+            new.append(s.removeSplitter())
+            bolts.append(bolt_at((xr, yb, gz_top), (0, 0, 1), 8.0, 12.0))
+            nuts.append(tnut_at(G, (xr, yb, gz_top), (0, 0, 1), (0, 1, 0)))
+            continue
         s = s.cut(Part.makeCylinder(2.75, 40, V(xr, yc, gz_top - 5)))
         s = s.cut(Part.makeCylinder(4.75, 20, V(xr, yc, gz_top + 6.0)))                       # 머리 자리 (위 6 mm 살 남김)
         new.append(s.removeSplitter())
         bolts.append(bolt_at((xr, yc, gz_top), (0, 0, 1), 6.0, 10.0))
         nuts.append(tnut_at(G, (xr, yc, gz_top), (0, 0, 1), (0, 1, 0)))
     o.Shape = Part.makeCompound(new)
-    o.Label = "218_rod_supports (X 봉 받침 4, 3D 프린트 — 레일에 M5 × 10 + T너트)"
-    notes.append("218 × 4: M5 × 10 + T너트")
+    o.Label = "218_rod_supports (X 봉 받침 4, 3D 프린트 — 100d 쪽 M5 × 10, 둘레 레일 쪽 귀 + M5 × 12, T너트)"
+    notes.append("218 × 4: M5 × 10 × 2 + M5 × 12 × 2 + T너트")
     # 2) 217 X 모터판: 위에 날개(두께 4)를 붙여 레일 아랫면 홈에 M5 × 8 두 개
     o = get("217_x_motor_plate")
     zr = K.FR["gantry_z"]                                                  # 레일 아랫면 452
