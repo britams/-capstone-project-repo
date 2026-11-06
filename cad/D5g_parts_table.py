@@ -131,7 +131,24 @@ NAMES = [
 ]
 
 
+# 이름 가운데 들어가는 말 (문 하우징 묶음 안 부품 등) — NAMES보다 먼저
+PART_IN = [
+    ("_gate_flap", "문 판 (미닫이)", "설계", "3D 프린트"),
+    ("_gate_horn", "문 서보 혼", "구매", "MG90S 부속"),
+    ("_gate_post", "문 서보 기둥", "설계", "3D 프린트"),
+    ("_servo_MG90S", "문 서보 MG90S", "구매", "금속 기어 마이크로 서보"),
+    ("_servo_spline", "문 서보 축", "구매", "MG90S 일부"),
+    ("REF_hornet", "말벌 크기 참고 (등검은말벌)", "참고", ""),
+    ("REF_mark_dot", "마킹 점 자리 참고", "참고", ""),
+]
+GATE = {"112": "입구", "170": "격리", "176": "방생"}
+
+
 def name_of(label):
+    for key, ko, kind, spec in PART_IN:
+        if key in label:
+            g = GATE.get(label[:3], "")
+            return key, (g + " " + ko).strip(), kind, spec
     for head, ko, kind, spec in NAMES:
         if label.startswith(head):
             return head, ko, kind, spec
@@ -154,3 +171,26 @@ def table(doc):
         rows.append((o.Label.split("_")[0], ko, kind, spec, n, o.Label.split(" ")[0]))
     rows.sort(key=lambda r: (r[0].replace("REF", "999"), r[5]))
     return rows, miss
+
+
+COUNT_SOLIDS = ("100e", "100f", "100g", "100h", "100i", "100j", "100k", "100m", "100n", "143i", "143t", "143s", "148m5",
+                "193s", "193w_wago_221", "198", "207", "213", "221", "222", "223", "212", "218", "199b", "199c")   # 한 객체에 여러 개 든 것
+
+
+def markdown(doc):
+    """번호·이름이 같은 것은 한 줄로 묶고 개수를 더함"""
+    rows, miss = table(doc)
+    agg = {}
+    order = []
+    for num, ko, kind, spec, n, nm in rows:
+        k = (num, ko)
+        if k not in agg:
+            agg[k] = [num, ko, kind, spec, 0, []]
+            order.append(k)
+        agg[k][4] += n if nm.startswith(COUNT_SOLIDS) else 1
+        agg[k][5].append(nm)
+    out = ["| 번호 | 이름 | 구분 | 규격·품번 | 개수(모델) | 모델 이름 |", "|---|---|---|---|---|---|"]
+    for k in order:
+        num, ko, kind, spec, n, nms = agg[k]
+        out.append("| %s | %s | %s | %s | %d | %s |" % (num, ko, kind, spec, n, ", ".join("`%s`" % x for x in nms[:4]) + (" …" if len(nms) > 4 else "")))
+    return "\n".join(out), miss
