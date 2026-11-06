@@ -265,14 +265,14 @@ def wago_holder(cx, cy, zb):
     return shp.removeSplitter(), (cx - w["W"] / 2, cy - Dt / 2 + 2, zb + 2.0), (cx - w["W"] / 2, cy - Dt / 2 + 2 + w["D"] + gap, zb + 2.0)
 
 
-WAGO_SCREWS = ((47.5, -78.0), (25.0, -57.0), (-37.5, -42.0), (-5.0, -42.0))
+WAGO_SCREWS = ((25.0, -57.0), (-37.5, -42.0), (-5.0, -42.0))   # y < −70 은 아래 가로대(y −90 ~ −70)에 나사 끝이 닿음 → 3개
 
 
 def apply_wago(doc):
     """(SJ-49, 서현 CAP-AI-32 요청) 와고 221-415 5개: GND 3개(이어서 11구) + +5 V 2개(이어서 8구).
     자리 [확실 — 모델]: 데크 −y 가장자리, UNO(x ≤ −56.4)와 ULN F(x ≥ 38, y ≥ −66)·입구 깔때기(r 30.5) 사이.
     2줄: 아래줄 y −88 ~ −69.4 (3개), 윗줄 y −66.4 ~ −47.8 (2개). 전선 구멍은 바깥(−y)·안(+y) 쪽, 레버는 위.
-    받침 193h: 바닥 2 + 칸막이 높이 4, 데크에 M3 × 10 볼트 4개 + 아래 너트"""
+    받침 193h: 바닥 2 + 칸막이 높이 4, 데크에 M3 × 10 볼트 3개 + 아래 너트"""
     for o in [o for o in doc.Objects if o.Label.startswith(("193_terminal", "193b_", "193h_", "193w_"))]:
         doc.removeObject(o.Name)
     w = WAGO
@@ -302,10 +302,10 @@ def apply_wago(doc):
                 sh = sh.cut(Part.makeCylinder(1.7, 20, V(x, y, zb - 10)))
             o.Shape = sh.removeSplitter()
     out = []
-    for nm, shp in (("193h_wago_holder (3D 프린트, 와고 5칸, 데크에 M3 × 10 네 개 + 너트)", base.removeSplitter()),
+    for nm, shp in (("193h_wago_holder (3D 프린트, 와고 5칸, 데크에 M3 × 10 세 개 + 너트)", base.removeSplitter()),
                     ("193w_wago_221-415 × 5 (아래줄 GND 3 / 윗줄 +5 V 2, 판매품 29.9 × 18.6 × 8.3)", Part.makeCompound(bodies)),
                     ("193w_wago_levers (주황 레버)", Part.makeCompound(levers)),
-                    ("193s_bolt_M3x10_wago (4개, 데크 아래 너트)", Part.makeCompound(screws))):
+                    ("193s_bolt_M3x10_wago (3개, 데크 아래 너트)", Part.makeCompound(screws))):
         o = doc.addObject("Part::Feature", "SJW%d" % len(out))
         o.Label = nm
         o.Shape = shp
@@ -362,6 +362,9 @@ def apply_circuit_extras(doc):
     g = HUBS["GATE_HUB"]
     xh = place_xy(load("xh4"), g["x0"] + g["L"] - 10.0, g["y0"] + g["W"] / 2, zb + g["stand"] + PERF["t"], rot=90)
     out.append(("193j_J_I2C_JST_XH_4P (VS·GND·SDA·SCL, KiCad STEP — 게이트 허브 위)", xh, (0.95, 0.95, 0.90)))
+    for i, (lab, shp, col) in enumerate(out):                            # 커넥터 핀이 지나는 기판 구멍
+        if lab.startswith("193g_"):
+            out[i] = (lab, shp.cut(xh).removeSplitter(), col)
     for o in doc.Objects:
         if o.Label.startswith("101_deck"):
             sh = o.Shape
