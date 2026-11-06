@@ -378,6 +378,10 @@ def ir_pair_door(doc):
         dn.rotate(V(0, 0, 0), V(1, 0, 0), 180)
         b = dn.BoundBox
         dn.translate(V(hi.Center.x - b.Center.x, hi.Center.y - b.Center.y, z_beam_hi - b.ZMin))     # 위 소자: 렌즈가 아래
+        # 다리: 몸통 뒤로 1.5 mm만 남김 (실물은 구부려 옆으로 뺌 — 문 하우징 사이 틈 5 mm에서 서로 닿지 않게) [확실 — 모델 겹침]
+        keep = 7.0
+        up = up.common(Part.makeBox(20, 20, keep, V(lo.Center.x - 10, lo.Center.y - 10, z_beam_lo - keep)))
+        dn = dn.common(Part.makeBox(20, 20, keep, V(hi.Center.x - 10, hi.Center.y - 10, z_beam_hi)))
         o.Shape = Part.makeCompound([up, dn])
         o.Label = o.Label.split(" ")[0].replace("_led", "_ir_pair") + " (3 mm 적외선 LED + 3 mm 수광, KiCad STEP)"
         out.append(o.Label)
