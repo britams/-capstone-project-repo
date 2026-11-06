@@ -161,6 +161,25 @@ def bracket_places():
     return out
 
 
+def joint_places():
+    """가로대 100c(4개)·갠트리 레일 100d 끝 이음부 (CAP-AI-SJ-49). 부재 끝이 옆 레일 안쪽 면에 맞닿는 'T 이음'.
+    브래킷은 부재의 양 옆면에 1개씩 (끝 1곳에 2개): 한 다리는 부재 옆면 홈, 다른 다리는 받는 레일 안쪽 면 홈.
+    (아래면에 달면 받는 레일 높이 20 mm 밖으로 다리가 나가서 볼트 걸 홈이 없음 → 옆면으로)"""
+    c = K.FR["c"]
+    e = c - S / 2                                          # 160: 받는 레일 안쪽 면
+    out = []
+    for z in (K.FR["deck_z"] + S / 2, K.FR["top_z"] + S / 2):      # 100c: x 방향, y ±80
+        for y in (-80.0, 80.0):
+            for xe, ax in ((-e, 1), (e, -1)):
+                for ny in (-1, 1):
+                    out.append(((xe, y + ny * S / 2, z), (ax, 0, 0), (0, ny, 0)))
+    zg = K.FR["gantry_z"] + S / 2                          # 100d: y 방향, x −18
+    for ye, ay in ((-e, 1), (e, -1)):
+        for nx in (-1, 1):
+            out.append(((-18.0 + nx * S / 2, ye, zg), (0, ay, 0), (nx, 0, 0)))
+    return out
+
+
 # ---------------- 분류 ----------------
 # (머리말, 분류) — 위에서부터 먼저 맞는 것
 CATEGORY = [
@@ -192,6 +211,28 @@ def category(label):
         if head in label:
             return cat
     return "B"
+
+
+def add_joint_hw(doc, bl=None, bol_r=None, bol_p=None, tn_r=None, tn_p=None):
+    """가로대·갠트리 레일 끝 T 이음 브래킷 20개 + 볼트 40 + T너트 40"""
+    bl = bl or bracket_local()
+    bol_r, bol_p = bol_r or bolt_local("rail"), bol_p or bolt_local("post")
+    tn_r, tn_p = tn_r or tnut_local("rail"), tn_p or tnut_local("post")
+    br, bo, tn = [], [], []
+    for p, nx, nz in joint_places():
+        br.append(to_world(bl, p, nx, nz))
+        bo += [to_world(bol_r, p, nx, nz), to_world(bol_p, p, nx, nz)]
+        tn += [to_world(tn_r, p, nx, nz), to_world(tn_p, p, nx, nz)]
+    n = len(br)
+    for nm, lst in (("100e2_bracket_2020_L_T이음 (%d)" % n, br), ("100f2_bolt_M5x8_T이음 (%d)" % (2 * n), bo),
+                    ("100g2_tnut_M5_slot6_T이음 (%d)" % (2 * n), tn)):
+        for o in list(doc.Objects):
+            if o.Label.split(" ")[0] == nm.split(" ")[0]:
+                doc.removeObject(o.Name)
+        o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
+        o.Label = nm
+        o.Shape = Part.makeCompound(lst)
+    return n
 
 
 def make():
@@ -230,18 +271,23 @@ def make():
         o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
         o.Label = nm
         o.Shape = Part.makeCompound(lst)
-    import D5g_feeder_uln as FU                      # 설탕물 급이 방 + ULN2003 실제 보드 (CAP-AI-SJ-40)
+    add_joint_hw(doc, bl, bol_r, bol_p, tn_r, tn_p)
+    import D5g_feeder_uln as FU                     # 설탕물 급이 방 + ULN2003 실제 보드 (CAP-AI-SJ-40)
     import sys
     FU.make_into(doc, sys.modules[__name__])
     FU.support_fixes(doc)
     FU.release_exit_fix(doc)
     FU.release_shaft_apply(doc)
     _lid = doc.addObject('Part::Feature', 'SJ_lid'); _lid.Label = '143l_feed_trough_lid (뚜껑, 3D 프린트 PETG — 벌레 막기)'; _lid.Shape = FU.trough_lid()
+    FU.feeder_detail_apply(doc)                     # (SJ-49) 급이 방 상세: 벽 보스·인서트·손나사·튜브 집게·코튼롤 잡이
+    FU.loadcell_apply(doc)                          # (SJ-49) 막대 로드셀 Adafruit 4540 + 캐리지 팔 + 받침판
     import D5g_real_parts as RP                      # 전기 부품 실제 CAD (KiCad STEP·Pi 5 공식 STEP, 인터넷 필요)
     try:
         RP.apply(doc)
     except Exception as e:
         print('실제 부품 CAD 못 받음 (인터넷 확인):', e)
+    import D5g_fasten as FA                          # (SJ-49) 얹기만 했던 부품 볼트 체결
+    FA.fasten(doc, sys.modules[__name__])
     for o in list(doc.Objects):        # D5f에서 스프링 204 뺀 뒤 남은 바탕 원기둥
         if o.Label in ("P204a", "P204b"):
             doc.removeObject(o.Name)

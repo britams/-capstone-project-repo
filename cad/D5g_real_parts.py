@@ -29,6 +29,7 @@ KICAD = "https://raw.githubusercontent.com/KiCad/kicad-packages3D/master/"
 SRC = {
     "dip16": KICAD + "Package_DIP.3dshapes/DIP-16_W7.62mm.step",
     "xh5": KICAD + "Connector_JST.3dshapes/JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical.step",
+    "xh4": KICAD + "Connector_JST.3dshapes/JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical.step",
     "hdr4": KICAD + "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step",
     "hdr2": KICAD + "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step",
     "led3": KICAD + "LED_THT.3dshapes/LED_D3.0mm.step",
@@ -221,6 +222,7 @@ def apply(doc):
     apply_wago(doc)
     apply_uno(doc)
     apply_gates_estop(doc)
+    apply_circuit_extras(doc)
     doc.recompute()
     return out
 
@@ -263,22 +265,47 @@ def wago_holder(cx, cy, zb):
     return shp.removeSplitter(), (cx - w["W"] / 2, cy - Dt / 2 + 2, zb + 2.0), (cx - w["W"] / 2, cy - Dt / 2 + 2 + w["D"] + gap, zb + 2.0)
 
 
+WAGO_SCREWS = ((47.5, -78.0), (25.0, -57.0), (-37.5, -42.0), (-5.0, -42.0))
+
+
 def apply_wago(doc):
-    """193 단자대·퓨즈 기판(193, 193b)을 지우고 와고 2개 + 받침으로"""
-    old = [o for o in doc.Objects if o.Label.startswith(("193_terminal", "193b_"))]
-    cx, cy, zb = -30.0, -65.0, 205.0
-    if old:
-        b = old[0].Shape.BoundBox
-        cx, cy = b.Center.x, b.Center.y
-    for o in old:
+    """(SJ-49, 서현 CAP-AI-32 요청) 와고 221-415 5개: GND 3개(이어서 11구) + +5 V 2개(이어서 8구).
+    자리 [확실 — 모델]: 데크 −y 가장자리, UNO(x ≤ −56.4)와 ULN F(x ≥ 38, y ≥ −66)·입구 깔때기(r 30.5) 사이.
+    2줄: 아래줄 y −88 ~ −69.4 (3개), 윗줄 y −66.4 ~ −47.8 (2개). 전선 구멍은 바깥(−y)·안(+y) 쪽, 레버는 위.
+    받침 193h: 바닥 2 + 칸막이 높이 4, 데크에 M3 × 10 볼트 4개 + 아래 너트"""
+    for o in [o for o in doc.Objects if o.Label.startswith(("193_terminal", "193b_", "193h_", "193w_"))]:
         doc.removeObject(o.Name)
-    holder, p1, p2 = wago_holder(cx, cy, zb)
-    b1, l1 = wago_221(*p1, front=-1)
-    b2, l2 = wago_221(*p2, front=1)
+    w = WAGO
+    zb = 205.0
+    xs = (-53.0, -20.1, 12.8)
+    rows = (("GND", -88.0 + 1.0), ("+5V", -66.4 + 1.0))
+    cells = [(xs[0], rows[0][1], "GND 1"), (xs[1], rows[0][1], "GND 2"), (xs[2], rows[0][1], "GND 3"),
+             (xs[0], rows[1][1], "+5V 1"), (xs[1], rows[1][1], "+5V 2")]
+    base = None
+    bodies, levers = [], []
+    for x0, y0, nm in cells:
+        cell = Part.makeBox(w["W"] + 2.4, w["D"] + 1.0, 6.0, V(x0 - 1.2, y0 - 0.5, zb)).cut(
+            Part.makeBox(w["W"] + 0.4, w["D"] + 3.0, 6.0, V(x0 - 0.2, y0 - 1.5, zb + 2.0)))
+        base = cell if base is None else base.fuse(cell)
+        bd, lv = wago_221(x0, y0, zb + 2.0, front=-1 if "GND" in nm else 1)
+        bodies.append(bd)
+        levers.append(lv)
+    screws = []
+    for x, y in WAGO_SCREWS:                                             # 칸 바깥 귀 4개 (와고 몸통·깔때기·UNO 피함)
+        base = base.fuse(Part.makeBox(9.0, 9.0, 2.0, V(x - 4.5, y - 4.5, zb)))
+        base = base.cut(Part.makeCylinder(1.7, 10, V(x, y, zb - 1)))
+        screws.append(Part.makeCylinder(1.5, 10, V(x, y, zb + 2.0), V(0, 0, -1)).fuse(Part.makeCylinder(2.75, 3.0, V(x, y, zb + 2.0))))
+    for o in doc.Objects:
+        if o.Label.startswith("101_deck"):
+            sh = o.Shape
+            for x, y in WAGO_SCREWS:
+                sh = sh.cut(Part.makeCylinder(1.7, 20, V(x, y, zb - 10)))
+            o.Shape = sh.removeSplitter()
     out = []
-    for nm, shp in (("193h_wago_holder (3D 프린트, 데크에 M3 × 2)", holder),
-                    ("193w_wago_221-415 × 2 (+5 V 줄 / GND 줄, 판매품 29.9 × 18.6 × 8.3)", Part.makeCompound([b1, b2])),
-                    ("193w_wago_levers (주황 레버)", Part.makeCompound([l1, l2]))):
+    for nm, shp in (("193h_wago_holder (3D 프린트, 와고 5칸, 데크에 M3 × 10 네 개 + 너트)", base.removeSplitter()),
+                    ("193w_wago_221-415 × 5 (아래줄 GND 3 / 윗줄 +5 V 2, 판매품 29.9 × 18.6 × 8.3)", Part.makeCompound(bodies)),
+                    ("193w_wago_levers (주황 레버)", Part.makeCompound(levers)),
+                    ("193s_bolt_M3x10_wago (4개, 데크 아래 너트)", Part.makeCompound(screws))):
         o = doc.addObject("Part::Feature", "SJW%d" % len(out))
         o.Label = nm
         o.Shape = shp
@@ -286,6 +313,86 @@ def apply_wago(doc):
     doc.recompute()
     return out
 
+
+# ---------------- (SJ-49) 서현 회로 요청: 허브 기판 2장·MOSFET 모듈·패널 퓨즈·J_I2C ----------------
+# 만능기판(양면 FR-4, 2.54 피치) — 서보 허브 4 × 6 cm, 게이트 허브(풀업 10 kΩ × 9) 3 × 7 cm, 모서리 구멍 Ø2.0 (가장자리에서 2) [가능성 높음 — 흔한 판매 규격]
+# MOSFET 모듈 SZH-AT021: 66.8 × 66.8 × 2.7 (디바이스마트 표기) [가능성 높음] — 구멍 위치 표기 없음 → 모서리 3.5 안쪽 Ø3.2로 그림 [추측 — 실물 재서 고칠 것, 미검증]
+# 패널 퓨즈 홀더 5 × 20 (F-520류): 판 구멍 Ø12, 머리 Ø15.2, 전체 32.8 [가능성 높음 — 같은 형식 판매처 치수] → 비상 정지 판 194b 옆에
+# J_I2C: JST XH 4핀(B4B-XH-A, KiCad STEP) — 게이트 허브 기판 위 (VS·GND·SDA·SCL, 서현 CAP-AI-35)
+PERF = dict(t=1.6, hole=2.0, edge=2.0)
+HUBS = {"SERVO_HUB": dict(L=60.0, W=40.0, x0=-30.0, y0=46.0, stand=8.0),
+        "GATE_HUB": dict(L=70.0, W=30.0, x0=-127.0, y0=-14.0, stand=8.0)}
+MOS = dict(L=66.8, W=66.8, t=2.7, x0=-125.0, y0=20.0, stand=6.0, off=3.5, hole=3.2)
+
+
+def perfboard(x0, y0, zb, L, W, stand, hole_off=None, hole_d=None, t=None):
+    t = t or PERF["t"]
+    off = hole_off or (PERF["edge"] + PERF["hole"] / 2)
+    d = hole_d or PERF["hole"]
+    board = Part.makeBox(L, W, t, V(x0, y0, zb + stand))
+    pts = [(x0 + off, y0 + off), (x0 + L - off, y0 + off), (x0 + off, y0 + W - off), (x0 + L - off, y0 + W - off)]
+    st = []
+    for x, y in pts:
+        board = board.cut(Part.makeCylinder(d / 2, t + 2, V(x, y, zb + stand - 1)))
+        st.append(Part.makeCylinder(d / 2 + 1.0, stand, V(x, y, zb)).cut(Part.makeCylinder(d / 2 - 0.3, stand + 1, V(x, y, zb - 0.5))))
+    for i in range(int((L - 4) / 2.54)):                                  # 2.54 구멍 줄 표시 (가장자리 한 줄씩만)
+        for yy in (y0 + 4.0, y0 + W - 4.0):
+            board = board.cut(Part.makeCylinder(0.5, t + 2, V(x0 + 3.5 + i * 2.54, yy, zb + stand - 1)))
+    return board.removeSplitter(), Part.makeCompound(st), pts
+
+
+def apply_circuit_extras(doc):
+    zb = 205.0
+    out = []
+    holes = []
+    for nm, h in HUBS.items():
+        b, st, pts = perfboard(h["x0"], h["y0"], zb, h["L"], h["W"], h["stand"])
+        holes += pts
+        lab = {"SERVO_HUB": "193v_servo_hub (만능기판 4 × 6 cm — 서보 5개 +5 V·GND·신호 나눔, 8 mm 기둥)",
+               "GATE_HUB": "193g_gate_hub (만능기판 3 × 7 cm — 빛 게이트 9쌍 풀업 10 kΩ, J_I2C, 8 mm 기둥)"}[nm]
+        out += [(lab, b, (0.15, 0.45, 0.20)), ("198h_hub_standoff_%s (M2 × 8 기둥 4, 구매)" % nm.lower(), st, (0.8, 0.7, 0.3))]
+    m = MOS
+    b, st, pts = perfboard(m["x0"], m["y0"], zb, m["L"], m["W"], m["stand"], m["off"], m["hole"], m["t"])
+    holes += pts
+    tb = load("tb4")
+    tb = place_xy(tb, m["x0"] + m["L"] / 2, m["y0"] + 6.0, zb + m["stand"] + m["t"], rot=0)
+    out += [("196m_mosfet_module_SZH-AT021 (66.8 × 66.8, 구멍 자리 미검증 — 실물 재기)", b.fuse(tb).removeSplitter() if False else Part.makeCompound([b, tb]), (0.10, 0.30, 0.60)),
+            ("198m_mosfet_standoff (M3 × 6 기둥 4, 구매)", st, (0.8, 0.7, 0.3))]
+    # J_I2C: 게이트 허브 위 오른쪽 끝
+    g = HUBS["GATE_HUB"]
+    xh = place_xy(load("xh4"), g["x0"] + g["L"] - 10.0, g["y0"] + g["W"] / 2, zb + g["stand"] + PERF["t"], rot=90)
+    out.append(("193j_J_I2C_JST_XH_4P (VS·GND·SDA·SCL, KiCad STEP — 게이트 허브 위)", xh, (0.95, 0.95, 0.90)))
+    for o in doc.Objects:
+        if o.Label.startswith("101_deck"):
+            sh = o.Shape
+            for x, y in holes:
+                sh = sh.cut(Part.makeCylinder(1.0, 20, V(x, y, zb - 10)))
+            o.Shape = sh.removeSplitter()
+    # 패널 퓨즈: 비상 정지 판 194b를 +y로 늘려 Ø12 구멍, 퓨즈 머리는 밖(−x)
+    pl = [o for o in doc.Objects if o.Label.startswith("194b_")]
+    if pl:
+        pb = pl[0].Shape.BoundBox
+        xf = pb.XMax                                                     # 레일 바깥 면 −180
+        ext = Part.makeBox(pb.XLength, 22.0, 30.0, V(pb.XMin, pb.YMax - 0.01, 210.0))
+        yc, zc = pb.YMax + 11.0, 225.0
+        sh = pl[0].Shape.fuse(ext).cut(Part.makeCylinder(6.0, 10, V(pb.XMin - 1, yc, zc), V(1, 0, 0)))
+        pl[0].Shape = sh.removeSplitter()
+        pl[0].Label = "194b_estop_plate (3D 프린트 4 mm — 비상 정지 Ø22.5 + 퓨즈 Ø12, 레일에 M5 × 8 두 개)"
+        cap = Part.makeCylinder(7.6, 9.0, V(pb.XMin, yc, zc), V(-1, 0, 0))
+        body = Part.makeCylinder(6.0, 32.8 - 9.0, V(pb.XMin, yc, zc), V(1, 0, 0))
+        nut = Part.makeCylinder(8.0, 3.0, V(xf, yc, zc), V(1, 0, 0)).cut(Part.makeCylinder(6.0, 5, V(xf - 1, yc, zc), V(1, 0, 0)))
+        out.append(("194f_panel_fuse_holder_5x20 (F-520류, 판 구멍 Ø12, T3A 퓨즈 — 서현 구매확정표 E3)", Part.makeCompound([cap, body, nut]), (0.15, 0.15, 0.15)))
+    objs = []
+    for nm, shp, col in out:
+        for old in [x for x in doc.Objects if x.Label.split(" ")[0] == nm.split(" ")[0]]:
+            doc.removeObject(old.Name)
+        o = doc.addObject("Part::Feature", "SJX%02d" % len(objs))
+        o.Label, o.Shape = nm, shp
+        if App.GuiUp and col:
+            o.ViewObject.ShapeColor = col
+        objs.append(o)
+    doc.recompute()
+    return objs
 
 
 # ---------------- (11/06 20:30) 아두이노 UNO R3 — 자리 상자 → 실제 모양 ----------------
@@ -374,6 +481,7 @@ def apply_uno(doc):
 # 비상 정지: 22 mm 버섯형 (XB7NS8442 같은 것) — 머리 Ø40, 전체 깊이 72 [가능성 높음 — 판매처 표기], 데크 구멍 Ø22.5.
 #   판 앞 31 (머리 18 + 목 13) / 판 뒤 41 (몸통 + 접점 블록)으로 나눔 → 판 앞·뒤 나눔은 실물로 확인.
 ADA2167 = dict(L=20.0, W=10.0, H=8.0, lens_r=1.5, lens_h=2.0)
+LEAD = dict(straight=2.5, bend=6.0)
 
 
 def ir_pair_door(doc):
@@ -395,8 +503,19 @@ def ir_pair_door(doc):
         keep = 7.0
         up = up.common(Part.makeBox(20, 20, keep, V(lo.Center.x - 10, lo.Center.y - 10, z_beam_lo - keep)))
         dn = dn.common(Part.makeBox(20, 20, keep, V(hi.Center.x - 10, hi.Center.y - 10, z_beam_hi)))
-        o.Shape = Part.makeCompound([up, dn])
-        o.Label = o.Label.split(" ")[0].replace("_led", "_ir_pair") + " (3 mm 적외선 LED + 3 mm 수광, KiCad STEP)"
+        # (SJ-49, 서현 CAP-AI-34) 납땜 여유: 몸통 뒤 다리를 2.5 mm 더 곧게 → 90° 꺾어 옆(문 틈 방향)으로 6 mm. 다리 간격 2.54 (x)
+        side = {"G2": 1, "G2b": 1, "G3": -1, "G3b": -1, "G5": 1, "G5b": 1}.get(o.Label.split("_")[2], 1)
+        legs = []
+        for c, z_end, sgn in ((lo.Center, z_beam_lo - keep, -1), (hi.Center, z_beam_hi + keep, 1)):
+            for dx in (-1.27, 1.27):
+                x = c.x + dx
+                zs = z_end if sgn > 0 else z_end - LEAD["straight"]
+                legs.append(Part.makeBox(0.5, 0.5, LEAD["straight"], V(x - 0.25, c.y - 0.25, zs)))
+                zb_ = z_end + sgn * LEAD["straight"] - (0.5 if sgn > 0 else 0.0)
+                y0 = c.y - 0.25 if side > 0 else c.y + 0.25 - LEAD["bend"]
+                legs.append(Part.makeBox(0.5, LEAD["bend"], 0.5, V(x - 0.25, y0, zb_)))
+        o.Shape = Part.makeCompound([up, dn] + legs)
+        o.Label = o.Label.split(" ")[0].replace("_led", "_ir_pair") + " (3 mm 적외선 LED + 3 mm 수광, KiCad STEP — 다리 2.5 곧게 후 옆으로 꺾음, 긴 다리 A·짧은 다리 K, 수광 렌즈가 LED를 마주봄)"
         out.append(o.Label)
     return out
 
