@@ -183,7 +183,7 @@ def apply(doc):
         o.Label = "195p_uln2003_%s (KiCad STEP 부품 + 판매 규격 기판)" % k
         out.append(o.Label)
     tf = [x for x in doc.Objects if x.Label.startswith("193_terminal_fuse")]
-    if tf:
+    if tf and False:   # 11/06 20:23 와고로 바꿈 → apply_wago()
         b = tf[0].Shape.BoundBox
         base, parts = terminal_fuse(b.XMin - 6, b.XMax + 10, b.YMin - 5, b.YMax + 5, b.ZMin)
         doc.removeObject(tf[0].Name)
@@ -213,5 +213,68 @@ def apply(doc):
             out += [o.Label, o2.Label]
         except Exception as e:
             out.append("Pi 5 STEP 실패: %s" % e)
+    apply_wago(doc)
+    doc.recompute()
+    return out
+
+
+# ---------------- (11/06 20:23 승준 결정) 단자대·퓨즈 기판 → 와고 레버 커넥터 ----------------
+# 와고 221-415 (5구, 1극): 폭 29.9 × 깊이 18.6 × 높이 8.3 [가능성 높음 — 판매처 표기]. 전선은 앞(깊이 방향)으로 꽂고 레버는 위.
+# + 줄 1개, − 줄 1개. 퓨즈는 어댑터 + 전선 중간의 줄 퓨즈(5×20 T2.5A) — 전선에 매달려 데크 자리 없음.
+WAGO = dict(W=29.9, D=18.6, H=8.3, n=5, hole=4.0, lever_w=4.2, lever_l=12.0, lever_t=1.6)
+
+
+def wago_221(x0, y0, z0, front=-1):
+    """모서리 (x0, y0, z0)에서 시작하는 221-415 한 개. front=-1 이면 전선 구멍이 −y 쪽"""
+    w = WAGO
+    body = Part.makeBox(w["W"], w["D"], w["H"], V(x0, y0, z0))
+    pitch = w["W"] / w["n"]
+    yf = y0 if front < 0 else y0 + w["D"]
+    levers = []
+    for i in range(w["n"]):
+        cx = x0 + pitch * (i + 0.5)
+        d = V(0, 1, 0) if front < 0 else V(0, -1, 0)                     # 앞면에서 안쪽으로
+        p0 = V(cx, yf - 0.5 * (1 if front < 0 else -1) * 0, z0 + 3.0)
+        body = body.cut(Part.makeCylinder(w["hole"] / 2, 10, p0 - d * 1.0, d))
+        levers.append(Part.makeBox(w["lever_w"], w["lever_l"], w["lever_t"], V(cx - w["lever_w"] / 2, y0 + w["D"] - w["lever_l"] - 1, z0 + w["H"])))
+    return body.removeSplitter(), Part.makeCompound(levers)
+
+
+def wago_holder(cx, cy, zb):
+    """193h 받침 (3D 프린트): 바닥 2 + 와고 두 개를 끼우는 낮은 벽(높이 4), 데크에 M3 × 2"""
+    w = WAGO
+    gap = 3.0
+    L = w["W"] + 4
+    Dt = 2 * w["D"] + gap + 4
+    base = Part.makeBox(L, Dt, 2.0, V(cx - L / 2, cy - Dt / 2, zb))
+    wall = Part.makeBox(L, Dt, 4.0, V(cx - L / 2, cy - Dt / 2, zb + 2)).cut(
+        Part.makeBox(w["W"] + 0.4, Dt - 4, 5, V(cx - (w["W"] + 0.4) / 2, cy - (Dt - 4) / 2, zb + 1.9)))
+    wall = wall.cut(Part.makeBox(L + 2, Dt - 4, 5, V(cx - L / 2 - 1, cy - (Dt - 4) / 2, zb + 2.5)))   # 앞뒤 열어 전선 지나감
+    shp = base.fuse(wall)
+    for sx in (-1, 1):
+        shp = shp.cut(Part.makeCylinder(1.7, 10, V(cx + sx * 6, cy, zb - 1)))          # M3 구멍 2 (두 와고 사이 틈)
+    return shp.removeSplitter(), (cx - w["W"] / 2, cy - Dt / 2 + 2, zb + 2.0), (cx - w["W"] / 2, cy - Dt / 2 + 2 + w["D"] + gap, zb + 2.0)
+
+
+def apply_wago(doc):
+    """193 단자대·퓨즈 기판(193, 193b)을 지우고 와고 2개 + 받침으로"""
+    old = [o for o in doc.Objects if o.Label.startswith(("193_terminal", "193b_"))]
+    cx, cy, zb = -30.0, -65.0, 205.0
+    if old:
+        b = old[0].Shape.BoundBox
+        cx, cy = b.Center.x, b.Center.y
+    for o in old:
+        doc.removeObject(o.Name)
+    holder, p1, p2 = wago_holder(cx, cy, zb)
+    b1, l1 = wago_221(*p1, front=-1)
+    b2, l2 = wago_221(*p2, front=1)
+    out = []
+    for nm, shp in (("193h_wago_holder (3D 프린트, 데크에 M3 × 2)", holder),
+                    ("193w_wago_221-415 × 2 (+5 V 줄 / GND 줄, 판매품 29.9 × 18.6 × 8.3)", Part.makeCompound([b1, b2])),
+                    ("193w_wago_levers (주황 레버)", Part.makeCompound([l1, l2]))):
+        o = doc.addObject("Part::Feature", "SJW%d" % len(out))
+        o.Label = nm
+        o.Shape = shp
+        out.append(o)
     doc.recompute()
     return out
