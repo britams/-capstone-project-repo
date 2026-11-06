@@ -537,3 +537,10 @@
 - 검증: 문서 안 값을 회로설계·배터리상자·판단 문서·승준 SJ-46/47과 대조 (핀 표는 circuit.py 검사 통과 값)
 - 남은 결정: 없음 (서현). 승준 확인: 펌웨어 핀 표, 하중 센서 막대 자리, J_I2C 자리
 - 다음: (D5g 좌표 오면) 하네스 확정 / 승준 답(2167 보유 여부) 반영
+
+## CAP-AI-37 — 2026-11-06 20:55 · 펌웨어 변경 요청 (승준 파일이라 요청만)
+- 명령: "그렇게 해" (펌웨어 핀 표 바뀐 부분을 정리해 Issue로)
+- 한 일: `control/firmware/trap_controller/trap_controller.ino` v0.1을 회로와 대조 → **UNO 1개 기준, 핀 10개 다름** (PEN A3→A0, HX711 A4/A5→A1/A2, 원점 A3~A5 없음, 문 서보 3개·빛 게이트·조명·송신·레일 감지는 UNO 2로). 요청 문서 `design/2026-11-06_펌웨어_변경요청_서현.md` (UNO별 표, HOME·SELFTEST·GATES·DOOR CLOSE 안전 규칙·LIGHT·EMIT·RAIL 명령 제안, 켤 때 서보 하나씩, HOLD F 0 권장, Pi 포트를 READY 이름으로 구분, 시뮬레이터 시험 4개) + 새 Issue
+- 근거 값: elec_budget worst_cases (켤 때 3.27 A), hold_check (마찰 92배 이상, 9시간 3.7 Wh)
+- 고치지 않은 것: control/ 전부 (승준 담당)
+- 다음: 승준 답 기다림 (2167 보유, D5g 좌표, 펌웨어)
