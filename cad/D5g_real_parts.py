@@ -99,27 +99,38 @@ def uln_board(cx, cy, zb):
 
 
 def terminal_fuse(x0, x1, y0, y1, zb):
-    """193: 3D 프린트 받침 2 mm + 단자대 4핀 × 2 (+5 V 줄 / GND 줄) + 퓨즈 홀더 5×20 — 자리 (x0~x1, y0~y1) 안"""
+    """193: 3D 프린트 받침(바닥 2 + 다리 4) + 만능기판 1.6 + 단자대 4핀 × 2 (+5 V 줄 / GND 줄) + 퓨즈 홀더 5×20
+    단자대·퓨즈 홀더는 기판에 꽂는 부품(다리가 기판 밑으로 3.6~5.0 나옴) → 기판을 받침 위 4 mm에 띄움"""
     base = Part.makeBox(x1 - x0, y1 - y0, 2.0, V(x0, y0, zb))
+    for sx in (x0, x1 - 4):
+        for sy in (y0, y1 - 4):
+            base = base.fuse(Part.makeBox(4, 4, 4.0, V(sx, sy, zb + 2.0)))
+    pcb = Part.makeBox(x1 - x0, y1 - y0, 1.6, V(x0, y0, zb + 6.0))
+    zt = zb + 7.6
     tb = load("tb4")
     fu = load("fuse")
-    zt = zb + 2.0
     yc = (y0 + y1) / 2
     a = place_xy(tb, x0 + 12, yc - 5.5, zt, 90)       # +5 V 줄
     b2 = place_xy(tb, x0 + 12, yc + 5.5, zt, 90)      # GND 줄
-    f = place_xy(fu, x1 - 17, yc, zt, 90)
-    return base, Part.makeCompound([a, b2, f])
+    f = place_xy(fu, x1 - 19, yc, zt, 90)
+    return base.removeSplitter(), Part.makeCompound([pcb, a, b2, f])
 
 
-def pi5(x0, y0, zb):
-    """공식 STEP. 기판이 xy에 눕게 돌리고(가장 얇은 방향 = z), 85 쪽을 x로. 기판 아래 면을 zb, 모서리를 (x0, y0)"""
+PI_HOLES = dict(px=58.0, py=49.0, off=3.5)   # B 폼팩터 [확실]
+PI_STAND = 5.0                                 # M2.5 × 5 기둥 (구매)
+
+
+def pi5(x0, y0, z_shelf):
+    """공식 STEP. 기판을 눕히고(가장 얇은 쪽 = z), 85 쪽을 x로.
+    M2.5 구멍 4개(반지름 1.2~1.5 원통)를 찾아 선반 구멍((x0+3.5, y0+3.5)부터 58 × 49)에 맞추고, 기판 아래 면 = 선반 + 기둥 5"""
     fn = fetch("pi5zip")
     d = os.path.join(CACHE, "pi5")
     if not os.path.isdir(d):
         zipfile.ZipFile(fn).extractall(d)
     steps = [os.path.join(r, f) for r, _, fs in os.walk(d) for f in fs if f.lower().endswith((".step", ".stp"))]
+    path = sorted(steps, key=os.path.getsize)[-1]
     s = Part.Shape()
-    s.read(sorted(steps, key=os.path.getsize)[-1])
+    s.read(path)
     b = s.BoundBox
     dims = [b.XLength, b.YLength, b.ZLength]
     if dims.index(min(dims)) == 1:
@@ -129,13 +140,36 @@ def pi5(x0, y0, zb):
     b = s.BoundBox
     if b.YLength > b.XLength:
         s.rotate(b.Center, V(0, 0, 1), 90)
-    b = s.BoundBox
-    # 기판 아래 면 찾기: 넓은 수평 면 중 가장 아래 → 그 아래로 나온 핀은 기판 밑
+    holes = {}
+    for f in s.Faces:
+        if f.Surface.TypeId == "Part::GeomCylinder" and 1.2 <= f.Surface.Radius <= 1.5 and abs(f.Surface.Axis.z) > 0.99:
+            c = f.Surface.Center
+            holes[(round(c.x, 1), round(c.y, 1))] = f
+    pts = sorted(holes)
+    # 4 구멍 = x, y 각각 58 / 49 떨어진 짝
+    xs = sorted({p[0] for p in pts})
+    ys = sorted({p[1] for p in pts})
+    hx0, hy0 = None, None
+    for xa in xs:
+        for ya in ys:
+            if any(abs(xb - xa - PI_HOLES["px"]) < 0.3 for xb in xs) and any(abs(yb - ya - PI_HOLES["py"]) < 0.3 for yb in ys):
+                hx0, hy0 = xa, ya
+                break
+        if hx0 is not None:
+            break
     flats = sorted([f for f in s.Faces if f.Surface.TypeId == "Part::GeomPlane" and abs(f.normalAt(0, 0).z) > 0.99 and f.Area > 3000],
                    key=lambda f: f.CenterOfMass.z)
-    z_bot = flats[0].CenterOfMass.z if flats else b.ZMin
-    s.translate(V(x0 - b.XMin, y0 - b.YMin, zb - z_bot))
-    return s, os.path.basename(sorted(steps, key=os.path.getsize)[-1])
+    z_bot = flats[0].CenterOfMass.z if flats else s.BoundBox.ZMin
+    if hx0 is None:
+        b = s.BoundBox
+        hx0, hy0 = b.XMin + PI_HOLES["off"], b.YMin + PI_HOLES["off"]
+        note = "구멍 못 찾음 — 외곽 맞춤"
+    else:
+        note = "구멍 4개 맞춤"
+    s.translate(V(x0 + PI_HOLES["off"] - hx0, y0 + PI_HOLES["off"] - hy0, z_shelf + PI_STAND - z_bot))
+    stands = [Part.makeCylinder(2.5, PI_STAND, V(x0 + PI_HOLES["off"] + sx, y0 + PI_HOLES["off"] + sy, z_shelf))
+              for sx in (0, PI_HOLES["px"]) for sy in (0, PI_HOLES["py"])]
+    return s, os.path.basename(path), note, Part.makeCompound(stands)
 
 
 def apply(doc):
@@ -160,18 +194,23 @@ def apply(doc):
         o2.Label = "193_terminal_fuse (KiCad STEP: 단자대 4핀 × 2 + 퓨즈 홀더 5×20)"
         o2.Shape = parts
         out += [o1.Label, o2.Label]
-    pi = [x for x in doc.Objects if x.Label.startswith("190_pi5_aihat (85")]
+    pi = [x for x in doc.Objects if x.Label.startswith(("190_pi5_aihat (85", "190_pi5_aihat 외곽"))]
     if pi:
         b = pi[0].Shape.BoundBox
+        for o in [x for x in doc.Objects if x.Label.startswith(("190r_", "198p_"))]:
+            doc.removeObject(o.Name)
         try:
-            s, nm = pi5(b.XMin, b.YMin, b.ZMin)
+            s, nm, note, stands = pi5(b.XMin, b.YMin, b.ZMin)
             o = doc.addObject("Part::Feature", "SJR_pi5")
-            o.Label = "190r_raspberry_pi5 (공식 STEP %s)" % nm
+            o.Label = "190r_raspberry_pi5 (공식 STEP %s, %s)" % (nm, note)
             o.Shape = s
-            pi[0].Label = "190_pi5_aihat 외곽 (AI HAT+ 자리, 반투명)"
+            o2 = doc.addObject("Part::Feature", "SJR_pi5_st")
+            o2.Label = "198p_pi_standoff (M2.5 × 5 기둥 4, 구매)"
+            o2.Shape = stands
+            pi[0].Label = "190_pi5_aihat 외곽 (AI HAT+ 자리, 반투명 — 숨김)"
             if App.GuiUp:
-                pi[0].ViewObject.Transparency = 80
-            out.append(o.Label)
+                pi[0].ViewObject.Visibility = False
+            out += [o.Label, o2.Label]
         except Exception as e:
             out.append("Pi 5 STEP 실패: %s" % e)
     doc.recompute()
