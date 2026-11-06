@@ -49,7 +49,7 @@ LOADS = {
     "pullup":       dict(rail="B", on=V_B / 10e3, src="10 kΩ 풀업, 빔이 끊겼을 때(LOW)만 0.5 mA [확실 계산]"),
     "light_top":    dict(rail="B", on=0.20, src="위 링 조명 182 [추측 — 보유 조명 실측 필요]"),
     "light_bot":    dict(rail="B", on=0.10, src="아래 조명 [추측]"),
-    "light_exit":   dict(rail="B", on=0.06, src="출구 조명 [추측]"),
+    "light_exit":   dict(rail="B", on=0.0, src="출구 조명 — 없앰 (승준 SJ-45 11/06: 굴뚝 위 하늘빛, 밤 LED는 벌레를 부름)"),
     "mosfet_led":   dict(rail="B", on=0.003, src="MOSFET 모듈 표시 LED [추측]"),
     # Pi 레일 A (W)
     "pi5":          dict(rail="A", halt=0.01, idle=3.0, active=4.5, peak=8.8,
@@ -102,7 +102,7 @@ def state_table(hold_f):
         ("4 자세·흉부 촬영", dict(stepper_hold=hf, top=1), dict(pi="active", cam="run", hat="run")),
         ("5 찍기 (펜 서보)", dict(stepper_hold=hf, top=1, pen="move"), dict(pi="active", cam="run", hat="idle")),
         ("6 급이·건조", dict(stepper_hold=hf, bot=1), dict(pi="idle", cam="run", hat="idle")),
-        ("7 방생 문 열고 기다림", dict(stepper_hold=hf, exit_=1, doors=("idle", "idle", "move")), dict(pi="active", cam="run", hat="idle")),
+        ("7 방생 문 열고 기다림 (마킹실 불 끔, 굴뚝 하늘빛)", dict(stepper_hold=hf, doors=("idle", "idle", "move")), dict(pi="active", cam="run", hat="idle")),
         ("8 격리 문 열고 기다림", dict(stepper_hold=hf, doors=("idle", "move", "idle")), dict(pi="active", cam="run", hat="idle")),
         ("밤 (Pi 꺼짐, UNO 꺼짐)", dict(emit=0, rx=N_GATE, pen="detached", doors=("detached",) * 3), dict(pi="halt", cam="off", hat="off")),
     ]
@@ -166,7 +166,7 @@ P = {
     "M_Y":  (91, -77, 453), "ULN_Y": (160, -10, 440), "SW_Y": (91, -56, 470),
     "PEN":  (97, -19, 418),             # 펜 서보: 캐리지 위 (대기 자리 기준)
     "D_IN": (26, -20, 349), "D_CAP": (26, -20, 377), "D_REL": (84, -20, 377),
-    "G1": (0, 0, 275), "G4": (0, 0, 570), "G6": (115, 0, 377),
+    "G1": (0, 0, 275), "G4": (0, 0, 570), "G6": (108, 0, 377),   # G6 방생 목 위 (승준 SJ-44, 11/06: x 120 → 108)
     # 문 빔 2개: 문판 평면(입구·격리 x ≈ 26, 방생 x ≈ 84) 앞뒤 각 2 mm
     "G2": (23, 0, 349), "G2b": (29, 0, 349), "G3": (29, 0, 377), "G3b": (23, 0, 377), "G5": (81, 0, 377), "G5b": (87, 0, 377),
     "CAM": (55, 0, 600), "L_TOP": (55, 0, 588), "L_BOT": (55, 15, 333), "L_EXIT": (115, 0, 395),
@@ -203,7 +203,6 @@ HARNESS = [
       for g in ("G1", "G2", "G2b", "G3", "G3b", "G4", "G5", "G5b", "G6")] + [
     ("UNO 2 → MOSFET → 위 조명 182", "UNO2", "L_TOP", 2, 24, 0.20, None),
     ("UNO 2 → MOSFET → 아래 조명", "UNO2", "L_BOT", 2, 24, 0.10, None),
-    ("UNO 2 → MOSFET → 출구 조명", "UNO2", "L_EXIT", 2, 24, 0.06, None),
 ]
 
 

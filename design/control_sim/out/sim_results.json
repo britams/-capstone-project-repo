@@ -35,6 +35,9 @@
   "T_light_s": 60.0,
   "T_alert_s": 120.0,
   "T_fallback_s": 300.0,
+  "clock_start_h": 12.0,
+  "sunrise_h": 7.0,
+  "sunset_h": 17.5,
   "hb_period_s": 0.5,
   "hb_timeout_s": 1.5,
   "uno_watchdog_s": 2.0,
@@ -131,7 +134,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.6904,
-   "E_B_Wh": 0.1627,
+   "E_B_Wh": 0.1598,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -143,8 +146,8 @@
    "fails": [],
    "per_hornet": {
     "cycle_s": 157.4,
-    "E_cycle_Wh": 0.3569,
-    "E_extra_Wh": 0.0325,
+    "E_cycle_Wh": 0.354,
+    "E_extra_Wh": 0.0296,
     "idle_W": 7.42
    }
   },
@@ -187,7 +190,7 @@
     "crush": 0
    },
    "E_A_Wh": 1.367,
-   "E_B_Wh": 0.3237,
+   "E_B_Wh": 0.3179,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -328,7 +331,7 @@
     "crush": 0
    },
    "E_A_Wh": 1.5127,
-   "E_B_Wh": 0.3394,
+   "E_B_Wh": 0.3365,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -369,7 +372,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.6904,
-   "E_B_Wh": 0.1627,
+   "E_B_Wh": 0.1598,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -418,6 +421,57 @@
    },
    "fsm_end": "IDLE",
    "cycle_s": 39.5,
+   "pass": true,
+   "fails": []
+  },
+  {
+   "name": "S15_night_hold",
+   "desc": "해 진 뒤(17:10 도착) 찍은 말벌 → 아침까지 마킹실, 7:30 지나 방생 (출구 조명 없음, SJ-45)",
+   "hornets": {
+    "h0": {
+     "zone": "outside",
+     "marked": true
+    }
+   },
+   "notes": [
+    {
+     "t": 0.31,
+     "kind": "selftest",
+     "reply": "OK SELFTEST"
+    },
+    {
+     "t": 18654.06,
+     "kind": "mark_result",
+     "ok": true
+    },
+    {
+     "t": 18723.92,
+     "kind": "night_hold",
+     "what": "해 진 뒤 → 아침까지 마킹실"
+    },
+    {
+     "t": 70323.92,
+     "kind": "morning",
+     "what": "해 뜬 뒤 30분 → 방생"
+    }
+   ],
+   "events": [],
+   "invariants": {
+    "max_servo_moving": 1,
+    "xy_move_pen_not_up": 0.0,
+    "mark_door_open": 0.0,
+    "peak_iB": 1.006,
+    "crush": 0
+   },
+   "E_A_Wh": 149.2238,
+   "E_B_Wh": 21.5226,
+   "final_doors": {
+    "IN": "open",
+    "CAP": "closed",
+    "REL": "closed"
+   },
+   "fsm_end": "IDLE",
+   "cycle_s": 51757.4,
    "pass": true,
    "fails": []
   },
@@ -533,7 +587,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.5116,
-   "E_B_Wh": 0.1104,
+   "E_B_Wh": 0.1075,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -567,10 +621,11 @@
     {
      "t": 249.13,
      "kind": "nudge",
-     "t_wait": 65
+     "t_wait": 65,
+     "what": "방생 60 s — 굴뚝 빛 쪽으로 가길 기다림"
     },
     {
-     "t": 305.14,
+     "t": 309.13,
      "kind": "alert",
      "what": "RELEASE 120 s"
     }
@@ -584,7 +639,7 @@
     "crush": 0
    },
    "E_A_Wh": 1.2257,
-   "E_B_Wh": 0.2638,
+   "E_B_Wh": 0.2496,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -630,8 +685,8 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6913,
-   "E_B_Wh": 0.1628,
+   "E_A_Wh": 0.6914,
+   "E_B_Wh": 0.1599,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -694,7 +749,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.6933,
-   "E_B_Wh": 0.1629,
+   "E_B_Wh": 0.16,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -741,7 +796,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.6956,
-   "E_B_Wh": 0.1657,
+   "E_B_Wh": 0.1628,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -792,7 +847,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.8688,
-   "E_B_Wh": 0.2141,
+   "E_B_Wh": 0.2112,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -833,7 +888,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.6928,
-   "E_B_Wh": 0.1627,
+   "E_B_Wh": 0.1598,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -941,7 +996,7 @@
     "crush": 0
    },
    "E_A_Wh": 1.0294,
-   "E_B_Wh": 0.2439,
+   "E_B_Wh": 0.241,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -1079,7 +1134,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.9916,
-   "E_B_Wh": 0.2348,
+   "E_B_Wh": 0.2319,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -1119,7 +1174,7 @@
      "ok": true
     },
     {
-     "t": 217.64,
+     "t": 217.63,
      "kind": "shutdown",
      "what": "passthrough 후 Pi 끔"
     }
@@ -1133,7 +1188,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.3982,
-   "E_B_Wh": 0.108,
+   "E_B_Wh": 0.1051,
    "final_doors": {
     "IN": "open",
     "CAP": "open",
@@ -1174,7 +1229,7 @@
     "crush": 0
    },
    "E_A_Wh": 0.6904,
-   "E_B_Wh": 0.1628,
+   "E_B_Wh": 0.1598,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -1188,8 +1243,8 @@
  ],
  "per_hornet": {
   "cycle_s": 157.4,
-  "E_cycle_Wh": 0.3569,
-  "E_extra_Wh": 0.0325,
+  "E_cycle_Wh": 0.354,
+  "E_extra_Wh": 0.0296,
   "idle_W": 7.42
  },
  "daily": [
@@ -1211,7 +1266,7 @@
    "bot_idle": true,
    "idle_W": 7.42,
    "load_Wh": 71.6,
-   "wall_Wh": 84.3
+   "wall_Wh": 84.2
   },
   {
    "visits": 100,
@@ -1220,8 +1275,8 @@
    "cam_always": true,
    "bot_idle": true,
    "idle_W": 7.42,
-   "load_Wh": 74.2,
-   "wall_Wh": 87.3
+   "load_Wh": 73.9,
+   "wall_Wh": 87.0
   },
   {
    "visits": 20,
@@ -1231,7 +1286,7 @@
    "bot_idle": true,
    "idle_W": 8.06,
    "load_Wh": 194.0,
-   "wall_Wh": 228.3
+   "wall_Wh": 228.2
   },
   {
    "visits": 20,
@@ -1240,8 +1295,8 @@
    "cam_always": false,
    "bot_idle": false,
    "idle_W": 5.33,
-   "load_Wh": 52.9,
-   "wall_Wh": 62.2
+   "load_Wh": 52.8,
+   "wall_Wh": 62.1
   }
  ],
  "single_beam_compare": {

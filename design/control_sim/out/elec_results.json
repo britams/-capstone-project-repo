@@ -51,8 +51,8 @@
   },
   "light_exit": {
    "rail": "B",
-   "on": 0.06,
-   "src": "출구 조명 [추측]"
+   "on": 0.0,
+   "src": "출구 조명 — 없앰 (승준 SJ-45 11/06: 굴뚝 위 하늘빛, 밤 LED는 벌레를 부름)"
   },
   "mosfet_led": {
    "rail": "B",
@@ -151,10 +151,10 @@
    "pA_W": 5.7
   },
   {
-   "state": "7 방생 문 열고 기다림",
-   "iB_typ": 0.494,
-   "iB_peak": 1.044,
-   "pB_W": 2.47,
+   "state": "7 방생 문 열고 기다림 (마킹실 불 끔, 굴뚝 하늘빛)",
+   "iB_typ": 0.431,
+   "iB_peak": 0.981,
+   "pB_W": 2.16,
    "pA_W": 7.2
   },
   {
@@ -230,10 +230,10 @@
    "pA_W": 5.7
   },
   {
-   "state": "7 방생 문 열고 기다림",
-   "iB_typ": 0.622,
-   "iB_peak": 1.214,
-   "pB_W": 3.11,
+   "state": "7 방생 문 열고 기다림 (마킹실 불 끔, 굴뚝 하늘빛)",
+   "iB_typ": 0.559,
+   "iB_peak": 1.151,
+   "pB_W": 2.79,
    "pA_W": 7.2
   },
   {
@@ -252,7 +252,7 @@
   }
  ],
  "worst": {
-  "rule_kept_A": 1.86,
+  "rule_kept_A": 1.8,
   "boot_all_servos_A": 3.27,
   "boot_staggered_A": 1.15,
   "note": "규칙: 서보는 한 번에 하나 (문 3개·펜). 지금 펌웨어 setup()은 서보 4개를 한꺼번에 attach·write → 켤 때 위치가 다르면 4개가 동시에 움직임"
@@ -581,9 +581,9 @@
    "to": "G6",
    "wires": 5,
    "awg": 28,
-   "len_mm": 504,
+   "len_mm": 496,
    "stock_mm": 230,
-   "extension_mm": 274,
+   "extension_mm": 266,
    "moving": false,
    "drop_V": null
   },
@@ -610,18 +610,6 @@
    "extension_mm": 397,
    "moving": false,
    "drop_V": 0.007
-  },
-  {
-   "name": "UNO 2 → MOSFET → 출구 조명",
-   "frm": "UNO2",
-   "to": "L_EXIT",
-   "wires": 2,
-   "awg": 24,
-   "len_mm": 526,
-   "stock_mm": null,
-   "extension_mm": 526,
-   "moving": false,
-   "drop_V": 0.005
   }
  ],
  "csi": {
@@ -776,5 +764,5 @@
    "days": 3.82
   }
  ],
- "harness_total_m": 43.3
+ "harness_total_m": 42.2
 }

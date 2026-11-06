@@ -43,6 +43,8 @@ PRM = dict(
     park=(65.0, -40.0), X_lim=(37.0, 73.0), Y_lim=(-40.0, 18.0),   # D5e 마커 범위 (cad/D5e_check.py) [확실 — 모델]
     thorax_p_min=0.6, pose_retry_max=3, mark_retry_max=1,
     T_enter_s=60.0, T_light_s=60.0, T_alert_s=120.0, T_fallback_s=300.0,
+    clock_start_h=12.0,   # 시뮬레이션 시작 시각 (정오)
+    sunrise_h=7.0, sunset_h=17.5,   # 공주 11월 초 해 뜸·짐 근사 [가능성 높음] — Pi는 날짜로 계산
     hb_period_s=0.5, hb_timeout_s=1.5, uno_watchdog_s=2.0,
     door_beams=2,         # 문틈 빔 수 (비교용: 1이면 옛 설계 — 통로 쪽 빔 하나만 봄)
     classes=("velutina", "crabro"),   # 분류는 등검은말벌·유럽말벌 2종만 (서현 11/02 09:25) — VespAI와 같은 2종
@@ -910,7 +912,6 @@ class PiFSM:
     def to_idle(self):
         self.state("IDLE")
         yield from self.cmd("U2", "LIGHT TOP 0")
-        yield from self.cmd("U2", "LIGHT EXIT 0")
         yield from self.cmd("U2", "LIGHT BOT 255")
         yield from self.close_door("CAP")
         yield from self.close_door("REL")
@@ -1084,12 +1085,9 @@ class PiFSM:
                     break
                 self.note("mismatch", what="ledger 0, camera %d" % len(obs))
                 n["chamber"] = len(obs)
-            if el > PRM["T_light_s"] and not nudged:
+            if el > PRM["T_light_s"] and not nudged:          # 출구 조명 없음 (SJ-45) → 기록만, 마킹실은 이미 어두움
                 nudged = True
-                self.note("nudge", t_wait=round(el))
-                yield from self.cmd("U2", "LIGHT EXIT 0")
-                yield ("sleep", 1.0)
-                yield from self.cmd("U2", "LIGHT EXIT 255")
+                self.note("nudge", t_wait=round(el), what="방생 60 s — 굴뚝 빛 쪽으로 가길 기다림")
             if el > PRM["T_alert_s"] and not alerted:
                 alerted = True
                 self.note("alert", what="%s 120 s" % name)
@@ -1101,10 +1099,28 @@ class PiFSM:
         if fallback:
             yield from self.close_door("CAP")
 
-    def release(self):
+    def daylight(self):
+        """낮인가 (CAP-AI-30, 제어 위임): 해 뜬 뒤 30분 ~ 해 지기 30분 전. Pi는 날짜·위치(공주 36.45 N, 127.12 E)로
+        해 뜨고 지는 시각을 계산 (NOAA 식, 인터넷 없이 RTC 시계로). 시뮬레이션은 PRM 시각을 씀."""
+        h = (PRM["clock_start_h"] + self.sim.t / 3600.0) % 24
+        return PRM["sunrise_h"] + 0.5 <= h <= PRM["sunset_h"] - 0.5
+
+    def night_hold(self):
+        """밤: 굴뚝이 어두워 말벌이 안 나감 → 300 s 뒤 격리 문 규칙에 걸려 찍은 말벌을 잃음 (SJ-45 질문 3).
+        그래서 급이 자리 그대로(먹이 있음, 불 끔) 아침까지 마킹실에서 기다림. 입구 문은 닫힌 채."""
+        self.state("NIGHT_HOLD")
+        self.note("night_hold", what="해 진 뒤 → 아침까지 마킹실")
         yield from self.cmd("U2", "LIGHT TOP 0")
         yield from self.cmd("U2", "LIGHT BOT 0")
-        yield from self.cmd("U2", "LIGHT EXIT 255")
+        while not self.daylight():
+            yield ("sleep", 600.0)
+        self.note("morning", what="해 뜬 뒤 30분 → 방생")
+
+    def release(self):
+        if not self.daylight():
+            yield from self.night_hold()
+        yield from self.cmd("U2", "LIGHT TOP 0")
+        yield from self.cmd("U2", "LIGHT BOT 0")
         yield from self.leave("REL", ("G5", "G6"), "RELEASE")
         yield from self.floor_down()
 
@@ -1120,7 +1136,6 @@ class PiFSM:
         self.state("SHUTDOWN")
         yield from self.cmd("U2", "LIGHT TOP 0")
         yield from self.cmd("U2", "LIGHT BOT 0")
-        yield from self.cmd("U2", "LIGHT EXIT 0")
         self.flush()
         yield from self.cmd("U2", "DOOR CAP OPEN")
         yield from self.done(["EVT DOOR CAP OPEN"], 3)
@@ -1253,7 +1268,9 @@ def scenarios():
                                     expect=dict(h0="outside", h0_marked=True), prm=dict(month=7)),
         "S4d_mw_fail_autumn":  dict(desc="폭 못 잼, 10월 → 여왕으로 보고 격리 (계절 규칙)", hornets=[H(0, mw_mm="fail")], until=300,
                                     expect=dict(h0="captured"), prm=dict(month=10)),
-        "S5_crabro":           dict(desc="유럽말벌 → 격리 (서현 결정 11/06)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
+"S15_night_hold":      dict(desc="해 진 뒤(17:10 도착) 찍은 말벌 → 아침까지 마킹실, 7:30 지나 방생 (출구 조명 없음, SJ-45)",
+                                    hornets=[H(0, t=18600.0)], until=80000, expect=dict(h0="outside", h0_marked=True)),
+                "S5_crabro":           dict(desc="유럽말벌 → 격리 (서현 결정 11/06)", hornets=[H(0, species="crabro")], until=300, expect=dict(h0="captured")),
         "S5b_other_insect":    dict(desc="2종이 아닌 곤충(장수말벌·꿀벌 등) → 분류기 불확실 → 격리", hornets=[H(0, species="other")], until=300,
                                     expect=dict(h0="captured")),
         "S6_already_marked":   dict(desc="이미 표식 있음 → 재방문 기록, 급이 후 방생", hornets=[H(0, marked=True)], until=300,

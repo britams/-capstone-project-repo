@@ -41,7 +41,7 @@ def con(net, *nodes, awg=26, note=""):
 con("VIN_B", "J_B.+", "F1.1", awg=20, note="배럴 5.5×2.1 (+ 가운데)")
 con("VF_B", "F1.2", "SW_E.1", awg=20, note="퓨즈 T2.5A 지연형")
 con("+5V_B", "SW_E.2", "TB.+5V", "C1.+", "C2.1", "R_RS.1", awg=20, note="비상 정지 NC 뒤 = 구동 레일")
-con("GND", "J_B.-", "TB.GND", "C1.-", "C2.2", awg=20, note="GND 한 점 (단자대)")
+con("GND", "J_B.-", "TB.GND", "C1.-", "C2.2", awg=20, note="GND 한 점 (와고 GND 묶음)")
 # 전원 ① → Pi
 con("USB_PI", "PSU_A.USBC", "PI.USBC", awg=0, note="27 W USB-C (또는 배터리 상자 5.1 V 5 A)")
 con("USB_U1", "PI.USB1", "U1.USB", awg=0, note="USB A-B 0.5 m, UNO 1 전원 + 115200")
@@ -93,7 +93,8 @@ con("EMIT_LO", "Q4.OUT-", awg=24)
 con("GND", "Q4.GND", awg=24)
 con("U2_EMIT", "U2.D4", "Q4.TRIG", awg=26, note="HIGH = 송신 켬 (자가 시험 때 끔)")
 # 조명 MOSFET
-for q, p, lamp in (("Q1", "D3", "L_TOP"), ("Q2", "D5", "L_BOT"), ("Q3", "D6", "L_EXIT")):
+# 출구 조명 L_EXIT·Q3 없앰 (승준 SJ-45 11/06: 방생 굴뚝 위 하늘빛, 밤 LED는 다른 벌레를 부름) → UNO 2 D6 예비
+for q, p, lamp in (("Q1", "D3", "L_TOP"), ("Q2", "D5", "L_BOT")):
     con("U2_%s" % q, "U2.%s" % p, "%s.TRIG" % q, awg=26, note="PWM 되는 핀")
     con("+5V_B", "%s.V+" % lamp, awg=24)
     con("%s_LO" % lamp, "%s.V-" % lamp, "%s.OUT-" % q, awg=24)
@@ -116,21 +117,23 @@ BOM = [
     ("Pi 5 RTC 배터리 (공식 충전식 ML-2020, J5 BAT 단자)", 1, "전원이 끊겨도 날짜 유지 → 여왕벌 계절 규칙 (11/06)", "**추가**"),
     ("마이크로 스위치 KW11-3Z 레버형 (원점)", 3, "F, X, Y — 외형 20×10.2×6.4, 승준 라이브러리 SJ-38", "추가"),
     ("빛 게이트 Adafruit 2167 (3 mm)", 9, "G1·G2·G2b·G3·G3b·G4·G5·G5b·G6", "**살 것 9쌍** (보유 0, 국내 판매처 확인 — 11/06 고침)"),
-    ("로직 레벨 MOSFET 모듈 (D4184 등)", 4, "조명 3 + 송신 켜기 1", "살 것 (시험 단계는 보유 릴레이 모듈로 대신 — 켜고 끄기만)"),
+    ("로직 레벨 MOSFET 모듈 (D4184 등)", 3, "조명 2 (위·아래) + 송신 켜기 1 — 출구 조명 없앰 (SJ-45)", "살 것 (시험 단계는 보유 릴레이 모듈로 대신 — 켜고 끄기만)"),
     ("저항 10 kΩ", 10, "게이트 풀업 9 + 레일 감지 1", "학습 키트 저항 세트에서 [실물 확인]"),
     ("커패시터 100 nF", 4, "원점 3 + 단자대 1", "키트 커패시터 세트에서 [실물 확인]"),
     ("전해 커패시터 1000 µF 10 V", 1, "서보 옆 단자대", "추가"),
     ("5 V 3 A 어댑터 + DC 잭 5.5×2.1", 1, "구동 레일", "구매 목록 G2"),
-    ("퓨즈 홀더 + T2.5A 5×20", 1, "구동 레일", "추가"),
+    ("줄 퓨즈 홀더(인라인) + T2.5A 5×20", 1, "구동 레일 (승준 SJ-43 제안 채택)", "살 것"),
     ("비상 정지 버튼 (NC)", 1, "구동 레일", "추가"),
-    ("단자대 (+5 V 줄 / GND 줄)", 1, "데크 위", "추가"),
+    ("와고 레버 커넥터 221-415 (5구)", 5, "+5V_B 2개 이어 8구 (입력·ULN 3·서보 허브·게이트 허브·조명 2), GND 3개 이어 11구 (+ UNO 1·2 GND) — 단자대 대신 (승준 SJ-43 제안 채택, 11/06)", "살 것"),
+    ("만능기판 소형 2장 + 핀 헤더", 1, "서보 허브 (서보 4 헤더 + 1000 µF + 100 nF), 게이트 허브 (수신 9 + 송신 9 헤더 + 풀업 10 kΩ × 9 + 송신 MOSFET)", "살 것 (헤더는 키트 확인)"),
+    ("20·22 AWG 연선 (와고 꽂는 줄)", 1, "와고 221은 가는 26·28 AWG를 직접 물기 어려움 → 허브까지는 20~22 AWG", "살 것"),
     ("실리콘 연선 26·28 AWG 각 10~15 m, 20·22 AWG 각 2 m", 1, "배선 약 44 m (가닥 합)", "추가"),
     ("듀폰·JST-XH 연장 커넥터", 1, "게이트·서보 연장", "추가"),
     ("(선택) 배터리 상자: LiFePO4 12.8 V 20 Ah (2일, 11/06) + 충전기 + 강압 5.1 V 5 A·5 V 3 A + INA226 + 퓨즈 5 A", 1, "배터리 운용", "현장 시험 날짜 보고"),
 ]
 
 UNO_PINS = ["D%d" % i for i in range(2, 14)] + ["A%d" % i for i in range(6)]
-RESERVED = {"U1": set(UNO_PINS), "U2": set(UNO_PINS) - {"D13"}}
+RESERVED = {"U1": set(UNO_PINS), "U2": set(UNO_PINS) - {"D13", "D6"}}
 
 
 def check():
@@ -197,7 +200,7 @@ def sheets():
         d += (sw := elm.Switch(nc=True).right().label("비상 정지\n(NC)", loc="top"))
         d += (n1 := elm.Dot())
         d += elm.Line().right(1.5)
-        d += (tb := elm.Dot().label("+5V_B (단자대)", loc="bottom"))
+        d += (tb := elm.Dot().label("+5V_B (와고 묶음)", loc="bottom"))
         d += elm.Capacitor(polar=True).down(2).at(n1.center).label("C1\n1000 µF", loc="bottom")
         d += (g1 := elm.Dot())
         d += elm.Capacitor().down(2).at((n1.center[0] + 1.5, n1.center[1])).label("C2 0.1 µF", loc="bottom")
@@ -207,8 +210,8 @@ def sheets():
         d += elm.Ground().at(g1.center)
         d += elm.Resistor().right(2.5).at(tb.center).label("R_RS 10 kΩ", loc="top")
         d += elm.Label().label("→ UNO 2 D2 (레일 감지)", loc="right")
-        d += elm.Label().label("GND 한 점 (단자대) ← UNO 1 GND, UNO 2 GND, 서보·게이트·ULN2003 GND", fontsize=10, halign="left").at((-1, -3.8))
-        d += elm.Label().label("+5V_B → ULN2003 ×3, SG90, MG90S ×3, 게이트 수신·송신 ×9, 풀업 10 kΩ ×9, 조명 ×3", fontsize=10, halign="left").at((-1, -4.4))
+        d += elm.Label().label("GND 한 점 (와고 GND 묶음) ← UNO 1 GND, UNO 2 GND, 서보·게이트·ULN2003 GND", fontsize=10, halign="left").at((-1, -3.8))
+        d += elm.Label().label("+5V_B → ULN2003 ×3, SG90, MG90S ×3, 게이트 수신·송신 ×9, 풀업 10 kΩ ×9, 조명 ×2", fontsize=10, halign="left").at((-1, -4.4))
         d += elm.Label().label("UNO 5V 핀과 +5V_B는 잇지 않음 (UNO는 Pi USB에서)", fontsize=10, halign="left").at((-1, -5.0))
         d += elm.Label().label("Pi 레일 (따로)", fontsize=12, halign="left").at((-1, -6.6))
         pi = elm.Ic(pins=[P("USB-C", "left", "pin1"), P("USB1", "right", "pin2"), P("USB2", "right", "pin3"),
@@ -247,7 +250,7 @@ def sheets():
             d += elm.Line().right(1.2).at(ul.XH5)
             d += elm.Label().label("28BYJ-48 %s\n(+5V_B, GND)" % {"F": "바닥", "X": "마커 X", "Y": "마커 Y"}[ax], loc="right")
         for p, txt in (("A0", "SG90 펜 신호 (전원 +5V_B)"), ("A1", "HX711 DT"), ("A2", "HX711 SCK  — HX711 VCC는 UNO 5V, RATE→5V (80 Hz)"),
-                       ("5V", "HX711 VCC"), ("GND", "단자대 GND (한 점)")):
+                       ("5V", "HX711 VCC"), ("GND", "와고 GND (한 점)")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
             d += elm.Label().label(txt, loc="left")
         for p, ax in (("A3", "F"), ("A4", "X"), ("A5", "Y")):
@@ -257,7 +260,7 @@ def sheets():
 
     # --- 3장: UNO 2 ---
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_3_UNO2_문게이트조명.png"), show=False, dpi=150) as d:
-        d += elm.Label().label("회로도 3/3 — UNO 2: 문 서보 3 · 빛 게이트 9쌍 (풀업 10 kΩ, 송신 MOSFET) · 조명 3 · 레일 감지", fontsize=14).at((-6, 13.5))
+        d += elm.Label().label("회로도 3/3 — UNO 2: 문 서보 3 · 빛 게이트 9쌍 (풀업 10 kΩ, 송신 MOSFET) · 조명 2 · 레일 감지", fontsize=14).at((-6, 13.5))
         right = ["A0", "A1", "A2", "A3", "A4", "A5", "D7", "D8", "D12"]
         left = ["D2", "D3", "D4", "D5", "D6", "D9", "D10", "D11"]
         u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p) for p in left[::-1]],
@@ -273,18 +276,18 @@ def sheets():
             d += elm.Label().label("수신 %s 흰 선 (%s)" % (g, GATE_WHERE[g]), loc="right", fontsize=10)
         d += elm.Label().label("수신 빨강 +5V_B / 검정 GND, 송신 빨강 +5V_B / 검정 → Q4", fontsize=10).at((3.2, -1.2))
         for p, txt in (("D2", "R_RS 10 kΩ ← +5V_B (레일 감지)"), ("D3", "Q1 MOSFET → 위 링 조명 182"), ("D4", "Q4 MOSFET → 송신 9개 GND 쪽 (EMIT_EN)"),
-                       ("D5", "Q2 MOSFET → 아래 조명"), ("D6", "Q3 MOSFET → 출구 조명"),
+                       ("D5", "Q2 MOSFET → 아래 조명"), ("D6", "예비 (출구 조명 없앰, SJ-45)"),
                        ("D9", "MG90S 입구 문 112 (주황)"), ("D10", "MG90S 격리 문 170"), ("D11", "MG90S 방생 문 176")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
             d += elm.Label().label(txt, loc="left", fontsize=10)
-        d += elm.Label().label("D13 예비 · 서보 전원 +5V_B · GND는 단자대 한 점 · 끊기면 LOW", fontsize=10).at((-9, -4.4))
+        d += elm.Label().label("D6·D13 예비 · 서보 전원 +5V_B · GND는 와고 한 점 · 끊기면 LOW", fontsize=10).at((-9, -4.4))
 
 
 def main():
     errs, use = check()
     write_tables()
     print("넷 %d개, 끝 %d개" % (len(NETS), sum(len(v) for v in NETS.values())))
-    print("UNO 1 핀 %d/18, UNO 2 핀 %d/17(D13 예비)" % (len([1 for k in use if k[0] == "U1"]), len([1 for k in use if k[0] == "U2"])))
+    print("UNO 1 핀 %d/18, UNO 2 핀 %d/16(D6·D13 예비)" % (len([1 for k in use if k[0] == "U1"]), len([1 for k in use if k[0] == "U2"])))
     print("검사:", "통과" if not errs else errs)
     try:
         sheets()
