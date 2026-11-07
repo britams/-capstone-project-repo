@@ -15,7 +15,7 @@ https://docs.google.com/presentation/d/1Sau8DxgiKAaaifgAzFaC2a1HySPL3LUgt0teYuxn
 | 조사 모드 | 여왕벌은 가둠, 일벌은 흉부에 수성 아크릴 마커로 점 → 먹이 → 방생, 다시 잡히면 로그 → 먹이 → 방생 |
 
 - 지도교수: 김성관 교수님 · 팀장 이서현 · 팀원 이승준
-- 지금 상태: [`docs/00_새채팅_인수인계_2026-10-28.md`](docs/00_새채팅_인수인계_2026-10-28.md)
+- 지금 상태: [`docs/00_새채팅_인수인계_2026-11-07.md`](docs/00_새채팅_인수인계_2026-11-07.md)
 - 역할 분담: [`docs/2026-10-28_분업계획_서현_승준.md`](docs/2026-10-28_분업계획_서현_승준.md)
 - GitHub 쓰는 법 (Chrome만): [`docs/GitHub_사용법_Chrome.md`](docs/GitHub_사용법_Chrome.md)
 - Claude 새 채팅 시작: [`docs/00_새채팅_시작키.md`](docs/00_새채팅_시작키.md)

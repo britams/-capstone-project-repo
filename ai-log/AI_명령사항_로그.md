@@ -554,3 +554,10 @@
 - [제안] (D5g 모델에 없음): HX711 (66, 95, 210), DC 잭 (−184, −22, 225) → 승준이 다시 작업할 때 CAD에
 - 승준 PDF에서 고칠 곳 (승준 파일이라 Issue에만): 22쪽 '줄 퓨즈 2.5 A·T2.5 A 지연형' → 5×20 3 A 패널 홀더, 45쪽 '하루 72 Wh' → 80 Wh(20마리, 배터리 문서)
 - 다음: 서현 쪽 회로 일은 끝 — 남은 것은 부품 도착 후 브링업 B1~B6, 승준 복귀 후 펌웨어(#8)·CAD 2자리
+
+## CAP-AI-39 — 2026-11-07 16:35 · VS Code + Claude Code 시작 정리
+- 명령: "지금까지 하는 거 vscode에서 실행해서 실제로 사용할 코드까지 만들어 버리고 싶은데 vscode에서 클로드 코드 실행하도록 정리해 줄래"
+- 한 일: `docs/2026-11-07_VSCode_ClaudeCode_시작정리_서현.md` — 설치(winget: Git·VS Code·Arduino CLI·Python, Claude Code), 레포를 C:\capstone에 새로 clone(PC 사본은 git 아님·한글 경로 빌드 문제), arduino:avr·Servo, 확장 설치·로그인, **첫 메시지**(펌웨어 trap_motion·trap_doors·pi_link를 design/circuit/firmware/에 — control/는 승준 파일이라 안 고침, 컴파일·시뮬 시험 4개, 로그 CAP-AI-40~), 막힐 때 표
+- 인수인계 파일 2026-10-28 → 2026-11-07로 이름 바꾸고 11/06 밤~11/07 줄 추가 (git mv), README 링크 고침
+- 근거: Claude Code 공식 문서 setup·vs-code 페이지 (설치 명령·VS Code 1.94 이상·유료 계정 필요)
+- 남은 결정 (서현): 펌웨어를 서현 폴더에 둘지, 분업계획을 바꿔 control/를 직접 고칠지 — 문서 0장 2번
