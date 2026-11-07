@@ -27,7 +27,7 @@
   "ir_emitter": {
    "rail": "B",
    "on": 0.02,
-   "src": "Adafruit 2167 송신 20 mA @5 V [확실 — 제조사]"
+   "src": "Adafruit 2167 송신 20 mA @5 V [확실 — 제조사]; 문 빔 낱개 LED는 220 Ω → 17 mA (11/06 21시) — 20 mA로 보수적으로 둠"
   },
   "ir_receiver": {
    "rail": "B",
@@ -269,11 +269,11 @@
    "to": "TB",
    "wires": 2,
    "awg": 20,
-   "len_mm": 198,
+   "len_mm": 346,
    "stock_mm": null,
-   "extension_mm": 198,
+   "extension_mm": 346,
    "moving": false,
-   "drop_V": 0.033
+   "drop_V": 0.058
   },
   {
    "name": "단자대 → ULN2003 F (+5 V, GND)",
@@ -281,9 +281,9 @@
    "to": "ULN_F",
    "wires": 2,
    "awg": 22,
-   "len_mm": 180,
+   "len_mm": 156,
    "stock_mm": null,
-   "extension_mm": 180,
+   "extension_mm": 156,
    "moving": false,
    "drop_V": 0.003
   },
@@ -293,11 +293,11 @@
    "to": "ULN_X",
    "wires": 2,
    "awg": 22,
-   "len_mm": 594,
+   "len_mm": 635,
    "stock_mm": null,
-   "extension_mm": 594,
+   "extension_mm": 635,
    "moving": false,
-   "drop_V": 0.021
+   "drop_V": 0.022
   },
   {
    "name": "UNO 1 → ULN2003 F (IN1~4)",
@@ -305,9 +305,9 @@
    "to": "ULN_F",
    "wires": 4,
    "awg": 26,
-   "len_mm": 203,
+   "len_mm": 246,
    "stock_mm": null,
-   "extension_mm": 203,
+   "extension_mm": 246,
    "moving": false,
    "drop_V": null
   },
@@ -317,9 +317,9 @@
    "to": "ULN_X",
    "wires": 4,
    "awg": 26,
-   "len_mm": 607,
+   "len_mm": 718,
    "stock_mm": null,
-   "extension_mm": 607,
+   "extension_mm": 718,
    "moving": false,
    "drop_V": null
   },
@@ -329,9 +329,9 @@
    "to": "ULN_Y",
    "wires": 4,
    "awg": 26,
-   "len_mm": 643,
+   "len_mm": 780,
    "stock_mm": null,
-   "extension_mm": 643,
+   "extension_mm": 780,
    "moving": false,
    "drop_V": null
   },
@@ -341,7 +341,7 @@
    "to": "M_F",
    "wires": 5,
    "awg": 26,
-   "len_mm": 110,
+   "len_mm": 113,
    "stock_mm": 240,
    "extension_mm": 0,
    "moving": false,
@@ -353,11 +353,11 @@
    "to": "M_X",
    "wires": 5,
    "awg": 26,
-   "len_mm": 126,
+   "len_mm": 196,
    "stock_mm": 240,
    "extension_mm": 0,
    "moving": false,
-   "drop_V": 0.006
+   "drop_V": 0.009
   },
   {
    "name": "ULN2003 Y → Y 모터 209 (X로 움직임)",
@@ -365,11 +365,11 @@
    "to": "M_Y",
    "wires": 5,
    "awg": 26,
-   "len_mm": 333,
+   "len_mm": 398,
    "stock_mm": 240,
-   "extension_mm": 93,
+   "extension_mm": 158,
    "moving": true,
-   "drop_V": 0.015
+   "drop_V": 0.017
   },
   {
    "name": "UNO 1 → 펜 서보 205 (신호 + 레일 전원, X·Y로 움직임)",
@@ -377,11 +377,11 @@
    "to": "PEN",
    "wires": 3,
    "awg": 26,
-   "len_mm": 711,
+   "len_mm": 752,
    "stock_mm": 250,
-   "extension_mm": 461,
+   "extension_mm": 502,
    "moving": true,
-   "drop_V": 0.124
+   "drop_V": 0.131
   },
   {
    "name": "HX711 → 로드셀 148 (바닥과 함께 움직임)",
@@ -389,9 +389,9 @@
    "to": "LC",
    "wires": 4,
    "awg": 28,
-   "len_mm": 221,
+   "len_mm": 208,
    "stock_mm": null,
-   "extension_mm": 221,
+   "extension_mm": 208,
    "moving": true,
    "drop_V": null
   },
@@ -401,9 +401,9 @@
    "to": "HX711",
    "wires": 4,
    "awg": 26,
-   "len_mm": 289,
+   "len_mm": 426,
    "stock_mm": null,
-   "extension_mm": 289,
+   "extension_mm": 426,
    "moving": false,
    "drop_V": null
   },
@@ -413,9 +413,9 @@
    "to": "SW_F",
    "wires": 2,
    "awg": 28,
-   "len_mm": 292,
+   "len_mm": 332,
    "stock_mm": null,
-   "extension_mm": 292,
+   "extension_mm": 332,
    "moving": false,
    "drop_V": null
   },
@@ -425,9 +425,9 @@
    "to": "SW_X",
    "wires": 2,
    "awg": 28,
-   "len_mm": 492,
+   "len_mm": 533,
    "stock_mm": null,
-   "extension_mm": 492,
+   "extension_mm": 533,
    "moving": false,
    "drop_V": null
   },
@@ -437,9 +437,9 @@
    "to": "SW_Y",
    "wires": 2,
    "awg": 28,
-   "len_mm": 654,
+   "len_mm": 695,
    "stock_mm": null,
-   "extension_mm": 654,
+   "extension_mm": 695,
    "moving": true,
    "drop_V": null
   },
@@ -449,11 +449,11 @@
    "to": "D_IN",
    "wires": 3,
    "awg": 26,
-   "len_mm": 340,
+   "len_mm": 382,
    "stock_mm": 250,
-   "extension_mm": 90,
+   "extension_mm": 132,
    "moving": false,
-   "drop_V": 0.068
+   "drop_V": 0.077
   },
   {
    "name": "UNO 2 → 격리 문 서보 170",
@@ -461,11 +461,11 @@
    "to": "D_CAP",
    "wires": 3,
    "awg": 26,
-   "len_mm": 373,
+   "len_mm": 415,
    "stock_mm": 250,
-   "extension_mm": 123,
+   "extension_mm": 165,
    "moving": false,
-   "drop_V": 0.075
+   "drop_V": 0.083
   },
   {
    "name": "UNO 2 → 방생 문 서보 176",
@@ -473,11 +473,11 @@
    "to": "D_REL",
    "wires": 3,
    "awg": 26,
-   "len_mm": 443,
+   "len_mm": 485,
    "stock_mm": 250,
-   "extension_mm": 193,
+   "extension_mm": 235,
    "moving": false,
-   "drop_V": 0.089
+   "drop_V": 0.097
   },
   {
    "name": "UNO 2 → 빛 게이트 G1 (송신 2선 + 수신 3선)",
@@ -485,9 +485,9 @@
    "to": "G1",
    "wires": 5,
    "awg": 28,
-   "len_mm": 244,
+   "len_mm": 286,
    "stock_mm": 230,
-   "extension_mm": 14,
+   "extension_mm": 56,
    "moving": false,
    "drop_V": null
   },
@@ -497,9 +497,9 @@
    "to": "G2",
    "wires": 5,
    "awg": 28,
-   "len_mm": 360,
+   "len_mm": 402,
    "stock_mm": 230,
-   "extension_mm": 130,
+   "extension_mm": 172,
    "moving": false,
    "drop_V": null
   },
@@ -509,9 +509,9 @@
    "to": "G2b",
    "wires": 5,
    "awg": 28,
-   "len_mm": 367,
+   "len_mm": 409,
    "stock_mm": 230,
-   "extension_mm": 137,
+   "extension_mm": 179,
    "moving": false,
    "drop_V": null
   },
@@ -521,9 +521,9 @@
    "to": "G3",
    "wires": 5,
    "awg": 28,
-   "len_mm": 401,
+   "len_mm": 443,
    "stock_mm": 230,
-   "extension_mm": 171,
+   "extension_mm": 213,
    "moving": false,
    "drop_V": null
   },
@@ -533,9 +533,9 @@
    "to": "G3b",
    "wires": 5,
    "awg": 28,
-   "len_mm": 394,
+   "len_mm": 436,
    "stock_mm": 230,
-   "extension_mm": 164,
+   "extension_mm": 206,
    "moving": false,
    "drop_V": null
   },
@@ -545,9 +545,9 @@
    "to": "G4",
    "wires": 5,
    "awg": 28,
-   "len_mm": 598,
+   "len_mm": 640,
    "stock_mm": 230,
-   "extension_mm": 368,
+   "extension_mm": 410,
    "moving": false,
    "drop_V": null
   },
@@ -557,9 +557,9 @@
    "to": "G5",
    "wires": 5,
    "awg": 28,
-   "len_mm": 463,
+   "len_mm": 505,
    "stock_mm": 230,
-   "extension_mm": 233,
+   "extension_mm": 275,
    "moving": false,
    "drop_V": null
   },
@@ -569,9 +569,9 @@
    "to": "G5b",
    "wires": 5,
    "awg": 28,
-   "len_mm": 470,
+   "len_mm": 512,
    "stock_mm": 230,
-   "extension_mm": 240,
+   "extension_mm": 282,
    "moving": false,
    "drop_V": null
   },
@@ -581,9 +581,9 @@
    "to": "G6",
    "wires": 5,
    "awg": 28,
-   "len_mm": 496,
+   "len_mm": 538,
    "stock_mm": 230,
-   "extension_mm": 266,
+   "extension_mm": 308,
    "moving": false,
    "drop_V": null
   },
@@ -593,11 +593,11 @@
    "to": "L_TOP",
    "wires": 2,
    "awg": 24,
-   "len_mm": 685,
+   "len_mm": 727,
    "stock_mm": null,
-   "extension_mm": 685,
+   "extension_mm": 727,
    "moving": false,
-   "drop_V": 0.023
+   "drop_V": 0.024
   },
   {
    "name": "UNO 2 → MOSFET → 아래 조명",
@@ -605,9 +605,9 @@
    "to": "L_BOT",
    "wires": 2,
    "awg": 24,
-   "len_mm": 397,
+   "len_mm": 439,
    "stock_mm": null,
-   "extension_mm": 397,
+   "extension_mm": 439,
    "moving": false,
    "drop_V": 0.007
   }
@@ -618,7 +618,7 @@
    "cable": 1000
   },
   "PI_B": {
-   "len_mm": 293,
+   "len_mm": 258,
    "cable": 300
   }
  },
@@ -764,5 +764,5 @@
    "days": 3.82
   }
  ],
- "harness_total_m": 42.2
+ "harness_total_m": 47.7
 }

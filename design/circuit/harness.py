@@ -3,7 +3,7 @@
 
 바탕: design/circuit/circuit.py (연결), design/control_sim/elec_budget.py (좌표 P, 길이 route_len, 전압 강하 drop)
 11/06 바뀐 것 반영: 문 빔 6쌍은 낱개 LED·포토TR (21시, 승준 SJ-47), 단자대 → 와고 221-415 (+5 V 묶음 / GND 묶음), 서보 허브·게이트 허브 만능기판, 출구 조명 없음, MOSFET 3채널 보드
-좌표는 D5f 기준 [가능성 높음] — 승준 D5g 실제 배치가 끝나면 P_EXTRA·P 값만 고치고 다시 돌림.
+좌표는 D5g 실제 배치 (11/07 확정, CAP-AI-38) — HX711·DC 잭 자리만 [제안].
 실행: python3 design/circuit/harness.py → design/circuit/out/harness.csv, 화면에 요약
 """
 import csv
@@ -15,14 +15,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "control_sim"))
 import elec_budget as EB   # noqa: E402
 
-# 허브 자리 (데크 위, UNO 쪽) [제안 — D5g에서 확정]
+# D5g 실제 자리 (승준 CAP-AI-SJ-49, Issue #7 2026-11-06 21:58 — 부품 가운데 점, 데크 윗면 z 205) [확실 — 승준 모델 값]
+# 표시 [제안]은 D5g 모델에 없는 것 → 서현 제안 자리
 P_EXTRA = {
-    "WAGO": EB.P["TB"],
-    "SERVO_HUB": (-35, -62, 212),
-    "GATE_HUB": (-35, -28, 232),
-    "MOSFET": (-45, -75, 230),
-    "FUSE": (-110, -78, 210),
-    "ESTOP": (-100, 45, 210),
+    "WAGO": (-5, -67, 211), "SERVO_HUB": (0, 66, 214), "GATE_HUB": (-92, 1, 214), "MOSFET": (-92, 53, 212),
+    "FUSE": (-184, 36, 225), "ESTOP": (-184, 0, 225), "J_I2C": (-67, 1, 215),
+    "UNO1": (-94, -48, 212), "UNO2": (-94, -48, 229),          # x −131.5~−56.4, y −75~−21.7, 기판 z 207 / 223.6
+    "PI_B": (-81, 32, 578),                                      # 190r 선반 199a 위: x −125.5~−36.9, y 3.4~61, z 568.5~587.5
+    "ULN_F": (55, -50, 208), "ULN_X": (170, -30, 478), "ULN_Y": (170, 22, 478),
+    "LC": (66.5, 77.5, 236),                                     # 막대 4540 +y 끝 (선이 나가는 곳), 바닥 내림 기준
+    "HX711": (66, 95, 210),                                      # [제안] D5g 모델에 없음 — 로드셀 +y 끝 아래 데크 위
+    "DCIN": (-184, -22, 225),                                    # [제안] D5g 모델에 없음 — 비상 정지 판 194b의 −y 쪽 (퓨즈 반대편)
 }
 P = dict(EB.P, **P_EXTRA)
 EB.P = P                        # route_len이 이 표를 쓰게
@@ -103,6 +106,18 @@ H = [
     ("S", "UNO 2 D3·D5 → MOSFET 보드 (조명 켜기)", "UNO2", "MOSFET", [("L_TOP", "노랑", 26, "D3", "Q1 TRIG"), ("L_BOT", "노랑", 26, "D5", "Q2 TRIG")], DUP_F, "보드 핀", 0.001, None),
     ("L", "MOSFET → 위 조명 182", "MOSFET", "L_TOP", [("+5V", "빨강", 24, "보드 V+", "조명 +"), ("Q1 OUT−", "검정", 24, "Q1 OUT−", "조명 −")], "보드 나사 단자", "조명 납땜", 0.20, None),
     ("L", "MOSFET → 아래 조명", "MOSFET", "L_BOT", [("+5V", "빨강", 24, "보드 V+", "조명 +"), ("Q2 OUT−", "검정", 24, "Q2 OUT−", "조명 −")], "보드 나사 단자", "조명 납땜", 0.10, None),
+    # 11/07 (CAP-AI-38): 배터리 상자 INA226 → Pi I2C. 본체 J_I2C(게이트 허브 위, 승준 193j) → Pi 40핀 헤더
+    ("S", "J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)", "J_I2C", "PI_B",
+     [("3.3V", "빨강", 28, "J_I2C 1 VS", "Pi 핀 1 (3V3)"), ("GND", "검정", 28, "J_I2C 2 GND", "Pi 핀 6 (GND)"),
+      ("SDA", "파랑", 28, "J_I2C 3 SDA", "Pi 핀 3 (GPIO2)"), ("SCL", "노랑", 28, "J_I2C 4 SCL", "Pi 핀 5 (GPIO3)")],
+     "JST XH 4P 하우징 (193j에 꽂음)", "듀폰 암 1핀 (Pi 헤더)", 0.001, None),
+]
+
+# 사서 쓰는 케이블 — 길이가 모자라지 않는지만 본다 (하네스에 안 넣음)
+BOUGHT = [
+    ("Pi USB → UNO 1 (USB A–B)", "PI_B", "UNO1", 1000),
+    ("Pi USB → UNO 2 (USB A–B)", "PI_B", "UNO2", 1000),
+    ("Pi CAM0 → AI 카메라 (22↔15핀 FFC)", "PI_B", "CAM", 300),
 ]
 
 
@@ -168,8 +183,14 @@ def main():
     print("가장 큰 전압 강하: %s %s V" % (worst["harness"], worst["drop_V"]))
     print("움직이는 선:", sorted(set(r["id"] for r in rows if r["moving"])))
     print(p)
+    chk = []
+    for nm, x, y, have in BOUGHT:
+        need = cut_len(EB.route_len(x, y))
+        chk.append("| %s | %d mm | %d mm | %s |" % (nm, need, have, "충분" if have >= need else "**모자람**"))
+        print("  산 케이블 %s: 필요 %d / 있음 %d" % (nm, need, have))
     with open(os.path.join(HERE, "out", "harness_table.md"), "w", encoding="utf-8") as f:
         f.write(write_md(rows, tot))
+        f.write("\n\n**사서 쓰는 케이블 길이 확인** (경로 + 10 %)\n\n| 케이블 | 필요 | 있음(산 것) | 판단 |\n|---|---|---|---|\n" + "\n".join(chk) + "\n")
     return rows, tot
 
 
