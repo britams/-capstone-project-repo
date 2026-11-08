@@ -1,4 +1,4 @@
-﻿// sim_common.h — 시험 보조 (서현 CAP-AI-43). 스케치와 이름이 겹치지 않게 t_ 로 시작.
+﻿// sim_common.h — 시험 보조 (서현 CAP-AI-44). 스케치와 이름이 겹치지 않게 t_ 로 시작.
 #pragma once
 #include <thread>
 #include <mutex>

@@ -1,4 +1,4 @@
-// Arduino.h — PC 시뮬레이션용 흉내 헤더 (서현 CAP-AI-43, 2026-11-08)
+﻿// Arduino.h — PC 시뮬레이션용 흉내 헤더 (서현 CAP-AI-44, 2026-11-08)
 // 목적: design/circuit/firmware/trap_motion·trap_doors 의 .ino 를 고치지 않고 그대로 PC에서 컴파일해 시험.
 // 승준 control/firmware/sim/Arduino.h 는 UNO 1개 v0.1 핀에 묶여 있어서 새로 만듦 (핀·세계는 sim_*.cpp 가 정함).
 // 한계: PC의 int는 32비트 (AVR은 16비트) → 16비트 넘침 버그는 못 잡음. 시간은 100 µs 단위로 흐름.

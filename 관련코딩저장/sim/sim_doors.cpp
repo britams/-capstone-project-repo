@@ -1,4 +1,4 @@
-// sim_doors.cpp — trap_doors.ino (UNO 2) PC 시험 (서현 CAP-AI-43)
+﻿// sim_doors.cpp — trap_doors.ino (UNO 2) PC 시험 (서현 CAP-AI-44)
 // 빌드:  zig c++ -std=c++17 -Wall -I. sim_doors.cpp -o sim_doors.exe   (run_all.ps1 이 해 줌)
 // 실제 .ino 를 그대로 #include 한다. 세계 = 빛 게이트 9개 + 레일 + 문 서보 기록.
 #include "Arduino.h"

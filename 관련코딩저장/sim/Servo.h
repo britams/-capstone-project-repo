@@ -1,4 +1,4 @@
-// Servo.h — PC 시뮬레이션용 서보 흉내 (서현 CAP-AI-43)
+﻿// Servo.h — PC 시뮬레이션용 서보 흉내 (서현 CAP-AI-44)
 // attach 시점과 '붙일 때 첫 펄스 각도'를 기록한다 → 서보 하나씩·0.3 s 간격·첫 펄스 규칙을 시험.
 #pragma once
 extern unsigned long g_us;

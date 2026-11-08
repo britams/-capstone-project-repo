@@ -1,4 +1,4 @@
-﻿# run_all.ps1 — 펌웨어 시뮬레이션 빌드 + 실행 (서현 CAP-AI-43)
+﻿# run_all.ps1 — 펌웨어 시뮬레이션 빌드 + 실행 (서현 CAP-AI-44)
 # 사용: PowerShell 에서  .\run_all.ps1      (zig 가 없으면: winget install zig.zig)
 # 결과: 두 시뮬레이터 모두 FAIL 0 이면 종료 코드 0
 $ErrorActionPreference = "Continue"   # Stop 이면 컴파일러 경고(stderr)도 오류로 처리됨 (PowerShell 5.1)

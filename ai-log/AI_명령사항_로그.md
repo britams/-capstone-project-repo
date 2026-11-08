@@ -576,3 +576,30 @@
 - 한 일: `docs/2026-11-08_CAD_D5g_정리_작업지시_서현.md` (C1 FCStd 저장 → C2 겹침·뜬 부품 검사 → C3 HX711·DC 잭 추가 → C4 전체 조립도·전기 배치·풍선도 그림 → C5 README·부품표 → C6 PC CAD files), 분업계획에 '바뀜(11/08)' 추가
 - 확인: D5g는 .FCStd 없음(승준이 '서현만 편집' 규칙으로 저장 안 함), 그림은 GUI 필요 → freecadcmd + 매크로 실행으로 나눔
 - 남은 결정 (서현, 그대로): 방생 출구 안 1/2, 급이 바닥 370, 3D 프린터 판 크기
+
+## CAP-AI-40·41 — 2026-11-08 · (VS Code) 펌웨어 v0.2 trap_motion · trap_doors (커밋 7ab95b5 — 그때 로그를 못 적어 여기 채움)
+- 명령: `docs/2026-11-07_VSCode_ClaudeCode_시작정리_서현.md` 5장 첫 메시지 (A·B)
+- 한 일: `design/circuit/firmware/trap_motion/trap_motion.ino` (UNO 1: F·X·Y D2~D13, PEN A0, HX711 A1/A2, 원점 A3~A5 + HOME, HOLD 기본 0, READY trap_motion), `trap_doors/trap_doors.ino` (UNO 2: 레일 D2, 조명 D3·D5, 송신 D4, 게이트 D7·D8·D12, 문 서보 D9~D11, 문 빔 A0~A5, SELFTEST·GATES·EVT GATE·DOOR CLOSE 안전 규칙·LIGHT·EMIT·RAIL, READY trap_doors)
+- 스스로 정한 규칙 V1~V7 → 웹 채팅이 CAP-AI-42에서 모두 받아들임
+- 검증: arduino-cli 1.5.1 + arduino:avr 1.8.8, 경고 모두 켜고 0개. 브링업 b2~b5도 처음으로 컴파일 통과 (CAP-AI-33 '미검증' 풀림)
+- 미검증 (#define): 문 열림/닫힘 30°/150°, 닫는 속도 100 °/s, 펜 천천히 시작 12°, 스위치 거름 3번, 원점 다시 닿는 속도 2000 µs
+
+## CAP-AI-44 — 2026-11-08 · (VS Code) 검토 반영 + 펌웨어 PC 시뮬레이터
+- 명령: "새로 받은 검토 문서 읽고 반영해, 만들 파일은 C:\capstone\-capstone-project-repo\관련코딩저장 여기에다 저장해" (+ 시뮬 컴파일러: 'WinLibs g++ 설치' 선택)
+- 검토 반영 (`design/2026-11-08_펌웨어v0.2_제어규칙_검토_서현.md`): **R1** — F를 올리는 MOVE·PRESS는 펜 UP일 때만 `ERR PEN_DOWN`, 내리기·HOME F는 언제나 / 변경 요청 문서 1장 고침: V6 HOME 한도 축별(F 20,634·X 20,379·Y 31,587), V7 PRESS 중 HOLD 1 필요 없음
+- 컴파일러: WinLibs는 GitHub 504로 두 번 실패 → **zig 0.17 (`zig c++`, clang 22)** 설치. `관련코딩저장/sim/`: 흉내 헤더 + 세계(코일 패턴 → 기계 위치, 스위치, HX711 클럭, 빛 게이트 9, 레일), 실제 .ino를 그대로 include, `run_all.ps1`
+- 시험: **sim_motion 82/82, sim_doors 77/77** — 요청한 4개(HOME NOSWITCH, 닫는 중 빔 끊김 → REOPEN·BLOCKED, SELFTEST FAIL → 닫기 거부, RAIL 0 → 문 명령 거부) + R1 + V1~V6 + 펜 2단계 58.8 °/s
+- **시뮬이 찾은 펌웨어 버그 2개 (고침, 웹 채팅 검토 필요)**:
+  1. trap_doors: 열리는 중 같은 문 CLOSE → WAIT 끝에 prev=OPENING으로 굳음 → `ERR BUSY` (고치기 전 코드로 돌리면 2 FAIL [확실])
+  2. trap_motion: 마지막 반걸음 코일을 켜자마자 끔 → `COIL_OFF_DWELL_MS` 20 ms 뒤 끔 (승준 v0.1도 같음, 실물 효과 미검증)
+- 컴파일 (경고 0): trap_motion 11,968 B 37 % / RAM 972 B 47 %, trap_doors 10,956 B 33 % / RAM 1,006 B 49 %
+- 만든·고친 파일: `관련코딩저장/sim/*`, `관련코딩저장/README.md`, 두 .ino, 변경 요청 문서, `.gitignore`(exe·pdb)
+- 메모: 펌웨어 .ino는 `design/circuit/firmware/`에 그대로 둠 (Arduino 폴더 이름 규칙 + 다른 문서가 가리킴). 새 파일만 `관련코딩저장/`
+
+## CAP-AI-45 — 2026-11-08 · (VS Code) Pi 연결 코드 pi_link (할 일 D)
+- 한 일: `관련코딩저장/pi_link/` — `uno_link.py`(OK/ERR와 비동기 DONE·EVT·ERR HOME/WAIT 구분), `ports.py`(READY 이름으로 두 포트, 놓치면 STATUS 모양으로), `controller.py`(켤 때: WATCHDOG 5 → SELFTEST → RAIL → 문 3개 닫기 → HOLD F 0 → PEN UP → HOME F·X·Y → 대기 자리 + PEN DOWN, 검토 P1~P7, 밤/낮, 레일 복귀), `sim_port.py`
+- 시험: `test_pi_link.py` **36/36** — 시뮬레이터 서버 모드(5배속)로 **실제 펌웨어 로직**에 붙임: 포트 순서를 바꿔도 가림, P1 G1 FAIL → 시작 안 함, P2 다시 시험(풀림/고장 → IN 안 씀), P3 밤 순서, P4 레일 복귀, P5 PING으로 WATCHDOG 막기, P6 9번 다시 열고 DOOR_IN_STUCK
+- 스스로 정한 것 (웹 채팅 검토 필요): **A1** EVT RAIL 0 → UNO 1 STOP, **A2** 대기 자리 X +10 mm (trap_sim CAD 좌표 65 − 55, 미검증)
+- 안 한 것: 판정·촬영·마킹 순서(trap_sim process()) — 카메라·비전 코드가 필요
+- 남은 일 (순서): ① 웹 채팅 검토: 버그 2개 고침·A1·A2 ② 새 지시 `docs/2026-11-08_CAD_D5g_정리_작업지시_서현.md` C1~C6 (VS Code CAD) ③ 부품 오면 브링업 B1~B6 → 실물 값으로 #define 미검증 채우기 ④ 승준 복귀 후 control/로 옮길지 결정
+- 바로잡음: PC 사본 경로는 `Desktop\capstone design\` (문서에 적힌 `capstone design_이서현`은 없음)

@@ -1,4 +1,4 @@
-﻿// sim_motion.cpp — trap_motion.ino (UNO 1) PC 시험 (서현 CAP-AI-43)
+﻿// sim_motion.cpp — trap_motion.ino (UNO 1) PC 시험 (서현 CAP-AI-44)
 // 빌드:  zig c++ -std=c++17 -Wall -I. sim_motion.cpp -o sim_motion.exe   (run_all.ps1 이 해 줌)
 // 세계 = 스테핑 3축(코일 패턴을 읽어 기계 위치를 셈) + 원점 스위치 3 + HX711 + 펜 서보 기록.
 #include "Arduino.h"
