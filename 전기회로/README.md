@@ -43,7 +43,7 @@
 2. **역극성 보호 D_RP** (AI 판단): 쇼트키 **SB540** (5 A)를 레일에 **거꾸로 걸침** (줄 K → +5V_B, A → GND), 서보 허브 위. 평소 전압 손실 0, 극성이 반대인 어댑터면 퓨즈 3 A가 끊김. 직렬 다이오드는 0.3~0.5 V 떨어져 MG90S(4.8 V~) 사양 밑이라 안 씀. circuit.py 넷·BOM에 넣음 (검사 통과). SB540 사양은 [가능성 높음] — 사기 전에 사양서 확인
 3. **카메라** (원래 정해져 있었으나 문서가 흩어져 있었음): Raspberry Pi AI 카메라 IMX500 (보유), 격자 위 200 mm, **Pi 5 CAM0 (22핀) ↔ 카메라 (15핀) FFC 500 mm** 하나로 신호·전원 (아두이노와 무관). circuit.py·회로설계 문서의 '300 mm'를 500 mm로 고침 (11/07 하네스 확정 CAP-AI-38·구매 E18과 맞춤). 자세히는 HTML 8-1장
 
-남은 것: **회로도 PNG 1·4장 다시 그리기** — D_RP·카메라 500 mm가 그림에 아직 없음 (이 PC Python에 schemdraw·matplotlib가 없어서 원본만 고침. `pip install schemdraw matplotlib` 후 `python design/circuit/circuit.py`)
+회로도 PNG 4장 다시 그림 (CAP-AI-52): 1장에 D_RP·카메라 500 mm 들어감. Windows에서는 맑은 고딕으로 그림 (`python design/circuit/circuit.py`, `battery_box.py`)
 ## 4. 펌웨어(11/08)가 회로에 기대는 것 — 회로를 바꿀 때 같이 보기
 - UNO 2 D2 레일 감지는 **내부 풀업을 쓰지 않는다** (외부 10 kΩ ← +5V_B. 내부 풀업이면 레일이 꺼져도 HIGH).
 - 통로 게이트 D7·D8·D12는 허브의 **외부 10 kΩ 풀업**, 문 빔 A0~A5는 **10 kΩ → GND** (빛 받으면 높음).

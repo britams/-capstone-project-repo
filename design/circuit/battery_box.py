@@ -202,10 +202,11 @@ def sheet():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family": "Noto Sans CJK JP"})
+    FONT = "Noto Sans CJK JP" if any(f.name == "Noto Sans CJK JP" for f in matplotlib.font_manager.fontManager.ttflist) else "Malgun Gothic"  # Windows는 맑은 고딕
+    plt.rcParams.update({"font.family": FONT})
     import schemdraw
     import schemdraw.elements as elm
-    schemdraw.config(font="Noto Sans CJK JP", fontsize=11)
+    schemdraw.config(font=FONT, fontsize=11)
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_4_배터리상자.png"), show=False, dpi=150) as d:
         d += elm.Label().label("회로도 4/4 — 배터리 상자 (본체는 그대로, 플러그 2개만 바꿔 꽂음)", fontsize=14).at((0, 4.0))
         d += (bat := elm.BatteryCell().up(3).at((0, -1.5)))
@@ -230,7 +231,7 @@ def sheet():
         d += elm.Line().up(1.6).at(nv.center)
         d += elm.Label().label("충전 단자 XT60 (14.6 V 전용 충전기, 0 °C 아래 충전 금지)", loc="top")
         d += elm.Line().down(1.5).at(bat.start)
-        d += (g := elm.Ground().label("GND 한 점 (배터리 −) — 강압 A·B 입력·출력 −, 충전 −, INA226 GND", loc="right"))
+        d += (g := elm.Ground().label("GND 한 점 (배터리 -) — 강압 A·B 입력·출력 -, 충전 -, INA226 GND", loc="right"))
         d += elm.Label().label("INA226: VS·GND·SDA·SCL 4심 1 m → 본체 J_I2C → Pi 3.3 V·GND·GPIO2·GPIO3 (주소 0x40, CAL 2560, 0.2 mA/LSB)", fontsize=10, halign="left").at((-1.5, -5.8))
         d += elm.Label().label("Pi가 0.5 s마다 읽음 → 남은 에너지 15 % 또는 부하 중 12.0 V 아래 = '부족' → 처리 끝내고 문 열고 Pi 끔", fontsize=10, halign="left").at((-1.5, -6.4))
         d += elm.Label().label("배터리일 때만 GND 고리가 생김 (강압 2개 GND가 만남) → 배럴 선 18 AWG, 별 모양 GND, B6에서 < 50 mV 확인", fontsize=10, halign="left").at((-1.5, -7.0))

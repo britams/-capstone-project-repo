@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """회로 설계 (서현, 2026-11-06, CAP-AI-23) — D5e + 11/02 결정 (빛 게이트 9쌍, 콘센트 + 배터리 상자)
 
 한 곳(NETS)에 모든 연결을 적고, 여기서
@@ -200,10 +200,11 @@ def sheets():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family": "Noto Sans CJK JP"})
+    FONT = "Noto Sans CJK JP" if any(f.name == "Noto Sans CJK JP" for f in matplotlib.font_manager.fontManager.ttflist) else "Malgun Gothic"  # Windows는 맑은 고딕
+    plt.rcParams.update({"font.family": FONT})
     import schemdraw
     import schemdraw.elements as elm
-    schemdraw.config(font="Noto Sans CJK JP", fontsize=11)
+    schemdraw.config(font=FONT, fontsize=11)
 
     def P(name, side, anchor=None):
         return elm.IcPin(name=name, side=side, anchorname=anchor or re.sub(r"[^0-9A-Za-z]", "_", name.split()[0]))
@@ -211,7 +212,7 @@ def sheets():
     # --- 1장: 전원 ---
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_1_전원.png"), show=False, dpi=150) as d:
         d += elm.Label().label("회로도 1/3 — 전원 (콘센트 기본, 같은 플러그로 배터리 상자)", fontsize=14).at((0, 4.2))
-        jb = elm.Ic(pins=[P("−", "right", "pin2"), P("+", "right", "pin1")], edgepadW=1.2, label="DC 잭\n5 V 3 A\n(또는 배터리\n상자 5 V 3 A)").at((0, 0))
+        jb = elm.Ic(pins=[P("-", "right", "pin2"), P("+", "right", "pin1")], edgepadW=1.2, label="DC 잭\n5 V 3 A\n(또는 배터리\n상자 5 V 3 A)").at((0, 0))
         d += jb
         d += elm.Line().right(0.8).at(jb.pin1)
         d += (f := elm.Fuse().right().label("F1\n5×20 3 A", loc="top"))
@@ -226,7 +227,12 @@ def sheets():
         d += elm.Wire("-|").at(jb.pin2).to((g1.center[0] - 2.8, g1.center[1]))
         d += elm.Line().tox(g1.center)
         d += elm.Ground().at(g1.center)
-        d += elm.Resistor().right(2.5).at(tb.center).label("R_RS 10 kΩ", loc="bottom")
+        d += elm.Line().right(3.0).at(tb.center)
+        d += (n3 := elm.Dot())
+        d += elm.Diode().up(2).at((n3.center[0], n3.center[1] - 2))
+        d += elm.Label().label("D_RP SB540\n(거꾸로 걸침, 평소 0 A)", fontsize=10, halign="left").at((n3.center[0] + 0.4, n3.center[1] - 1.0))
+        d += elm.Line().at((n3.center[0], n3.center[1] - 2)).tox(tb.center)
+        d += elm.Resistor().right(2.5).at(n3.center).label("R_RS 10 kΩ", loc="top")
         d += elm.Label().label("→ UNO 2 D2 (레일 감지)", loc="right")
         d += elm.Label().label("GND 한 점 (와고 GND 묶음) ← UNO 1 GND, UNO 2 GND, 서보·게이트·ULN2003 GND", fontsize=10, halign="left").at((-1, -3.8))
         d += elm.Label().label("+5V_B → ULN2003 ×3, SG90, MG90S ×3, 게이트 수신·송신 ×9, 풀업 10 kΩ ×9, 조명 ×2", fontsize=10, halign="left").at((-1, -4.4))

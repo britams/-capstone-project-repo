@@ -21,11 +21,29 @@ trap_sim.py (PiFSM wait_entry·process·press_mark·feed·release·isolate·leav
       (trap_sim은 카메라 흉내 안에서 했음 → 비전은 숫자만 주고 판단은 한 곳에서)
   C2. 흉부 좌표는 '자세 확인' 사진(PRESS 뒤)의 x·y를 쓴다 (trap_sim은 고정 55, 0) — 눌린 뒤 자리가 정확함
   C3. 비전 좌표 = 펌웨어 좌표 (원점 격자 가운데, 인터페이스 정의서 좌표계). 범위 밖이면 마킹 안 하고 급이·방생
+  C4. (CAP-AI-52) 비전이 흉부 타원 thorax(x, y, θ, L, w)·unc를 주면 승준 mark_planner.plan()으로 찍을 점을 고른다
+      (격자 구멍 안 + 흉부 안전영역 확률 ≥ 0.5). 고를 점이 없으면 자세 다시 잡기. thorax가 없으면 C2대로 x, y 한 점.
+      결과 형식은 vision_format.py
+  C5. (CAP-AI-52) 낮밤은 서현 결정: 밤에는 처리하지 않고 전부 포획통 (daynight.py와 같은 순서). 기다리는 중에 해가 지면
+      wait_entry가 0으로 돌아와 다음 step이 night_mode로 간다
 """
+import os
+import sys
 import time
 from dataclasses import dataclass
 
 from controller import TrapFault
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'vision', 'scripts'))
+
+
+def plan_stamps(h, start):
+    """C4: 승준 mark_planner로 찍을 점들. thorax 없으면 [(x, y)], 확률 낮으면 []."""
+    if 'thorax' not in h:
+        return [(h['x'], h['y'])]
+    import mark_planner                                  # numpy 필요 — thorax를 줄 때만 부름
+    r = mark_planner.plan(h['thorax'], h['unc'], start=start)
+    return [tuple(p) for p in r['route']]
 
 GAP = {'IN': ('G2', 'G2b'), 'CAP': ('G3', 'G3b'), 'REL': ('G5', 'G5b')}
 PAIR = {g: (d, i) for d, pr in GAP.items() for i, g in enumerate(pr)}
@@ -202,6 +220,8 @@ class Processor:
                     break
             if timeout_s is not None and time.monotonic() - t0 > timeout_s:
                 return 0
+            if not self.is_day():              # C5: 기다리다 해 짐 → 다음 step이 밤으로
+                return 0
         obs = []
         for _ in range(p.entry_looks):        # 구석에 있으면 못 볼 수 있음
             obs = self.look('entry')
@@ -265,12 +285,19 @@ class Processor:
                 c.move('F', max(0.0, F_now - p.F_retract))
                 c.idle(2.0)
                 continue
+            route = plan_stamps(h, (c.cfg.park['X'], c.cfg.park['Y']))
+            if not route:                                  # C4: 안전하게 찍을 점 없음 → 자세 다시
+                self.note('pose_retry', attempt=attempt, pose='no_safe_point')
+                c.move('F', max(0.0, F_now - p.F_retract))
+                c.idle(2.0)
+                continue
             for k in range(p.mark_retry_max + 1):
-                c.move_xy(h['x'], h['y'])                  # C2
-                for _ in range(p.stamps):
-                    c.pen(False)
-                    c.idle(p.dwell_s)
-                    c.pen(True)
+                for x, y in route:
+                    c.move_xy(x, y)                        # C2 / C4
+                    for _ in range(p.stamps):
+                        c.pen(False)
+                        c.idle(p.dwell_s)
+                        c.pen(True)
                 c.move_xy(c.cfg.park['X'], c.cfg.park['Y'])
                 v = self.look('verify')
                 if v and v[0].get('marked'):

@@ -23,6 +23,7 @@ class FakeVision:
         self.marks_ok = marks_ok
         self.pose_seq = list(pose_seq or ['dorsal'])
         self.calls = []
+        FakeVision.last = self
 
     def look(self, what):
         self.calls.append(what)
@@ -174,11 +175,8 @@ def t_season():
 
 
 def t_dusk():
-    state = {'n': 0}
-
-    def is_day():
-        state['n'] += 1
-        return state['n'] <= 1          # step 시작 때만 낮, 방생 직전엔 해 짐
+    def is_day():                       # 판별(identify) 사진 뒤에 해 짐 → 방생 직전엔 밤
+        return 'identify' not in FakeVision.last.calls
     r, proc, vis, res, cm, cd = run_scene('dusk 재방문인데 방생 직전 해 짐 → 격리',
                                           dict(species='velutina', mw_mm=4.0, marked=True, x=0, y=0), is_day=is_day)
     try:
@@ -200,9 +198,61 @@ def t_pose_retry():
         r.close()
 
 
+def t_format():
+    print('[format] vision_format: VespAI 클래스·신뢰도 → species, 점 → marked, 화소 → mm (CAP-AI-52)')
+    from vision_format import make_obs, px_to_mm
+    check(make_obs(1, 0.95)['species'] == 'velutina' and make_obs(0, 0.9)['species'] == 'crabro', '클래스 1 velutina, 0 crabro')
+    check(make_obs(1, 0.7)['species'] == 'other', '신뢰도 0.7 < 0.8 → other (격리)')
+    check(make_obs(1, 0.9, dots=[dict(x=1, y=1)])['marked'] and not make_obs(1, 0.9)['marked'], '점 있으면 marked')
+    o = make_obs(1, 0.9, mw_mm=4.0, thorax=(1.0, -0.5, 0.5, 5.5, 4.1))
+    check(o['x'] == 1.0 and o['y'] == -0.5 and len(o['unc']) == 3, 'thorax → x, y, unc')
+    check(decide([o], 7)[0] == 'mark', 'make_obs 결과가 decide로 바로 들어감')
+    cam = dict(u0=1000, v0=800, px_per_mm=15.6)
+    x, y = px_to_mm(1000 + 15.6 * 3, 800 - 15.6 * 2, cam)
+    check(abs(x - 3) < 1e-9 and abs(y - 2) < 1e-9, '화소 (+3 mm 오른쪽, 2 mm 위) → (3, 2)')
+
+
+def t_planner():
+    import math
+    th = (1.0, -0.5, math.radians(30), 5.5, 4.1)
+    r, proc, vis, res, cm, cd = run_scene('planner 흉부 타원을 주면 승준 mark_planner가 고른 점에 찍음 (C4)',
+                                          dict(species='velutina', mw_mm=4.0, marked=False, x=th[0], y=th[1],
+                                               thorax=th, unc=(0.4, math.radians(8), 0.1)))
+    try:
+        import mark_planner
+        want = mark_planner.plan(th, (0.4, math.radians(8), 0.1), start=(10.0, -40.0))['route']
+        check(res == ('release', 'worker'), '결과 release (worker)')
+        check(len(want) == 1, '고른 점 1개 (k=1)')
+        mx = 'MOVE X %.3f' % want[0][0]
+        check(mx in cm and 'MOVE Y %.3f' % want[0][1] in cm, '그 점으로 감 %s' % (want[0],))
+        check(cm[cm.index('MOVE Y %.3f' % want[0][1]) + 1:][:2] == ['PEN DOWN', 'PEN UP'], '거기서 찍음')
+    finally:
+        r.close()
+
+
+def t_night_wait():
+    print('[nightwait] 말벌 기다리는 중 해 짐 → step 끝 → 다음 step이 밤 (REL 닫고 IN·CAP 엶) (C5)')
+    r = Rig()
+    try:
+        r.ctl.boot()
+        day = {'v': True}
+        proc = Processor(r.ctl, FakeVision(None), fast_prm(), month=lambda: 7, is_day=lambda: day['v'])
+        threading.Timer(1.5, lambda: day.__setitem__('v', False)).start()
+        t0 = time.time()
+        res = proc.step()                       # 시간 제한 없음 — 고치기 전에는 여기서 안 끝남
+        check(res == 'no_entry' and time.time() - t0 < 10, '기다림이 해 지자 끝남 (%s, %.1f s)' % (res, time.time() - t0))
+        n0 = len(r.d.history)
+        check(proc.step() == 'night', '다음 step → night')
+        cd = [s for _, d, s in list(r.d.history)[n0:] if d == '>>' and s != 'PING']
+        check('DOOR CAP OPEN' in cd and 'DOOR IN OPEN' in cd and 'DOOR REL OPEN' not in cd, '밤: CAP·IN 열림, REL 안 엶')
+    finally:
+        r.close()
+
+
 if __name__ == '__main__':
     t0 = time.time()
-    tests = dict(decide=t_decide, mark=t_mark, queen=t_queen, revisit=t_revisit, season=t_season, dusk=t_dusk, pose=t_pose_retry)
+    tests = dict(decide=t_decide, format=t_format, mark=t_mark, queen=t_queen, revisit=t_revisit, season=t_season,
+                 dusk=t_dusk, pose=t_pose_retry, planner=t_planner, nightwait=t_night_wait)
     for n in (sys.argv[1:] or list(tests)):
         tests[n]()
     print('\n== test_process: PASS %d, FAIL %d (%.0f s)' % (PASS[0], FAIL[0], time.time() - t0))

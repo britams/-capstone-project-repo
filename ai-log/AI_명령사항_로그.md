@@ -648,3 +648,12 @@
 - 가림: 펜은 쉴 때 캡 컵(Y −40, 마킹실 밖), 격자 열린 면적 36.5 % → 투명 격자 권장, X·Y 몸체가 시선에 오는지는 CAD에서 확인 (미검증)
 - HTML 8-1장 표에 '몇 대?'·'그 1대가 하는 일'·'가리는 것은?' 세 줄 추가
 - 남은 것: 2대째는 J3 실측(200 mm에서 여왕벌 폭 4.4 mm를 가를 수 있나)이 실패할 때만 검토
+## CAP-AI-52 — 2026-11-08 · (VS Code) 인터페이스 정의서 v0.2, 비전 결과 형식 맞춤, 해 짐 버그, 회로도 다시 그림, CLAUDE.md 코딩 원칙
+- 명령: "합치고 설치해. 1. 반영해 2. 밤에 작동 안 하는 거 내 생각이야. 3. 맞춰 4. 그려"
+- CLAUDE.md에 andrej_CLAUDE.md 4원칙(코딩 전 생각·단순하게·필요한 곳만·목표로)을 한국어로 합침. schemdraw 0.23·matplotlib 3.11.2 설치
+- 1. 인터페이스 정의서 'Pi ↔ 아두이노 통신' → 펌웨어 v0.2 (응답 4가지, READY 이름으로 포트 가리기, 명령 목록, 안전 규칙 R1′·BUSY·문 닫기·RAIL·WATCHDOG), 변경 이력 추가. 승준 v0.1·control/은 안 고침
+- 2. 밤 처리 안 함 = 서현 생각 → Issue 안 엶. 정의서 운용 시간 결정자를 '서현 (구현 승준)'으로. 우리 controller.night_mode는 이미 daynight.py와 같은 순서 [확실]. **버그 하나 찾아 고침 (C5)**: 말벌을 기다리는 중(wait_entry, 시간 제한 없음) 해가 지면 밤으로 안 넘어갔음 → 기다리는 중 is_day() 확인, 0 돌려줌 → 다음 step이 night_mode. 시험 nightwait
+- 3. 비전 결과 형식을 승준 코드에 맞춤: `vision_format.py` (VespAI 클래스 1 velutina/0 crabro, 신뢰도 < 0.8 → other, find_dots → marked, 화소 → mm), process.py C4 — thorax (x, y, θ, L, w) + unc를 주면 **승준 mark_planner.plan()**이 고른 점에 찍음, 고를 점 없으면 자세 다시. thorax 없으면 예전처럼 x, y 한 점. 정의서에 '비전 → 제어 결과' 줄 새로
+- 4. 회로도 PNG 4장 다시 그림: 1장에 D_RP SB540(거꾸로 걸침)·카메라 FFC 500 mm. Noto 글꼴 없는 PC는 맑은 고딕으로 (circuit.py·battery_box.py), '−' 기호가 깨져 '-'로. 그림 1·3·4 눈으로 확인
+- 검증: test_process 52/52 (새 format 6·planner 4·nightwait 3, dusk 시험의 가짜 해 짐을 '판별 사진 뒤'로 고침 — C5 때문에 기다리는 중에도 is_day를 부름), test_pi_link 36/36, circuit.py 검사 통과
+- 미검증·남은 것: 카메라 방향(px_to_mm rot_deg)은 장착 뒤 격자 사진으로, 실제 비전이 thorax·unc를 내는지 승준 확인, mark_planner 기본값(Grid 3.0/4.4, 팁 2.0) = 지금 격자 가정
