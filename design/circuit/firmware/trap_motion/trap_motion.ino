@@ -32,7 +32,8 @@
 // 안전 규칙 (AI 판단, 서현 위임 — CAP-AI-40)
 //   - X·Y는 펜이 UP일 때만 움직인다 (MOVE·HOME 모두). 펜이 캡 컵에 꽂힌 채 끌리지 않게. → ERR PEN_DOWN
 //   - 켤 때 펜 서보를 붙이지 않는다 (LIMP). Pi가 PEN UP을 먼저 보낸다. 서보 1개뿐이라 켤 때 전류 문제 없음.
-//   - R1 (웹 채팅 검토 CAP-AI-42): 바닥 F를 올리는 MOVE·PRESS도 펜이 UP일 때만 (ERR PEN_DOWN). F 내리기·HOME F는 언제나 허용.
+//   - R1 (검토 CAP-AI-42) → R1′ (CAP-AI-48): 펜이 DOWN이고 마킹실 위(Y > -20.5)면 F를 올리는 MOVE 거부 (ERR PEN_DOWN).
+//     펜이 대기 자리 캡 컵에 꽂혀 있으면 F 올리기 허용 (재방문 말벌 급이 높이로). PRESS는 언제나 펜 UP일 때만. F 내리기·HOME F는 언제나.
 //   - 스위치 쪽으로 MOVE 하다가 원점보다 0.5 mm 넘게 위에서 스위치가 눌리면 걸음을 잃은 것 → 그 축 정지, HOMED 지움, EVT SWITCH <축> <mm>
 //   - 마지막 반걸음 뒤 코일은 COIL_OFF_DWELL_MS(20 ms) 뒤에 끈다 (CAP-AI-44, 시뮬레이터가 찾음): 이전 코드는 도착한 loop에서 걸음 코일을 켜자마자 꺼서
 //     모터가 마지막 반걸음(약 2 µm)을 돌 시간이 없고, 이동마다 쌓여 위치가 틀어질 수 있음. v0.1(승준)에도 같은 구조. 실물 효과는 미검증.
@@ -54,6 +55,7 @@
 #define HOME_Y_MM         (-40.0f)
 #define SWITCH_SAMPLES    3        // 걸음마다 읽어 3번 연속 LOW면 눌림 (튐 막기) — 미검증
 #define SWITCH_GUARD_MM   0.5f     // 원점보다 이만큼 넘게 위에서 눌리면 걸음 잃음
+#define PEN_CHAMBER_Y_MM  (-20.5f)  // Y가 이보다 크면 펜이 마킹실 위 (trap_sim: Y > -20.5) — [가능성 높음] D5e 모델 값, R1′
 #define COIL_OFF_DWELL_MS 20       // 마지막 반걸음 뒤 코일을 이만큼 더 켜 둔 다음 끔 (HOLD 0일 때) — 미검증, 아래 안전 규칙
 #define PEN_UP_DEG        60       // v0.1 값 — 미검증 (SETDOOR PEN으로 맞춤)
 #define PEN_DOWN_DEG      0        // v0.1 값 — 미검증
@@ -335,7 +337,8 @@ void handle(char* cmd) {
     float mm = atof(tok[2]);
     if (mm < a->minMm || mm > a->maxMm) { reply("ERR LIMIT"); return; }
     // R1 (검토 문서 CAP-AI-42): 바닥을 '올리는' MOVE는 펜 UP일 때만. 내리기는 언제나 허용 (말벌에서 멀어짐)
-    if (a->name == 'F' && mmToSteps(mm) > a->pos && penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }
+    // R1′ (CAP-AI-48): 펜이 내려가 있고 마킹실 위에 있으면 막음. 대기 자리(캡 컵, Y ≤ -20.5)에 꽂혀 있으면 허용 (재방문 급이)
+    if (a->name == 'F' && mmToSteps(mm) > a->pos && penState != PEN_IS_UP && posMm(axes[2]) > PEN_CHAMBER_Y_MM) { reply("ERR PEN_DOWN"); return; }
     if (a->name == 'F') pressActive = false;
     Serial.print(F("OK MOVE ")); Serial.print(a->name); Serial.print(' '); Serial.println(mm, 3);
     startMove(*a, mm);

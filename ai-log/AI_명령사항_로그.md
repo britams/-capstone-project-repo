@@ -615,3 +615,13 @@
 - 한 일: 분업계획 '바뀜(11/08)' 줄 고침 (규칙도 VS Code), 검토 문서 5장 추가 — B1 문 BUSY 고침 맞다, B2 코일 20 ms 맞다, A1 RAIL 0 → STOP 맞다, **A2 대기 자리 X +10 보류** (D5g에서 캡 컵 219와 X 스위치 자리를 재서 정함 → CAD 채팅에서)
 - CAD C1을 이 채팅에서 시작했다가 멈춤 (FreeCAD RPC 90 s 시간 초과, 파일 안 생김) → **CAD는 다른 채팅에서** (`docs/2026-11-08_CAD_D5g_정리_작업지시_서현.md`). 참고: 서현 PC FreeCAD 1.1.3 + freecad-mcp 애드온 RPC 127.0.0.1:9875, G.make()는 90 s를 넘으므로 `execute_code_async`나 freecadcmd로
 - 남은 일 (펌웨어·제어, 순서): ① 처리 순서(판별→PRESS→마킹→급이→방생/격리, trap_sim process()) 규칙 + pi_link 코드 ② 주 루프(낮/밤·배터리 부족·통신 끊김 복구) ③ 인터페이스 정의서 'Pi ↔ 아두이노' 줄 v0.2로 ④ 승준 daynight.py 밤 순서가 P3과 다름 → Issue ⑤ 부품 오면 #define 미검증 값
+
+## CAP-AI-48 — 2026-11-08 · (VS Code) 처리 순서 (판별 → PRESS → 마킹 → 급이 → 방생/격리) + 주 루프
+- 명령: "1번부터 하고 …" (남은 일 ① 처리 순서)
+- 한 일: `관련코딩저장/pi_link/process.py` — trap_sim wait_entry·process·press_mark·feed·release·isolate·leave·night·shutdown을 펌웨어 v0.2 명령으로. 장부(Ledger, EVT GATE 순서로 방향), `decide()` 판정 표(순수 함수), `Processor.step()` 주 루프(배터리 부족 → 통과 모드, 밤 → night_mode 1번, 아침 → day_mode), 고장이면 통과 모드(CAP·IN 열기). controller에 gate_listeners·move_xy_press·move_xy·lights
+- 규칙 (AI 판단, 서현 위임):
+  - **R1 → R1′**: 펜 DOWN이어도 대기 자리 캡 컵(Y ≤ −20.5)이면 F 올리기 허용 — 재방문 말벌 급이(F 10)가 R1에 막히는 것을 옮기다 찾음. PRESS는 계속 펜 UP일 때만 (`trap_motion.ino`, sim [7b])
+  - C1 여왕 판정은 Pi가 (≥ 4.4 mm, 못 재면 3~5·9~11월 여왕) / C2 흉부 좌표는 PRESS 뒤 자세 사진 값 / C3 비전 좌표 = 펌웨어 좌표, 범위 밖이면 마킹 안 함
+- 시험: `test_process.py` decide 12 + 장면 6 (일벌 마킹·여왕 격리·재방문·10월 계절 규칙·해 짐 → 격리·자세 다시) **39/39**, sim_motion **84/84**, sim_doors 77/77, test_pi_link 36/36. 펌웨어 컴파일 12,016 B 37 %
+- 미검증·[추측]: feed_s 60 s, dwell 0.3 s, Y 경계 −20.5 (D5e 값), 비전 출력 형식(dict) — 승준 비전과 맞출 것
+- 남은 일: ② 전기 회로 정리 (`전기회로/`) ③ 인터페이스 정의서 'Pi ↔ 아두이노' v0.2 ④ 승준 daynight.py 밤 순서 Issue

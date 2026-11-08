@@ -180,6 +180,7 @@ int main(int argc, char** argv) {
 
   printf("[7] R1 (검토 CAP-AI-42): 바닥 올리기는 펜 UP 일 때만, 내리기·HOME F 는 언제나\n");
   pen_up();
+  m = t_cmd("MOVE Y 0", 10); t_wait(m, "DONE MOVE Y", 40000);          // 펜을 마킹실 위로 (R1′ 은 Y > -20.5 에서만 막음)
   m = t_cmd("MOVE F 20", 10); CHECK(t_has(m, "OK MOVE F"), "펜 UP: MOVE F 20 접수"); t_wait(m, "DONE MOVE F", 40000);
   CHECK(t_near(t_value(m, "DONE MOVE F "), 20.0, 0.01), "F 20 mm 도착");
   pen_down();
@@ -189,6 +190,13 @@ int main(int argc, char** argv) {
   m = t_cmd("MOVE F 5", 10); CHECK(t_has(m, "OK MOVE F"), "펜 DOWN: MOVE F 5 (내리기) → OK"); t_wait(m, "DONE MOVE F", 40000);
   CHECK(t_near(t_value(m, "DONE MOVE F "), 5.0, 0.01), "F 5 mm 도착 (내려감)");
   m = t_cmd("MOVE F 0", 10); t_wait(m, "DONE MOVE F", 40000); CHECK(t_near(t_value(m, "DONE MOVE F "), 0.0, 0.01), "펜 DOWN: MOVE F 0 (내리기) → OK");
+  printf("[7b] R1′: 펜이 대기 자리 캡 컵(Y −40)에 꽂혀 있으면 F 올리기 허용 (재방문 급이)\n");
+  pen_up();
+  m = t_cmd("MOVE Y -40", 10); t_wait(m, "DONE MOVE Y", 40000);
+  pen_down();
+  m = t_cmd("MOVE F 10", 10); CHECK(t_has(m, "OK MOVE F"), "펜 DOWN + Y −40: MOVE F 10 → OK"); t_wait(m, "DONE MOVE F", 40000);
+  m = t_cmd("PRESS 50"); CHECK(t_has(m, "ERR PEN_DOWN"), "PRESS 는 그래도 펜 UP 일 때만");
+  m = t_cmd("MOVE F 0", 10); t_wait(m, "DONE MOVE F", 40000);
   pen_up();
 
   printf("[8] 펜 내리기 2단계: 마지막 구간은 ≤ 60 °/s (S4 M8), 올리기는 빠르게\n");

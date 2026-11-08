@@ -76,6 +76,7 @@ class TrapController:
         self.rail_restored = False
         self.unusable = set()      # P2: 빔 고장으로 쓰지 않는 문
         self.notes = []            # 사람에게 알릴 것
+        self.gate_listeners = []   # EVT GATE 줄을 받을 함수 (process.Ledger)
 
     # ---------------- 바탕 ----------------
     def notify(self, kind, **kw):
@@ -87,6 +88,9 @@ class TrapController:
             lk.ping_if_idle(self.cfg.keepalive_s)
 
     def _scan_rail(self):
+        for e in self.d.take('EVT GATE'):          # 순서대로 넘김 (장부는 빔 순서로 방향을 앎)
+            for cb in self.gate_listeners:
+                cb(e)
         for e in self.d.take('EVT RAIL'):
             if e == 'EVT RAIL 0' and self.rail:
                 self.rail = False
@@ -143,6 +147,33 @@ class TrapController:
         if s.startswith('EVT SWITCH'):
             raise TrapFault('LOST_STEPS_%s' % ax, s)     # 펌웨어 V5: 걸음 잃음 → 다시 HOME 필요
         return float(s.split()[-1])
+
+    def move_xy_press(self, x, y, grams):
+        """X·Y를 흉부 위로 보내면서 바닥을 PRESS (trap_sim press_mark — 세 축 같이). (F mm, g) 또는 한계면 None."""
+        self.m.command('MOVE X %.3f' % x)
+        self.m.command('MOVE Y %.3f' % y)
+        self.m.command('PRESS %g' % grams)
+        got = {}
+        for p in ('DONE MOVE X', 'DONE MOVE Y', 'DONE PRESS'):
+            got[p] = self._await(self.m, (p, 'EVT SWITCH'), self.cfg.move_timeout_s)
+            if got[p].startswith('EVT SWITCH'):
+                raise TrapFault('LOST_STEPS', got[p])
+        t = got['DONE PRESS'].split()
+        if t[2] == 'LIMIT':
+            return None
+        return float(t[2]), float(t[3])
+
+    def move_xy(self, x, y):
+        self.m.command('MOVE X %.3f' % x)
+        self.m.command('MOVE Y %.3f' % y)
+        for ax in ('X', 'Y'):
+            s = self._await(self.m, ('DONE MOVE ' + ax, 'EVT SWITCH ' + ax), self.cfg.move_timeout_s)
+            if s.startswith('EVT SWITCH'):
+                raise TrapFault('LOST_STEPS_%s' % ax, s)
+
+    def lights(self, top, bot):
+        self.d.command('LIGHT TOP %d' % top)
+        self.d.command('LIGHT BOT %d' % bot)
 
     def park(self):
         """대기 자리로 가서 펜을 캡 컵에 놓음 (trap_sim park(pen_down=True))."""
