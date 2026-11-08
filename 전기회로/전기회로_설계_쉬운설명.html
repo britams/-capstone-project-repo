@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -61,7 +61,7 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 <body>
 <main>
 
-<p class="mini">서현 PC · 2026-11-08 · Claude (CAP-AI-49) · 원본 회로는 <code>design/circuit/circuit.py</code></p>
+<p class="mini">서현 PC · 2026-11-08 · Claude (CAP-AI-49·50) · 원본 회로는 <code>design/circuit/circuit.py</code></p>
 <h1>말벌 기계의 전기회로<br>— 처음부터 차근차근</h1>
 <p class="lead">이 기계가 전기를 어떻게 쓰는지, 왜 그렇게 정했는지, 이제 무엇을 어떤 순서로 만들면 되는지 설명해요. 전기를 처음 배우는 사람도 읽을 수 있게 썼어요.</p>
 
@@ -80,7 +80,10 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 <a href="#s6">6. 손 2 (UNO 2) — 문과 문지기</a><br>
 <a href="#s7">7. 빛 게이트와 자가 시험</a><br>
 <a href="#s8">8. 문 닫기 규칙 (끼임 방지)</a><br>
+<a href="#cam">8-1. 눈 — 카메라는 무엇을, 어떻게 잇나</a><br>
 <a href="#s9">9. 진짜 회로도 보기</a><br>
+<a href="#hub">9-1. 허브 기판 — 납땜 지도</a><br>
+<a href="#rp">9-2. 역극성 보호 — 거꾸로 꽂아도 안전하게</a><br>
 <a href="#s10">10. 이제 만드는 순서 (체크리스트)</a><br>
 <a href="#s11">11. 자주 하는 실수</a><br>
 <a href="#s12">12. 아직 모르는 것·정할 것</a><br>
@@ -276,6 +279,52 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 </ol>
 
 <!-- ============================================================ -->
+<h2 id="cam">8-1. 눈 — 카메라는 무엇을, 어떻게 잇나</h2>
+<div class="big"><b>한 줄 요약:</b> 이미 가지고 있는 <b>Raspberry Pi AI 카메라 (소니 IMX500 센서)</b> 1대를 마킹실 바닥(격자) <b>위 200 mm</b>에 아래를 보게 달고, <b>납작한 리본 케이블 하나</b>로 뇌(Pi 5)의 <b>CAM0</b> 구멍에 꽂아요. 아두이노와는 잇지 않아요.</div>
+<div class="scroll"><table>
+<tr><th>궁금한 것</th><th>답</th><th>근거</th></tr>
+<tr><td>어떤 제품?</td><td>Raspberry Pi AI 카메라 (IMX500) — <b>보유 1대</b>, 새로 안 사요</td><td><span class="tag sure">확실</span> 보유 목록</td></tr>
+<tr><td>뭐가 특별해요?</td><td>카메라 <b>안에 작은 AI 두뇌</b>가 있어서 "말벌이 어디 있나"를 카메라가 직접 찾아요. 뇌(Pi)는 덜 바빠져요</td><td>제조사 사양</td></tr>
+<tr><td>어디에 달아요?</td><td>마킹실 격자 위 <b>200 mm</b>, 아래를 봄. 렌즈 둘레에 <b>위 링 조명</b>(손 2의 D3)</td><td>인터페이스 정의서</td></tr>
+<tr><td>왜 200 mm?</td><td>초점이 <b>20 cm보다 가까우면 흐려져요</b>. 손으로 돌려 맞추는 수동 초점이라 200 mm에 한 번 맞춰 두고 고정해요</td><td><span class="tag sure">확실</span> 제조사 사양 (20 cm~무한대)</td></tr>
+<tr><td>얼마나 넓게·자세히?</td><td>보이는 넓이 약 260 × 196 mm 중 마킹실 40 × 40 mm만 써요. <b>1 mm에 약 15.6 화소</b> (화소 하나 ≈ 0.064 mm)</td><td><span class="tag maybe">계산값</span> 실측은 J3</td></tr>
+<tr><td>어떻게 이어요?</td><td>납작한 리본 케이블(FFC) 하나: <b>Pi 5 CAM0 (22핀, 0.5 mm 간격)</b> ↔ <b>카메라 (15핀, 1 mm 간격)</b>. 이 선 하나로 <b>전기도 받고 사진도 보내요</b> — 따로 전원 선 없음</td><td><span class="tag sure">확실</span> circuit.py <code>CSI</code></td></tr>
+<tr><td>케이블 길이?</td><td><b>500 mm를 새로 사요.</b> Pi 자리에서 카메라까지 약 320 mm인데, 같이 온 선은 300 mm라 모자라요</td><td><span class="tag sure">확실 — 계산</span> 구매표 E18</td></tr>
+<tr><td>전기 얼마나?</td><td>AI가 돌 때 약 1.9 W — Pi의 27 W 충전기 길에서 받아요 (힘 길과 상관없음)</td><td><span class="tag maybe">가능성 높음</span> 측정 기사</td></tr>
+</table></div>
+<svg viewBox="0 0 760 150" width="100%" role="img" aria-label="카메라 연결: Pi 5 CAM0에서 리본 케이블 500 mm로 AI 카메라">
+  <rect x="20" y="40" width="170" height="70" rx="12" fill="none" stroke="var(--brain)" stroke-width="2.5"/>
+  <text x="105" y="70" text-anchor="middle" font-size="16" font-weight="700" fill="var(--brain)">뇌 · Pi 5</text>
+  <text x="105" y="94" text-anchor="middle" font-size="13" fill="var(--soft)">CAM0 구멍 (22핀)</text>
+  <path d="M190 75 C 300 20, 420 130, 540 75" fill="none" stroke="var(--warn)" stroke-width="9" stroke-linecap="round" opacity=".8"/>
+  <text x="365" y="40" text-anchor="middle" font-size="13.5" fill="var(--ink)">납작한 리본 케이블 (FFC) 500 mm</text>
+  <text x="365" y="130" text-anchor="middle" font-size="12.5" fill="var(--soft)">사진 + 전기가 같이 다녀요 · 날카롭게 접지 않기</text>
+  <rect x="545" y="40" width="195" height="70" rx="12" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <text x="642" y="70" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">눈 · AI 카메라</text>
+  <text x="642" y="94" text-anchor="middle" font-size="13" fill="var(--soft)">15핀 · 격자 위 200 mm</text>
+</svg>
+<div class="box"><b>꽂는 법 (부품이 오면)</b>
+<ol>
+<li>Pi 전원을 <b>뺀 상태</b>에서 해요.</li>
+<li>CAM0 구멍의 검은 잠금 막대를 살짝 들어 올려요.</li>
+<li>리본의 <b>넓은 쪽(15핀)은 카메라</b>, <b>좁은 쪽(22핀)은 Pi</b>예요. 금속 접점이 어느 쪽을 보게 꽂는지는 <b>카메라 설명서 그림대로</b> 해요 (거꾸로 꽂으면 카메라가 안 잡혀요).</li>
+<li>끝까지 밀어 넣고 잠금 막대를 내려요. 리본은 <b>날카롭게 접지 않고</b> 둥글게 돌려요.</li>
+<li>켜서 Pi에서 카메라 목록 명령으로 잡히는지 확인해요 (승준 J3 단계).</li>
+</ol></div>
+<div class="box"><b>카메라가 하는 일, 뇌가 하는 일</b>
+<ol>
+<li><b>카메라 안 AI</b>: 마킹실에 말벌이 있나, 어디 있나 찾기</li>
+<li><b>Pi 5 + AI HAT+</b>: 원래 크기 사진 조각으로 등 무늬·여왕벌 폭(4.4 mm) 재기 <span class="tag maybe">가능성 높음 — 승준 확인</span></li>
+<li><b>Pi 코드</b>(<code>관련코딩저장/pi_link/process.py</code>): 그 결과로 "마킹 / 재방문 / 격리"를 정해요. 카메라 결과는 <code>종, 폭(mm), 표식 있나, 자세, 흉부 x·y</code> 형식으로 받기로 했어요 — 비전 코드(승준)와 맞춰야 해요</li>
+</ol></div>
+<div class="box"><b>아직 모르는 것</b>
+<ul>
+<li>말벌 찾는 AI(VespAI, YOLOv5)를 카메라 안(IMX500)으로 옮길 수 있는지 <span class="tag guess">미검증</span></li>
+<li>200 mm에서 4.4 mm와 4.5 mm를 가를 만큼 정확한지 — 화소 하나가 0.064 mm라 될 것 같지만 실제 흔들림(σ)은 재 봐야 해요</li>
+<li>격자판이 말벌을 가려요 (열린 면적 36.5 %) → 투명 격자를 권했어요 (11/02)</li>
+</ul></div>
+
+<!-- ============================================================ -->
 <h2 id="s9">9. 진짜 회로도 보기</h2>
 <p>아래는 실제 회로도예요(<code>design/img/circuit/</code>). 레포 폴더 안에서 이 파일을 열어야 그림이 보여요.</p>
 <p class="mini"><b>읽는 법:</b> 빨간 선은 +5 V, 검은 선은 GND예요. 파란 이름표가 같은 선끼리는 이어져 있다는 뜻이에요 (예: <code>F_IN1</code>이 두 군데 있으면 그 둘은 한 선).</p>
@@ -285,11 +334,47 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 <figure><img src="../design/img/circuit/회로도_3_UNO2_문게이트조명.png" alt="회로도 3 UNO2" onerror="this.parentNode.style.display='none'"><figcaption>회로도 3 — 손 2 (문 · 문지기 · 조명)</figcaption></figure>
 <figure><img src="../design/img/circuit/회로도_4_배터리상자.png" alt="회로도 4 배터리 상자" onerror="this.parentNode.style.display='none'"><figcaption>회로도 4 — 배터리 상자 (콘센트가 없는 곳에서)</figcaption></figure>
 
+<p class="mini">※ 회로도 1·4장 그림에는 아직 역극성 다이오드(D_RP)가 안 그려져 있고, 카메라 선이 "300 mm"로 적혀 있어요. 원본(circuit.py)은 고쳤고, 그림은 다음에 다시 그려요 (이 PC에 그림 도구가 없음).</p>
+
+<!-- ============================================================ -->
+<h2 id="hub">9-1. 허브 기판 — 납땜 지도</h2>
+<p><b>허브</b>는 "선이 모이는 작은 판"이에요. 서보 4개, 문지기 9쌍의 선이 각각 아두이노까지 따로 가면 너무 복잡해서, 판 하나에 모아 <b>전기를 나눠 주고</b> 저항을 달아요. 판은 구멍이 2.54 mm마다 뚫린 <b>만능기판</b>이에요.</p>
+<div class="box"><b>판 위에서 전기를 잇는 방법 3가지</b>
+<ul>
+<li><b>땜납 다리</b>: 뒷면(납땜 면)에서 바로 옆 구멍끼리 땜납으로 이어요. 그림의 짧은 굵은 선.</li>
+<li><b>버스</b>: 한 줄을 따라 맨 구리선을 깔아요. +5V(빨강), GND(검정), 송신 켜기 EMIT_LO(보라) 세 줄.</li>
+<li><b>점퍼</b>: 앞면(부품 면)에서 피복선으로 버스를 <b>넘어갈 때만</b> 써요. 그림의 곡선. 게이트 허브에 9개, 서보 허브에 0개.</li>
+</ul>
+<p class="mini">이 배치는 손으로 그린 게 아니라 <code>전기회로/hub_boards.py</code>가 만들고, 회로 원본(circuit.py)과 <b>연결이 하나하나 같은지</b>(합선 0, 끊김 0) 검사해요. 일부러 합선·끊김·핀 잘못을 넣어 보니 다 잡았어요 <span class="tag sure">확실 — 검사 스크립트</span>.</p></div>
+<h3>게이트 허브 (70 × 30 mm) — 문지기 9쌍 + 레일 감지</h3>
+<p class="mini">칸마다 위 글자가 문지기 이름이에요. 검은 네모 = 문지기 쪽 선이 꽂히는 핀, 파란 네모 = 아두이노(손 2)로 가는 신호 핀, 하늘색 동그라미 = 세워 꽂는 저항(220 = 220 Ω, 10k = 10 kΩ).<br>
+문 빔 핀 글자: <b>C</b> 받는 쪽 컬렉터 · <b>A</b> LED 긴 다리 · <b>E</b> 받는 쪽 이미터(신호) · <b>K</b> LED 짧은 다리.
+통로 게이트: <b>T+ T−</b> 쏘는 쪽 빨강·검정 · <b>R+ R−</b> 받는 쪽 빨강·검정 · <b>S</b> 받는 쪽 흰 선(신호).</p>
+<figure><img src="out/gate_hub_top.svg" alt="게이트 허브 부품 면"><figcaption>부품 면 (위에서 본 모습)</figcaption></figure>
+<figure><img src="out/gate_hub_solder.svg" alt="게이트 허브 납땜 면"><figcaption>납땜 면 (뒤집은 모습 — 좌우가 바뀌어요. 납땜할 때는 이 그림을 보세요)</figcaption></figure>
+<h3>서보 허브 (60 × 40 mm) — 서보 4개 + 레일 부품</h3>
+<p class="mini">서보 커넥터는 갈색(GND)·빨강(+5V)·주황(신호) 순서. 오른쪽에 큰 콘덴서 C1(1000 µF, 긴 다리 +), 작은 콘덴서 C2(0.1 µF), 역극성 다이오드 D_RP(줄 표시가 +5V 쪽)를 달아요.</p>
+<figure><img src="out/servo_hub_top.svg" alt="서보 허브 부품 면"><figcaption>부품 면</figcaption></figure>
+<figure><img src="out/servo_hub_solder.svg" alt="서보 허브 납땜 면"><figcaption>납땜 면 (좌우 바뀜)</figcaption></figure>
+<p class="mini">핀 하나하나의 이름과 회로 노드 표: <code>전기회로/out/hub_pinout.md</code></p>
+
+<!-- ============================================================ -->
+<h2 id="rp">9-2. 역극성 보호 — 거꾸로 꽂아도 안전하게</h2>
+<p>건전지를 반대로 넣으면 장난감이 고장 날 수 있죠? 어댑터 플러그에도 +와 −가 정해져 있어요(보통 가운데가 +). 극성이 반대인 어댑터를 실수로 꽂으면 전기가 거꾸로 흘러서 서보·센서·아두이노가 한꺼번에 상할 수 있어요.</p>
+<div class="box"><b>우리가 고른 방법: "거꾸로면 퓨즈를 끊는 다이오드"</b> <span class="tag sure">AI 판단, 서현 위임</span>
+<ul>
+<li><b>다이오드</b>는 전기를 <b>한쪽으로만</b> 보내는 문이에요.</li>
+<li>+5V와 GND 사이에 <b>거꾸로</b> 걸쳐 둬요. 평소(바르게 꽂음)에는 문이 닫혀 있어서 아무 일도 안 해요 → <b>전압이 하나도 안 떨어져요</b>.</li>
+<li>거꾸로 꽂으면 문이 열려서 전기가 다이오드로 와르르 흘러요 → <b>퓨즈 3 A가 툭 끊어져요</b>. 부품에는 −0.5 V 정도만 걸려서 안전해요. 퓨즈만 새로 갈면 돼요.</li>
+<li>안 쓴 방법: 다이오드를 길 중간에 넣으면 늘 0.3~0.5 V가 떨어져서, 문 서보(4.8 V 이상 필요)가 힘이 모자랄 수 있어요.</li>
+<li>부품: 쇼트키 다이오드 <b>SB540</b> (5 A) 1개, 서보 허브에 <b>줄 표시가 +5V 쪽</b>으로 <span class="tag maybe">가능성 높음 — 사기 전에 사양서 확인</span></li>
+</ul></div>
+
 <!-- ============================================================ -->
 <h2 id="s10">10. 이제 만드는 순서 (체크리스트)</h2>
 <p>레고를 만들 때 설명서 1번부터 하나씩 하듯이 해요. <b>한 단계가 "통과"해야 다음으로</b> 가요. 안 되면 그 단계 안에서만 찾으면 되니까 쉬워요. 칸을 누르면 이 컴퓨터에 기억돼요.</p>
 <div class="box" id="checklist">
-<label class="check"><input type="checkbox" data-k="E1"><span><b>E1 · 1차 부품 주문 확인</b><small>구매확정표 1장. 승준이 쉬고 있으니 서현이 주문할지 정해요. MG90S는 3주 걸릴 수 있어요.</small></span></label>
+<label class="check"><input type="checkbox" data-k="E1"><span><b>E1 · 1차 부품 주문 (CAD가 끝난 뒤)</b><small>구매확정표 1장 + 카메라 리본 500 mm(E18) + SB540 다이오드 + 만능기판 2장. MG90S는 3주 걸릴 수 있어요.</small></span></label>
 <label class="check"><input type="checkbox" data-k="E2"><span><b>E2 · B1 힘 길만 꽂기</b><small>어댑터 → 퓨즈 → 비상 정지 → 와고. 멀티미터로 5.0 V, 비상 정지를 누르면 0 V. 아두이노는 아직 안 꽂아요.</small></span></label>
 <label class="check"><input type="checkbox" data-k="E3"><span><b>E3 · B2 손 2 + 문지기 1쌍</b><small>스케치 b2_gate. 손으로 가리면 BLOCK, 's'를 치면 자가 시험 OK, 비상 정지를 누르면 RAIL=0.</small></span></label>
 <label class="check"><input type="checkbox" data-k="E4"><span><b>E4 · B3 문 서보 1개 + 문 빔 2개</b><small>스케치 b3_door. 켬−끔 차이 200 이상인지 숫자로 보기. 빔을 막으면 안 닫히고, 닫다가 막으면 다시 열려야 해요.</small></span></label>
@@ -317,11 +402,13 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 
 <!-- ============================================================ -->
 <h2 id="s12">12. 아직 모르는 것 · 정할 것</h2>
-<div class="box"><h3>아직 설계 안 된 것</h3>
+<div class="box"><h3>11/08에 설계한 것 (전에는 없었음)</h3>
 <ol>
-<li><b>허브 기판 배치도</b> <span class="tag sure">확실 — 문서에 없음</span>: 서보 허브와 게이트 허브(저항 10개를 꽂는 작은 판)의 구멍 자리·납땜 그림이 아직 없어요. E9 전에 그려야 해요.</li>
-<li><b>역극성 보호</b> <span class="tag guess">추측 — 제안</span>: 실수로 +/−가 반대인 어댑터를 꽂으면 부품이 상할 수 있어요. 다이오드를 넣으면 막을 수 있지만, 전압이 0.3~0.5 V 떨어져서 서보 힘이 조금 약해져요. 넣을지 정해야 해요.</li>
-</ol></div>
+<li><b>허브 기판 배치도</b> → 9-1장 (검사 통과)</li>
+<li><b>역극성 보호</b> → 9-2장 (SB540, 서보 허브)</li>
+</ol>
+<h3>정할 때가 오면</h3>
+<ul><li>부품 주문은 CAD가 끝난 뒤에 해요 (서현 11/08).</li></ul></div>
 <div class="box"><h3>실물이 와야 아는 숫자 (미검증)</h3>
 <ul>
 <li>문 열림·닫힘 각도 (지금은 30° / 150°), 닫는 속도 (초당 100°)</li>

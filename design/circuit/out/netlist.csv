@@ -4,6 +4,7 @@
 +5V_B,C1.+,20,비상 정지 NC 뒤 = 구동 레일
 +5V_B,C2.1,20,비상 정지 NC 뒤 = 구동 레일
 +5V_B,R_RS.1,20,비상 정지 NC 뒤 = 구동 레일
++5V_B,D_RP.K,20,비상 정지 NC 뒤 = 구동 레일
 +5V_B,ULN_F.VCC,22,
 +5V_B,ULN_X.VCC,22,
 +5V_B,ULN_Y.VCC,22,
@@ -34,8 +35,8 @@
 +5V_B,PT_G5b.C,28,포토TR 컬렉터
 +5V_B,L_TOP.V+,24,
 +5V_B,L_BOT.V+,24,
-CSI,PI.CAM0,,Pi 5 22핀 ↔ 15핀 300 mm
-CSI,CAM.CSI,,Pi 5 22핀 ↔ 15핀 300 mm
+CSI,PI.CAM0,,"Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로"
+CSI,CAM.CSI,,"Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로"
 EMIT_LO,TX_G1.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
 EMIT_LO,TX_G4.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
 EMIT_LO,TX_G6.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
@@ -50,6 +51,7 @@ GND,J_B.-,20,GND 한 점 (와고 GND 묶음)
 GND,TB.GND,20,GND 한 점 (와고 GND 묶음)
 GND,C1.-,20,GND 한 점 (와고 GND 묶음)
 GND,C2.2,20,GND 한 점 (와고 GND 묶음)
+GND,D_RP.A,20,GND 한 점 (와고 GND 묶음)
 GND,U1.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
 GND,U2.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
 GND,ULN_F.GND,22,
