@@ -285,7 +285,10 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 <tr><th>궁금한 것</th><th>답</th><th>근거</th></tr>
 <tr><td>어떤 제품?</td><td>Raspberry Pi AI 카메라 (IMX500) — <b>보유 1대</b>, 새로 안 사요</td><td><span class="tag sure">확실</span> 보유 목록</td></tr>
 <tr><td>뭐가 특별해요?</td><td>카메라 <b>안에 작은 AI 두뇌</b>가 있어서 "말벌이 어디 있나"를 카메라가 직접 찾아요. 뇌(Pi)는 덜 바빠져요</td><td>제조사 사양</td></tr>
+<tr><td>몇 대?</td><td><b>1대.</b> 화면이 필요한 곳은 마킹실뿐이에요. 통로는 "지나갔나·어느 쪽으로"만 알면 돼서 빛 게이트(G1~G6)가 더 빠르고 싸요. 불투명 관 속은 카메라로 볼 수도 없어요</td><td><span class="tag sure">확실</span> 11/02 제어 통합정리 D5e</td></tr>
+<tr><td>그 1대가 하는 일</td><td>들어온 마리 수 → 문 닫은 뒤 다시 확인 → 종·여왕벌(폭)·표식 판별 → 누른 뒤 자세(등이 위?)·흉부 좌표 → 점 확인 → 나간 뒤 0마리 확인. 전부 같은 카메라</td><td>process.py 순서</td></tr>
 <tr><td>어디에 달아요?</td><td>마킹실 격자 위 <b>200 mm</b>, 아래를 봄. 렌즈 둘레에 <b>위 링 조명</b>(손 2의 D3)</td><td>인터페이스 정의서</td></tr>
+<tr><td>가리는 것은?</td><td>① 펜: 안 찍을 때는 마킹실 밖 <b>캡 컵(Y −40)</b>에 쉬어서 안 가려요. 찍는 순간만 들어와요 ② 격자: 지금 격자는 <b>36.5 %만 뚫려</b> 말벌이 점박이로 보여요 → <b>투명 격자</b> 권장 ③ 펜을 나르는 X·Y 몸체가 카메라와 마킹실 사이에 오는지는 <b>CAD에서 확인</b></td><td>①③ <span class="tag maybe">CAD 확인</span> ② VespAI 점검 11/02</td></tr>
 <tr><td>왜 200 mm?</td><td>초점이 <b>20 cm보다 가까우면 흐려져요</b>. 손으로 돌려 맞추는 수동 초점이라 200 mm에 한 번 맞춰 두고 고정해요</td><td><span class="tag sure">확실</span> 제조사 사양 (20 cm~무한대)</td></tr>
 <tr><td>얼마나 넓게·자세히?</td><td>보이는 넓이 약 260 × 196 mm 중 마킹실 40 × 40 mm만 써요. <b>1 mm에 약 15.6 화소</b> (화소 하나 ≈ 0.064 mm)</td><td><span class="tag maybe">계산값</span> 실측은 J3</td></tr>
 <tr><td>어떻게 이어요?</td><td>납작한 리본 케이블(FFC) 하나: <b>Pi 5 CAM0 (22핀, 0.5 mm 간격)</b> ↔ <b>카메라 (15핀, 1 mm 간격)</b>. 이 선 하나로 <b>전기도 받고 사진도 보내요</b> — 따로 전원 선 없음</td><td><span class="tag sure">확실</span> circuit.py <code>CSI</code></td></tr>
