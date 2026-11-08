@@ -9,10 +9,10 @@ purchase/cad_parts/sj_purchased_parts.py KW11 값, 판매처 대표값. 실물 �
 레버는 '눌린 자리'로 그림: 레버 끝 면 = 본체 위 12.2 (H + 1.5 + 0.5).
 
 펌웨어 (design/circuit/firmware/trap_motion): HOME_F 0 / HOME_X −18 / HOME_Y −40 mm, X 0 = CAD x 55, Y = CAD y 그대로.
-  F : 바닥 0 (가장 아래)에서 캐리지 158 아랫면 z 242 가 레버를 누름 → 스위치는 151_L 안쪽 면 (x 36)에 M2 × 12 두 개
+  F : 바닥 0 (가장 아래)에서 캐리지 158 아랫면 z 262 (레버 자리) 가 레버를 누름 → 스위치는 151_L 안쪽 면 (x 36)에 M2 × 12 두 개
   X : xm 37 (펌웨어 −18, 지금 대기 65에서 dx −28)에서 Y 모터 브래킷 211 −x 면 (69.9 − 28 = 41.9) 이 레버를 누름
       → X 봉(−y) 집게 + 팔 226 (3D 프린트, M3 조임 나사) 밑에 스위치
-  Y : ym −40 (지금 자세 그대로)에서 Y 캐리지 206 −y 면 (y −55) 이 레버를 누름 → 빔 끝 블록 212A −x 면에 M2 × 12 두 개
+  Y : ym −40 (지금 자세 그대로)에서 펜 홀더 202 −y 면 (y −54) 이 레버를 누름 (206 면은 212A에 가려짐) → 빔 끝 블록 212A −x 면에 M2 × 12 두 개
 """
 import FreeCAD as App
 import Part
@@ -64,12 +64,12 @@ def make_parts():
     X, Y, Z = V(1, 0, 0), V(0, 1, 0), V(0, 0, 1)
     out = []
     # F — 본체 x 36~42.4 (W: 구멍 방향 +x, 옆판 151_L 면 x 36에 붙음), y 3.3~23.3 (L), z 229.8~240 (H 위)
-    sF, scF, lvF = switch(V(36.0, 3.3, 242.0 - LEVER_TOP), Y, X, Z)
+    sF, scF, lvF = switch(V(36.0, 3.3, 262.0 - LEVER_TOP), Y, X, Z)   # 158 아랫면은 이 자리(x 37~46, y −20~20)에서 z 262 [확실 — 선 쏘아 잼]
     # 위 switch()는 나사 머리를 W+ 면(x 42.4) 밖에 두고 몸통을 −x로 12 → 옆판 안 5.6 mm
     out.append(("227f_home_switch_F (KW11-3Z — 바닥 0 mm에서 캐리지 158 아랫면이 누름, 151_L 안쪽 면에 M2 × 12 두 개)", sF, (0.15, 0.15, 0.15)))
     out.append(("227fs_switch_screws_F (M2 × 12 십자 냄비머리 2 — 151_L에 셀프 탭)", Part.makeCompound(scF), (0.1, 0.1, 0.1)))
     # X — 레버 끝 면 x 41.9 (211 −x 면 at 원점), H = +x, L = y (−98 ~ −78), W = z (467.6 ~ 474, 구멍 방향 +z → 나사 머리는 위로? 아니라 아래에서)
-    x_lev = 69.9 + DX_HOME                                   # 41.9
+    x_lev = 69.9 + DX_HOME - 0.05                            # 41.85 (211 면과 0.05 틈 — 닿음 판정)
     sX, _scX, lvX = switch(V(x_lev - LEVER_TOP, -98.0, 474.0), Y, V(0, 0, -1), X)
     # 나사는 아래(본체 밑면 z 467.6)에서 위로 팔 226 안으로 — 직접 만듦
     scX = []
@@ -79,22 +79,23 @@ def make_parts():
     out.append(("227x_home_switch_X (KW11-3Z — xm 37 (펌웨어 X −18)에서 Y 모터 브래킷 211 −x 면이 누름, 팔 226 밑에 M2 × 12 두 개)", sX, (0.15, 0.15, 0.15)))
     out.append(("227xs_switch_screws_X (M2 × 12 십자 냄비머리 2 — 아래에서 팔 226에 셀프 탭)", Part.makeCompound(scX), (0.1, 0.1, 0.1)))
     # 226 X 봉 집게 + 팔 (3D 프린트): 집게 x 22~41, y −73~−57, z 472~488 (Ø8 봉 구멍 y −65 z 480, 아래 틈 1 + M3 조임)
-    cl = Part.makeBox(19, 16, 16, V(22, -73, 472))
+    cl = Part.makeBox(19, 16, 18, V(22, -73, 470))
     cl = cl.cut(Part.makeCylinder(4.0, 21, V(21.5, -65, 480), X))
-    cl = cl.cut(Part.makeBox(21, 1.0, 9, V(21.5, -65.5, 472 - 1)))                     # 아래 쪼갬 틈 (조이면 봉을 잡음)
-    cl = cl.cut(Part.makeCylinder(1.7, 17, V(31.5, -73.5, 475), Y))                    # M3 조임 나사 구멍 (y 방향, 틈 아래)
-    arm = Part.makeBox(19, 27, 14, V(22, -100, 474))
+    cl = cl.cut(Part.makeBox(21, 1.0, 11, V(21.5, -65.5, 470 - 1)))                    # 아래 쪼갬 틈 (조이면 봉을 잡음)
+    cl = cl.cut(Part.makeCylinder(1.7, 17, V(24.5, -73.5, 473.5), Y))                  # M3 조임 나사 구멍 (y 방향, 봉 아래, 팔 옆)
+    arm = Part.makeBox(13, 27, 14, V(28, -100, 474))                                   # 팔 x 28~41 (나사 머리 x 21.8~27.3 비킴)
     out.append(("226_x_home_clamp (3D 프린트 — X 봉 −y 집게 + 팔, M3 × 16 조임 1, 스위치 X 받침)", cl.fuse(arm).removeSplitter(), (0.95, 0.45, 0.05)))
-    out.append(("226s_clamp_screw (M3 × 16 십자 냄비머리 + 너트 — 집게 조임)", Part.makeCylinder(2.75, 2.0, V(31.5, -75.0, 475), Y).fuse(
-        Part.makeCylinder(1.5, 16, V(31.5, -73.0, 475), Y)).fuse(Part.makeCylinder(3.2, 2.4, V(31.5, -57.0, 475), Y)), (0.1, 0.1, 0.1)))
+    out.append(("226s_clamp_screw (M3 × 16 십자 냄비머리 + 너트 — 집게 조임)", Part.makeCylinder(2.75, 2.0, V(24.5, -75.0, 473.5), Y).fuse(
+        Part.makeCylinder(1.5, 16, V(24.5, -73.0, 473.5), Y)).fuse(Part.makeCylinder(3.2, 2.4, V(24.5, -57.0, 473.5), Y)), (0.1, 0.1, 0.1)))
     # Y — 빔 끝 블록 212A −x 면 (x 77.4)에 붙음: W = −x (x 71 ~ 77.4, 구멍 방향), L = z (440 ~ 460), H = +y (레버 끝 면 y −55)
-    y_lev = -55.0
-    sY, _s, lvY = switch(V(77.4, y_lev - LEVER_TOP, 440.0), Z, V(-1, 0, 0), Y)
+    y_lev = -54.0          # 펜 홀더 202 −y 면 (x 67~81.4). 206 −y 면(−55)은 x 82~ 라 끝 블록 212A가 1 mm 틈으로 가림 [확실 — 선 쏘아 잼]
+    xb = 77.3              # 212A −x 면 77.39 에서 0.1 띄움
+    sY, _s, lvY = switch(V(xb, y_lev - LEVER_TOP, 440.0), Z, V(-1, 0, 0), Y)
     scY = []
     for l in ((KW["L"] - KW["hole_p"]) / 2, (KW["L"] + KW["hole_p"]) / 2):
-        c = V(77.4 - KW["W"], y_lev - LEVER_TOP + KW["hole_z"], 440.0 + l)
+        c = V(xb - KW["W"], y_lev - LEVER_TOP + KW["hole_z"], 440.0 + l)
         scY.append(Part.makeCylinder(1.9, 1.3, c - X * 1.3, X).fuse(Part.makeCylinder(1.0, 12.0, c, X)))
-    out.append(("227y_home_switch_Y (KW11-3Z — ym −40에서 Y 캐리지 206 −y 면이 누름, 빔 끝 블록 212A −x 면에 M2 × 12 두 개, 빔과 같이 움직임)", sY, (0.15, 0.15, 0.15)))
+    out.append(("227y_home_switch_Y (KW11-3Z — ym −40에서 펜 홀더 202 −y 면이 누름, 빔 끝 블록 212A −x 면에 M2 × 12 두 개, 빔과 같이 움직임)", sY, (0.15, 0.15, 0.15)))
     out.append(("227ys_switch_screws_Y (M2 × 12 십자 냄비머리 2 — 212A에 셀프 탭)", Part.makeCompound(scY), (0.1, 0.1, 0.1)))
     levers = {"F": lvF, "X": lvX, "Y": lvY}
     return out, levers
@@ -139,32 +140,39 @@ def check(doc):
     new = [o for o in objs if o.Label.startswith(("226", "227"))]
     res = {"contact": {}, "hits": []}
 
-    def moved(o, dx, dy, dz):
-        s = o.Shape.copy()
-        s.translate(V(dx if o.Label.startswith(BEAM + CARR) else 0, dy if o.Label.startswith(CARR) else 0,
-                      dz if o.Label.startswith(FLOOR) else 0))
-        return s
+    def off(o, dx, dy, dz):
+        return V(dx if o.Label.startswith(BEAM + CARR) else 0, dy if o.Label.startswith(CARR) else 0,
+                 dz if o.Label.startswith(FLOOR) else 0)
+
+    def mbb(b, v):                       # 상자만 옮김 (모양 복사 없이)
+        return App.BoundBox(b.XMin + v.x, b.YMin + v.y, b.ZMin + v.z, b.XMax + v.x, b.YMax + v.y, b.ZMax + v.z)
 
     # 닿음 (원점 자세): 레버 ↔ 누르는 부품 거리
-    for ax, pre, d in (("F", "158_", (0, 0, 0)), ("X", "211_", (DX_HOME, 0, 0)), ("Y", "206_", (0, 0, 0))):
+    for ax, pre, d in (("F", "158_", (0, 0, 0)), ("X", "211_", (DX_HOME, 0, 0)), ("Y", "202_", (0, 0, 0))):
         o = [x for x in objs if x.Label.startswith(pre)][0]
         s = o.Shape.copy()
         s.translate(V(*d))
         res["contact"][ax] = round(lv[ax].distToShape(s)[0], 3)
     # 겹침: 자세 여러 개 (X −28·−14·0·+7.6, Y 0·+29·+57.6, 바닥 0·18·36.5)
-    poses = [(dx, dy, dz) for dx in (DX_HOME, -14.0, 0.0, 7.6) for dy in (0.0, 29.0, 57.6) for dz in (0.0, 36.5)]
+    poses = [(dx, dy, dz) for dx in (DX_HOME, -14.0, 0.0, 7.6) for dy in (0.0, 29.0, 57.6) for dz in (0.0, 36.5)]   # 24 자세
+    sol = {o.Name: [(s, s.BoundBox) for s in (o.Shape.Solids or [o.Shape])] for o in objs}
     for n in new:
         for o in objs:
             if o is n:
                 continue
             for p in poses:
-                sn = n.Shape.copy()
-                if n.Label.startswith("227y"):
-                    sn.translate(V(p[0], 0, 0))
-                so = moved(o, *p)
-                if not sn.BoundBox.intersect(so.BoundBox):
+                vn = V(p[0], 0, 0) if n.Label.startswith("227y") else V(0, 0, 0)
+                vo = off(o, *p)
+                if not mbb(n.Shape.BoundBox, vn).intersect(mbb(o.Shape.BoundBox, vo)):
                     continue
-                v = sn.common(so).Volume
+                v = 0.0                                          # 고체 상자끼리 닿는 것만 복사·불 연산
+                for a_, ab in sol[n.Name]:
+                    for b_, bb in sol[o.Name]:
+                        if mbb(ab, vn).intersect(mbb(bb, vo)):
+                            sa, sb = a_.copy(), b_.copy()
+                            sa.translate(vn)
+                            sb.translate(vo)
+                            v += sa.common(sb).Volume
                 if v > 0.01:
                     res["hits"].append((n.Label[:24], o.Label[:50], [round(q, 1) for q in p], round(v, 3)))
                     break
