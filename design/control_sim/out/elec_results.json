@@ -269,11 +269,11 @@
    "to": "TB",
    "wires": 2,
    "awg": 20,
-   "len_mm": 346,
+   "len_mm": 330,
    "stock_mm": null,
-   "extension_mm": 346,
+   "extension_mm": 330,
    "moving": false,
-   "drop_V": 0.058
+   "drop_V": 0.055
   },
   {
    "name": "단자대 → ULN2003 F (+5 V, GND)",
@@ -389,9 +389,9 @@
    "to": "LC",
    "wires": 4,
    "awg": 28,
-   "len_mm": 208,
+   "len_mm": 343,
    "stock_mm": null,
-   "extension_mm": 208,
+   "extension_mm": 343,
    "moving": true,
    "drop_V": null
   },
@@ -401,9 +401,9 @@
    "to": "HX711",
    "wires": 4,
    "awg": 26,
-   "len_mm": 426,
+   "len_mm": 244,
    "stock_mm": null,
-   "extension_mm": 426,
+   "extension_mm": 244,
    "moving": false,
    "drop_V": null
   },
@@ -413,9 +413,9 @@
    "to": "SW_F",
    "wires": 2,
    "awg": 28,
-   "len_mm": 332,
+   "len_mm": 344,
    "stock_mm": null,
-   "extension_mm": 332,
+   "extension_mm": 344,
    "moving": false,
    "drop_V": null
   },
@@ -425,9 +425,9 @@
    "to": "SW_X",
    "wires": 2,
    "awg": 28,
-   "len_mm": 533,
+   "len_mm": 574,
    "stock_mm": null,
-   "extension_mm": 533,
+   "extension_mm": 574,
    "moving": false,
    "drop_V": null
   },
@@ -437,9 +437,9 @@
    "to": "SW_Y",
    "wires": 2,
    "awg": 28,
-   "len_mm": 695,
+   "len_mm": 657,
    "stock_mm": null,
-   "extension_mm": 695,
+   "extension_mm": 657,
    "moving": true,
    "drop_V": null
   },
@@ -764,5 +764,5 @@
    "days": 3.82
   }
  ],
- "harness_total_m": 47.6
+ "harness_total_m": 47.4
 }

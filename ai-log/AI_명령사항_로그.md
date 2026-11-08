@@ -689,3 +689,5 @@
 - 시간 문제: 이 PC는 승준 PC보다 많이 느림 — 승준 `floating()`·자세 검사가 1시간 넘게 안 끝나서 멈추고 고체 상자 거르기로 바꿈. 서현에게 진행 상황을 그림 없이 말만 해서 답답하게 함 → 다음엔 그림부터
 - 만든·고친 파일: `cad/D5g_c3_hx711_dcjack.py`·`D5g_home_switches.py`·`D5g_render.py`(새), `cad/D5g_frame_detail.py`(부르는 4줄), `D5g_real_parts.py`(J_I2C 4줄), `D5g_parts_table.py`·`2026-11-06_D5g_부품표_승준.md`(새 줄), `cad/D5g_full.FCStd`, `cad/img/D5g_*.png` 6장, `cad/README.md`, 명령 정리 3-A 표시
 - 남은 것: ① Issue #9에 위 답 댓글 (Chrome) ② 펌웨어 대화 3-B 3 하네스 다시 계산 ③ 결정 안 함: 방생 출구 안, 급이 바닥 370, 프린터 판 크기, 드라이버 4곳
+- (이어서, 서현 "남은 것 해") 3-B 3 하네스: `elec_budget.py` P (DCIN −184,−35 · HX711 −44.5,54 · SW_F 39,13,255 · SW_X 35,−88,471 · SW_Y 74,−61,450), `harness.py` P_EXTRA (HX711·DCIN·J_I2C −65,2) → 다시 돌림: **43묶음 115가닥 44.8 m** (47.6 → 44.8), HX711 → 로드셀 230 → 380 mm, UNO 1 → HX711 470 → 270, 원점 X 590 → 640, Y 770 → 730, 가장 큰 강하 0.123 V 그대로. [가능성 높음] **카메라 FFC 필요 330 > 산 것 300 mm** (승준 SJ-54 FPC 30 cm) → Issue #9 댓글로 승준에게
+
