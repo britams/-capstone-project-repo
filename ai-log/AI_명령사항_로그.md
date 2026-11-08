@@ -669,8 +669,9 @@
 - 3-B 2: `design/2026-11-09_미검증값_맞추는순서_서현.md` V1~V17 (빔 → 문 → 축 → 하중 → 펜 → 자리 → 카메라 → 찍기·급이), 재는 법·명령·통과 기준. [확실] SETDOOR는 전원 끄면 사라지고 닫는 속도·BLOCK_SAMPLES·COIL_OFF_DWELL은 명령이 없음 → 정한 값은 #define에 적고 다시 올림. 정의서 '닫힘 0.2 s'와 펌웨어 약 1.2 s는 일부러 다름
 - Issue #9 3~6 (AI 판단, 서현 위임): `hub_boards.py`에 **몸통 겹침 검사**(몸통·하우징·전선 Ø2·귀 기둥·판 가장자리) — 전 배치로 C2↔D_RP·C2↔C1 재현 + D_RP↔C1도 걸림. 서보 허브 D_RP c17, C1 c19 r11~13, C2 c20 r5~6, 그림을 보다 **GND 전선이 C1 몸통 밑**인 것 찾아 전선 검사 추가 → 전원 전선 c22. SB540 구멍 Ø1.5 (`Board.drill`). J_I2C: CAD 193j(60, 15 가로)는 핀이 구멍 줄 사이 + 레일 핀 0.23 mm 겹침(검사로 재현) → 줄 6·칸 22~25 가로 (61.67, 16.27). 와고 5개 그대로. 넷 검사·circuit.py 통과, HTML 9-1·8-1(CM3 알림)·README 3-1
 - 3-B 3: CM3 자리 (승준 CAM tip_z 540) → `elec_budget.py` CAM (55, 0, 551)·L_TOP (55, 0, 540) → harness L01 830 → 770 mm, FFC 필요 320 → 330 mm (500 mm E18 그대로), 하네스 47.6 m. circuit.py·battery_box.py 통과
-- 3-B 6: 승준에게 Issue 본문 (#9 답 + find_dots 문턱, thorax·unc 형식, px_to_mm·rot_deg, **여왕벌 폭은 720p60 11.5 화소/mm로 0.1 mm = 1.2 화소라 사진 모드 23 화소/mm로** [가능성 높음], FFC·control/ 합칠지) — gh 없음 → 미리 채운 Issue 링크를 서현 Chrome으로 열어 둠 (서현이 제출)
+- 3-B 6: 승준에게 **Issue #10** (서현이 Chrome에서 제출, 11/09 — 미리 채운 긴 주소는 GitHub 오류라 제목만 주소 + 본문 붙여 넣기) (#9 답 + find_dots 문턱, thorax·unc 형식, px_to_mm·rot_deg, **여왕벌 폭은 720p60 11.5 화소/mm로 0.1 mm = 1.2 화소라 사진 모드 23 화소/mm로** [가능성 높음], FFC·control/ 합칠지) — gh 없음 → 미리 채운 Issue 링크를 서현 Chrome으로 열어 둠 (서현이 제출)
 - 만든·고친 파일: `관련코딩저장/pi_link/light_test.py`(새), `design/2026-11-09_조명시험_계획_서현.md`(새), `design/2026-11-09_미검증값_맞추는순서_서현.md`(새), `전기회로/hub_boards.py`·`out/*`, `전기회로/README.md`, `전기회로/전기회로_설계_쉬운설명.html`, `design/control_sim/elec_budget.py`·`out/elec_results.json`, `design/circuit/out/harness*`, 명령 정리 3-A 7번·3-B 표시
 - 미검증: light_test capture (Pi·CM3 없음), 기준 숫자 [추측], 부품 몸통 크기 (사양서 대표값), XH 2.5 피치가 2.54 구멍에 꽂히는지
-- 남은 결정 (서현): ① **CM3 살지** (약 43,780원) — 조명 시험·J3가 여기에 걸림 ② Issue 제출 (Chrome 탭) ③ Issue #9 1·2·7·8은 CAD 대화 3-A 7번
+- 서현 결정 (11/09): **부품 주문·카메라(CM3) 구매는 CAD가 다 끝나고 서현이 "주문하자" 할 때 한꺼번에** (비상 정지·MG90S 배송 기간은 그때 다시 봄)
+- 남은 것: ① Issue #9 1·2·7·8은 CAD 대화 3-A 7번
 - 다음 (펌웨어 대화): 승준 Issue 답 반영, CAD 끝나면 E1 주문 (SB540 사양서)
