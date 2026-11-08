@@ -319,6 +319,11 @@ def make():
     for o in list(doc.Objects):        # 빈 옛 묶음 지우기
         if o.TypeId == "App::DocumentObjectGroup" and not o.Name.startswith("GSJ_") and not o.Group:
             doc.removeObject(o.Name)
+    import D5g_fix_sj53 as FX          # (SJ-53, 서현 요청) 십자 냄비머리 볼트·문 서보 고정·모터 귀 나사·카메라 CM3·3D 프린트 색
+    global FIX_REPORT
+    FIX_REPORT = FX.apply(doc, sys.modules[__name__])
+    import D5g_circuit_sj53 as FC      # (SJ-53) 허브 기판 2장(서현 hub_boards.py 배치)·MOSFET 모듈 자세히 — 인터넷 필요
+    FIX_REPORT["circuit"] = FC.apply(doc)
     doc.recompute()
     return doc
 
