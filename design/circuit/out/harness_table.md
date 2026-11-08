@@ -40,7 +40,7 @@
 | G08 | 게이트 허브 → 문 빔 G5 (낱개: IR LED 2선 + 포토TR 2선, 220 Ω·10 kΩ는 허브에) | LED +(220 Ω 뒤) (빨강, 28 AWG)<br>LED −(켜기) (검정, 28 AWG)<br>포토TR C (빨강, 28 AWG)<br>포토TR E(신호) (흰색, 28 AWG) | 허브 R220 끝 → LED 긴 다리 A<br>허브 Q4 OUT− → LED 짧은 다리 K<br>허브 +5V → 포토TR 컬렉터<br>허브 G5 (10 kΩ → GND) → 포토TR 이미터 | 520 mm | 듀폰 2.54 헤더 (허브 기판) / LED·포토TR 다리 납땜 + 수축튜브 |  |
 | G09 | 게이트 허브 → 문 빔 G5b (낱개: IR LED 2선 + 포토TR 2선, 220 Ω·10 kΩ는 허브에) | LED +(220 Ω 뒤) (빨강, 28 AWG)<br>LED −(켜기) (검정, 28 AWG)<br>포토TR C (빨강, 28 AWG)<br>포토TR E(신호) (흰색, 28 AWG) | 허브 R220 끝 → LED 긴 다리 A<br>허브 Q4 OUT− → LED 짧은 다리 K<br>허브 +5V → 포토TR 컬렉터<br>허브 G5b (10 kΩ → GND) → 포토TR 이미터 | 520 mm | 듀폰 2.54 헤더 (허브 기판) / LED·포토TR 다리 납땜 + 수축튜브 |  |
 | S12 | UNO 2 D3·D5 → MOSFET 보드 (조명 켜기) | L_TOP (노랑, 26 AWG)<br>L_BOT (노랑, 26 AWG) | D3 → Q1 TRIG<br>D5 → Q2 TRIG | 230 mm | 듀폰 암 1핀 (UNO 헤더) / 보드 핀 |  |
-| L01 | MOSFET → 위 조명 182 | +5V (빨강, 24 AWG)<br>Q1 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q1 OUT− → 조명 − | 830 mm | 보드 나사 단자 / 조명 납땜 |  |
+| L01 | MOSFET → 위 조명 182 | +5V (빨강, 24 AWG)<br>Q1 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q1 OUT− → 조명 − | 770 mm | 보드 나사 단자 / 조명 납땜 |  |
 | L02 | MOSFET → 아래 조명 | +5V (빨강, 24 AWG)<br>Q2 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q2 OUT− → 조명 − | 470 mm | 보드 나사 단자 / 조명 납땜 |  |
 | S13 | J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음) | 3.3V (빨강, 28 AWG)<br>GND (검정, 28 AWG)<br>SDA (파랑, 28 AWG)<br>SCL (노랑, 28 AWG) | J_I2C 1 VS → Pi 핀 1 (3V3)<br>J_I2C 2 GND → Pi 핀 6 (GND)<br>J_I2C 3 SDA → Pi 핀 3 (GPIO2)<br>J_I2C 4 SCL → Pi 핀 5 (GPIO3) | 610 mm | JST XH 4P 하우징 (193j에 꽂음) / 듀폰 암 1핀 (Pi 헤더) |  |
 
@@ -50,4 +50,4 @@
 |---|---|---|---|
 | Pi USB → UNO 1 (USB A–B) | 680 mm | 1000 mm | 충분 |
 | Pi USB → UNO 2 (USB A–B) | 650 mm | 1000 mm | 충분 |
-| Pi CAM0 → AI 카메라 (22↔15핀 FFC) | 320 mm | 300 mm | **모자람** |
+| Pi CAM0 → AI 카메라 (22↔15핀 FFC) | 330 mm | 300 mm | **모자람** |

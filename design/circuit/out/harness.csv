@@ -106,8 +106,8 @@ G09,"게이트 허브 → 문 빔 G5b (낱개: IR LED 2선 + 포토TR 2선, 220 
 G09,"게이트 허브 → 문 빔 G5b (낱개: IR LED 2선 + 포토TR 2선, 220 Ω·10 kΩ는 허브에)",포토TR E(신호),흰색,28,GATE_HUB,허브 G5b (10 kΩ → GND),듀폰 2.54 헤더 (허브 기판),G5b,포토TR 이미터,LED·포토TR 다리 납땜 + 수축튜브,472,520,0,False,
 S12,UNO 2 D3·D5 → MOSFET 보드 (조명 켜기),L_TOP,노랑,26,UNO2,D3,듀폰 암 1핀 (UNO 헤더),MOSFET,Q1 TRIG,보드 핀,204,230,0,False,
 S12,UNO 2 D3·D5 → MOSFET 보드 (조명 켜기),L_BOT,노랑,26,UNO2,D5,듀폰 암 1핀 (UNO 헤더),MOSFET,Q2 TRIG,보드 핀,204,230,0,False,
-L01,MOSFET → 위 조명 182,+5V,빨강,24,MOSFET,보드 V+,보드 나사 단자,L_TOP,조명 +,조명 납땜,751,830,0,False,0.025
-L01,MOSFET → 위 조명 182,Q1 OUT−,검정,24,MOSFET,Q1 OUT−,보드 나사 단자,L_TOP,조명 −,조명 납땜,751,830,0,False,0.025
+L01,MOSFET → 위 조명 182,+5V,빨강,24,MOSFET,보드 V+,보드 나사 단자,L_TOP,조명 +,조명 납땜,694,770,0,False,0.023
+L01,MOSFET → 위 조명 182,Q1 OUT−,검정,24,MOSFET,Q1 OUT−,보드 나사 단자,L_TOP,조명 −,조명 납땜,694,770,0,False,0.023
 L02,MOSFET → 아래 조명,+5V,빨강,24,MOSFET,보드 V+,보드 나사 단자,L_BOT,조명 +,조명 납땜,427,470,0,False,0.007
 L02,MOSFET → 아래 조명,Q2 OUT−,검정,24,MOSFET,Q2 OUT−,보드 나사 단자,L_BOT,조명 −,조명 납땜,427,470,0,False,0.007
 S13,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",3.3V,빨강,28,J_I2C,J_I2C 1 VS,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 1 (3V3),듀폰 암 1핀 (Pi 헤더),550,610,0,False,

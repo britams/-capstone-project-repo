@@ -593,11 +593,11 @@
    "to": "L_TOP",
    "wires": 2,
    "awg": 24,
-   "len_mm": 727,
+   "len_mm": 670,
    "stock_mm": null,
-   "extension_mm": 727,
+   "extension_mm": 670,
    "moving": false,
-   "drop_V": 0.024
+   "drop_V": 0.023
   },
   {
    "name": "UNO 2 → MOSFET → 아래 조명",
@@ -614,11 +614,11 @@
  ],
  "csi": {
   "PI_A": {
-   "len_mm": 682,
+   "len_mm": 625,
    "cable": 1000
   },
   "PI_B": {
-   "len_mm": 258,
+   "len_mm": 264,
    "cable": 300
   }
  },
@@ -764,5 +764,5 @@
    "days": 3.82
   }
  ],
- "harness_total_m": 47.7
+ "harness_total_m": 47.6
 }
