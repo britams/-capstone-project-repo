@@ -12,6 +12,7 @@
   - 점퍼(jumper): 부품 면의 피복선, 버스를 넘어갈 때만 (판마다 개수를 셈)
   - 저항은 세워 꽂기 (다리 간격 2.54) — 1/4 W 세움 [가능성 높음 — 흔한 방법]
   - 헤더 핀 1 × n (2.54) — 하네스표의 듀폰 커넥터가 꽂힘
+  - (CAP-AI-54) 부품 몸통 겹침 검사: 위에서 본 몸통(아래 BODY)끼리, 귀 기둥(Ø4), 판 가장자리와 틈 ≥ 0 — 승준 CAD(SJ-53)가 찾은 C1·C2·SB540 겹침 때문
 
 실행:  python 전기회로/hub_boards.py   →  전기회로/out/*.svg, hub_pinout.md, 검사 결과 출력 (오류면 종료 코드 1)
 """
@@ -29,6 +30,12 @@ OUT = os.path.join(HERE, "out")
 os.makedirs(OUT, exist_ok=True)
 P = 2.54
 NODE_NET = {n: net for net, lst in circuit.NETS.items() for n, _a, _note in lst}
+# 위에서 본 몸통 (mm) — 흔한 부품 외형 [가능성 높음 — 사양서 대표값, 실물로 확인]
+BODY = {"0.1µ": ("rect", 2.5, 5.0),        # 세라믹 디스크 Ø5 × 두께 2.5, 다리 2.54 (판이 다리 방향)
+        "1000µ": ("circ", 5.0),           # 전해 1000 µF 10 V Ø10, 다리 5.0
+        "SB540": ("rect", 5.3, 9.5)}      # DO-201AD 누움 Ø5.3 × 9.5, 다리 Ø1.2~1.3 → 구멍 Ø1.5
+MOUNT_R = 2.0                              # M2 기둥·나사 머리 Ø4
+XH4 = (12.4, 5.75)                         # JST XH B4B-XH-A 하우징 (핀 4 × 2.5)
 
 
 class Board:
@@ -46,6 +53,9 @@ class Board:
         self.free_pads = {}     # (c,r) → 표시 (J_I2C 처럼 판과 안 이어지는 부품)
         self.col_labels = []    # (칸, 글자) — 그림 위쪽에 게이트·서보 이름
         self.errors = []
+        self.housings = []      # (이름, cx, cy, 가로, 세로) — 판과 안 이어지는 부품 몸통 (J_I2C)
+        self.drill = {}         # (c,r) → 넓힐 구멍 지름 mm (만능기판 기본 Ø1.0)
+        self.near = []
 
     def xy(self, h):
         c, r = h
@@ -104,6 +114,58 @@ class Board:
         return ["점퍼 끝 %s 에 헤더 핀/저항 다리가 있음 (점퍼를 꽂을 수 없음)" % (h,)
                 for kind, a, b, _n in self.links if kind == "jumper" for h in (a, b) if h in legs]
 
+    # ---- 몸통 겹침 (CAP-AI-54) ----
+    def bodies(self):
+        """위에서 본 몸통: ('rect', 이름, cx, cy, 가로, 세로) / ('circ', 이름, cx, cy, 반지름)"""
+        out = []
+        for h, (node, label, kind) in self.pins.items():
+            if kind == "hdr":                                  # 듀폰 하우징 한 칸
+                out.append(("rect", "%s %s" % (label, h)) + self.xy(h) + (2.5, 2.5))
+            elif kind == "wire":                               # 납땜한 전선이 위로 섬 (피복 Ø2)
+                out.append(("circ", "%s %s" % (label, h)) + self.xy(h) + (1.0,))
+        for name, val, h1, h2 in self.res:
+            (x1, y1), (x2, y2) = self.xy(h1), self.xy(h2)
+            cx, cy, along_x = (x1 + x2) / 2, (y1 + y2) / 2, y1 == y2
+            shape = BODY.get(val)
+            if shape is None:                                  # 세운 저항: 몸통이 첫 다리 위
+                out.append(("circ", name, x1, y1, 1.25))
+            elif shape[0] == "circ":
+                out.append(("circ", name, cx, cy, shape[1]))
+            else:                                              # (가로질러, 다리 방향)
+                a, l = shape[1], shape[2]
+                out.append(("rect", name, cx, cy, l if along_x else a, a if along_x else l))
+        out += [("rect",) + t for t in self.housings]
+        return out
+
+    def footprint_check(self):
+        def gap(p, q):
+            if p[0] == "circ" and q[0] == "circ":
+                return math.hypot(p[2] - q[2], p[3] - q[3]) - p[4] - q[4]
+            if p[0] == "circ":
+                p, q = q, p
+            if q[0] == "circ":                                 # 사각형 p ↔ 원 q
+                dx = max(abs(q[2] - p[2]) - p[4] / 2, 0)
+                dy = max(abs(q[3] - p[3]) - p[5] / 2, 0)
+                return math.hypot(dx, dy) - q[4]
+            return max(abs(p[2] - q[2]) - (p[4] + q[4]) / 2, abs(p[3] - q[3]) - (p[5] + q[5]) / 2)
+        bs = self.bodies()
+        errs, near = [], []
+        for i, p in enumerate(bs):
+            for q in bs[i + 1:]:
+                g = gap(p, q)
+                if g < 0:
+                    errs.append("몸통 겹침: %s ↔ %s (%.2f mm)" % (p[1], q[1], g))
+                elif g < 0.5 and g > 0.05:                      # 0.04 = 2.54 간격 이웃 하우징 (정상)
+                    near.append((round(g, 2), p[1], q[1]))
+            for mx, my in self.mounts:
+                if gap(p, ("circ", "기둥", mx, my, MOUNT_R)) < 0:
+                    errs.append("몸통 겹침: %s ↔ 귀 기둥 (%.1f, %.1f)" % (p[1], mx, my))
+            hx, hy = (p[4], p[4]) if p[0] == "circ" else (p[4] / 2, p[5] / 2)
+            if p[2] - hx < 0 or p[2] + hx > self.L or p[3] - hy < 0 or p[3] + hy > self.W:
+                errs.append("판 밖으로 나감: %s" % p[1])
+        self.near = sorted(near)
+        return errs
+
     # ---- 검사 ----
     def groups(self):
         parent = {}
@@ -135,7 +197,7 @@ class Board:
         return out
 
     def check(self):
-        errs = list(self.errors) + self._jumper_ends_free()
+        errs = list(self.errors) + self._jumper_ends_free() + self.footprint_check()
         f = self.groups()
         nh = self.node_holes()
         for node, h, label in nh:
@@ -188,6 +250,8 @@ class Board:
                 if self.ok_hole((c, r)):
                     x, y = H((c, r))
                     o.append('<circle cx="%.1f" cy="%.1f" r="3.2" fill="#c9a25a" stroke="#8a6d30" stroke-width="0.6"/>' % (x, y))
+                    if (c, r) in self.drill:                   # 넓힐 구멍: 빨간 고리
+                        o.append('<circle cx="%.1f" cy="%.1f" r="7" fill="none" stroke="#e00" stroke-width="2"/>' % (x, y))
         # 버스·다리 (납땜 면 것) — 부품 면 그림에서는 옅게
         op = "1" if solder_side else "0.35"
         for kind, a, b, net in self.links:
@@ -233,6 +297,16 @@ class Board:
             for cx, text in self.col_labels:
                 x, _ = H((cx, self.nr - 1))
                 o.append('<text x="%.1f" y="%.1f" font-size="12" text-anchor="middle" font-weight="bold" fill="#5a3d00">%s</text>' % (x if not solder_side else x, pad + 13, text))
+            for bd in self.bodies():                       # 부품 몸통 테두리 (CAP-AI-54) — 헤더·세운 저항은 빼고
+                if bd[0] == "rect" and not bd[1].endswith(")") or bd[0] == "rect" and bd[1].startswith("J_I2C"):
+                    w, h_ = bd[4] * s, bd[5] * s
+                    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="none" stroke="#b03a2e" stroke-width="1.5" stroke-dasharray="4 3"/>'
+                             % (X(bd[2]) - w / 2, Y(bd[3]) - h_ / 2, w, h_))
+                    o.append('<text x="%.1f" y="%.1f" font-size="9" fill="#b03a2e">%s</text>' % (X(bd[2]) - w / 2, Y(bd[3]) - h_ / 2 - 2, bd[1]))
+                elif bd[0] == "circ" and bd[4] > 2:
+                    o.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="none" stroke="#b03a2e" stroke-width="1.5" stroke-dasharray="4 3"/>'
+                             % (X(bd[2]), Y(bd[3]), bd[4] * s))
+                    o.append('<text x="%.1f" y="%.1f" font-size="9" fill="#b03a2e">%s</text>' % (X(bd[2]) + bd[4] * s * 0.7, Y(bd[3]) - bd[4] * s * 0.7, bd[1]))
             for h, label in self.free_pads.items():
                 x, y = H(h)
                 o.append('<rect x="%.1f" y="%.1f" width="10" height="10" fill="#fff" stroke="#999"/>' % (x - 5, y - 5))
@@ -309,10 +383,13 @@ def gate_hub():
     b.bus(TOP, 2, c, "+5V_B")
     b.bus(GNDR, 2, c + 3, "GND")
     b.bus(EMR, 2, c, "EMIT_LO")
-    # J_I2C (판과 안 이어짐 — Pi 4선이 지나가는 자리, CAD 193j: 오른쪽 끝에서 10 mm)
-    jc = round((70.0 - 10.0 - b.mx) / P)
+    # J_I2C (판과 안 이어짐 — Pi 4선이 지나가는 자리). CAP-AI-54 (Issue #9 5번): CAD 193j는 가로(x)로 놓여 핀이 줄 사이(y 15)에 옴
+    # → 줄 6, 칸 22~25 가로로 (레일 핀 c20과 띄움). 핀 간격 2.5 vs 구멍 2.54 — 끝 핀에서 0.06 mm [가능성 높음 — 꽂힘]
+    jc, jr = 22, 6
     for i, nm in enumerate(("VS", "GND", "SDA", "SCL")):
-        b.free_pads[(jc, 4 + i)] = "J_I2C " + nm
+        b.free_pads[(jc + i, jr)] = "J_I2C " + nm
+    (x0, y0), (x1, _y1) = b.xy((jc, jr)), b.xy((jc + 3, jr))
+    b.housings.append(("J_I2C (JST XH 4P)", (x0 + x1) / 2, y0, XH4[0], XH4[1]))
     return b
 
 
@@ -338,17 +415,19 @@ def servo_hub():
         b.col_labels.append((c + 0.5, label.split()[0]))
         b.bridge((c, 7), (c, 6), net="SIG")
     # 레일 부품 (circuit.py C1·C2가 서보 허브, CAP-AI-50 역극성 D_RP): 모두 +5V 버스(r4) ↔ GND 버스(r12)
-    b.resistor("C2", "0.1µ", (17, 7), "C2.1", (17, 8), "C2.2")                               # 세라믹 100 nF (2.54)
-    b.bridge((17, 7), (17, 6), (17, 5), (17, 4), net="+5V_B")
-    b.bridge((17, 8), (17, 9), (17, 10), (17, 11), (17, 12), net="GND")
-    b.resistor("D_RP", "SB540", (18, 5), "D_RP.K", (18, 11), "D_RP.A", span=6)                 # 줄 표시(K)가 +5V 쪽!
-    b.bridge((18, 5), (18, 4), net="+5V_B")
-    b.bridge((18, 11), (18, 12), net="GND")
-    b.resistor("C1", "1000µ", (19, 6), "C1.+", (19, 8), "C1.-", span=2)                       # 전해 — 긴 다리 +
-    b.bridge((19, 6), (19, 5), (19, 4), net="+5V_B")
-    b.bridge((19, 8), (19, 9), (19, 10), (19, 11), (19, 12), net="GND")
-    b.col_labels.append((18, "레일 부품"))
-    pc = 3 + 4 * len(servos) + 1
+    # CAP-AI-54 (Issue #9 3·4번): 몸통이 겹쳐 다시 놓음 — D_RP c17, C1은 위로 (몸통이 GND 버스 위), C2는 전원 들어오는 c20
+    b.resistor("D_RP", "SB540", (17, 5), "D_RP.K", (17, 11), "D_RP.A", span=6)                 # 줄 표시(K)가 +5V 쪽!
+    b.bridge((17, 5), (17, 4), net="+5V_B")
+    b.bridge((17, 11), (17, 12), net="GND")
+    b.drill[(17, 5)] = b.drill[(17, 11)] = 1.5                                                # 다리 Ø1.2~1.3 > 구멍 Ø1.0
+    b.resistor("C1", "1000µ", (19, 11), "C1.+", (19, 13), "C1.-", span=2)                     # 전해 — 긴 다리 +
+    b.bridge((19, 11), (19, 10), (19, 9), (19, 8), (19, 7), (19, 6), (19, 5), (19, 4), net="+5V_B")
+    b.bridge((19, 13), (19, 12), net="GND")
+    b.resistor("C2", "0.1µ", (20, 5), "C2.1", (20, 6), "C2.2")                               # 세라믹 100 nF (2.54)
+    b.bridge((20, 5), (20, 4), net="+5V_B")
+    b.bridge((20, 6), (20, 7), (20, 8), (20, 9), (20, 10), (20, 11), (20, 12), net="GND")
+    b.col_labels.append((18.5, "레일 부품"))
+    pc = 22                                   # CAP-AI-54: 전원 전선은 오른쪽 끝 (c20이면 C1 몸통 밑)
     b.pin((pc, V_R), "TB.+5V", "+5V 입력 20AWG", kind="wire")
     b.pin((pc, GND_R), "TB.GND", "GND 입력 20AWG", kind="wire")
     b.bus(GND_R, 3, pc, "GND")
@@ -365,6 +444,10 @@ def pinout_md(boards):
         L += ["", "저항: " + ", ".join("%s %s (c%d r%d–r%d)" % (n, v, a[0], a[1], c[1]) for n, v, a, c in b.res), ""]
         st = b.stats()
         L.append("수: " + ", ".join("%s %s" % kv for kv in st.items()))
+        if b.drill:
+            L += ["", "**구멍 넓힘** (드릴): " + ", ".join("c%d r%d → Ø%.1f mm" % (h[0], h[1], d) for h, d in sorted(b.drill.items()))]
+        if b.housings:
+            L += ["", "판과 안 이어지는 부품: " + ", ".join("%s 가운데 (%.2f, %.2f) mm, %.2f × %.2f" % t for t in b.housings) + " — 판 왼쪽 아래 귀퉁이 기준, 긴 쪽이 x"]
         L.append("")
     return "\n".join(L)
 
@@ -379,6 +462,12 @@ def main():
             print("   ", e)
         bad += len(errs)
         print("   ", b.stats())
+        if b.near:
+            print("    몸통 틈 < 0.5 mm:", "; ".join("%s ↔ %s %.2f" % (x, y, g) for g, x, y in b.near))
+        if b.drill:
+            print("    구멍 넓힘:", ", ".join("c%d r%d → Ø%.1f" % (h[0], h[1], d) for h, d in sorted(b.drill.items())))
+        for t in b.housings:
+            print("    %s 가운데 (%.2f, %.2f) mm, %.2f × %.2f (판 왼쪽 아래 기준)" % t)
         for side in (False, True):
             fn = os.path.join(OUT, "%s_%s.svg" % (b.name, "solder" if side else "top"))
             open(fn, "w", encoding="utf-8").write(b.svg(side))

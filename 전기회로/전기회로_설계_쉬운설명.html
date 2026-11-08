@@ -280,6 +280,8 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 
 <!-- ============================================================ -->
 <h2 id="cam">8-1. 눈 — 카메라는 무엇을, 어떻게 잇나</h2>
+<div class="box"><b>⚠ 11/09 바뀔 수 있음:</b> 승준이 "720p · 60 fps 이상" 요청에 맞춰 카메라를 <b>Camera Module 3 (IMX708)</b>로 바꾸고, 렌즈 끝을 격자 위 <b>153.5 mm</b>에 놓았어요 (CAP-AI-SJ-53, 인터페이스 정의서). AI 카메라는 최대 30 fps라서예요. <b>아직 안 샀어요</b> (약 43,780원 — 서현 결정).
+전기 연결은 똑같아요: 15핀 리본 → Pi 5 CAM0, 전원도 리본으로 <span class="tag maybe">가능성 높음</span>. 아래 표는 AI 카메라 기준 그대로예요. 60 fps면 한 장을 찍는 시간이 짧아 <b>빛이 더 필요</b>해요 → 조명 시험 <code>design/2026-11-09_조명시험_계획_서현.md</code>.</div>
 <div class="big"><b>한 줄 요약:</b> 이미 가지고 있는 <b>Raspberry Pi AI 카메라 (소니 IMX500 센서)</b> 1대를 마킹실 바닥(격자) <b>위 200 mm</b>에 아래를 보게 달고, <b>납작한 리본 케이블 하나</b>로 뇌(Pi 5)의 <b>CAM0</b> 구멍에 꽂아요. 아두이노와는 잇지 않아요.</div>
 <div class="scroll"><table>
 <tr><th>궁금한 것</th><th>답</th><th>근거</th></tr>
@@ -356,7 +358,8 @@ dl dt{font-weight:700;margin-top:.6em} dl dd{margin:0 0 .3em 0}
 <figure><img src="out/gate_hub_top.svg" alt="게이트 허브 부품 면"><figcaption>부품 면 (위에서 본 모습)</figcaption></figure>
 <figure><img src="out/gate_hub_solder.svg" alt="게이트 허브 납땜 면"><figcaption>납땜 면 (뒤집은 모습 — 좌우가 바뀌어요. 납땜할 때는 이 그림을 보세요)</figcaption></figure>
 <h3>서보 허브 (60 × 40 mm) — 서보 4개 + 레일 부품</h3>
-<p class="mini">서보 커넥터는 갈색(GND)·빨강(+5V)·주황(신호) 순서. 오른쪽에 큰 콘덴서 C1(1000 µF, 긴 다리 +), 작은 콘덴서 C2(0.1 µF), 역극성 다이오드 D_RP(줄 표시가 +5V 쪽)를 달아요.</p>
+<p class="mini">서보 커넥터는 갈색(GND)·빨강(+5V)·주황(신호) 순서. 오른쪽에 큰 콘덴서 C1(1000 µF, 긴 다리 +), 작은 콘덴서 C2(0.1 µF), 역극성 다이오드 D_RP(줄 표시가 +5V 쪽)를 달아요.<br>
+<b>11/09 고침:</b> 승준 CAD에서 이 세 부품의 몸통이 서로 겹쳤어요. 그래서 스크립트가 <b>몸통 크기(빨간 점선)까지 재서 겹치지 않는지</b> 검사하게 하고 자리를 옮겼어요. C1은 위쪽, 전원 전선은 오른쪽 끝으로 갔어요. <b>빨간 고리 구멍 2개는 드릴로 Ø1.5 mm로 넓혀요</b>. SB540 다리가 Ø1.2~1.3 mm라 기본 구멍 Ø1.0에 안 들어가요.</p>
 <figure><img src="out/servo_hub_top.svg" alt="서보 허브 부품 면"><figcaption>부품 면</figcaption></figure>
 <figure><img src="out/servo_hub_solder.svg" alt="서보 허브 납땜 면"><figcaption>납땜 면 (좌우 바뀜)</figcaption></figure>
 <p class="mini">핀 하나하나의 이름과 회로 노드 표: <code>전기회로/out/hub_pinout.md</code></p>
