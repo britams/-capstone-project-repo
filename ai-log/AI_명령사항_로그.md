@@ -570,3 +570,9 @@
   - 고칠 것 R1: F를 올리는 MOVE·PRESS는 펜 UP일 때만 (내리기·HOME F는 언제나)
   - Pi 순서 규칙 P1~P7 (G1 FAIL이면 시작 안 함, 빔 FAIL 재시험, 밤 순서 REL CLOSE 먼저, RAIL 복귀 시 PEN UP→HOME, WATCHDOG 5, BLOCKED 5 s 재시도 ×3, 응답 이름 DONE DOOR — trap_sim은 EVT DOOR)
 - VS Code 세션 질문(시뮬 컴파일러)에는 'WinLibs g++ 설치'를 권함 — 실제 .ino를 시험
+
+## CAP-AI-43 — 2026-11-08 18:21 · (웹 채팅) D5g CAD 인수 — VS Code 작업 지시
+- 명령: "cad가 완벽하게 정리가 되지 않았으니까 그것을 해야 될 듯… 내가 총지휘라서 내가 수정해도 돼" → "vscode에서 cad 할래"
+- 한 일: `docs/2026-11-08_CAD_D5g_정리_작업지시_서현.md` (C1 FCStd 저장 → C2 겹침·뜬 부품 검사 → C3 HX711·DC 잭 추가 → C4 전체 조립도·전기 배치·풍선도 그림 → C5 README·부품표 → C6 PC CAD files), 분업계획에 '바뀜(11/08)' 추가
+- 확인: D5g는 .FCStd 없음(승준이 '서현만 편집' 규칙으로 저장 안 함), 그림은 GUI 필요 → freecadcmd + 매크로 실행으로 나눔
+- 남은 결정 (서현, 그대로): 방생 출구 안 1/2, 급이 바닥 370, 3D 프린터 판 크기
