@@ -359,7 +359,8 @@ void handle(char* cmd) {
     else { reply("ERR STATE"); return; }
     if (!railStable) { reply("ERR RAIL"); return; }
     Door* b = busyDoor();
-    if (b && b != d) { reply("ERR BUSY"); return; }
+    // 움직이는 문이 있으면 거부. 단 같은 문에 OPEN은 허용 (닫는 중 Pi가 취소하고 열기). 같은 문 CLOSE 겹치기는 거부.
+    if (b && (b != d || !open)) { reply("ERR BUSY"); return; }
     if (open) {
       reply("OK DOOR");
       if (d->state == D_OPEN) { doorMsg("DONE DOOR ", *d, " OPEN"); return; }

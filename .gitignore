@@ -21,3 +21,7 @@ datasets/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# 펌웨어 시뮬레이션 빌드 산출물 (관련코딩저장/sim)
+관련코딩저장/**/*.exe
+관련코딩저장/**/__pycache__/

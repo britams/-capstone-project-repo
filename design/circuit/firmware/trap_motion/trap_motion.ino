@@ -1,4 +1,4 @@
-// trap_motion.ino — UNO 1 (움직임): 바닥 F·마커 X·Y 스테핑, 펜 서보, HX711, 원점 스위치 3 — v0.2
+﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F·마커 X·Y 스테핑, 펜 서보, HX711, 원점 스위치 3 — v0.2
 // 작성: 서현 (Claude, CAP-AI-40, 2026-11-08). 바탕: control/firmware/trap_controller/trap_controller.ino v0.1 (승준 SJ-19)
 // 사양: design/2026-11-06_펌웨어_변경요청_서현.md 1장, 핀 원본: design/circuit/circuit.py (검사 통과)
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
@@ -16,7 +16,7 @@
 //   PING                         → OK PONG
 //   STATUS                       → OK STATUS F=<mm> X=<mm> Y=<mm> MOVING=<FXY|-> HOMED=<FXY|-> LOAD=<g> PEN=<UP|DOWN|MOVING|LIMP> SW=<FXY 눌림 1/0>
 //   HOME <F|X|Y>                 → OK HOME <축>, 끝나면 DONE HOME <축> <찾을 때까지 반걸음> | ERR HOME <축> NOSWITCH | ERR HOME <축> STUCK
-//   MOVE <F|X|Y> <mm>            → OK MOVE <축> <mm>, 끝나면 DONE MOVE <축> <mm>   (HOME/ZERO 전에는 ERR NOT_HOMED)
+//   MOVE <F|X|Y> <mm>            → OK MOVE <축> <mm>, 끝나면 DONE MOVE <축> <mm>   (HOME/ZERO 전에는 ERR NOT_HOMED, 펜 DOWN이면 X·Y와 F 올리기는 ERR PEN_DOWN)
 //   STOP                         → OK STOP (HOME 중이면 HOME도 멈춤 → ERR HOME <축> STOPPED)
 //   ZERO <F|X|Y> <mm>            현재 위치를 <mm>로 (스위치 고장일 때 손으로) → OK ZERO, 그 축은 HOMED
 //   SPEED <F|X|Y> <us>           반걸음 간격 (기본 1000, 최소 800, 1080~1460은 스프링 서지 띠라 거부)
@@ -32,7 +32,10 @@
 // 안전 규칙 (AI 판단, 서현 위임 — CAP-AI-40)
 //   - X·Y는 펜이 UP일 때만 움직인다 (MOVE·HOME 모두). 펜이 캡 컵에 꽂힌 채 끌리지 않게. → ERR PEN_DOWN
 //   - 켤 때 펜 서보를 붙이지 않는다 (LIMP). Pi가 PEN UP을 먼저 보낸다. 서보 1개뿐이라 켤 때 전류 문제 없음.
+//   - R1 (웹 채팅 검토 CAP-AI-42): 바닥 F를 올리는 MOVE·PRESS도 펜이 UP일 때만 (ERR PEN_DOWN). F 내리기·HOME F는 언제나 허용.
 //   - 스위치 쪽으로 MOVE 하다가 원점보다 0.5 mm 넘게 위에서 스위치가 눌리면 걸음을 잃은 것 → 그 축 정지, HOMED 지움, EVT SWITCH <축> <mm>
+//   - 마지막 반걸음 뒤 코일은 COIL_OFF_DWELL_MS(20 ms) 뒤에 끈다 (CAP-AI-43, 시뮬레이터가 찾음): 이전 코드는 도착한 loop에서 걸음 코일을 켜자마자 꺼서
+//     모터가 마지막 반걸음(약 2 µm)을 돌 시간이 없고, 이동마다 쌓여 위치가 틀어질 수 있음. v0.1(승준)에도 같은 구조. 실물 효과는 미검증.
 //   - 원점 위치는 LIMIT와 따로 상수(HOME_*_MM)로 둔다 (LIMIT를 바꿔도 스위치 자리는 그대로)
 
 #include <Servo.h>
@@ -51,6 +54,7 @@
 #define HOME_Y_MM         (-40.0f)
 #define SWITCH_SAMPLES    3        // 걸음마다 읽어 3번 연속 LOW면 눌림 (튐 막기) — 미검증
 #define SWITCH_GUARD_MM   0.5f     // 원점보다 이만큼 넘게 위에서 눌리면 걸음 잃음
+#define COIL_OFF_DWELL_MS 20       // 마지막 반걸음 뒤 코일을 이만큼 더 켜 둔 다음 끔 (HOLD 0일 때) — 미검증, 아래 안전 규칙
 #define PEN_UP_DEG        60       // v0.1 값 — 미검증 (SETDOOR PEN으로 맞춤)
 #define PEN_DOWN_DEG      0        // v0.1 값 — 미검증
 #define PEN_SLOW_DEG      12       // 여기부터 천천히 (팁 위 약 2 mm ≈ 60° × 2/10 mm) — [추측] 미검증
@@ -75,12 +79,14 @@ struct Axis {
   uint8_t home;        // HomePhase
   long homeCount, homeLeg;
   uint8_t swLow;       // 연속 LOW 수
+  bool offPending;     // HOLD 0: 마지막 걸음 뒤 코일 끄기 대기
+  unsigned long offAt; // 그 시각 (ms)
 };
 
 Axis axes[3] = {
-  {'F', {2, 3, 4, 5},     A3, HOME_F_MM, 0, 0, 0, HALF_US_DEFAULT, 0, 0.0f,   36.5f, false, false, false, H_NONE, 0, 0, 0},
-  {'X', {6, 7, 8, 9},     A4, HOME_X_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -18.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0},
-  {'Y', {10, 11, 12, 13}, A5, HOME_Y_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -40.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0},
+  {'F', {2, 3, 4, 5},     A3, HOME_F_MM, 0, 0, 0, HALF_US_DEFAULT, 0, 0.0f,   36.5f, false, false, false, H_NONE, 0, 0, 0, false, 0},
+  {'X', {6, 7, 8, 9},     A4, HOME_X_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -18.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
+  {'Y', {10, 11, 12, 13}, A5, HOME_Y_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -40.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
 };
 
 bool pressActive = false;
@@ -147,6 +153,7 @@ void doneMove(const Axis& a) {
 }
 
 void startMove(Axis& a, float mm) {
+  a.offPending = false;
   a.target = mmToSteps(mm);
   a.moving = (a.target != a.pos);
   a.lastUs = micros();
@@ -158,7 +165,8 @@ void endAxis(Axis& a) {
   a.moving = false;
   a.home = H_NONE;
   a.swLow = 0;
-  if (!a.hold) coils(a, false);
+  // 마지막 반걸음 코일을 바로 끄면 모터가 그 걸음을 돌 시간이 없다 (같은 loop 안에서 켜자마자 끔) → 잠깐 두었다 끔
+  if (!a.hold) { a.offPending = true; a.offAt = millis() + COIL_OFF_DWELL_MS; }
 }
 
 void homeFail(Axis& a, const char* why) {
@@ -230,6 +238,7 @@ long homeMaxSteps(const Axis& a) { return mmToSteps(a.maxMm - a.homeMm + HOME_MA
 //   스위치에 못 닿아 거짓 NOSWITCH가 남 → 축마다 (행정 + 4 mm): F 20,634 · X 20,379 · Y 31,587 반걸음 (AI 판단, CAP-AI-40)
 
 void homeStart(Axis& a) {
+  a.offPending = false;
   a.homeCount = 0; a.homeLeg = 0; a.swLow = 0;
   a.moving = true;
   a.homed = false;
@@ -325,6 +334,8 @@ void handle(char* cmd) {
     if (a->name != 'F' && penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }
     float mm = atof(tok[2]);
     if (mm < a->minMm || mm > a->maxMm) { reply("ERR LIMIT"); return; }
+    // R1 (검토 문서 CAP-AI-42): 바닥을 '올리는' MOVE는 펜 UP일 때만. 내리기는 언제나 허용 (말벌에서 멀어짐)
+    if (a->name == 'F' && mmToSteps(mm) > a->pos && penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }
     if (a->name == 'F') pressActive = false;
     Serial.print(F("OK MOVE ")); Serial.print(a->name); Serial.print(' '); Serial.println(mm, 3);
     startMove(*a, mm);
@@ -368,7 +379,7 @@ void handle(char* cmd) {
     Axis* a = findAxis(tok[1]);
     if (!a) { reply("ERR AXIS"); return; }
     a->hold = atoi(tok[2]) != 0;
-    if (!a->moving) coils(*a, a->hold);
+    if (!a->moving) { coils(*a, a->hold); a->offPending = false; }
     reply("OK HOLD");
     return;
   }
@@ -377,6 +388,7 @@ void handle(char* cmd) {
     Axis& f = axes[0];
     if (f.home != H_NONE || f.moving) { reply("ERR BUSY"); return; }
     if (!f.homed) { reply("ERR NOT_HOMED"); return; }
+    if (penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }   // R1: 펜이 내려간 채 바닥을 올리면 말벌이 눌림
     float maxMm = (n == 3) ? atof(tok[2]) : f.maxMm;
     if (maxMm > f.maxMm) maxMm = f.maxMm;
     pressGrams = atof(tok[1]);
@@ -435,6 +447,7 @@ void stepAxes() {
   unsigned long now = micros();
   for (int i = 0; i < 3; i++) {
     Axis& a = axes[i];
+    if (a.offPending && !a.moving && (long)(millis() - a.offAt) >= 0) { coils(a, false); a.offPending = false; }
     if (!a.moving) continue;
     unsigned long iv = (a.home == H_SLOW) ? HOME_SLOW_US : a.intervalUs;
     if (now - a.lastUs < iv) continue;
@@ -517,3 +530,4 @@ void loop() {
     lastCmdMs = millis();
   }
 }
+
