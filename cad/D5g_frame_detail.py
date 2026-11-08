@@ -324,6 +324,10 @@ def make():
     FIX_REPORT = FX.apply(doc, sys.modules[__name__])
     import D5g_circuit_sj53 as FC      # (SJ-53) 허브 기판 2장(서현 hub_boards.py 배치)·MOSFET 모듈 자세히 — 인터넷 필요
     FIX_REPORT["circuit"] = FC.apply(doc)
+    import D5g_c3_hx711_dcjack as C3   # (CAP-AI-55, 서현) HX711 모듈·받침 + 패널 DC 잭 (194b −y로 늘림)
+    FIX_REPORT["c3"] = C3.apply(doc)
+    import D5g_home_switches as HS     # (CAP-AI-55, 서현) 원점 스위치 F·X·Y + X 집게 226 + 투명 격자 130
+    FIX_REPORT["switches"] = HS.apply(doc)
     doc.recompute()
     return doc
 

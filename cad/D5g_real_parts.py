@@ -358,9 +358,11 @@ def apply_circuit_extras(doc):
     tb = place_xy(tb, m["x0"] + m["L"] / 2, m["y0"] + 6.0, zb + m["stand"] + m["t"], rot=0)
     out += [("196m_mosfet_module_SZH-AT021 (66.8 × 66.8, 구멍 자리 미검증 — 실물 재기)", b.fuse(tb).removeSplitter() if False else Part.makeCompound([b, tb]), (0.10, 0.30, 0.60)),
             ("198m_mosfet_standoff (M3 × 6 기둥 4, 구매)", st, (0.8, 0.7, 0.3))]
-    # J_I2C: 게이트 허브 위 오른쪽 끝
+    # J_I2C: 게이트 허브 위 — 서현 hub_boards.py 줄 6·칸 22~25 가로 (1번 핀 판 기준 57.86, 16.27 · 가운데 61.67)
+    # (CAP-AI-55, Issue #9 5번: 옛 자리 (60, 15) 90° 는 핀이 구멍 줄 사이에 왔음). KiCad 원점 = 1번 핀, 핀은 +x로 2.5 간격
     g = HUBS["GATE_HUB"]
-    xh = place_xy(load("xh4"), g["x0"] + g["L"] - 10.0, g["y0"] + g["W"] / 2, zb + g["stand"] + PERF["t"], rot=90)
+    xh = load("xh4").copy()
+    xh.translate(V(g["x0"] + 57.86, g["y0"] + 16.27, zb + g["stand"] + PERF["t"]))
     out.append(("193j_J_I2C_JST_XH_4P (VS·GND·SDA·SCL, KiCad STEP — 게이트 허브 위)", xh, (0.95, 0.95, 0.90)))
     for i, (lab, shp, col) in enumerate(out):                            # 커넥터 핀이 지나는 기판 구멍
         if lab.startswith("193g_"):
