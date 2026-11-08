@@ -561,3 +561,12 @@
 - 인수인계 파일 2026-10-28 → 2026-11-07로 이름 바꾸고 11/06 밤~11/07 줄 추가 (git mv), README 링크 고침
 - 근거: Claude Code 공식 문서 setup·vs-code 페이지 (설치 명령·VS Code 1.94 이상·유료 계정 필요)
 - 남은 결정 (서현): 펌웨어를 서현 폴더에 둘지, 분업계획을 바꿔 control/를 직접 고칠지 — 문서 0장 2번
+
+## CAP-AI-42 — 2026-11-08 17:54 · (웹 채팅) 펌웨어 v0.2 제어 규칙 검토
+- 명령: "코딩하려는 것은 vscode에서 하고 제어 규칙 같은 것은 너가 다 하는 것이 맞지 않나? 너가 해"
+- 나눔: 제어 규칙 = 웹 채팅 Claude, 코드 = VS Code Claude, 연결 = GitHub 문서 (번호는 같은 CAP-AI 줄을 이어 씀)
+- 한 일: VS Code 커밋 7ab95b5(trap_motion·trap_doors) 전체를 변경 요청·trap_sim과 대조 → `design/2026-11-08_펌웨어v0.2_제어규칙_검토_서현.md`
+  - 변경 요청 규칙 모두 들어감, VS Code가 정한 규칙 V1~V7 받아들임 (V6 HOME 최대 축별 → 변경 요청 20480 고침, V7 PRESS 중 HOLD 불필요 — hold_check 92배)
+  - 고칠 것 R1: F를 올리는 MOVE·PRESS는 펜 UP일 때만 (내리기·HOME F는 언제나)
+  - Pi 순서 규칙 P1~P7 (G1 FAIL이면 시작 안 함, 빔 FAIL 재시험, 밤 순서 REL CLOSE 먼저, RAIL 복귀 시 PEN UP→HOME, WATCHDOG 5, BLOCKED 5 s 재시도 ×3, 응답 이름 DONE DOOR — trap_sim은 EVT DOOR)
+- VS Code 세션 질문(시뮬 컴파일러)에는 'WinLibs g++ 설치'를 권함 — 실제 .ino를 시험
