@@ -25,7 +25,8 @@ V = App.Vector
 PUMP = dict(motor_d=27.8, L=66.8, head_d=32.0, head_h=22.0, port_dx=6.0, port_L=8.0, A=0.5, flow_ml_min=100.0)
 BOT = dict(d=61.0, h=131.0, wall=1.2, cap_d=48.0, cap_h=15.0)
 TUBE = dict(id=3.5, od=5.0)
-HB = dict(x0=20.0, x1=140.0, y_face=180.0, t=4.0, z0=92.0, z1=200.0, bolt_x=(40.0, 120.0), bolt_z=190.0,
+# (11/10 밤) 볼트 x 40 → 27: 머리가 병에 닿음 (6 mm³, 모델 검사)
+HB = dict(x0=20.0, x1=140.0, y_face=180.0, t=4.0, z0=92.0, z1=200.0, bolt_x=(27.0, 125.0), bolt_z=190.0,
           bot_x=55.0, gap=2.0, ring_z=(168.0, 178.0), pump_x=112.0)
 COL = dict(PRINT=None, BOT=(0.92, 0.95, 1.0), PUMP=(0.25, 0.25, 0.28), TUBE=(0.95, 0.95, 0.95), STEEL=(0.15, 0.15, 0.15))
 
@@ -82,8 +83,8 @@ def holder():
         pl = pl.cut(Part.makeCylinder(2.75, 20, V(bx, yf - 5, h["bolt_z"]), V(0, 1, 0)))
     b = bottle_center()
     ro = BOT["d"] / 2 + h["gap"]
-    cup = Part.makeCylinder(ro + 2.5, 15.0, V(b.x, b.y, h["z0"])).cut(Part.makeCylinder(ro, 20, V(b.x, b.y, h["z0"] + 3.0)))
-    cup = cup.fuse(box(b.x - 12, b.x + 12, yf + t - 0.01, b.y, h["z0"], h["z0"] + 15))
+    cup = Part.makeCylinder(ro + 2.5, 15.0, V(b.x, b.y, h["z0"])).fuse(box(b.x - 12, b.x + 12, yf + t - 0.01, b.y, h["z0"], h["z0"] + 15))
+    cup = cup.cut(Part.makeCylinder(ro, 20, V(b.x, b.y, h["z0"] + 3.0)))          # (11/10 밤) 팔을 붙인 뒤 안을 파냄 — 팔이 병 자리를 채우던 것
     ring = Part.makeCylinder(ro + 2.5, h["ring_z"][1] - h["ring_z"][0], V(b.x, b.y, h["ring_z"][0])).cut(
         Part.makeCylinder(ro, 30, V(b.x, b.y, h["ring_z"][0] - 1)))
     ring = ring.fuse(box(b.x - 8, b.x + 8, yf + t - 0.01, b.y - ro, h["ring_z"][0], h["ring_z"][1]))
