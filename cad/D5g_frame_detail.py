@@ -330,6 +330,8 @@ def make():
     FIX_REPORT["switches"] = HS.apply(doc)
     import D5g_feeder_mcm as FM        # (CAP-AI-57, 서현) 급이 방 나사·인서트·T너트 = McMaster STEP (cad/vendor_step, 없으면 단순 모양)
     FIX_REPORT["feeder_mcm"] = FM.apply(doc)
+    import D5g_print_color as PCOL     # (CAP-AI-58, 서현) 3D 프린트 부품만 파랑, 나머지 회색 — 맨 끝 (앞 단계 색을 덮음)
+    FIX_REPORT["print_color"] = PCOL.apply(doc)
     doc.recompute()
     return doc
 
