@@ -168,4 +168,14 @@ def check(doc):
                 if c.BoundBox.intersect(b.Shape.BoundBox) and c.common(b.Shape).Volume > 1:
                     fing.append(((round(f["x"] + sx * e["lid_dx"]), cy), b.Label.split(" ")[0]))
     r["finger_blockers"] = fing
+    # 드라이버 자리: 발 볼트 머리 위로 PH2 축 Ø6 × 110 mm
+    import D5g_feeder_uln as FU2
+    px = f["x"] + f["post_dx"]
+    drv = []
+    for sx in (-FU2.FOOT_DX, FU2.FOOT_DX):
+        c = Part.makeCylinder(3.0, 110, V(px + sx, f["post_y"], f["post_foot_z"] + 3 + 1 + 3.9 + 0.2))
+        for b in others:
+            if c.BoundBox.intersect(b.Shape.BoundBox) and c.common(b.Shape).Volume > 0.5:
+                drv.append((round(px + sx), b.Label.split(" ")[0]))
+    r["driver_blockers"] = drv
     return r
