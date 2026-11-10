@@ -60,7 +60,7 @@ GND,ULN_F.GND,22,
 GND,ULN_X.GND,22,
 GND,ULN_Y.GND,22,
 GND,SG90.GND,26,갈색
-GND,HX711.GND,26,
+GND,PSW.NC_B,28,
 GND,SW_HF.COM,28,
 GND,C_HF.2,28,
 GND,SW_HX.COM,28,
@@ -83,20 +83,10 @@ GND,Q4.GND,24,
 GND,Q1.GND,24,
 GND,Q2.GND,24,
 GND,Q3.GND,22,
-HX_RATE,HX711.RATE,,RATE를 5 V로 → 80 Hz (모듈 납땜 다리)
-HX_RATE,HX711.VCC_PAD,,RATE를 5 V로 → 80 Hz (모듈 납땜 다리)
 I2C_SCL,PI.GPIO3,28,
 I2C_SCL,J_I2C.SCL,28,
 I2C_SDA,PI.GPIO2,28,INA226 (배터리 상자)
 I2C_SDA,J_I2C.SDA,28,INA226 (배터리 상자)
-LC_A+,HX711.A+,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_A+,LC.초록,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_A-,HX711.A-,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_A-,LC.흰,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_E+,HX711.E+,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_E+,LC.빨강,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_E-,HX711.E-,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
-LC_E-,LC.검정,28,"로드셀 148 (바닥과 움직임, 실리콘 선)"
 LEDA_G2,RLED_G2.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
 LEDA_G2,LED_G2.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
 LEDA_G2b,RLED_G2b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
@@ -126,8 +116,6 @@ PI_GND,J_I2C.GND,28,
 PUMP_LO,PUMP.V-,22,
 PUMP_LO,D_P.A,22,
 PUMP_LO,Q3.OUT-,22,
-U1_5V,U1.5V,26,HX711은 UNO 5 V (조용함)
-U1_5V,HX711.VCC,26,HX711은 UNO 5 V (조용함)
 U1_F_IN1,U1.D2,26,
 U1_F_IN1,ULN_F.IN1,26,
 U1_F_IN2,U1.D3,26,
@@ -145,12 +133,10 @@ U1_HOME_X,C_HX.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
 U1_HOME_Y,U1.A5,28,"내부 풀업, 눌리면 LOW, 100 nF"
 U1_HOME_Y,SW_HY.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
 U1_HOME_Y,C_HY.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HX_DT,U1.A1,26,
-U1_HX_DT,HX711.DT,26,
-U1_HX_SCK,U1.A2,26,
-U1_HX_SCK,HX711.SCK,26,
 U1_PEN,U1.A0,26,주황
 U1_PEN,SG90.SIG,26,주황
+U1_PSW,U1.A1,28,"캐리지와 같이 움직임 — 실리콘 선, 100 nF 함께"
+U1_PSW,PSW.NC_A,28,"캐리지와 같이 움직임 — 실리콘 선, 100 nF 함께"
 U1_X_IN1,U1.D6,26,
 U1_X_IN1,ULN_X.IN1,26,
 U1_X_IN2,U1.D7,26,

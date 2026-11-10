@@ -20,16 +20,15 @@
 | M03 | ULN2003 Y → Y 모터 209 (X로 움직임) | 모터 5선 (파랑·분홍·노랑·주황·빨강, 26 AWG) | ULN JST-XH 5 → 모터 | 기본 240 + 연장 180 | JST-XH 5핀 / 모터 (기본) | 휨 고리 |
 | V01 | 서보 허브 → 펜 서보 SG90 205 (X·Y로 움직임) | 서보 3선 (갈색 GND·빨강 +5V·주황 신호, 26 AWG) | 허브 헤더 S1 → 서보 | 기본 250 + 연장 500 | 듀폰 2.54 헤더 (허브 기판) / 서보 3핀 (기본) | 휨 고리 |
 | S04 | UNO 1 A0 → 서보 허브 S1 신호 | PEN 신호 (주황, 26 AWG) | A0 → 허브 S1 신호 | 350 mm | 듀폰 암 1핀 (UNO 헤더) / 허브 기판 납땜 |  |
-| S05 | UNO 1 → HX711 (VCC, GND, DT, SCK) | VCC (빨강, 26 AWG)<br>GND (검정, 26 AWG)<br>DT (흰색, 26 AWG)<br>SCK (초록, 26 AWG) | 5V → VCC<br>GND → GND<br>A1 → DT<br>A2 → SCK | 270 mm | 듀폰 암 1핀 (UNO 헤더) / 듀폰 암 (HX711 헤더) |  |
-| S06 | HX711 → 로드셀 (바닥과 함께 움직임) | E+ (빨강, 28 AWG)<br>E− (검정, 28 AWG)<br>A− (흰색, 28 AWG)<br>A+ (초록, 28 AWG) | E+ → 로드셀 빨강<br>E− → 로드셀 검정<br>A− → 로드셀 흰색<br>A+ → 로드셀 초록 | 380 mm | HX711 납땜 / 로드셀 선 (납땜 + 수축튜브) | 휨 고리 |
-| S07 | UNO 1 → 원점 F | HOME_F (노랑, 28 AWG)<br>GND (검정, 28 AWG) | A3 → 스위치 NO<br>GND → 스위치 COM | 380 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 납땜 + 100 nF |  |
-| S08 | UNO 1 → 원점 X | HOME_X (노랑, 28 AWG)<br>GND (검정, 28 AWG) | A4 → 스위치 NO<br>GND → 스위치 COM | 640 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 납땜 + 100 nF |  |
-| S09 | UNO 1 → 원점 Y (빔과 함께 움직임) | HOME_Y (노랑, 28 AWG)<br>GND (검정, 28 AWG) | A5 → 스위치 NO<br>GND → 스위치 COM | 730 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 납땜 + 100 nF | 휨 고리 |
+| S05 | UNO 1 → 누름 스위치 PSW (바닥과 함께 움직임, NC) | PSW (흰색, 28 AWG)<br>GND (검정, 28 AWG) | A1 → NC<br>GND → COM | 510 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 다리 납땜 + 수축튜브 | 휨 고리 |
+| S06 | UNO 1 → 원점 F | HOME_F (노랑, 28 AWG)<br>GND (검정, 28 AWG) | A3 → 스위치 NO<br>GND → 스위치 COM | 380 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 납땜 + 100 nF |  |
+| S07 | UNO 1 → 원점 X | HOME_X (노랑, 28 AWG)<br>GND (검정, 28 AWG) | A4 → 스위치 NO<br>GND → 스위치 COM | 640 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 납땜 + 100 nF |  |
+| S08 | UNO 1 → 원점 Y (빔과 함께 움직임) | HOME_Y (노랑, 28 AWG)<br>GND (검정, 28 AWG) | A5 → 스위치 NO<br>GND → 스위치 COM | 730 mm | 듀폰 암 1핀 (UNO 헤더) / 스위치 납땜 + 100 nF | 휨 고리 |
 | V02 | 서보 허브 → 입구 문 서보 112 | 서보 3선 (갈색·빨강·주황, 26 AWG) | 허브 S2 → 서보 | 기본 250 + 연장 120 | 듀폰 2.54 헤더 (허브 기판) / 서보 3핀 (기본) |  |
 | V03 | 서보 허브 → 격리 문 서보 170 | 서보 3선 (갈색·빨강·주황, 26 AWG) | 허브 S3 → 서보 | 기본 250 + 연장 160 | 듀폰 2.54 헤더 (허브 기판) / 서보 3핀 (기본) |  |
 | V04 | 서보 허브 → 방생 문 서보 176 | 서보 3선 (갈색·빨강·주황, 26 AWG) | 허브 S4 → 서보 | 기본 250 + 연장 240 | 듀폰 2.54 헤더 (허브 기판) / 서보 3핀 (기본) |  |
-| S10 | UNO 2 D9·D10·D11 → 서보 허브 S2~S4 신호 | DOOR_IN (주황, 26 AWG)<br>DOOR_CAP (주황, 26 AWG)<br>DOOR_REL (주황, 26 AWG) | D9 → 허브 S2<br>D10 → 허브 S3<br>D11 → 허브 S4 | 370 mm | 듀폰 암 1핀 (UNO 헤더) / 허브 기판 납땜 |  |
-| S11 | UNO 2 → 게이트 허브 (수신 9 + 송신 켜기 1) | G2 (흰색, 28 AWG)<br>G2b (흰색, 28 AWG)<br>G3 (흰색, 28 AWG)<br>G3b (흰색, 28 AWG)<br>G5 (흰색, 28 AWG)<br>G5b (흰색, 28 AWG)<br>G1 (흰색, 28 AWG)<br>G4 (흰색, 28 AWG)<br>G6 (흰색, 28 AWG)<br>EMIT_EN (보라, 28 AWG) | A0 → 허브 G2<br>A1 → 허브 G2b<br>A2 → 허브 G3<br>A3 → 허브 G3b<br>A4 → 허브 G5<br>A5 → 허브 G5b<br>D7 → 허브 G1<br>D8 → 허브 G4<br>D12 → 허브 G6<br>D4 → 허브 Q4 TRIG | 160 mm | 듀폰 암 1핀 (UNO 헤더) / 허브 기판 납땜 |  |
+| S09 | UNO 2 D9·D10·D11 → 서보 허브 S2~S4 신호 | DOOR_IN (주황, 26 AWG)<br>DOOR_CAP (주황, 26 AWG)<br>DOOR_REL (주황, 26 AWG) | D9 → 허브 S2<br>D10 → 허브 S3<br>D11 → 허브 S4 | 370 mm | 듀폰 암 1핀 (UNO 헤더) / 허브 기판 납땜 |  |
+| S10 | UNO 2 → 게이트 허브 (수신 9 + 송신 켜기 1) | G2 (흰색, 28 AWG)<br>G2b (흰색, 28 AWG)<br>G3 (흰색, 28 AWG)<br>G3b (흰색, 28 AWG)<br>G5 (흰색, 28 AWG)<br>G5b (흰색, 28 AWG)<br>G1 (흰색, 28 AWG)<br>G4 (흰색, 28 AWG)<br>G6 (흰색, 28 AWG)<br>EMIT_EN (보라, 28 AWG) | A0 → 허브 G2<br>A1 → 허브 G2b<br>A2 → 허브 G3<br>A3 → 허브 G3b<br>A4 → 허브 G5<br>A5 → 허브 G5b<br>D7 → 허브 G1<br>D8 → 허브 G4<br>D12 → 허브 G6<br>D4 → 허브 Q4 TRIG | 160 mm | 듀폰 암 1핀 (UNO 헤더) / 허브 기판 납땜 |  |
 | G01 | 게이트 허브 → 통로 빛 게이트 G1 (Adafruit 2167: 송신 2선 + 수신 3선) | 송신 +5V (빨강, 28 AWG)<br>송신 GND(켜기) (검정, 28 AWG)<br>수신 +5V (빨강, 28 AWG)<br>수신 GND (검정, 28 AWG)<br>수신 신호 (흰색, 28 AWG) | 허브 TX+ → 송신 빨강<br>허브 Q4 OUT− → 송신 검정<br>허브 RX+ → 수신 빨강<br>허브 GND → 수신 검정<br>허브 G1 (10 kΩ 풀업) → 수신 흰색 | 기본 230 + 연장 20 | 듀폰 2.54 헤더 (허브 기판) / 게이트 기본 선 + 연장 (납땜 + 수축튜브) |  |
 | G02 | 게이트 허브 → 통로 빛 게이트 G4 (Adafruit 2167: 송신 2선 + 수신 3선) | 송신 +5V (빨강, 28 AWG)<br>송신 GND(켜기) (검정, 28 AWG)<br>수신 +5V (빨강, 28 AWG)<br>수신 GND (검정, 28 AWG)<br>수신 신호 (흰색, 28 AWG) | 허브 TX+ → 송신 빨강<br>허브 Q4 OUT− → 송신 검정<br>허브 RX+ → 수신 빨강<br>허브 GND → 수신 검정<br>허브 G4 (10 kΩ 풀업) → 수신 흰색 | 기본 230 + 연장 410 | 듀폰 2.54 헤더 (허브 기판) / 게이트 기본 선 + 연장 (납땜 + 수축튜브) |  |
 | G03 | 게이트 허브 → 통로 빛 게이트 G6 (Adafruit 2167: 송신 2선 + 수신 3선) | 송신 +5V (빨강, 28 AWG)<br>송신 GND(켜기) (검정, 28 AWG)<br>수신 +5V (빨강, 28 AWG)<br>수신 GND (검정, 28 AWG)<br>수신 신호 (흰색, 28 AWG) | 허브 TX+ → 송신 빨강<br>허브 Q4 OUT− → 송신 검정<br>허브 RX+ → 수신 빨강<br>허브 GND → 수신 검정<br>허브 G6 (10 kΩ 풀업) → 수신 흰색 | 기본 230 + 연장 300 | 듀폰 2.54 헤더 (허브 기판) / 게이트 기본 선 + 연장 (납땜 + 수축튜브) |  |
@@ -39,10 +38,10 @@
 | G07 | 게이트 허브 → 문 빔 G3b (낱개: IR LED 2선 + 포토TR 2선, 220 Ω·10 kΩ는 허브에) | LED +(220 Ω 뒤) (빨강, 28 AWG)<br>LED −(켜기) (검정, 28 AWG)<br>포토TR C (빨강, 28 AWG)<br>포토TR E(신호) (흰색, 28 AWG) | 허브 R220 끝 → LED 긴 다리 A<br>허브 Q4 OUT− → LED 짧은 다리 K<br>허브 +5V → 포토TR 컬렉터<br>허브 G3b (10 kΩ → GND) → 포토TR 이미터 | 440 mm | 듀폰 2.54 헤더 (허브 기판) / LED·포토TR 다리 납땜 + 수축튜브 |  |
 | G08 | 게이트 허브 → 문 빔 G5 (낱개: IR LED 2선 + 포토TR 2선, 220 Ω·10 kΩ는 허브에) | LED +(220 Ω 뒤) (빨강, 28 AWG)<br>LED −(켜기) (검정, 28 AWG)<br>포토TR C (빨강, 28 AWG)<br>포토TR E(신호) (흰색, 28 AWG) | 허브 R220 끝 → LED 긴 다리 A<br>허브 Q4 OUT− → LED 짧은 다리 K<br>허브 +5V → 포토TR 컬렉터<br>허브 G5 (10 kΩ → GND) → 포토TR 이미터 | 520 mm | 듀폰 2.54 헤더 (허브 기판) / LED·포토TR 다리 납땜 + 수축튜브 |  |
 | G09 | 게이트 허브 → 문 빔 G5b (낱개: IR LED 2선 + 포토TR 2선, 220 Ω·10 kΩ는 허브에) | LED +(220 Ω 뒤) (빨강, 28 AWG)<br>LED −(켜기) (검정, 28 AWG)<br>포토TR C (빨강, 28 AWG)<br>포토TR E(신호) (흰색, 28 AWG) | 허브 R220 끝 → LED 긴 다리 A<br>허브 Q4 OUT− → LED 짧은 다리 K<br>허브 +5V → 포토TR 컬렉터<br>허브 G5b (10 kΩ → GND) → 포토TR 이미터 | 520 mm | 듀폰 2.54 헤더 (허브 기판) / LED·포토TR 다리 납땜 + 수축튜브 |  |
-| S12 | UNO 2 D3·D5 → MOSFET 보드 (조명 켜기) | L_TOP (노랑, 26 AWG)<br>L_BOT (노랑, 26 AWG) | D3 → Q1 TRIG<br>D5 → Q2 TRIG | 230 mm | 듀폰 암 1핀 (UNO 헤더) / 보드 핀 |  |
+| S11 | UNO 2 D3·D5 → MOSFET 보드 (조명 켜기) | L_TOP (노랑, 26 AWG)<br>L_BOT (노랑, 26 AWG) | D3 → Q1 TRIG<br>D5 → Q2 TRIG | 230 mm | 듀폰 암 1핀 (UNO 헤더) / 보드 핀 |  |
 | L01 | MOSFET → 위 조명 182 | +5V (빨강, 24 AWG)<br>Q1 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q1 OUT− → 조명 − | 770 mm | 보드 나사 단자 / 조명 납땜 |  |
 | L02 | MOSFET → 아래 조명 | +5V (빨강, 24 AWG)<br>Q2 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q2 OUT− → 조명 − | 470 mm | 보드 나사 단자 / 조명 납땜 |  |
-| S13 | J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음) | 3.3V (빨강, 28 AWG)<br>GND (검정, 28 AWG)<br>SDA (파랑, 28 AWG)<br>SCL (노랑, 28 AWG) | J_I2C 1 VS → Pi 핀 1 (3V3)<br>J_I2C 2 GND → Pi 핀 6 (GND)<br>J_I2C 3 SDA → Pi 핀 3 (GPIO2)<br>J_I2C 4 SCL → Pi 핀 5 (GPIO3) | 610 mm | JST XH 4P 하우징 (193j에 꽂음) / 듀폰 암 1핀 (Pi 헤더) |  |
+| S12 | J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음) | 3.3V (빨강, 28 AWG)<br>GND (검정, 28 AWG)<br>SDA (파랑, 28 AWG)<br>SCL (노랑, 28 AWG) | J_I2C 1 VS → Pi 핀 1 (3V3)<br>J_I2C 2 GND → Pi 핀 6 (GND)<br>J_I2C 3 SDA → Pi 핀 3 (GPIO2)<br>J_I2C 4 SCL → Pi 핀 5 (GPIO3) | 610 mm | JST XH 4P 하우징 (193j에 꽂음) / 듀폰 암 1핀 (Pi 헤더) |  |
 
 **사서 쓰는 케이블 길이 확인** (경로 + 10 %)
 

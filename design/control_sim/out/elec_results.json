@@ -59,6 +59,12 @@
    "on": 0.003,
    "src": "MOSFET 모듈 표시 LED [추측]"
   },
+  "pump": {
+   "rail": "B",
+   "on": 0.5,
+   "stall": 0.8,
+   "src": "급이 펌프 Adafruit 3910 0.5 A [확실 — Adafruit 페이지] / 막힘 0.8 A [추측] (CAP-AI-59)"
+  },
   "pi5": {
    "rail": "A",
    "halt": 0.01,
@@ -88,8 +94,8 @@
   },
   "hx711": {
    "rail": "A",
-   "on": 0.03,
-   "src": "HX711 1.5 mA + 1 kΩ 브리지 약 4 mA [가능성 높음], UNO 1 5V 핀에서 받음"
+   "on": 0.0,
+   "src": "(CAP-AI-60) HX711·로드셀 없앰 → 누름 스위치 (풀업 0.1 mA, 무시)"
   }
  },
  "I_phase_A": 0.082,
@@ -99,70 +105,70 @@
    "iB_typ": 0.496,
    "iB_peak": 0.581,
    "pB_W": 2.48,
-   "pA_W": 5.63
+   "pA_W": 5.6
   },
   {
    "state": "대기 (아래 조명 켬)",
    "iB_typ": 0.344,
    "iB_peak": 0.344,
    "pB_W": 1.72,
-   "pA_W": 5.7
+   "pA_W": 5.67
   },
   {
    "state": "1 진입 → 입구 문 닫기 (0.2 s)",
    "iB_typ": 0.535,
    "iB_peak": 1.085,
    "pB_W": 2.67,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "2 판별 (위 조명)",
    "iB_typ": 0.444,
    "iB_peak": 0.444,
    "pB_W": 2.22,
-   "pA_W": 8.4
+   "pA_W": 8.37
   },
   {
    "state": "3 누르기 + X·Y 미리 이동",
    "iB_typ": 0.727,
    "iB_peak": 0.854,
    "pB_W": 3.63,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "4 자세·흉부 촬영",
    "iB_typ": 0.444,
    "iB_peak": 0.444,
    "pB_W": 2.22,
-   "pA_W": 8.4
+   "pA_W": 8.37
   },
   {
    "state": "5 찍기 (펜 서보)",
    "iB_typ": 0.684,
    "iB_peak": 1.084,
    "pB_W": 3.42,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "6 급이·건조",
    "iB_typ": 0.344,
    "iB_peak": 0.344,
    "pB_W": 1.72,
-   "pA_W": 5.7
+   "pA_W": 5.67
   },
   {
    "state": "7 방생 문 열고 기다림 (마킹실 불 끔, 굴뚝 하늘빛)",
    "iB_typ": 0.431,
    "iB_peak": 0.981,
    "pB_W": 2.16,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "8 격리 문 열고 기다림",
    "iB_typ": 0.431,
    "iB_peak": 0.981,
    "pB_W": 2.16,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "밤 (Pi 꺼짐, UNO 꺼짐)",
@@ -178,70 +184,70 @@
    "iB_typ": 0.624,
    "iB_peak": 0.751,
    "pB_W": 3.12,
-   "pA_W": 5.63
+   "pA_W": 5.6
   },
   {
    "state": "대기 (아래 조명 켬)",
    "iB_typ": 0.472,
    "iB_peak": 0.514,
    "pB_W": 2.36,
-   "pA_W": 5.7
+   "pA_W": 5.67
   },
   {
    "state": "1 진입 → 입구 문 닫기 (0.2 s)",
    "iB_typ": 0.662,
    "iB_peak": 1.254,
    "pB_W": 3.31,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "2 판별 (위 조명)",
    "iB_typ": 0.572,
    "iB_peak": 0.614,
    "pB_W": 2.86,
-   "pA_W": 8.4
+   "pA_W": 8.37
   },
   {
    "state": "3 누르기 + X·Y 미리 이동",
    "iB_typ": 0.727,
    "iB_peak": 0.854,
    "pB_W": 3.63,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "4 자세·흉부 촬영",
    "iB_typ": 0.572,
    "iB_peak": 0.614,
    "pB_W": 2.86,
-   "pA_W": 8.4
+   "pA_W": 8.37
   },
   {
    "state": "5 찍기 (펜 서보)",
    "iB_typ": 0.811,
    "iB_peak": 1.254,
    "pB_W": 4.06,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "6 급이·건조",
    "iB_typ": 0.472,
    "iB_peak": 0.514,
    "pB_W": 2.36,
-   "pA_W": 5.7
+   "pA_W": 5.67
   },
   {
    "state": "7 방생 문 열고 기다림 (마킹실 불 끔, 굴뚝 하늘빛)",
    "iB_typ": 0.559,
    "iB_peak": 1.151,
    "pB_W": 2.79,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "8 격리 문 열고 기다림",
    "iB_typ": 0.559,
    "iB_peak": 1.151,
    "pB_W": 2.79,
-   "pA_W": 7.2
+   "pA_W": 7.17
   },
   {
    "state": "밤 (Pi 꺼짐, UNO 꺼짐)",
@@ -255,6 +261,7 @@
   "rule_kept_A": 1.8,
   "boot_all_servos_A": 3.27,
   "boot_staggered_A": 1.15,
+  "feed_pump_A": 1.66,
   "note": "규칙: 서보는 한 번에 하나 (문 3개·펜). 지금 펌웨어 setup()은 서보 4개를 한꺼번에 attach·write → 켤 때 위치가 다르면 4개가 동시에 움직임"
  },
  "fuse": {
@@ -384,27 +391,15 @@
    "drop_V": 0.131
   },
   {
-   "name": "HX711 → 로드셀 148 (바닥과 함께 움직임)",
-   "frm": "HX711",
-   "to": "LC",
-   "wires": 4,
-   "awg": 28,
-   "len_mm": 343,
-   "stock_mm": null,
-   "extension_mm": 343,
-   "moving": true,
-   "drop_V": null
-  },
-  {
-   "name": "UNO 1 → HX711 (5V, GND, DT, SCK)",
+   "name": "UNO 1 → 누름 스위치 PSW (바닥과 함께 움직임)",
    "frm": "UNO1",
-   "to": "HX711",
-   "wires": 4,
-   "awg": 26,
-   "len_mm": 244,
+   "to": "PSW",
+   "wires": 2,
+   "awg": 28,
+   "len_mm": 460,
    "stock_mm": null,
-   "extension_mm": 244,
-   "moving": false,
+   "extension_mm": 460,
+   "moving": true,
    "drop_V": null
   },
   {
@@ -655,9 +650,9 @@
    "hold_f": true,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 8.06,
-   "load_Wh": 193.4,
-   "wall_Wh": 227.5
+   "idle_W": 8.03,
+   "load_Wh": 192.7,
+   "wall_Wh": 226.7
   },
   {
    "visits": 20,
@@ -665,9 +660,9 @@
    "hold_f": true,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 8.06,
-   "load_Wh": 76.7,
-   "wall_Wh": 90.3
+   "idle_W": 8.03,
+   "load_Wh": 76.4,
+   "wall_Wh": 89.9
   },
   {
    "visits": 20,
@@ -675,9 +670,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.42,
-   "load_Wh": 71.0,
-   "wall_Wh": 83.5
+   "idle_W": 7.39,
+   "load_Wh": 70.7,
+   "wall_Wh": 83.2
   },
   {
    "visits": 20,
@@ -685,9 +680,9 @@
    "hold_f": false,
    "cam_always": false,
    "bot_idle": false,
-   "idle_W": 5.33,
-   "load_Wh": 52.2,
-   "wall_Wh": 61.4
+   "idle_W": 5.3,
+   "load_Wh": 51.9,
+   "wall_Wh": 61.1
   },
   {
    "visits": 100,
@@ -695,9 +690,9 @@
    "hold_f": false,
    "cam_always": true,
    "bot_idle": true,
-   "idle_W": 7.42,
-   "load_Wh": 71.0,
-   "wall_Wh": 83.5
+   "idle_W": 7.39,
+   "load_Wh": 70.7,
+   "wall_Wh": 83.2
   }
  ],
  "battery": {
@@ -711,58 +706,58 @@
    "mode": "보통 (카메라 늘 켬, 대기 조명)",
    "Ah": 6,
    "Wh": 77,
-   "need_Wh_day": 81.1,
+   "need_Wh_day": 80.9,
    "days": 0.85
   },
   {
    "mode": "보통 (카메라 늘 켬, 대기 조명)",
    "Ah": 12,
    "Wh": 154,
-   "need_Wh_day": 81.1,
-   "days": 1.7
+   "need_Wh_day": 80.9,
+   "days": 1.71
   },
   {
    "mode": "보통 (카메라 늘 켬, 대기 조명)",
    "Ah": 15,
    "Wh": 192,
-   "need_Wh_day": 81.1,
-   "days": 2.13
+   "need_Wh_day": 80.9,
+   "days": 2.14
   },
   {
    "mode": "보통 (카메라 늘 켬, 대기 조명)",
    "Ah": 20,
    "Wh": 256,
-   "need_Wh_day": 81.1,
-   "days": 2.84
+   "need_Wh_day": 80.9,
+   "days": 2.85
   },
   {
    "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
    "Ah": 6,
    "Wh": 77,
-   "need_Wh_day": 60.3,
+   "need_Wh_day": 60.0,
    "days": 1.15
   },
   {
    "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
    "Ah": 12,
    "Wh": 154,
-   "need_Wh_day": 60.3,
-   "days": 2.29
+   "need_Wh_day": 60.0,
+   "days": 2.3
   },
   {
    "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
    "Ah": 15,
    "Wh": 192,
-   "need_Wh_day": 60.3,
-   "days": 2.87
+   "need_Wh_day": 60.0,
+   "days": 2.88
   },
   {
    "mode": "절약 (카메라 G1 때만, 대기 조명 끔)",
    "Ah": 20,
    "Wh": 256,
-   "need_Wh_day": 60.3,
-   "days": 3.82
+   "need_Wh_day": 60.0,
+   "days": 3.84
   }
  ],
- "harness_total_m": 47.4
+ "harness_total_m": 46.0
 }

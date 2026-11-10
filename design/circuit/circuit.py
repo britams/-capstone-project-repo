@@ -71,14 +71,10 @@ for ax, pins in (("F", "D2 D3 D4 D5"), ("X", "D6 D7 D8 D9"), ("Y", "D10 D11 D12 
 con("U1_PEN", "U1.A0", "SG90.SIG", awg=26, note="주황")
 con("+5V_B", "SG90.V+", awg=26, note="빨강 — 레일에서 (UNO 5V 아님)")
 con("GND", "SG90.GND", awg=26, note="갈색")
-# HX711
-con("U1_5V", "U1.5V", "HX711.VCC", awg=26, note="HX711은 UNO 5 V (조용함)")
-con("GND", "HX711.GND", awg=26)
-con("U1_HX_DT", "U1.A1", "HX711.DT", awg=26)
-con("U1_HX_SCK", "U1.A2", "HX711.SCK", awg=26)
-for w, p in (("빨강", "E+"), ("검정", "E-"), ("흰", "A-"), ("초록", "A+")):
-    con("LC_%s" % p, "HX711.%s" % p, "LC.%s" % w, awg=28, note="로드셀 148 (바닥과 움직임, 실리콘 선)")
-con("HX_RATE", "HX711.RATE", "HX711.VCC_PAD", awg=0, note="RATE를 5 V로 → 80 Hz (모듈 납땜 다리)")
+# (11/10 밤, CAP-AI-60) HX711·로드셀 없앰 (교수님 '로드셀은 과함') → 누름 스위치 PSW (KW11-3Z, NC 접점): 스프링 146이 0.5 N만큼 눌리면 열림
+#   NC → GND, A1 내부 풀업: 평소 LOW, 눌림·선 끊김 = HIGH → 펌웨어가 바닥을 멈춤 (선이 끊겨도 누르지 않는 쪽). A2 예비
+con("U1_PSW", "U1.A1", "PSW.NC_A", awg=28, note="캐리지와 같이 움직임 — 실리콘 선, 100 nF 함께")
+con("GND", "PSW.NC_B", awg=28)
 # 원점 스위치
 for ax, p in (("F", "A3"), ("X", "A4"), ("Y", "A5")):
     con("U1_HOME_%s" % ax, "U1.%s" % p, "SW_H%s.NO" % ax, "C_H%s.1" % ax, awg=28, note="내부 풀업, 눌리면 LOW, 100 nF")
@@ -132,7 +128,7 @@ BOM = [
     ("28BYJ-48 + ULN2003 세트", 3, "바닥 F, 마커 X, Y", "보유 1 → 살 것 2 (구매목록 B1)"),
     ("SG90", 1, "펜 들기 205", "보유 1 (학습 키트, 실물 확인)"),
     ("MG90S (혼 포함)", 3, "문 112·170·176", "보유 1 (혼 없음, 예비) → 살 것 3 (B2)"),
-    ("HX711 + 막대형 로드셀 500 g~1 kg", 1, "누르는 힘 — 버튼형(145,200원) 대신 막대형(6,710원), 11/06 CAP-AI-31. 캐리지 아래 외팔보로 (승준 CAD)", "**살 것** (구매확정표 E11·E12)"),
+    ("마이크로 스위치 KW11-3Z 레버형 (누름 스위치 PSW, NC 접점 씀)", 1, "로드셀·HX711 대신 — 스프링 146이 4.8 mm(0.5 N) 눌리면 축 걸쇠가 누름 (CAP-AI-60, 교수님 피드백)", "추가 (원점 스위치와 같은 것)"),
     ("Pi 5 RTC 배터리 (공식 충전식 ML-2020, J5 BAT 단자)", 1, "전원이 끊겨도 날짜 유지 → 여왕벌 계절 규칙 (11/06)", "**추가**"),
     ("마이크로 스위치 KW11-3Z 레버형 (원점)", 3, "F, X, Y — 외형 20×10.2×6.4, 승준 라이브러리 SJ-38", "추가"),
     ("빛 게이트 Adafruit 2167 (3 mm)", 3, "통로 G1·G4·G6 (11/06 21시: 문 빔은 낱개로 — 승준 SJ-47)", "**살 것 3 (+1)**"),
@@ -144,7 +140,7 @@ BOM = [
     ("다이오드 1N5819 (펌프 역기전력)", 1, "펌프 +, − 양 끝 (K → +5V_B)", "살 것 [사양서 확인]"),
     ("Nalgene 2104-0008 250 mL 넓은 입 병 + 식품용 실리콘 관 3.5 × 5 약 1.2 m", 1, "급이 병·관 (뚜껑에 구멍 2개)", "**살 것**"),
     ("저항 10 kΩ", 10, "통로 게이트 풀업 3 + 문 빔 포토TR 부하 6 + 레일 감지 1", "학습 키트 저항 세트에서 [실물 확인]"),
-    ("커패시터 100 nF", 4, "원점 3 + 단자대 1", "키트 커패시터 세트에서 [실물 확인]"),
+    ("커패시터 100 nF", 5, "원점 3 + 누름 스위치 1 + 단자대 1", "키트 커패시터 세트에서 [실물 확인]"),
     ("전해 커패시터 1000 µF 10 V", 1, "서보 허브 (+5V 버스 ↔ GND 버스)", "추가"),
     ("쇼트키 다이오드 SB540 (5 A 40 V, DO-201) — 역극성 보호 D_RP", 1, "서보 허브, 줄 표시(K) +5V 쪽 — 거꾸로 꽂으면 퓨즈를 끊음 (CAP-AI-50)", "살 것 [사양서 확인]"),
     ("5 V 3 A 어댑터 + DC 잭 5.5×2.1", 1, "구동 레일", "구매 목록 G2"),
@@ -159,13 +155,13 @@ BOM = [
 ]
 
 UNO_PINS = ["D%d" % i for i in range(2, 14)] + ["A%d" % i for i in range(6)]
-RESERVED = {"U1": set(UNO_PINS), "U2": set(UNO_PINS) - {"D13"}}
+RESERVED = {"U1": set(UNO_PINS) - {"A2"}, "U2": set(UNO_PINS) - {"D13"}}
 
 
 def check():
     errs, use = [], defaultdict(list)
     for net, nodes in NETS.items():
-        if len({n for n, _, _ in nodes}) < 2 and net not in ("HX_RATE",):
+        if len({n for n, _, _ in nodes}) < 2:
             errs.append("넷 %s 끝이 하나뿐" % net)
         for n, _, _ in nodes:
             part, pin = n.split(".", 1)
@@ -265,7 +261,7 @@ def sheets():
 
     # --- 2장: UNO 1 ---
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_2_UNO1_움직임.png"), show=False, dpi=150) as d:
-        d += elm.Label().label("회로도 2/3 — UNO 1 (움직임): 스테핑 3 · 펜 서보 · HX711 · 원점 3", fontsize=14).at((0, 9))
+        d += elm.Label().label("회로도 2/3 — UNO 1 (움직임): 스테핑 3 · 펜 서보 · 누름 스위치 · 원점 3", fontsize=14).at((0, 9))
         right = ["D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13"]
         left = ["A0", "A1", "A2", "A3", "A4", "A5", "5V", "GND"]
         u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p) for p in left[::-1]],
@@ -287,8 +283,7 @@ def sheets():
                 d += elm.Label().label(net, loc="left", fontsize=9).color("#2a78d6")
             d += elm.Line().right(1.2).at(ul.XH5)
             d += elm.Label().label("28BYJ-48 %s\n(+5V_B, GND)" % {"F": "바닥", "X": "마커 X", "Y": "마커 Y"}[ax], loc="right")
-        for p, txt in (("A0", "SG90 펜 신호 (전원 +5V_B)"), ("A1", "HX711 DT"), ("A2", "HX711 SCK  — HX711 VCC는 UNO 5V, RATE→5V (80 Hz)"),
-                       ("5V", "HX711 VCC"), ("GND", "와고 GND (한 점)")):
+        for p, txt in (("A0", "SG90 펜 신호 (전원 +5V_B)"), ("A1", "누름 스위치 PSW (NC → GND, 내부 풀업 — 눌림·끊김 HIGH)"), ("A2", "예비 (HX711 없앰, CAP-AI-60)"), ("GND", "와고 GND (한 점)")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
             d += elm.Label().label(txt, loc="left")
         for p, ax in (("A3", "F"), ("A4", "X"), ("A5", "Y")):
