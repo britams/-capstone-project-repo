@@ -51,6 +51,7 @@ LOADS = {
     "light_bot":    dict(rail="B", on=0.10, src="아래 조명 [추측]"),
     "light_exit":   dict(rail="B", on=0.0, src="출구 조명 — 없앰 (승준 SJ-45 11/06: 굴뚝 위 하늘빛, 밤 LED는 벌레를 부름)"),
     "mosfet_led":   dict(rail="B", on=0.003, src="MOSFET 모듈 표시 LED [추측]"),
+    "pump":         dict(rail="B", on=0.5, stall=0.8, src="급이 펌프 Adafruit 3910 0.5 A [확실 — Adafruit 페이지] / 막힘 0.8 A [추측] (CAP-AI-59)"),
     # Pi 레일 A (W)
     "pi5":          dict(rail="A", halt=0.01, idle=3.0, active=4.5, peak=8.8,
                          src="Pi 5 대기 약 3.0 W, CPU 4코어 최대 약 8.8 W (raspberry.tips 측정), 꺼짐 0.01 W (POWER_OFF_ON_HALT=1, Jeff Geerling) [가능성 높음]. 'active' 4.5 W는 [추측]"),
@@ -67,7 +68,7 @@ N_GATE = 9   # G1, 문마다 2개(G2·G2b, G3·G3b, G5·G5b), G4, G6 — 서현 
 
 
 def rail_b(stepper_move=0, stepper_hold=0, pen="idle", doors=("idle", "idle", "idle"), emit=N_GATE, rx=N_GATE, blocked=0,
-           top=0, bot=0, exit_=0, peak=False):
+           top=0, bot=0, exit_=0, pump=0, peak=False):
     """구동 레일 B 전류 (A). peak=True면 스테핑은 2상, 서보 move는 막힘값으로 본다."""
     st = LOADS["stepper"]
     i = stepper_move * (st["peak"] if peak else st["move"]) + stepper_hold * (st["peak"] if peak else st["hold"])
@@ -78,7 +79,8 @@ def rail_b(stepper_move=0, stepper_hold=0, pen="idle", doors=("idle", "idle", "i
         i += mg["stall"] if (peak and d == "move") else mg[d]
     i += emit * LOADS["ir_emitter"]["on"] + rx * LOADS["ir_receiver"]["on"] + blocked * LOADS["pullup"]["on"]
     i += top * LOADS["light_top"]["on"] + bot * LOADS["light_bot"]["on"] + exit_ * LOADS["light_exit"]["on"]
-    i += (top + bot + exit_ + (1 if emit else 0)) * LOADS["mosfet_led"]["on"]
+    i += (top + bot + exit_ + (1 if emit else 0) + pump) * LOADS["mosfet_led"]["on"]
+    i += pump * (LOADS["pump"]["stall"] if peak else LOADS["pump"]["on"])
     return i
 
 
@@ -123,10 +125,12 @@ def worst_cases():
     rule = rail_b(stepper_move=3, doors=("move", "idle", "idle"), pen="idle", top=1, bot=1, exit_=1, blocked=N_GATE, peak=True)
     boot_all = rail_b(stepper_hold=1, pen="move", doors=("move", "move", "move"), blocked=0, peak=True)
     boot_seq = rail_b(stepper_hold=1, pen="idle", doors=("move", "idle", "idle"), peak=True)
+    feed = rail_b(stepper_hold=3, pen="idle", top=0, bot=1, blocked=N_GATE, pump=1, peak=True)   # 펌프는 문과 같이 안 돎 (펌웨어 ERR BUSY)
     return dict(
         rule_kept_A=round(rule, 2),
         boot_all_servos_A=round(boot_all, 2),
         boot_staggered_A=round(boot_seq, 2),
+        feed_pump_A=round(feed, 2),
         note="규칙: 서보는 한 번에 하나 (문 3개·펜). 지금 펌웨어 setup()은 서보 4개를 한꺼번에 attach·write → 켤 때 위치가 다르면 4개가 동시에 움직임",
     )
 

@@ -186,7 +186,7 @@ CATEGORY = [
     ("REF_camera_view", "X"), ("P204", "X"), ("190_pi5_aihat (D5e", "X"),
     ("REF_", "C"),
     ("195p_", "A"), ("198_", "A"), ("198p_", "A"), ("190r_", "A"), ("193_terminal", "A"), ("193w_", "A"), ("198u_", "A"), ("142n_", "A"), ("144n_", "A"), ("100h_", "A"), ("100i_", "A"),
-    ("143i_", "A"), ("143t_", "A"), ("143s_", "A"), ("148_load", "A"), ("148g_", "A"), ("148m", "A"),
+    ("143i_", "A"), ("143t_", "A"), ("143s_", "A"), ("143m", "A"), ("144p", "A"), ("144h", "A"), ("144s_", "A"), ("144t_", "A"), ("148_load", "A"), ("148g_", "A"), ("148m", "A"),
     ("193s_", "A"), ("193v_", "A"), ("193g_", "A"), ("193j_", "A"), ("194f_", "A"), ("196m_", "A"), ("198h_", "A"), ("198m_", "A"),   # (SJ-49) 새 구매품
     ("_beam", "D"), ("196_gate_G", "A"), ("194_", "A"), ("193_", "D"), ("196_", "D"),
     ("100", "A"), ("153_", "A"), ("153r_", "A"), ("209_", "A"), ("209r_", "A"), ("215_", "A"), ("215r_", "A"),
@@ -330,6 +330,8 @@ def make():
     FIX_REPORT["switches"] = HS.apply(doc)
     import D5g_feeder_mcm as FM        # (CAP-AI-57, 서현) 급이 방 나사·인서트·T너트 = McMaster STEP (cad/vendor_step, 없으면 단순 모양)
     FIX_REPORT["feeder_mcm"] = FM.apply(doc)
+    import D5g_feeder_pump as FPMP     # (CAP-AI-59, 서현) 급이: 바깥 병 + 연동 펌프 + 관 + 걸이 (사용자 편의)
+    FIX_REPORT["feeder_pump"] = FPMP.apply(doc)
     import D5g_print_color as PCOL     # (CAP-AI-58, 서현) 3D 프린트 부품만 파랑, 나머지 회색 — 맨 끝 (앞 단계 색을 덮음)
     FIX_REPORT["print_color"] = PCOL.apply(doc)
     doc.recompute()

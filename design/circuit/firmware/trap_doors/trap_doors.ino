@@ -3,10 +3,11 @@
 // 사양: design/2026-11-06_펌웨어_변경요청_서현.md 2장, 핀 원본: design/circuit/circuit.py (GATE_PIN, 검사 통과)
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
 //
-// 핀 (UNO 2, 16/18 — D6·D13 예비)
+// 핀 (UNO 2, 17/18 — D13 예비)
 //   D2  레일 감지 (+5V_B → 10 kΩ → D2, 레일 있으면 HIGH) — INPUT (내부 풀업 쓰면 레일이 꺼져도 HIGH라 안 됨)
 //   D3  위 링 조명 Q1 (PWM)      D5  아래 조명 Q2 (PWM)
 //   D4  송신 켜기 Q4 (EMIT_EN, HIGH = 9개 송신 켬)
+//   D6  급이 펌프 Q3 (Adafruit 3910 5 V 0.5 A, HIGH = 돎) — 11/10 밤 CAP-AI-59 (예비였던 핀)
 //   D7 / D8 / D12  통로 게이트 G1 / G4 / G6 (Adafruit 2167, 외부 10 kΩ 풀업, 끊기면 LOW)
 //   D9 / D10 / D11 문 서보 IN 112 / CAP 170 / REL 176 (MG90S)
 //   A0..A5 문 빔 G2 G2b G3 G3b G5 G5b (포토TR 이미터 팔로어, 빛 받으면 높음 → analogRead)
@@ -29,6 +30,9 @@
 //   LIGHT <TOP|BOT> <0~255>     → OK LIGHT
 //   EMIT <0|1>                  송신 끔/켬 (기본 켬). 끄면 게이트 사건 멈춤, 닫기 거부 → OK EMIT
 //   RAIL                        → OK RAIL 1|0. 바뀌면 EVT RAIL 0|1 (20 ms 같은 값 뒤)
+//   PUMP <ms>                   급이 펌프를 ms 동안 돌림 (1~PUMP_MAX_MS) → OK PUMP, 끝나면 DONE PUMP <ms>. PUMP 0 = 바로 멈춤 → OK PUMP 0
+//                                  거부: ERR RAIL · ERR BUSY (문이 움직이는 중 — 서보 붙일 때 전류와 겹치지 않게) · ERR PUMP MAX (너무 김)
+//                                  돌던 중 레일 끊김·WATCHDOG → 멈춤 + EVT PUMP STOP. 펌프가 도는 동안 DOOR·SERVO 명령은 ERR BUSY
 //   WATCHDOG <s>                s초 명령 없으면 닫는 중인 문을 엶 → EVT WATCHDOG_HOLD (0 = 끔)
 //
 // 안전 규칙 (AI 판단, 서현 위임 — CAP-AI-41)
@@ -36,6 +40,7 @@
 //   - 문 서보는 한 번에 하나만 붙인다 (다른 문은 떼고), 붙이는 사이는 0.3 s 이상 (켤 때 3.27 A > 퓨즈 3 A, 변경요청 0장).
 //   - 움직임이 끝나고 0.5 s 뒤 뗀다 (MG90S 기어 마찰로 자리 유지 — trap_sim, b3_door).
 //   - 문 하나가 움직이는(열기·기다림·닫기·다시 열기) 동안 다른 문 명령은 ERR BUSY. Pi가 순서를 정한다.
+//   - (CAP-AI-59) 펌프 한 번 최대 PUMP_MAX_MS: 고장 나도 물길이 넘치지 않는 양 (cad/feeder_check.py 1번이 이 값을 읽어 검사). 펌프와 문은 같이 안 움직임.
 
 #include <Servo.h>
 
@@ -57,7 +62,9 @@
 #define BEAM_MIN_DIFF       200   // 사양: 켬−끔 < 200 이면 FAIL (약 1 V)
 #define SETTLE_MS           20    // 송신 켜고 끈 뒤 기다림 (b2·b3)
 
-const uint8_t PIN_RAIL = 2, PIN_TOP = 3, PIN_EMIT = 4, PIN_BOT = 5;
+const uint8_t PIN_RAIL = 2, PIN_TOP = 3, PIN_EMIT = 4, PIN_BOT = 5, PIN_PUMP = 6;
+const unsigned int PUMP_MAX_MS = 2000;   // 100 mL/min × 2 s = 3.3 mL ≤ 물길 넘침까지 (feeder_check 1)
+unsigned long pumpOffAt = 0, pumpMs = 0;  // 0 = 멈춤
 
 // ---------------- 빛 게이트 ----------------
 struct Gate {
@@ -299,6 +306,19 @@ void gatesPoll() {
   }
 }
 
+void pumpStop(bool evt) {
+  bool was = pumpOffAt != 0;
+  digitalWrite(PIN_PUMP, LOW); pumpOffAt = 0;
+  if (was && evt) reply("EVT PUMP STOP");
+}
+
+void pumpPoll() {
+  if (pumpOffAt && (long)(millis() - pumpOffAt) >= 0) {
+    digitalWrite(PIN_PUMP, LOW); pumpOffAt = 0;
+    Serial.print(F("DONE PUMP ")); Serial.println(pumpMs);
+  }
+}
+
 void railPoll() {
   unsigned long now = millis();
   bool r = digitalRead(PIN_RAIL) == HIGH;
@@ -308,6 +328,7 @@ void railPoll() {
     if (!railStable) {                     // 구동 전원 끊김: 움직이던 문은 자리를 모름
       for (int i = 0; i < 3; i++) if (doorBusy(doors[i])) doors[i].state = D_UNKNOWN;
       detachAll();
+      pumpStop(true);
     }
     reply(railStable ? "EVT RAIL 1" : "EVT RAIL 0");
   }
@@ -335,6 +356,7 @@ void handle(char* cmd) {
     for (int i = 0; i < 3; i++) { Serial.print(' '); Serial.print(doors[i].name); Serial.print('='); Serial.print(DOOR_STATE_NAME[doors[i].state]); }
     Serial.print(F(" RAIL=")); Serial.print(railStable ? '1' : '0');
     Serial.print(F(" EMIT=")); Serial.print(emitOn ? '1' : '0');
+    Serial.print(F(" PUMP=")); Serial.print(pumpOffAt ? '1' : '0');
     Serial.print(F(" GATES=")); printGateBits(false);
     Serial.println();
     return;
@@ -358,6 +380,7 @@ void handle(char* cmd) {
     else if (!strcmp(tok[2], "CLOSE")) open = false;
     else { reply("ERR STATE"); return; }
     if (!railStable) { reply("ERR RAIL"); return; }
+    if (pumpOffAt) { reply("ERR BUSY"); return; }
     Door* b = busyDoor();
     // 움직이는 문이 있으면 거부. 단 같은 문에 OPEN은 허용 (닫는 중 Pi가 취소하고 열기). 같은 문 CLOSE 겹치기는 거부.
     if (b && (b != d || !open)) { reply("ERR BUSY"); return; }
@@ -381,6 +404,7 @@ void handle(char* cmd) {
     if (!d) { reply("ERR DOOR"); return; }
     if (deg < 0 || deg > 180) { reply("ERR DEG"); return; }
     if (!railStable) { reply("ERR RAIL"); return; }
+    if (pumpOffAt) { reply("ERR BUSY"); return; }
     if (busyDoor()) { reply("ERR BUSY"); return; }
     d->cur = deg;
     if (!servoAttach(*d)) { reply("ERR BUSY"); return; }   // 0.3 s 안에 다른 서보를 붙였음 — 조금 뒤 다시
@@ -424,6 +448,18 @@ void handle(char* cmd) {
     return;
   }
 
+  if (!strcmp(tok[0], "PUMP") && n == 2) {
+    long ms = atol(tok[1]);
+    if (ms <= 0) { pumpStop(false); reply("OK PUMP 0"); return; }
+    if (ms > (long)PUMP_MAX_MS) { reply("ERR PUMP MAX"); return; }
+    if (!railStable) { reply("ERR RAIL"); return; }
+    for (int i = 0; i < 3; i++) if (doorBusy(doors[i])) { reply("ERR BUSY"); return; }
+    pumpMs = ms; pumpOffAt = millis() + ms; if (pumpOffAt == 0) pumpOffAt = 1;
+    digitalWrite(PIN_PUMP, HIGH);
+    reply("OK PUMP");
+    return;
+  }
+
   if (!strcmp(tok[0], "WATCHDOG") && n == 2) { watchdogMs = (unsigned long)(atof(tok[1]) * 1000); reply("OK WATCHDOG"); return; }
 
   reply("ERR UNKNOWN");
@@ -435,6 +471,7 @@ void setup() {
   pinMode(PIN_TOP, OUTPUT); analogWrite(PIN_TOP, 0);
   pinMode(PIN_BOT, OUTPUT); analogWrite(PIN_BOT, 0);
   pinMode(PIN_EMIT, OUTPUT); digitalWrite(PIN_EMIT, HIGH);
+  pinMode(PIN_PUMP, OUTPUT); digitalWrite(PIN_PUMP, LOW);
   for (int i = 0; i < 9; i++) if (!gates[i].analog) pinMode(gates[i].pin, INPUT);   // 풀업은 허브 10 kΩ
   // 문 서보는 붙이지 않음 (UNKNOWN) — 위 '안전 규칙'
   railRaw = railStable = digitalRead(PIN_RAIL) == HIGH;
@@ -464,11 +501,13 @@ void loop() {
   railPoll();
   gatesPoll();
   for (int i = 0; i < 3; i++) doorPoll(doors[i]);
+  pumpPoll();
   if (watchdogMs && millis() - lastCmdMs > watchdogMs) {
     for (int i = 0; i < 3; i++) {
       Door& d = doors[i];
       if (d.state == D_WAIT || d.state == D_CLOSING || d.state == D_REOPEN) startOpen(d);
     }
+    pumpStop(true);
     reply("EVT WATCHDOG_HOLD");
     lastCmdMs = millis();
   }

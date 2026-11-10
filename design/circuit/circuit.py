@@ -113,6 +113,11 @@ for q, p, lamp in (("Q1", "D3", "L_TOP"), ("Q2", "D5", "L_BOT")):
     con("+5V_B", "%s.V+" % lamp, awg=24)
     con("%s_LO" % lamp, "%s.V-" % lamp, "%s.OUT-" % q, awg=24)
     con("GND", "%s.GND" % q, awg=24)
+# (11/10 밤, CAP-AI-59) 급이 펌프: UNO 2 D6 → Q3 (MOSFET 모듈) → 펌프 Adafruit 3910 (5 V 0.5 A), 펌프 양 끝에 역기전력 다이오드 D_P
+con("U2_PUMP", "U2.D6", "Q3.TRIG", awg=26, note="HIGH = 펌프 돎 (펌웨어 PUMP <ms>, 최대 2 s)")
+con("+5V_B", "PUMP.V+", "D_P.K", awg=22)
+con("PUMP_LO", "PUMP.V-", "D_P.A", "Q3.OUT-", awg=22)
+con("GND", "Q3.GND", awg=22)
 # 레일 감지
 con("U2_RAIL", "U2.D2", "R_RS.2", awg=28, note="10 kΩ 직렬, 레일 있으면 HIGH (INT0)")
 
@@ -134,7 +139,10 @@ BOM = [
     ("적외선 LED 3 mm 940 nm", 6, "문 빔 송신 G2·G2b·G3·G3b·G5·G5b (Ø4.2 구멍에 꽂음)", "**살 것 6 (+4)**"),
     ("포토트랜지스터 3 mm 940 nm (검은 몸통, 햇빛 거름)", 6, "문 빔 수신, 이미터 팔로어 (빛 받으면 HIGH)", "**살 것 6 (+4)**"),
     ("저항 220 Ω", 6, "적외선 LED 전류 약 17 mA", "키트 저항 세트 [실물 확인]"),
-    ("로직 레벨 MOSFET 모듈 (D4184 등)", 3, "조명 2 (위·아래) + 송신 켜기 1 — 출구 조명 없앰 (SJ-45)", "살 것 (시험 단계는 보유 릴레이 모듈로 대신 — 켜고 끄기만)"),
+    ("로직 레벨 MOSFET 모듈 (D4184 등)", 4, "조명 2 (위·아래) + 송신 켜기 1 + 급이 펌프 1 (CAP-AI-59) — 출구 조명 없앰 (SJ-45)", "살 것 (시험 단계는 보유 릴레이 모듈로 대신 — 켜고 끄기만)"),
+    ("연동 펌프 Adafruit 3910 (5~6 V, 0.5 A, 100 mL/min, 관 3.5 × 5)", 1, "급이 — 바깥 병에서 솜으로, 먹일 때만 (CAP-AI-59)", "**살 것**"),
+    ("다이오드 1N5819 (펌프 역기전력)", 1, "펌프 +, − 양 끝 (K → +5V_B)", "살 것 [사양서 확인]"),
+    ("Nalgene 2104-0008 250 mL 넓은 입 병 + 식품용 실리콘 관 3.5 × 5 약 1.2 m", 1, "급이 병·관 (뚜껑에 구멍 2개)", "**살 것**"),
     ("저항 10 kΩ", 10, "통로 게이트 풀업 3 + 문 빔 포토TR 부하 6 + 레일 감지 1", "학습 키트 저항 세트에서 [실물 확인]"),
     ("커패시터 100 nF", 4, "원점 3 + 단자대 1", "키트 커패시터 세트에서 [실물 확인]"),
     ("전해 커패시터 1000 µF 10 V", 1, "서보 허브 (+5V 버스 ↔ GND 버스)", "추가"),
@@ -151,7 +159,7 @@ BOM = [
 ]
 
 UNO_PINS = ["D%d" % i for i in range(2, 14)] + ["A%d" % i for i in range(6)]
-RESERVED = {"U1": set(UNO_PINS), "U2": set(UNO_PINS) - {"D13", "D6"}}
+RESERVED = {"U1": set(UNO_PINS), "U2": set(UNO_PINS) - {"D13"}}
 
 
 def check():
@@ -309,18 +317,18 @@ def sheets():
         d += elm.Label().label("문 빔 6쌍(A0~A5): +5V_B → 220 Ω → IR LED → Q4 / +5V_B → 포토TR C·E → 핀 + 10 kΩ → GND (빛 받으면 HIGH)", fontsize=10, halign="left").at((1.2, -1.2))
         d += elm.Label().label("통로 3쌍(D7·D8·D12, Adafruit 2167): 수신 빨강 +5V_B / 검정 GND, 송신 빨강 +5V_B / 검정 → Q4", fontsize=10, halign="left").at((1.2, -1.8))
         for p, txt in (("D2", "R_RS 10 kΩ ← +5V_B (레일 감지)"), ("D3", "Q1 MOSFET → 위 링 조명 182"), ("D4", "Q4 MOSFET → 송신 9개(LED 6 + 2167 3) GND 쪽 (EMIT_EN)"),
-                       ("D5", "Q2 MOSFET → 아래 조명"), ("D6", "예비 (출구 조명 없앰, SJ-45)"),
+                       ("D5", "Q2 MOSFET → 아래 조명"), ("D6", "Q3 MOSFET → 급이 펌프 (CAP-AI-59)"),
                        ("D9", "MG90S 입구 문 112 (주황)"), ("D10", "MG90S 격리 문 170"), ("D11", "MG90S 방생 문 176")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
             d += elm.Label().label(txt, loc="left", fontsize=10)
-        d += elm.Label().label("D6·D13 예비 · 서보 전원 +5V_B · GND는 와고 한 점 · 끊기면 LOW", fontsize=10).at((-9, -4.4))
+        d += elm.Label().label("D13 예비 · D6 = 급이 펌프 · 서보 전원 +5V_B · GND는 와고 한 점 · 끊기면 LOW", fontsize=10).at((-9, -4.4))
 
 
 def main():
     errs, use = check()
     write_tables()
     print("넷 %d개, 끝 %d개" % (len(NETS), sum(len(v) for v in NETS.values())))
-    print("UNO 1 핀 %d/18, UNO 2 핀 %d/16(D6·D13 예비)" % (len([1 for k in use if k[0] == "U1"]), len([1 for k in use if k[0] == "U2"])))
+    print("UNO 1 핀 %d/18, UNO 2 핀 %d/17(D13 예비)" % (len([1 for k in use if k[0] == "U1"]), len([1 for k in use if k[0] == "U2"])))
     print("검사:", "통과" if not errs else errs)
     try:
         sheets()

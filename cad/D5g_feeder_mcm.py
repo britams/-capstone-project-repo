@@ -5,8 +5,8 @@ D5g_frame_detail.make() 끝에서 부름: FM.apply(doc) → 보고 dict
 STEP 파일: cad/vendor_step/<부품번호>.STEP — McMaster 페이지에서 '3-D STEP'으로 받은 것 (레포에 안 올림: McMaster CAD는 '참고용' 배포
   조건이고 공개 레포라서. 없으면 McMaster 표 치수로 단순 모양을 대신 넣고 보고에 적음)
 부품 [확실 — McMaster 페이지 표, 11/10 확인]
-  94459A130 열 압입 인서트 M3 × 0.5, 설치 길이 4.3, 구멍 최대 Ø4, 최소 두께 5.1 (STEP: 바깥 Ø4.74, 작은 끝 Ø3.74)  × 4 (뚜껑 기둥)
-  92545A111 손나사 M3 × 8, 머리 Ø8 × 5, 나사산 6.5 (머리 밑 1.5 민짜)                                              × 4 (뚜껑)
+  (11/10 밤, CAP-AI-59) 뚜껑 인서트 94459A130 × 4 · 손나사 92545A111 × 4 없앰 → 자석 2쌍 (서현 '사용자 편의')
+  94459A130 열 압입 인서트 M3 × 0.5, 설치 길이 4.3, 구멍 최대 Ø4, 최소 두께 5.1 (STEP: 바깥 Ø4.74, 작은 끝 Ø3.74)
   92000A118 냄비머리 십자 M3 × 8, 머리 Ø6 × 2.5, PH1                                                              × 2 (데크 아래 → 발 인서트)
   94459A130 (위와 같음)                                                                                           × 2 (발)
   (처음 안: 위에서 M5 × 14 92000A324 + 와셔 93475A240 + 가로대 T너트 4976N25 — 볼트 위가 그릇이라 드라이버가 못 들어가고,
@@ -88,20 +88,9 @@ def apply(doc):
     import D5g_feeder_uln as FU
     f, e, ins = FU.FD, FU.FDX, FU.INS
     missing, rep = [], {}
-    # --- 1) 뚜껑: 인서트 4 + 손나사 4
-    lid_top = f["wall_top"] + 2.0
-    I, T = [], []
-    for sx in (-1, 1):
-        for cy in e["lid_y"]:
-            cx = f["x"] + sx * e["lid_dx"]
-            I.append(_insert(V(cx, cy, f["wall_top"]), missing))
-            alt = Part.makeCylinder(1.5, 8, V(0, 0, -6.5)).fuse(Part.makeCylinder(4, 5, V(0, 0, 1.5)))
-            T.append(_screw("92545A111", V(cx, cy, lid_top), missing, alt))
-    for pre in ("143s_",):
-        for o in [o for o in doc.Objects if o.Label.startswith(pre)]:
-            doc.removeObject(o.Name)
-    _add(doc, "143i_insert_M3_heatset (McMaster 94459A130 — STEP, 뚜껑 기둥 4개)", Part.makeCompound(I), BRASS)
-    _add(doc, "143t_thumbscrew_M3x8 (McMaster 92545A111 — STEP, 4개, 손으로 돌림)", Part.makeCompound(T), STEEL)
+    # --- 1) 뚜껑: (11/10 밤, CAP-AI-59) 인서트·손나사 없앰 → 자석 (D5g_feeder_uln). 옛 물체만 지움
+    for o in [o for o in doc.Objects if o.Label.startswith(("143s_", "143i_", "143t_"))]:
+        doc.removeObject(o.Name)
     # --- 2) 발
     px = f["x"] + f["post_dx"]
     # (11/10) 발은 데크 아래에서 M3 × 8 (92000A118) → 발 속 인서트 94459A130 (큰 끝이 아래 = 나사 들어오는 쪽)
@@ -134,7 +123,7 @@ def check(doc):
     import D5g_feeder_uln as FU
     f, e, ins = FU.FD, FU.FDX, FU.INS
     r = {}
-    mine = [o for o in doc.Objects if o.Label.startswith(("143i_", "143t_", "143f_", "143fi_"))]
+    mine = [o for o in doc.Objects if o.Label.startswith(("143f_", "143fi_"))]
     others = [o for o in doc.Objects if o.TypeId == "Part::Feature" and o not in mine and not o.Shape.isNull()
               and o.Shape.Volume > 0 and not o.Label.startswith(("REF", "FitBox")) and "beam" not in o.Label]
     ov = []
@@ -146,24 +135,9 @@ def check(doc):
                     ov.append((a.Label.split(" ")[0], b.Label.split(" ")[0], round(v, 2)))
     r["overlaps"] = ov
     # 물림·여유 (숫자 — 위 배치식 그대로)
-    top = f["wall_top"]
-    r["lid"] = dict(insert=(round(top - ins["L"], 2), top), screw_tip=round(top + 2 - 8, 2), hole_bottom=top - ins["depth"],
-                    engage=ins["L"], tip_to_bottom=round((top + 2 - 8) - (top - ins["depth"]), 2),
-                    insert_wall=round(ins["boss_r"] - 2.37, 2), boss_depth=ins["depth"], need_depth=5.1)
     fz = f["post_foot_z"]
     r["foot"] = dict(deck=(fz - 5, fz), insert=(fz, fz + 4.3), screw_tip=fz - 5 + 8, engage=round(min(4.3, 8 - 5), 2),
                      foot_top=fz + FU.FOOT["t"], tip_to_foot_top=round(fz + FU.FOOT["t"] - (fz + 3), 2), need_depth=5.1)
-    # 손가락 자리: 손나사 머리 둘레 반지름 12, 높이 머리 + 15 에 닿는 고정 부품 (뚜껑 빼고)
-    fing = []
-    for sx in (-1, 1):
-        for cy in e["lid_y"]:
-            c = Part.makeCylinder(12, 20, V(f["x"] + sx * e["lid_dx"], cy, top + 2)).cut(Part.makeCylinder(4.5, 21, V(f["x"] + sx * e["lid_dx"], cy, top + 1.5)))
-            for b in others:
-                if b.Label.startswith("143l_"):
-                    continue
-                if c.BoundBox.intersect(b.Shape.BoundBox) and c.common(b.Shape).Volume > 1:
-                    fing.append(((round(f["x"] + sx * e["lid_dx"]), cy), b.Label.split(" ")[0]))
-    r["finger_blockers"] = fing
     # 드라이버 자리: 발 나사 머리 아래로 PH1 축 Ø4.5 × 110 mm (데크를 프레임에 올리기 전 — 데크·가로대는 빼고 봄)
     px = f["x"] + f["post_dx"]
     drv = []

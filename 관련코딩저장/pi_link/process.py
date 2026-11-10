@@ -11,7 +11,7 @@ trap_sim.py (PiFSM wait_entry·process·press_mark·feed·release·isolate·leav
     격리  : 2마리 이상 / 안 보임 / 2종 아님·불확실 / 유럽말벌 / 여왕벌 / 방제 모드
     재방문: 이미 표식 → 급이 → 방생
     마킹  : PRESS(51 g) → 자세 확인(등이 위, p ≥ 0.6) → 흉부 위 펜 2번 찍기 → 대기 자리 → 점 확인 → 급이 → 방생
-  급이: 바닥 10 mm, feed_s 동안 (샤피 건조 시간 시험 전 [추측])
+  급이: 펌프 feed_pump_ms로 솜 적심 → 바닥 F_feed, feed_s 동안 (샤피 건조 시간 시험 전 [추측]) — 펌프는 CAP-AI-59
   방생: (해 지면 격리로) REL 열기 → 장부·카메라로 빌 때까지 → 60 s 기록, 120 s 알림, 300 s CAP도 엶 → 닫기 → 바닥 0
   격리: 바닥 0 → CAP 열기 → 빌 때까지 → 닫기
   고장(TrapFault): 통과 모드 — CAP·IN 열고 조명 끔 (마킹실에 갇혀 죽지 않게), 알리고 멈춤
@@ -56,6 +56,7 @@ class Params:                   # 값 근거는 trap_sim PRM — [추측]은 시
     F_feed: float = 31.0
     F_retract: float = 10.0
     feed_s: float = 60.0        # [추측]
+    feed_pump_ms: float = 100.0  # (CAP-AI-59) 한 번 먹일 때 펌프 시간 — 약 0.14 mL [추측 — 실측으로 맞춤]. 펌웨어 PUMP_MAX_MS 이하
     dwell_s: float = 0.3        # 펜이 닿아 있는 시간 [추측]
     stamps: int = 2
     pose_retry_max: int = 3
@@ -313,6 +314,8 @@ class Processor:
 
     def feed(self):
         self.ctl.lights(0, 255)
+        if not self.ctl.pump(self.prm.feed_pump_ms):    # (CAP-AI-59) 먹일 때만 솜을 적심 — 평소 솜은 마름 (다른 벌레가 덜 먹음)
+            self.note('pump_stop')
         self.ctl.move('F', self.prm.F_feed)               # R1′: 펜이 캡 컵(Y −40)이면 펜 DOWN이어도 올림 허용
         self.ctl.idle(self.prm.feed_s)
 

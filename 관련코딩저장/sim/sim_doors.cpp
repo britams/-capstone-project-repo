@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
   CHECK(g_servo_events.empty(), "켤 때 문 서보를 붙이지 않음 (V1)");
   t_run(100);
   size_t m = t_cmd("STATUS");
-  CHECK(t_has(m, "OK STATUS IN=UNKNOWN CAP=UNKNOWN REL=UNKNOWN RAIL=1 EMIT=1 GATES=111111111"), "STATUS: 문 UNKNOWN, 게이트 9개 1");
+  CHECK(t_has(m, "OK STATUS IN=UNKNOWN CAP=UNKNOWN REL=UNKNOWN RAIL=1 EMIT=1 PUMP=0 GATES=111111111"), "STATUS: 문 UNKNOWN, 게이트 9개 1");
   m = t_cmd("PING"); CHECK(t_has(m, "OK PONG"), "PING");
   m = t_cmd("foo"); CHECK(t_has(m, "ERR UNKNOWN"), "모르는 명령 → ERR UNKNOWN");
 
@@ -288,6 +288,25 @@ int main(int argc, char** argv) {
   CHECK(t_has(m, "EVT WATCHDOG_HOLD"), "EVT WATCHDOG_HOLD");
   m = t_cmd("WATCHDOG 0"); t_run(1500);
   CHECK(last_write(11) == DOOR_OPEN_DEG || g_servo_attached[11] == 0, "닫던 문을 열림으로 (또는 이미 닫혔으면 뗌)");
+
+  // ===== 16. PUMP (11/10 밤, CAP-AI-59 급이 펌프 D6) =====
+  printf("[16] PUMP: 시간만큼 돌고 멈춤, 최대 시간, 문과 같이 안 움직임, 레일 끊기면 멈춤\n");
+  t_run(1500);
+  m = t_cmd("PUMP 300", 50); CHECK(t_has(m, "OK PUMP") && g_pins[6] == 1, "PUMP 300 → OK PUMP, D6 HIGH");
+  CHECK(t_wait(m, "DONE PUMP 300", 600), "300 ms 뒤 DONE PUMP 300");
+  CHECK(g_pins[6] == 0, "끝나면 D6 LOW");
+  m = t_cmd("PUMP 2001"); CHECK(t_has(m, "ERR PUMP MAX") && g_pins[6] == 0, "PUMP 2001 → ERR PUMP MAX (안 돎)");
+  m = t_cmd("PUMP 500", 20); CHECK(g_pins[6] == 1, "PUMP 500 돎");
+  m = t_cmd("DOOR CAP OPEN"); CHECK(t_has(m, "ERR BUSY"), "펌프 도는 중 DOOR → ERR BUSY");
+  m = t_cmd("PUMP 0"); CHECK(t_has(m, "OK PUMP 0") && g_pins[6] == 0, "PUMP 0 → 바로 멈춤");
+  m = t_cmd("STATUS"); CHECK(t_has(m, "PUMP=0"), "STATUS PUMP=0");
+  m = t_cmd("DOOR IN CLOSE", 20); m = t_cmd("PUMP 100"); CHECK(t_has(m, "ERR BUSY") && g_pins[6] == 0, "문 움직이는 중 PUMP → ERR BUSY");
+  t_run(3000);
+  m = t_cmd("PUMP 1500", 50); CHECK(g_pins[6] == 1, "다시 돎");
+  mm = t_mark(); w_rail = false; t_run(100);
+  CHECK(t_has(mm, "EVT PUMP STOP") && g_pins[6] == 0, "레일 끊기면 EVT PUMP STOP, D6 LOW");
+  m = t_cmd("PUMP 100"); CHECK(t_has(m, "ERR RAIL"), "레일 없으면 PUMP → ERR RAIL");
+  w_rail = true; t_run(100);
 
   printf("\n서보 이벤트 수 %zu, 시리얼 줄 %zu\n", g_servo_events.size(), g_lines.size());
   return t_summary("sim_doors");

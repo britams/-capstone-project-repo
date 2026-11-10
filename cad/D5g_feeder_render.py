@@ -19,19 +19,23 @@ V = App.Vector
 
 # (머리말, 분해 방향·거리, 그림 번호, 이름)
 PARTS = [
-    ("143_feed_trough", V(0, 0, 0), "1", "물길·그릇·기둥·집게 143 (PETG 3D 프린트, 앞벽 솜 구멍)"),
-    ("143l_", V(0, 0, 70), "2", "뚜껑 143l (PETG)"),
-    ("143t_", V(0, 0, 110), "3", "손나사 M3 × 8 — McMaster 92545A111 × 4"),
-    ("143i_", V(0, 0, 35), "4", "열 압입 인서트 M3 — McMaster 94459A130 × 4"),
-    ("144n_", V(0, 0, 150), "5", "15 mL 원뿔 튜브 — 코닝 352096 × 1"),
-    ("142n_", V(0, -35, 0), "6", "코튼롤 2호 Ø10 × 38 (치과 재료) × 1"),
-    ("143fi_", V(0, 0, 25), "7", "발 인서트 M3 — McMaster 94459A130 × 2"),
-    ("143f_screw", V(0, 0, -45), "8", "냄비머리 M3 × 8 (데크 아래에서) — McMaster 92000A118 × 2"),
+    ("143_feed_trough", V(0, 0, 0), "1", "물길·기둥·노즐 143 (PETG 3D 프린트)"),
+    ("143l_", V(0, 0, 60), "2", "뚜껑 143l (PETG) — 자석 2쌍 + 핀 2, 손으로 뗌"),
+    ("143mm_", V(0, 0, 45), "3", "자석 Ø6 × 2 N35 × 4 (물길 2 + 뚜껑 2)"),
+    ("142n_", V(0, -35, 0), "4", "솜 = 코튼롤 2호 Ø10 × 38 (치과 재료)"),
+    ("144b_", V(0, 0, 0), "5", "병·펌프 걸이 144b (PETG) — 레일에 M5 × 2"),
+    ("144n_", V(0, 30, 0), "6", "병 250 mL Nalgene 2104-0008 (뚜껑에 구멍 2)"),
+    ("144p_", V(0, 30, 0), "7", "연동 펌프 Adafruit 3910 (5 V 0.5 A)"),
+    ("144hf_", V(0, 0, 0), "8", "실리콘 관 3.5 × 5 (병 → 펌프 → 노즐, 물빠짐)"),
+    ("143fi_", V(0, 0, 25), "9", "발 인서트 M3 — McMaster 94459A130 × 2"),
+    ("143f_screw", V(0, 0, -45), "10", "냄비머리 나사 M3 × 8 (데크 아래에서) — McMaster 92000A118 × 2"),
+    ("143m_", V(0, 0, 0), "", ""), ("144nc_", V(0, 30, 0), "", ""), ("144pp_", V(0, 30, 0), "", ""),
+    ("144h_", V(0, 0, 0), "", ""), ("144hd_", V(0, 0, 0), "", ""), ("144s_", V(0, 0, 0), "", ""),
     ("101_deck", V(0, 0, 0), "", ""),
-    ("100c_cross_deck_yp80", V(0, 0, 0), "", ""),
+    ("100b_rail_deck_x+170", V(0, 0, 0), "", ""),
     ("120_chamber_walls", V(0, 0, 0), "", ""),
 ]
-BOX = (15, 120, 40, 125, 185, 500)   # 급이 방 둘레
+BOX = (15, 145, 15, 260, 85, 500)   # 급이 방 둘레
 
 
 def setup():
@@ -42,8 +46,6 @@ def setup():
 
 
 def pick(doc, pre):
-    if pre == "100c_cross_deck_yp80":
-        return [o for o in doc.Objects if o.Name == "P100c_cross_deck_yp80"]
     return [o for o in doc.Objects if o.Label.startswith(pre) and hasattr(o, "Shape")]
 
 
@@ -62,7 +64,7 @@ def shoot(doc, name, explode):
         if d.Length > 0:
             o.Placement.Base = o.Placement.Base + d
             moved.append((o, d))
-        if o.Label.startswith(("101_deck", "100c_", "120_")):
+        if o.Label.startswith(("101_deck", "100c_", "100b_", "120_")):
             o.ViewObject.Transparency = 75
     v.viewIsometric()
     v.fitAll()
@@ -109,7 +111,7 @@ def run():
     for name, ex, title in (("D5g_급이방_조립", False, "급이 방 상세 — 조립 (등각, 정투영)"),
                             ("D5g_급이방_분해", True, "급이 방 상세 — 분해 (등각, 정투영) · 나사 = McMaster STEP")):
         p, tags = shoot(doc, name, ex)
-        annotate(p, title, tags, "데크·가로대·마킹실 벽은 반투명 · 단위 mm · CAP-AI-57")
+        annotate(p, title, tags, "데크·레일·마킹실 벽은 반투명 · 단위 mm · CAP-AI-59 (펌프 방식)")
         done.append(p)
     json.dump(done, open(os.path.join(OUT, "_feeder_render_done.json"), "w", encoding="utf-8"), ensure_ascii=False)
 

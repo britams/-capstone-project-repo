@@ -171,6 +171,12 @@ class TrapController:
             if s.startswith('EVT SWITCH'):
                 raise TrapFault('LOST_STEPS_%s' % ax, s)
 
+    def pump(self, ms):
+        """급이 펌프를 ms 동안 (UNO 2 D6, CAP-AI-59). 끝나면 True, 레일 끊김 등으로 멈추면 False."""
+        self.d.command('PUMP %d' % ms)
+        s = self._await(self.d, ('DONE PUMP', 'EVT PUMP STOP'), ms / 1000.0 + 2.0, rail_matters=False)
+        return s.startswith('DONE PUMP')
+
     def lights(self, top, bot):
         self.d.command('LIGHT TOP %d' % top)
         self.d.command('LIGHT BOT %d' % bot)

@@ -131,6 +131,7 @@ def t_mark():
         i = cm.index('MOVE Y -5.000')
         check(cm[i + 1:i + 5] == ['PEN DOWN', 'PEN UP', 'PEN DOWN', 'PEN UP'], '2번 찍기 (DOWN·UP ×2)')
         check('MOVE F 31.000' in cm, '급이 높이 F 31')
+        check('PUMP 100' in cd and cd.index('PUMP 100') < cd.index('DOOR REL OPEN'), '급이 때 펌프 100 ms (방생 문 열기 전, CAP-AI-59)')
         check(cd[-2:] == ['DOOR REL CLOSE', 'LIGHT TOP 0'] or 'DOOR REL CLOSE' in cd, 'REL 닫음')
         check(cm[-1] == 'MOVE F 0.000', '마지막에 바닥 0')
         check(proc.ledger.n['released'] == 1 and proc.ledger.n['chamber'] == 0, '장부: 방생 1, 마킹실 0')

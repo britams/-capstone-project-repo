@@ -35,6 +35,8 @@
 +5V_B,PT_G5b.C,28,포토TR 컬렉터
 +5V_B,L_TOP.V+,24,
 +5V_B,L_BOT.V+,24,
++5V_B,PUMP.V+,22,
++5V_B,D_P.K,22,
 CSI,PI.CAM0,,"Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로"
 CSI,CAM.CSI,,"Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로"
 EMIT_LO,TX_G1.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
@@ -80,6 +82,7 @@ GND,RL_G5b.2,28,
 GND,Q4.GND,24,
 GND,Q1.GND,24,
 GND,Q2.GND,24,
+GND,Q3.GND,22,
 HX_RATE,HX711.RATE,,RATE를 5 V로 → 80 Hz (모듈 납땜 다리)
 HX_RATE,HX711.VCC_PAD,,RATE를 5 V로 → 80 Hz (모듈 납땜 다리)
 I2C_SCL,PI.GPIO3,28,
@@ -120,6 +123,9 @@ PI_3V3,PI.3V3,28,
 PI_3V3,J_I2C.VCC,28,
 PI_GND,PI.GND,28,
 PI_GND,J_I2C.GND,28,
+PUMP_LO,PUMP.V-,22,
+PUMP_LO,D_P.A,22,
+PUMP_LO,Q3.OUT-,22,
 U1_5V,U1.5V,26,HX711은 UNO 5 V (조용함)
 U1_5V,HX711.VCC,26,HX711은 UNO 5 V (조용함)
 U1_F_IN1,U1.D2,26,
@@ -196,6 +202,8 @@ U2_G5b,RL_G5b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때
 U2_G6,U2.D12,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G6,RX_G6.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
 U2_G6,R_G6.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
+U2_PUMP,U2.D6,26,"HIGH = 펌프 돎 (펌웨어 PUMP <ms>, 최대 2 s)"
+U2_PUMP,Q3.TRIG,26,"HIGH = 펌프 돎 (펌웨어 PUMP <ms>, 최대 2 s)"
 U2_Q1,U2.D3,26,PWM 되는 핀
 U2_Q1,Q1.TRIG,26,PWM 되는 핀
 U2_Q2,U2.D5,26,PWM 되는 핀

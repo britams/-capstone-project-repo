@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
-"""급이 방 검사 — FreeCAD 없이 (서현, 2026-11-10, CAP-AI-56)
+"""급이 방 검사 — FreeCAD 없이 (서현, 2026-11-10, CAP-AI-56 → 11/10 밤 펌프 방식으로 다시, CAP-AI-59)
 
 값은 cad/D5g_feeder_uln.py 의 FD 를 그대로 읽는다 (한 곳에서만 고침). 마킹실·바닥 치수는 D5e CH·FLOOR.
-검사 6개 (모두 통과해야 함):
-  1 열팽창: 맑은 날·햇빛에 튜브 안 공기(+수증기)가 부풀어 밀어낸 물 높이 + 표면장력 1 mm < 벽 구멍 아래 끝
-  2 솜 바깥 끝이 물에 잠김 (1.5 mm 이상), 물길 바닥(364) 아래로 안 내려감
-  3 솜이 벽 구멍 안에 들어감 (기울어진 솜이 벽 두께 3 mm를 지날 때 필요한 높이 ≤ 구멍 지름)
-  4 솜이 마킹실 안으로 안 나옴 → 바닥(벽에서 0.5 mm 떨어짐)을 0~36.5 mm 올려도 겹침 0
-  5 급이 높이에서 말벌 입이 솜 끝 높이에 있고, 말벌이 격자에 안 눌림
-  6 솜이 빨아올릴 높이 ≤ 25 mm
-실행: python cad/feeder_check.py   (현재 값 + 예전 50 mL 값 비교)
+(11/10 밤) '거꾸로 병' → '바깥 병 + 연동 펌프가 먹일 때만 몇 방울 + 물빠짐'. 고인 물이 없어 열팽창 검사는 없앰.
+검사 7개 (모두 통과해야 함):
+  1 펌프 고장(명령 최대 시간 내내 돎) 때 나온 물 ≤ 물길이 넘침 높이까지 담는 양 (물빠짐이 막혀도)
+  2 물빠짐 구멍이 바닥 높이에 있음 (고인 물이 바로 빠짐)
+  3 노즐이 솜 바로 옆 (벽 안 면 ↔ 솜 틈 ≤ 1.5, 높이가 솜 축 ± 반지름 0.6 안)
+  4 솜이 벽 구멍 안에 들어감
+  5 솜이 마킹실 안으로 안 나옴 (바닥 0~36.5 올려도 겹침 0)
+  6 급이 높이에서 말벌 입이 솜 끝 높이, 말벌이 격자에 안 눌림
+  7 노즐 → 솜 끝 거리 ≤ 40 (면 심지가 젖어 가는 길) [가능성 높음 — 실물 시험]
+실행: python cad/feeder_check.py
 """
 import ast
 import math
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(HERE)
 
 
 def load_fd():
@@ -27,18 +31,21 @@ def load_fd():
     raise SystemExit("FD 못 찾음")
 
 
+def pump_limits():
+    """펌웨어 trap_doors 의 PUMP 최대 시간(ms)과 Pi 한 번 양(ms)을 코드에서 읽음 — 숫자를 두 곳에 안 적으려고"""
+    fw = open(os.path.join(REPO, "design", "circuit", "firmware", "trap_doors", "trap_doors.ino"), encoding="utf-8").read()
+    mx = int(re.search(r"PUMP_MAX_MS\s*=\s*(\d+)", fw).group(1))
+    pr = open(os.path.join(REPO, "관련코딩저장", "pi_link", "process.py"), encoding="utf-8").read()
+    dose = float(re.search(r"feed_pump_ms:\s*float\s*=\s*([\d.]+)", pr).group(1))
+    return mx, dose
+
+
 CH = dict(cx=55.0, inner=40.0, wall=3.0, zc0=335.0, z_grid_bot=385.0)   # D5e_module_kinematic.py CH (마킹실 안 y −20~20, 벽 20~23)
 FLOOR = dict(t=6.0, clear=0.5, stroke=36.5, top_rest=341.0)
 HORNET_H = 7.5          # D5e HORNET h
 MOUTH_ABOVE_FLOOR = 3.0  # 말벌 입 높이 [추측 — 표본으로 확인]
-THREAD_R = {8.685: 9.625, 14.86: 14.86}   # 물 높이에 걸리는 튜브 바깥 반지름 (15 mL는 입구 쪽 나사 Ø19.25)
-TUBE_V = {8.685: 17.0, 14.86: 52.0}       # 튜브 안 전체 부피 mL (가득 + 원뿔) [가능성 높음]
 F_FEED = 31.0           # 급이 높이 (바닥 리프트 mm) — 관련코딩저장/pi_link/process.py, design/control_sim/trap_sim.py 와 같아야 함
-WEATHER = {"맑은 날 5→30 °C": (5.0, 30.0, 0.0), "햇빛 5→45 °C + 기압 −2 kPa": (5.0, 45.0, 2.0)}
-
-
-def psat(t):  # kPa, Magnus
-    return 0.61094 * math.exp(17.625 * t / (t + 243.04))
+FLOW = 100.0 * 5.0 / 6.0  # mL/min: Adafruit 3910 최대 100 (6 V) → 5 V 레일에서 약 5/6 [추측 — 실측으로 바꿈]
 
 
 def roll_geom(f):
@@ -55,60 +62,57 @@ def in_roll(p, t, u, L, r):
     return q[0] ** 2 + q[1] ** 2 + q[2] ** 2 <= r * r
 
 
-def water_area(f, t, u, L, h=0.2):
-    """물 높이에서 열린 물 면적 mm² (그릇 − 튜브 + 물길 − 솜 − 코튼롤 잡이 리브)"""
-    z = f["mouth_z"]; rt = THREAD_R.get(f["tube_r"], f["tube_r"]); A = 0.0
-    y0 = f["ch_y0"]; ybowl = f["tube_y"] - f["bowl_ri"]
-    xs = f["x"] - f["bowl_ri"]
-    nx = int(2 * f["bowl_ri"] / h); ny = int((f["tube_y"] + f["bowl_ri"] - y0) / h)
-    for i in range(nx):
-        x = xs + (i + 0.5) * h
-        for j in range(ny):
-            y = y0 + (j + 0.5) * h
-            rr = (x - f["x"]) ** 2 + (y - f["tube_y"]) ** 2
-            inbowl = rr <= f["bowl_ri"] ** 2
-            inch = abs(x - f["x"]) <= f["ch_w"] / 2 and y <= ybowl + 1
-            if not (inbowl or inch) or rr <= rt ** 2 or in_roll((x, y, z), t, u, L, f["roll_r"]):
-                continue
-            A += h * h
-    return A
+def overflow_z(f):
+    """넘침 높이 = min(마킹실 벽 구멍 아래 끝, 물길 앞벽 솜 구멍 아래 끝)"""
+    hb = f["wall_hole_z"] - f["wall_hole_r"]
+    yb = f["ch_y0"] + f["front_t"]
+    th = math.atan2(f["tip_z"] - f["end_z"], f["end_y"] - f["tip_y"])
+    zc = f["tip_z"] - (yb - f["tip_y"]) * math.tan(th)
+    return min(hb, zc - f["front_hole_r"] / math.cos(th))
 
 
-def rise_mm(f, A, T1, T2, dP):
-    k = (101.3 - psat(T1)) / (101.3 - dP - psat(T2)) * (T2 + 273.15) / (T1 + 273.15) - 1   # 부피 늘어나는 비율 (공기 + 수증기)
-    Vt = TUBE_V.get(f["tube_r"], 50.0)
-    dV = Vt * k / (1 + k) * 1000.0    # 가장 나쁜 채움 비율 (공기가 늘어난 만큼 밀어낼 물이 남아 있는 한계)
-    return k, dV / A
+def trough_volume(f, z_top, h=0.25):
+    """물길 안(앞벽 뒤 ~ 끝 벽 앞) 바닥 윗면 → z_top 사이 빈 부피 (솜 빼고) mm³"""
+    t, u, L = roll_geom(f)
+    y0, y1 = f["ch_y0"] + f["front_t"], f["ch_y1"] - f["ch_t"]
+    z0 = f["floor_z"] + f["floor_t"]
+    n = 0
+    x = f["x"] - f["ch_w"] / 2 + h / 2
+    while x < f["x"] + f["ch_w"] / 2:
+        y = y0 + h / 2
+        while y < y1:
+            z = z0 + h / 2
+            while z < z_top:
+                if not in_roll((x, y, z), t, u, L, f["roll_r"]):
+                    n += 1
+                z += h
+            y += h
+        x += h
+    return n * h ** 3
 
 
 def check(f, label):
     ok_all = True
     t, u, L = roll_geom(f)
     th = math.degrees(math.asin((f["tip_z"] - f["end_z"]) / L))
-    hole_bot = f["wall_hole_z"] - f["wall_hole_r"]
-    if "front_t" in f:   # (11/10 상세) 물길 앞벽 솜 구멍이 더 낮으면 그쪽이 넘침 높이
-        yb = f["ch_y0"] + f["front_t"]
-        zc = f["tip_z"] - (yb - f["tip_y"]) * (f["tip_z"] - f["end_z"]) / (f["end_y"] - f["tip_y"])
-        hole_bot = min(hole_bot, zc - f["front_hole_r"] / math.cos(math.atan2(f["tip_z"] - f["end_z"], f["end_y"] - f["tip_y"])))
-    print("\n== %s ==  튜브 반지름 %.2f, 물 높이 %.1f, 솜 기울기 %.1f°, 솜 길이 %.2f" % (label, f["tube_r"], f["mouth_z"], th, L))
+    print("\n== %s ==  솜 기울기 %.1f°, 솜 길이 %.2f" % (label, th, L))
 
     def res(name, ok, txt):
         nonlocal ok_all
         ok_all &= ok
         print("  [%s] %s — %s" % ("통과" if ok else "실패", name, txt))
-    A = water_area(f, t, u, L)
-    worst = 0
-    for nm, (T1, T2, dP) in WEATHER.items():
-        k, h = rise_mm(f, A, T1, T2, dP); worst = max(worst, h)
-        print("      %s: 부피 +%.1f %% → 물 +%.1f mm" % (nm, k * 100, h))
-    top = f["mouth_z"] + worst + 1.0
-    res("1 열팽창", top < hole_bot - 0.5, "물 면 %.0f mm², 최악 물 높이 %.1f (표면장력 1 포함) vs 넘침 높이(벽·앞벽 구멍 아래 끝) %.1f (여유 %.1f)" % (A, top, hole_bot, hole_bot - top))
-    low = f["end_z"] - f["roll_r"] * math.cos(math.radians(th))
-    imm = f["mouth_z"] - low
-    res("2 솜 잠김", imm >= 1.5 and low >= f["floor_z"] + f["floor_t"] - 0.3, "솜 바깥 끝 가장 낮은 점 %.2f, 잠김 %.1f mm (물길 바닥 %.0f)" % (low, imm, f["floor_z"] + f["floor_t"]))
+    mx, dose = pump_limits()
+    zo = overflow_z(f)
+    vol = trough_volume(f, zo - 0.5) / 1000.0
+    worst = FLOW * mx / 60000.0 * 6 / 5            # 6 V 최대 유량으로 넉넉히
+    res("1 펌프 고장", worst <= vol, "명령 최대 %d ms × 최대 100 mL/min = %.2f mL ≤ 물길이 넘침 높이 %.1f − 0.5까지 담는 양 %.2f mL (물빠짐 막혀도)" % (mx, worst, zo, vol))
+    res("2 물빠짐", f["ch_y0"] + f["front_t"] < f["dr_y"] < f["ch_y1"] - f["ch_t"], "바닥 끝 y %.0f, 구멍 Ø2가 바닥 윗면 %.0f에서 아래로 (고인 물 → 프레임 밖)" % (f["dr_y"], f["floor_z"] + f["floor_t"]))
+    s = (f["nz_y"] - t[1]) / u[1]
+    za = t[2] + s * u[2]
+    gap = (f["x"] + f["ch_w"] / 2) - (f["x"] + f["roll_r"])
+    res("3 노즐 → 솜", gap <= 1.5 and abs(f["nz_z"] - za) <= 0.6 * f["roll_r"], "노즐 y %.0f z %.1f, 그 자리 솜 축 z %.1f (차 %.1f), 벽 안 면 ↔ 솜 틈 %.1f" % (f["nz_y"], f["nz_z"], za, f["nz_z"] - za, gap))
     need = 2 * f["roll_r"] / math.cos(math.radians(th)) + CH["wall"] * math.tan(math.radians(th))
-    res("3 벽 구멍", need <= 2 * f["wall_hole_r"] + 0.2, "필요 높이 %.2f vs 구멍 Ø%.1f" % (need, 2 * f["wall_hole_r"]))
-    # 4 바닥 겹침 (바닥판: x cx±19.5, y ±19.5, 두께 6, 윗면 341+lift)
+    res("4 벽 구멍", need <= 2 * f["wall_hole_r"] + 0.2, "필요 높이 %.2f vs 구멍 Ø%.1f" % (need, 2 * f["wall_hole_r"]))
     y_in = CH["inner"] / 2; fe = y_in - FLOOR["clear"]
     hits = []
     for lift in [i * 0.5 for i in range(int(FLOOR["stroke"] / 0.5) + 1)]:
@@ -127,21 +131,17 @@ def check(f, label):
         if n:
             hits.append((lift, round(n * h ** 3, 1)))
     yi = min(f["tip_y"] - f["roll_r"] * math.sin(math.radians(th)), f["tip_y"])
-    res("4 바닥과 솜", not hits, "솜 안 끝 가장 안쪽 y %.2f (벽 안 면 %.0f, 바닥 끝 %.1f), 겹침 %s" % (yi, y_in, fe, hits[:3] if hits else "0"))
+    res("5 바닥과 솜", not hits, "솜 안 끝 가장 안쪽 y %.2f (벽 안 면 %.0f, 바닥 끝 %.1f), 겹침 %s" % (yi, y_in, fe, hits[:3] if hits else "0"))
     zf = FLOOR["top_rest"] + F_FEED; mouth = zf + MOUTH_ABOVE_FLOOR
     face = (f["tip_z"] - f["roll_r"] / math.cos(math.radians(th)), f["tip_z"] + f["roll_r"] / math.cos(math.radians(th)))
-    res("5 급이 높이", face[0] + 0.5 <= mouth <= face[1] - 0.5 and zf + HORNET_H < CH["z_grid_bot"],
+    res("6 급이 높이", face[0] + 0.5 <= mouth <= face[1] - 0.5 and zf + HORNET_H < CH["z_grid_bot"],
         "F %.0f → 바닥 %.0f, 입 %.0f, 솜 끝 %.1f~%.1f, 말벌 위 %.1f < 격자 %.0f" % (F_FEED, zf, mouth, face[0], face[1], zf + HORNET_H, CH["z_grid_bot"]))
-    lift = face[1] - f["mouth_z"]
-    res("6 빨아올림", lift <= 25.0, "물 → 솜 끝 위 %.1f mm (면 심지는 수 cm까지 [가능성 높음 — 실물 시험])" % lift)
+    res("7 젖어 가는 길", s <= 40.0, "노즐 자리 → 솜 끝 %.1f mm (면 심지 [가능성 높음 — 실물 시험])" % s)
+    print("      한 번 양: %.0f ms × %.0f mL/min (5 V 추정) = %.2f mL [추측 — 실측으로 맞춤]" % (dose, FLOW, FLOW * dose / 60000.0))
     return ok_all
 
 
 if __name__ == "__main__":
-    f = load_fd()
-    ok = check(f, "지금 값 (D5g_feeder_uln.py)")
-    old = {k: v for k, v in f.items() if k not in ("front_t", "front_hole_r")}
-    old = dict(old, tube_r=14.86, mouth_z=369.0, tip_y=16.0, tip_z=379.0, end_y=54.0, end_z=372.0, wall_hole_z=378.2)
-    check(old, "참고: 11/06 승준 값 (50 mL, 물 369) — 실패해야 맞음")
+    ok = check(load_fd(), "지금 값 (D5g_feeder_uln.py)")
     print("\n결과:", "모두 통과" if ok else "실패 있음")
     sys.exit(0 if ok else 1)
