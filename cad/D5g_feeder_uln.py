@@ -139,7 +139,7 @@ def make_into(doc, G):
             o.Label = "120_chamber_walls (+y 벽 Ø10.6 급이 구멍)"
     add = []
     add.append(("142n_cotton_roll_#2 (Ø10×38, 구매)", cotton_roll(), (0.97, 0.97, 0.92)))
-    add.append(("144n_falcon_50mL_inverted (설탕물 50 mL, 구매)", falcon_tube_inverted(), (0.85, 0.92, 1.0)))
+    add.append(("144n_falcon_15mL_inverted (설탕물 15 mL, 코닝 352096, 구매)", falcon_tube_inverted(), (0.85, 0.92, 1.0)))
     add.append(("143_feed_trough (설탕물 방 물길·그릇·기둥, 3D 프린트 PETG)", feed_trough(), None))
     f = FD
     # 기둥 발 → 데크(5) 지나 아래 2020 가로대(y +80, 윗면 z = 데크 아래 면) T너트, M5 × 12

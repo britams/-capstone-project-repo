@@ -140,3 +140,10 @@
 - **C4** `D5g_render.py` (새, GUI 매크로, 정투영·애니메이션 끔): `img/D5g_도1_전체_등각`·`도2_정면`·`도3_측면`·`도4_위` (프레임 + 상용 트랩), `img/D5g_전기배치_위`, `img/D5g_부품번호_풍선도` — 한 장씩 열어 확인 (화살표 끝 자리 0.52배 어긋남 → 고침, '−' 글자 없음 → '-')
 - 다시 만들기: `freecad.exe` 파이썬 콘솔에서 `import sys; sys.path.insert(0, r"<repo>\cad"); import D5g_frame_detail as G; doc = G.make()` (인터넷 필요 — KiCad STEP·hub_boards.py) → 그림은 `set D5G_FILE=...` 후 `freecad.exe cad\D5g_render.py`
 - 남은 결정 (정하지 않음): 방생 출구 안 1/2, 급이 바닥 높이 370, 3D 프린터 판 크기, 드라이버 안 들어가는 4곳 (SJ-53)
+
+## 2026-11-10 — 급이 방 고침 (서현, CAP-AI-56)
+- 11/06 급이 방 결함 3개 [확실 — `cad/feeder_check.py`·모델]: ① 맑은 날 열팽창으로 물 +6.7~13.0 mm → 벽 구멍(여유 3.6) 넘어 마킹실로 샘 (승준 계산 2.6 mm는 물 면적에 튜브 자리를 셈 + 수증기 빠뜨림) ② 솜 끝이 마킹실로 4 mm 나와 바닥이 33 mm 넘게 오르면 짓누름 ③ 급이 높이 F 10이면 솜이 말벌보다 23 mm 위
+- 고침 (`D5g_feeder_uln.py` FD): 튜브 50 → **15 mL (코닝 352096)**, 물(입구) 369 → **366**, 솜 안 끝 (16, 379) → **(21.4, 378) 벽 안 면 뒤 0.2**, 바깥 끝 (58.28, 368.85), 벽 구멍 z 378.0, 받침 리브 반지름 8.3. 급이 높이 F 31 (pi_link·trap_sim)
+- 검사: `python cad/feeder_check.py` 6개 통과 (11/06 값은 1·4번 실패). 서현 PC에서 `G.make()` 다시 → `D5g_full.FCStd` 저장, 급이 부품 ↔ 전체 겹침 0, 바닥 0~36.5 mm 올림 vs 솜·벽·물길 겹침 0
+- 그림: `img/D5g_급이방_단면_x55.png` (모델을 x = 55에서 자른 선, FreeCAD 안 matplotlib), 전체 그림 6장 다시 (`D5g_render.py`). 원리 동영상 `design/img/feeder/급이방_원리.mp4` (`design/calc/feeder_anim.py`)
+- 설명: `design/2026-11-10_급이방_원리_사용법_고침_서현.md`

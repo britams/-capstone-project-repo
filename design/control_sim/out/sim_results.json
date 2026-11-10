@@ -13,7 +13,7 @@
   "feed_s": 60.0,
   "press_g": 51.0,
   "F_max": 36.5,
-  "F_feed": 10.0,
+  "F_feed": 31.0,
   "F_retract": 10.0,
   "hornet_h": 7.5,
   "park": [
@@ -133,21 +133,21 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6904,
-   "E_B_Wh": 0.1598,
+   "E_A_Wh": 0.6949,
+   "E_B_Wh": 0.1586,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 157.4,
+   "cycle_s": 159.1,
    "pass": true,
    "fails": [],
    "per_hornet": {
-    "cycle_s": 157.4,
-    "E_cycle_Wh": 0.354,
-    "E_extra_Wh": 0.0296,
+    "cycle_s": 159.1,
+    "E_cycle_Wh": 0.3606,
+    "E_extra_Wh": 0.0326,
     "idle_W": 7.42
    }
   },
@@ -176,7 +176,7 @@
      "ok": true
     },
     {
-     "t": 265.16,
+     "t": 266.86,
      "kind": "mark_result",
      "ok": true
     }
@@ -189,15 +189,15 @@
     "peak_iB": 1.007,
     "crush": 0
    },
-   "E_A_Wh": 1.367,
-   "E_B_Wh": 0.3179,
+   "E_A_Wh": 1.3757,
+   "E_B_Wh": 0.3155,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 157.4,
+   "cycle_s": 159.1,
    "pass": true,
    "fails": []
   },
@@ -330,8 +330,8 @@
     "peak_iB": 1.012,
     "crush": 0
    },
-   "E_A_Wh": 1.5127,
-   "E_B_Wh": 0.3365,
+   "E_A_Wh": 1.517,
+   "E_B_Wh": 0.3353,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
@@ -371,15 +371,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6904,
-   "E_B_Wh": 0.1598,
+   "E_A_Wh": 0.6949,
+   "E_B_Wh": 0.1586,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 157.4,
+   "cycle_s": 159.1,
    "pass": true,
    "fails": []
   },
@@ -445,12 +445,12 @@
      "ok": true
     },
     {
-     "t": 28923.92,
+     "t": 28914.94,
      "kind": "decision",
      "what": "dusk → isolate"
     },
     {
-     "t": 28958.21,
+     "t": 28959.91,
      "kind": "night",
      "what": "해 짐 - 30분 → 전부 포획통으로"
     }
@@ -463,8 +463,8 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 69.0116,
-   "E_B_Wh": 12.8809,
+   "E_A_Wh": 69.0153,
+   "E_B_Wh": 12.8814,
    "final_doors": {
     "IN": "open",
     "CAP": "open",
@@ -504,15 +504,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 29.5094,
-   "E_B_Wh": 6.5876,
+   "E_A_Wh": 29.5138,
+   "E_B_Wh": 6.5864,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 157.4,
+   "cycle_s": 159.1,
    "pass": true,
    "fails": []
   },
@@ -627,15 +627,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.5116,
-   "E_B_Wh": 0.1075,
+   "E_A_Wh": 0.5152,
+   "E_B_Wh": 0.1098,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 108.7,
+   "cycle_s": 130.1,
    "pass": true,
    "fails": []
   },
@@ -660,13 +660,13 @@
      "ok": true
     },
     {
-     "t": 249.13,
+     "t": 240.15,
      "kind": "nudge",
      "t_wait": 65,
      "what": "방생 60 s — 굴뚝 빛 쪽으로 가길 기다림"
     },
     {
-     "t": 309.13,
+     "t": 300.15,
      "kind": "alert",
      "what": "RELEASE 120 s"
     }
@@ -679,15 +679,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 1.2257,
-   "E_B_Wh": 0.2496,
+   "E_A_Wh": 1.2301,
+   "E_B_Wh": 0.2483,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 287.4,
+   "cycle_s": 289.1,
    "pass": true,
    "fails": []
   },
@@ -726,15 +726,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6914,
-   "E_B_Wh": 0.1599,
+   "E_A_Wh": 0.6956,
+   "E_B_Wh": 0.1587,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 159.6,
+   "cycle_s": 161.4,
    "pass": true,
    "fails": []
   },
@@ -789,15 +789,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6933,
-   "E_B_Wh": 0.16,
+   "E_A_Wh": 0.6977,
+   "E_B_Wh": 0.1588,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 164.9,
+   "cycle_s": 166.6,
    "pass": true,
    "fails": []
   },
@@ -836,15 +836,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6956,
-   "E_B_Wh": 0.1628,
+   "E_A_Wh": 0.7001,
+   "E_B_Wh": 0.1615,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 170.4,
+   "cycle_s": 172.1,
    "pass": true,
    "fails": []
   },
@@ -887,15 +887,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.8688,
-   "E_B_Wh": 0.2112,
+   "E_A_Wh": 0.8733,
+   "E_B_Wh": 0.21,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 200.3,
+   "cycle_s": 202.0,
    "pass": true,
    "fails": []
   },
@@ -928,15 +928,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.6928,
-   "E_B_Wh": 0.1598,
+   "E_A_Wh": 0.6973,
+   "E_B_Wh": 0.1586,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 162.2,
+   "cycle_s": 163.9,
    "pass": true,
    "fails": []
   },
@@ -1036,15 +1036,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 1.0294,
-   "E_B_Wh": 0.241,
+   "E_A_Wh": 1.0337,
+   "E_B_Wh": 0.2398,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 202.9,
+   "cycle_s": 204.7,
    "pass": true,
    "fails": []
   },
@@ -1174,15 +1174,15 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.9916,
-   "E_B_Wh": 0.2319,
+   "E_A_Wh": 0.9952,
+   "E_B_Wh": 0.2341,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 196.9,
+   "cycle_s": 218.3,
    "pass": true,
    "fails": []
   },
@@ -1215,7 +1215,7 @@
      "ok": true
     },
     {
-     "t": 217.63,
+     "t": 219.35,
      "kind": "shutdown",
      "what": "passthrough 후 Pi 끔"
     }
@@ -1228,8 +1228,8 @@
     "peak_iB": 1.006,
     "crush": 0
    },
-   "E_A_Wh": 0.3982,
-   "E_B_Wh": 0.1051,
+   "E_A_Wh": 0.4054,
+   "E_B_Wh": 0.1045,
    "final_doors": {
     "IN": "open",
     "CAP": "open",
@@ -1269,23 +1269,23 @@
     "peak_iB": 1.007,
     "crush": 0
    },
-   "E_A_Wh": 0.6904,
-   "E_B_Wh": 0.1598,
+   "E_A_Wh": 0.6949,
+   "E_B_Wh": 0.1586,
    "final_doors": {
     "IN": "open",
     "CAP": "closed",
     "REL": "closed"
    },
    "fsm_end": "IDLE",
-   "cycle_s": 182.9,
+   "cycle_s": 184.6,
    "pass": true,
    "fails": []
   }
  ],
  "per_hornet": {
-  "cycle_s": 157.4,
-  "E_cycle_Wh": 0.354,
-  "E_extra_Wh": 0.0296,
+  "cycle_s": 159.1,
+  "E_cycle_Wh": 0.3606,
+  "E_extra_Wh": 0.0326,
   "idle_W": 7.42
  },
  "daily": [
@@ -1307,7 +1307,7 @@
    "bot_idle": true,
    "idle_W": 7.42,
    "load_Wh": 71.6,
-   "wall_Wh": 84.2
+   "wall_Wh": 84.3
   },
   {
    "visits": 100,
@@ -1316,8 +1316,8 @@
    "cam_always": true,
    "bot_idle": true,
    "idle_W": 7.42,
-   "load_Wh": 73.9,
-   "wall_Wh": 87.0
+   "load_Wh": 74.2,
+   "wall_Wh": 87.3
   },
   {
    "visits": 20,
@@ -1327,7 +1327,7 @@
    "bot_idle": true,
    "idle_W": 8.06,
    "load_Wh": 194.0,
-   "wall_Wh": 228.2
+   "wall_Wh": 228.3
   },
   {
    "visits": 20,
@@ -1336,8 +1336,8 @@
    "cam_always": false,
    "bot_idle": false,
    "idle_W": 5.33,
-   "load_Wh": 52.8,
-   "wall_Wh": 62.1
+   "load_Wh": 52.9,
+   "wall_Wh": 62.2
   }
  ],
  "single_beam_compare": {

@@ -154,12 +154,12 @@ def t_queen():
 
 
 def t_revisit():
-    r, proc, vis, res, cm, cd = run_scene('revisit 이미 표식 → 급이(펜 캡 컵에 꽂힌 채 F 10, R1′) → 방생',
+    r, proc, vis, res, cm, cd = run_scene('revisit 이미 표식 → 급이(펜 캡 컵에 꽂힌 채 F 31, R1′) → 방생',
                                           dict(species='velutina', mw_mm=4.0, marked=True, x=0, y=0))
     try:
         check(res == ('release', 'marked'), '결과 release (marked)')
         check(not any(s.startswith(('PRESS', 'PEN')) for s in cm), 'PRESS·펜 명령 없음')
-        check('MOVE F 10.000' in cm, '급이 F 10 — 펌웨어가 받아들임 (R1′, 펜은 Y −40 캡 컵)')
+        check('MOVE F 31.000' in cm, '급이 F 31 — 펌웨어가 받아들임 (R1′, 펜은 Y −40 캡 컵)')
         check(not any('ERR' in n.get('why', '') for n in proc.log), '오류 없음')
     finally:
         r.close()
