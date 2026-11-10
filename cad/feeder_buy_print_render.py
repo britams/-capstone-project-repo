@@ -78,7 +78,7 @@ def run():
         c = tuple(int(255 * t) for t in col)
         dr.ellipse([bx - 30, by - 30, bx + 30, by + 30], fill=c, outline=(30, 30, 30), width=4)
         dr.text((bx, by), n, fill=(0, 0, 0), font=f3, anchor="mm")
-    x0, y0 = 1560, 260                       # 표는 오른쪽 위 (아래에 두면 발 나사를 가림)
+    x0, y0 = 1560, 1080                      # 표는 오른쪽 아래 (왼쪽 아래는 발 나사, 오른쪽 위는 튜브 번호를 가림)
     f4 = ImageFont.truetype(FONT, 28)
     dr.rectangle([x0 - 20, y0 - 25, W - 20, y0 + 92 * len(tags) + 10], fill=(255, 255, 255), outline=(120, 120, 120), width=2)
     for i, (_, n, txt, col) in enumerate(tags):
