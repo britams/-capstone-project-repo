@@ -220,6 +220,8 @@ def assemble():
     if "A143_급이방_조립" in App.listDocuments():
         App.closeDocument("A143_급이방_조립")
     asm = App.newDocument("A143_급이방_조립")
+    apath = os.path.join(OUT, "A143_급이방_조립.FCStd")
+    asm.saveAs(apath)                       # 바깥 파일 링크는 조립 파일이 먼저 저장돼 있어야 함
     links = []
     for num, tag, pl in placements():
         lk = asm.addObject("App::Link", "L_" + tag)
@@ -234,7 +236,7 @@ def assemble():
                 pass
         links.append((num, tag, lk))
     asm.recompute()
-    asm.saveAs(os.path.join(OUT, "A143_급이방_조립.FCStd"))
+    asm.save()
     return asm, links
 
 
