@@ -758,3 +758,29 @@
 - 출처: Adafruit 3910 상품 페이지 (5~6 V 0.5 A, 100 mL/min, 관 3.5 × 5, Ø27.8 × 66.8), 코닝 50 mL 도면 LSR00042 (안 씀, 참고), Zoro Nalgene 2104-0008 (Ø61 × 131) [가능성 높음]
 - 미검증: 펌프 머리 모양·관 자리 [추측], 병 뚜껑 모양 [추측], 5 V 유량 83 mL/min [추측], 솜이 끝까지 젖는지, 자석 당김 힘
 - 남은 일 (순서): ① PC FreeCAD 켜고 G.make() → `_mcm_report.json`의 feeder_pump (겹침 '문제' 0, 관 경로, 병 들어 올림·뚜껑 손 자리) ② FCStd 저장(레포판 = 단순 나사), `feeder_parts.run()`, 그림 매크로 3개 ③ README·상세설계 문서 고침 ④ 서현 결정: 143 둘로 나눌지, 프린터 판 크기
+
+## CAP-AI-60 — 2026-11-10 21:45 · (웹 채팅) 교수님 피드백 "로드셀은 너무 많이 갔다" → 로드셀 없앰
+- 명령: "로드셀 넣지 않는 방향으로 해" → 21:56 "일단 정지"
+- 결정 (AI 판단, 서현 위임): 로드셀·HX711 → **스프링 146 + 누름 스위치 227p (KW11-3Z, NC 접점, UNO 1 A1)**
+  - 스프링이 4.83 mm(0.5 N / 103.6 N/m) 눌리면 축 걸쇠 148c가 스위치를 누름 → 멈춤
+  - 선이 끊겨도 HIGH가 돼서 멈추는 쪽으로 안전
+  - 힘은 스위치 긴 구멍으로 저울 위에서 한 번 맞춤
+- 한 일 (모두 커밋·푸시):
+  - 펌웨어 trap_motion: PRESS를 스위치로, STATUS PSW=, LOAD/TARE/CAL 없앰, 누르기 전부터 HIGH면 ERR PRESS_SW → sim_motion **88/88**
+  - Pi 시험: test_pi_link **36/36**, test_process **53/53**
+  - circuit.py: HX711·로드셀 넷 → PSW (UNO 1 17/18, A2 예비), 검사 통과. harness.py·elec_budget.py도 고침
+  - CAD: `D5g_feeder_uln.press_parts/press_apply/press_check` (캐리지 받침 칸 + 걸쇠 + 스위치)
+    - 옛 loadcell 함수 지움
+    - C3에서 HX711·받침·데크 탭 구멍 없앰
+    - 부품표·그림 이름 고침
+- **멈춘 자리 (21:56):** PC FreeCAD에서 전체 다시 만들기(G.make → 저장 → feeder_parts.run)가 돌던 중
+  - 결과는 `cad/_rebuild60.json`에 써짐 (커밋 안 함)
+  - 그 결과로 `D5g_full.FCStd`와 `cad/parts/feeder/`가 PC에서 바뀌었을 수 있음 → 확인 전에는 커밋하지 말 것
+- 남은 일 (순서):
+  1. `_rebuild60.json` 확인: press의 bad·sweep_hits 0, feeder_pump bad 0
+  2. 문제 있으면 받침 칸·걸쇠 자리 고침
+  3. 그림 매크로 4개 → PC에서 FCStd·그림 커밋
+  4. 인터페이스 정의서 하중 센서 줄 + 변경 이력
+  5. S4 문서에 '로드셀 없앰' 메모
+  6. 하네스에 펌프 선(Q3 → 펌프) 넣기
+  7. 슬라이드 12 숫자 고치기 (넷 59, MOSFET 4, 펌프, 누름 스위치)
