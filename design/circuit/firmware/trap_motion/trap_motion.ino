@@ -1,4 +1,6 @@
-﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F·마커 X·Y 스테핑, 펜 서보, HX711, 원점 스위치 3 — v0.2
+﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F·마커 X·Y 스테핑, 펜 서보, 누름 스위치, 원점 스위치 3 — v0.2
+// (11/10 밤, CAP-AI-60) 교수님 피드백 '로드셀은 과함' → HX711·로드셀 없앰. 스프링 146(k 103.6 N/m)이 4.8 mm 눌리면(0.5 N)
+//   축 147의 걸쇠가 누름 스위치(KW11, NC 접점)를 누름 → 멈춤. 힘은 스위치 자리로 정함 (저울로 한 번 맞춤)
 // 작성: 서현 (Claude, CAP-AI-40, 2026-11-08). 바탕: control/firmware/trap_controller/trap_controller.ino v0.1 (승준 SJ-19)
 // 사양: design/2026-11-06_펌웨어_변경요청_서현.md 1장, 핀 원본: design/circuit/circuit.py (검사 통과)
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
@@ -8,13 +10,13 @@
 //   X 마커 X   215 : D6  D7  D8  D9
 //   Y 마커 Y   209 : D10 D11 D12 D13
 //   PEN 펜 서보 205 : A0  (SG90, 전원 +5V_B)
-//   HX711 DT / SCK : A1 / A2  (RATE → 5V, 80 Hz)
+//   누름 스위치 PSW : A1 (INPUT_PULLUP, NC 접점 → GND: 평소 LOW, 눌림·선 끊김 = HIGH → 멈춤 쪽으로 안전)   A2 예비
 //   원점 F / X / Y : A3 / A4 / A5  (INPUT_PULLUP, 눌리면 LOW, 100 nF)
 //
 // 시리얼 115200, 한 줄 = 명령 하나 (대문자로 바꿔 읽음)
 //   응답: OK ... (접수) / ERR <이유> / DONE ... (끝) / EVT ... (사건)
 //   PING                         → OK PONG
-//   STATUS                       → OK STATUS F=<mm> X=<mm> Y=<mm> MOVING=<FXY|-> HOMED=<FXY|-> LOAD=<g> PEN=<UP|DOWN|MOVING|LIMP> SW=<FXY 눌림 1/0>
+//   STATUS                       → OK STATUS F=<mm> X=<mm> Y=<mm> MOVING=<FXY|-> HOMED=<FXY|-> PSW=<1|0> PEN=<UP|DOWN|MOVING|LIMP> SW=<FXY 눌림 1/0>
 //   HOME <F|X|Y>                 → OK HOME <축>, 끝나면 DONE HOME <축> <찾을 때까지 반걸음> | ERR HOME <축> NOSWITCH | ERR HOME <축> STUCK
 //   MOVE <F|X|Y> <mm>            → OK MOVE <축> <mm>, 끝나면 DONE MOVE <축> <mm>   (HOME/ZERO 전에는 ERR NOT_HOMED, 펜 DOWN이면 X·Y와 F 올리기는 ERR PEN_DOWN)
 //   STOP                         → OK STOP (HOME 중이면 HOME도 멈춤 → ERR HOME <축> STOPPED)
@@ -22,11 +24,11 @@
 //   SPEED <F|X|Y> <us>           반걸음 간격 (기본 1000, 최소 800, 1080~1460은 스프링 서지 띠라 거부)
 //   LIMIT <F|X|Y> <min> <max>    소프트 한계 mm
 //   HOLD <F|X|Y> <0|1>           멈춘 뒤 코일 전류 (기본 모두 0 — F도 0, 변경요청 1장)
-//   PRESS <g> [<mm>]             → OK PRESS, DONE PRESS <mm> <g> | DONE PRESS LIMIT <mm> <g>
+//   PRESS <g> [<mm>]             → OK PRESS, DONE PRESS <mm> <g> | DONE PRESS LIMIT <mm> 0
+//                                  (g는 기록용 — 힘은 스위치 자리가 정함). 누르기 전부터 스위치가 HIGH면 ERR PRESS_SW (눌림·선 끊김)
 //   PEN <UP|DOWN>                → OK PEN, 끝나면 DONE PEN UP|DOWN. DOWN은 2단계(마지막 구간 ≤ 60 °/s). X·Y가 움직이면 ERR XY_MOVING
 //   SERVO PEN <deg>              각도 직접 (보정용) → OK SERVO
 //   SETDOOR PEN <위> <아래>       펜 각도 보정 (전원 끄면 사라짐) → OK SETDOOR
-//   LOAD / TARE / CAL <g/raw>    하중
 //   WATCHDOG <s>                 s초 명령 없으면 정지·펜 들기 (0 = 끔)
 //
 // 안전 규칙 (AI 판단, 서현 위임 — CAP-AI-40)
@@ -105,11 +107,10 @@ int penCur = PEN_UP_DEG;          // 지금 쓴 각도
 unsigned long penT = 0;           // 다음 일 시각 (ms)
 uint8_t penStage = 0;             // 0 없음, 1 빠르게 가는 중, 2 천천히 내리는 중
 
-// ---------------- HX711 ----------------
-const uint8_t HX_DT = A1, HX_SCK = A2;
-long hxOffset = 0;
-float hxScale = 1.0f;
-long hxLastRaw = 0;
+// ---------------- 누름 스위치 (스프링 + KW11, CAP-AI-60) ----------------
+const uint8_t PSW_PIN = A1;
+#define PSW_SAMPLES 2           // 연속 2걸음 HIGH면 눌림 (잡음 거름)
+uint8_t pswHigh = 0;
 
 // ---------------- 기타 ----------------
 char line[64];
@@ -129,22 +130,7 @@ float posMm(const Axis& a) { return a.pos / STEPS_PER_MM; }
 long mmToSteps(float mm) { return lround(mm * STEPS_PER_MM); }
 bool swPressed(const Axis& a) { return digitalRead(a.sw) == LOW; }
 
-bool hxReady() { return digitalRead(HX_DT) == LOW; }
-long hxReadRaw() {               // 128배 이득, A 채널 (펄스 25개)
-  long v = 0;
-  noInterrupts();
-  for (int i = 0; i < 24; i++) {
-    digitalWrite(HX_SCK, HIGH); delayMicroseconds(1);
-    v = (v << 1) | digitalRead(HX_DT);
-    digitalWrite(HX_SCK, LOW); delayMicroseconds(1);
-  }
-  digitalWrite(HX_SCK, HIGH); delayMicroseconds(1); digitalWrite(HX_SCK, LOW);
-  interrupts();
-  if (v & 0x800000L) v |= 0xFF000000L;
-  return v;
-}
-float grams() { return (hxLastRaw - hxOffset) * hxScale; }
-void hxPoll() { if (hxReady()) hxLastRaw = hxReadRaw(); }
+bool pswPressed() { return digitalRead(PSW_PIN) == HIGH; }
 
 void reply(const char* s) { Serial.println(s); }
 void replyAxis(const char* head, const Axis& a, const char* tail) {
@@ -309,7 +295,7 @@ void handle(char* cmd) {
     any = false;
     for (int i = 0; i < 3; i++) if (axes[i].homed) { Serial.print(axes[i].name); any = true; }
     if (!any) Serial.print('-');
-    Serial.print(F(" LOAD=")); Serial.print(grams(), 1);
+    Serial.print(F(" PSW=")); Serial.print(pswPressed() ? '1' : '0');
     Serial.print(F(" PEN=")); Serial.print(penName());
     Serial.print(F(" SW="));
     for (int i = 0; i < 3; i++) Serial.print(swPressed(axes[i]) ? '1' : '0');
@@ -396,6 +382,8 @@ void handle(char* cmd) {
     if (maxMm > f.maxMm) maxMm = f.maxMm;
     pressGrams = atof(tok[1]);
     if (pressGrams <= 0) { reply("ERR GRAMS"); return; }
+    if (pswPressed()) { reply("ERR PRESS_SW"); return; }          // 누르기 전부터 HIGH = 눌린 채 걸림 또는 선 끊김 → 안 올림
+    pswHigh = 0;
     pressActive = true;
     reply("OK PRESS");
     startMove(f, maxMm);
@@ -434,12 +422,6 @@ void handle(char* cmd) {
     return;
   }
 
-  if (!strcmp(tok[0], "LOAD")) {
-    Serial.print(F("OK LOAD ")); Serial.print(grams(), 1); Serial.print(' '); Serial.println(hxLastRaw);
-    return;
-  }
-  if (!strcmp(tok[0], "TARE")) { hxOffset = hxLastRaw; reply("OK TARE"); return; }
-  if (!strcmp(tok[0], "CAL") && n == 2) { hxScale = atof(tok[1]); reply("OK CAL"); return; }
 
   if (!strcmp(tok[0], "WATCHDOG") && n == 2) { watchdogMs = (unsigned long)(atof(tok[1]) * 1000); reply("OK WATCHDOG"); return; }
 
@@ -474,17 +456,20 @@ void stepAxes() {
     } else a.swLow = 0;
 
     stepOnce(a, dir);
-    if (i == 0 && pressActive && dir > 0 && grams() >= pressGrams) {
-      endAxis(a);
-      pressActive = false;
-      Serial.print(F("DONE PRESS ")); Serial.print(posMm(a), 3); Serial.print(' '); Serial.println(grams(), 1);
-      continue;
+    if (i == 0 && pressActive && dir > 0) {
+      if (pswPressed()) { if (pswHigh < 255) pswHigh++; } else pswHigh = 0;
+      if (pswHigh >= PSW_SAMPLES) {
+        endAxis(a);
+        pressActive = false;
+        Serial.print(F("DONE PRESS ")); Serial.print(posMm(a), 3); Serial.print(' '); Serial.println(pressGrams, 1);
+        continue;
+      }
     }
     if (a.pos == a.target) {
       endAxis(a);
       if (i == 0 && pressActive) {
         pressActive = false;
-        Serial.print(F("DONE PRESS LIMIT ")); Serial.print(posMm(a), 3); Serial.print(' '); Serial.println(grams(), 1);
+        Serial.print(F("DONE PRESS LIMIT ")); Serial.print(posMm(a), 3); Serial.println(F(" 0"));
       } else {
         doneMove(a);
       }
@@ -499,9 +484,7 @@ void setup() {
     coils(axes[i], false);                 // HOLD 기본 0 — 켤 때 코일 끔
     pinMode(axes[i].sw, INPUT_PULLUP);
   }
-  pinMode(HX_DT, INPUT);
-  pinMode(HX_SCK, OUTPUT);
-  digitalWrite(HX_SCK, LOW);
+  pinMode(PSW_PIN, INPUT_PULLUP);
   // 펜 서보는 붙이지 않음 (LIMP) — Pi가 PEN UP을 먼저 보냄
   lastCmdMs = millis();
   reply("EVT READY trap_motion v0.2");
@@ -523,7 +506,6 @@ void loop() {
       reply("ERR TOO_LONG");
     }
   }
-  hxPoll();
   stepAxes();
   penPoll();
   if (watchdogMs && millis() - lastCmdMs > watchdogMs) {

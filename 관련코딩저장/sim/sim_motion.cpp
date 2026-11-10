@@ -1,6 +1,6 @@
 ﻿// sim_motion.cpp — trap_motion.ino (UNO 1) PC 시험 (서현 CAP-AI-44)
 // 빌드:  zig c++ -std=c++17 -Wall -I. sim_motion.cpp -o sim_motion.exe   (run_all.ps1 이 해 줌)
-// 세계 = 스테핑 3축(코일 패턴을 읽어 기계 위치를 셈) + 원점 스위치 3 + HX711 + 펜 서보 기록.
+// 세계 = 스테핑 3축(코일 패턴을 읽어 기계 위치를 셈) + 원점 스위치 3 + 누름 스위치(A1, CAP-AI-60 — HX711 대신) + 펜 서보 기록.
 #include "Arduino.h"
 #include "Servo.h"
 SIM_DEFINE_GLOBALS
@@ -23,16 +23,9 @@ struct AxisW {
 };
 static AxisW W[3] = {{2, A3}, {6, A4}, {10, A5}};
 static const int HALF_T[8][4] = {{1,0,0,0},{1,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,1},{0,0,0,1},{1,0,0,1}};
-static long w_hx_raw_base = 0;
-static int hx_pulse = 0;          // HX711 클럭 수
-static int last_sck = 0;
-static long hx_latched = 0;
+static double w_psw_at = 10.5;     // 바닥(F)이 원점 스위치 위 이 mm 에 오면 스프링이 4.8 mm 눌려 누름 스위치가 눌림 (말벌 닿음 10 + 0.5)
+static bool w_psw_broken = false;  // 선 끊김 (NC라 HIGH)
 static std::function<void()> w_script;
-
-static long hx_raw_now() {        // 바닥(F)이 스위치 위 10 mm 를 넘으면 1 mm당 1000
-  double mm = (W[0].mech - W[0].swPos) / STEPS_PER_MM;
-  return w_hx_raw_base + (mm > 10 ? (long)((mm - 10) * 1000) : 0);
-}
 
 static void sample_axes() {
   for (int a = 0; a < 3; a++) {
@@ -53,16 +46,9 @@ static void sample_axes() {
 
 static void world_setup() {
   g_world = []() { sample_axes(); if (w_script) w_script(); };
-  g_dwrite_hook = [](int p, int v) {                       // HX711 SCK(A2) 오름 가장자리마다 비트 하나
-    if (p == A2) { if (v && !last_sck) { hx_pulse++; if (hx_pulse == 1) hx_latched = hx_raw_now() & 0xFFFFFF; if (hx_pulse >= 25) hx_pulse = 0; } last_sck = v; }
-  };
   g_dread = [](int p) -> int {
     for (int a = 0; a < 3; a++) if (p == W[a].swPin) return (W[a].swConnected && W[a].mech <= W[a].swPos) ? 0 : 1;   // 눌리면 LOW (풀업)
-    if (p == A1) {                                         // HX711 DT
-      if (hx_pulse == 0) return 0;                         // 준비됨 (LOW)
-      if (hx_pulse > 24) return 0;
-      return (hx_latched >> (24 - hx_pulse)) & 1;
-    }
+    if (p == A1) return (w_psw_broken || (W[0].mech - W[0].swPos) / STEPS_PER_MM >= w_psw_at) ? 1 : 0;   // 누름 스위치 (NC: 평소 LOW)
     return g_pins[p];
   };
 }
@@ -246,18 +232,23 @@ int main(int argc, char** argv) {
   m = t_cmd("ZERO Y 3"); CHECK(t_has(m, "OK ZERO"), "ZERO Y 3");
   m = t_cmd("STATUS"); CHECK(t_near(t_value(m, "Y="), 3.0, 0.01) && t_has(m, "HOMED=FXY"), "ZERO 한 축도 HOMED");
 
-  printf("[12] PRESS: 하중이 g 에 닿으면 멈춤 (HX711 흉내), 펜 UP 일 때만\n");
-  m = t_cmd("CAL 0.1"); m = t_cmd("TARE");
-  hx_pulse = 0;
+  printf("[12] PRESS: 누름 스위치가 눌리면 멈춤 (스프링 + KW11, HX711 없음), 펜 UP 일 때만\n");
+  m = t_cmd("STATUS"); CHECK(t_has(m, "PSW=0"), "STATUS PSW=0 (평소)");
   m = t_cmd("PRESS 50 30", 10);
   CHECK(t_has(m, "OK PRESS"), "OK PRESS");
   CHECK(t_wait(m, "DONE PRESS", 40000), "DONE PRESS");
   printf("      %s", t_dump(m).c_str());
-  CHECK(t_near(t_value(m, "DONE PRESS "), 10.5, 0.1), "10.5 mm 근처(스위치 위 10 mm + 0.5 mm = 50 g)에서 멈춤");
+  CHECK(t_near(t_value(m, "DONE PRESS "), 10.5, 0.1), "10.5 mm 근처(누름 스위치가 눌리는 자리)에서 멈춤");
   CHECK(!t_has(m, "LIMIT"), "한계에 닿아서 멈춘 것이 아님");
   m = t_cmd("MOVE F 0", 10); t_wait(m, "DONE MOVE F 0.000", 40000);
-  m = t_cmd("PRESS 99999 5", 10); t_wait(m, "DONE PRESS", 40000);
-  CHECK(t_has(m, "DONE PRESS LIMIT"), "너무 큰 g → DONE PRESS LIMIT (5 mm 한계)");
+  m = t_cmd("PRESS 50 5", 10); t_wait(m, "DONE PRESS", 40000);
+  CHECK(t_has(m, "DONE PRESS LIMIT"), "스위치가 안 눌리면 → DONE PRESS LIMIT (5 mm 한계)");
+  m = t_cmd("MOVE F 0", 10); t_wait(m, "DONE MOVE F 0.000", 40000);
+  w_psw_broken = true;
+  m = t_cmd("PRESS 50 30", 10); CHECK(t_has(m, "ERR PRESS_SW") && !t_has(m, "OK PRESS"), "선 끊김(HIGH) → ERR PRESS_SW, 안 올림");
+  m = t_cmd("STATUS"); CHECK(t_has(m, "PSW=1"), "STATUS PSW=1");
+  w_psw_broken = false;
+  m = t_cmd("LOAD"); CHECK(t_has(m, "ERR UNKNOWN"), "LOAD 명령 없음 (HX711 없앰)");
   m = t_cmd("MOVE F 0", 10); t_wait(m, "DONE MOVE F 0.000", 40000);
 
   printf("[13] STOP: 움직이는 축 정지, HOME 중이면 HOME 도 멈춤\n");
