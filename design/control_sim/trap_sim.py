@@ -38,7 +38,7 @@ PRM = dict(
     look_s=0.6,           # 촬영 + 추론 (5장) [추측]
     feed_s=60.0,          # 급이·건조 (샤피 건조 시간 시험 전) [추측]
     press_g=51.0,         # F_p 0.5 N = 51 g [확실 — D6]
-    F_max=36.5, F_feed=10.0, F_retract=10.0,
+    F_max=36.5, F_feed=31.0, F_retract=10.0,   # F_feed 11/10: 10 → 31 (솜 끝 높이, cad/feeder_check.py)
     hornet_h=7.5,         # 말벌 등 높이 [가능성 높음 — D6]
     park=(65.0, -40.0), X_lim=(37.0, 73.0), Y_lim=(-40.0, 18.0),   # D5e 마커 범위 (cad/D5e_check.py) [확실 — 모델]
     thorax_p_min=0.6, pose_retry_max=3, mark_retry_max=1,

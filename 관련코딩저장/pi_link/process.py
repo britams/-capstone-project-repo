@@ -53,7 +53,7 @@ QUEEN_MONTHS = (3, 4, 5, 9, 10, 11)
 @dataclass
 class Params:                   # 값 근거는 trap_sim PRM — [추측]은 시험으로 고칠 것
     press_g: float = 51.0       # F_p 0.5 N [확실 — D6]
-    F_feed: float = 10.0
+    F_feed: float = 31.0
     F_retract: float = 10.0
     feed_s: float = 60.0        # [추측]
     dwell_s: float = 0.3        # 펜이 닿아 있는 시간 [추측]

@@ -130,7 +130,7 @@ def t_mark():
         check('MOVE X 3.000' in cm and 'MOVE Y -5.000' in cm, '자세 사진의 흉부 좌표(3, −5)로 감 (C2)')
         i = cm.index('MOVE Y -5.000')
         check(cm[i + 1:i + 5] == ['PEN DOWN', 'PEN UP', 'PEN DOWN', 'PEN UP'], '2번 찍기 (DOWN·UP ×2)')
-        check('MOVE F 10.000' in cm, '급이 높이 F 10')
+        check('MOVE F 31.000' in cm, '급이 높이 F 31')
         check(cd[-2:] == ['DOOR REL CLOSE', 'LIGHT TOP 0'] or 'DOOR REL CLOSE' in cd, 'REL 닫음')
         check(cm[-1] == 'MOVE F 0.000', '마지막에 바닥 0')
         check(proc.ledger.n['released'] == 1 and proc.ledger.n['chamber'] == 0, '장부: 방생 1, 마킹실 0')

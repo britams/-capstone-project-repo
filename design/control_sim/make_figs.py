@@ -287,7 +287,7 @@ digraph fsm {
   POSE  [label="POSE\n등 위? 흉부 확률 ≥ 0.6"];
   MARK  [label="MARK\n펜 2단계 내리기 ×2"];
   VERIFY[label="VERIFY\n대기 자리에서 점 확인"];
-  FEED  [label="FEED 급이·건조\n바닥 10 mm, 60 s"];
+  FEED  [label="FEED 급이·건조\n바닥 31 mm, 60 s"];
   REL   [label="RELEASE\n출구 조명·방생 문 열기\nG5 → G6 + 카메라 0 → 닫기", fillcolor="#eef8ef", color="#008300"];
   ISO   [label="ISOLATE\n바닥 내림·격리 문 열기\nG3 → G4 + 카메라 0 → 닫기", fillcolor="#fbeeee", color="#e34948"];
   FAULT [label="FAULT_WAIT\n문은 그대로 · 장치 READY 기다림\n안 돌아오면 격리·입구 문 열어\n상용 트랩처럼 (passthrough)", fillcolor="#fff6e0", color="#eda100"];
