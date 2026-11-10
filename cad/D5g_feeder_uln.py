@@ -34,7 +34,11 @@ FD = dict(x=55.0, roll_r=5.0, tip_y=21.4, tip_z=378.0, end_y=58.28, end_z=368.85
           front_t=2.0, front_hole_r=5.3,                                               # (11/10 상세) 물길 앞벽: 물길이 마킹실 벽에 안 붙어도 물이 안 새게 — 솜 구멍만 (솜 축 따라 Ø10.6)                                                                    # 받침 리브 가운데 반지름 (튜브 입구 살 7.33~9.6 아래)
           bowl_ri=17.5, bowl_t=2.5, bowl_top=400.0, post_y=80.0, post_w=12.0, post_foot_z=205.0,
           post_dx=-3.0)   # (SJ-49) 기둥을 x −3: 막대 로드셀(x 60.15~72.85, y ~77.5) 자리 비움   # 발: 데크(101) 윗면 z 205, 아래 2020 가로대 y +80
-FOOT_DX = 22.0     # (11/10 상세, CAP-AI-57) 12 → 22: 12면 볼트 바로 위가 그릇(반지름 20)이라 드라이버(PH2 Ø6)가 못 들어감 — 22면 그릇까지 24.2 > 20 + 3
+FOOT_DX = 12.0     # (옛 값 — 가로대 T너트 자리, 이제 안 씀)
+# (11/10 상세, CAP-AI-57) 발 고정을 '위에서 M5 + 가로대 T너트' → '데크 아래에서 M3 + 발 속 인서트'로:
+#   위에서는 볼트 바로 위가 그릇(한 덩어리 출력)이라 드라이버가 못 들어가고, 옆으로 옮기면 서보 허브(x 30)·로드셀(x 74)에 막힘 [확실 — 모델 검사]
+#   데크를 프레임에 올리기 전에 급이 방을 데크에 붙임 → 데크 아래가 열려 있어 드라이버가 들어감. 볼트는 가로대 띠(y 70~90) 밖 y 80 ∓ 14
+FOOT = dict(t=6.0, half_x=10.0, half_y=20.0, dy=14.0)
 ULN = dict(L=35.0, W=31.9, t=1.6, hx=30.0, hy=26.5, hole=2.7, stand=5.0)
 ULN_SPOTS = {"X": (170.0, -30.0, 472.0, "rail"), "Y": (170.0, 22.0, 472.0, "rail"), "F": (55.0, -50.0, 205.0, "deck")}
 
@@ -81,10 +85,10 @@ def feed_trough():
     shp = shp.cut(front_hole())
     pw = f["post_w"] / 2
     px = f["x"] + f["post_dx"]
-    post = box(px - pw, px + pw, f["post_y"] - pw, f["post_y"] + pw, f["post_foot_z"] + 3, f["floor_z"] + 0.01)
-    foot = box(px - FOOT_DX - 6, px + FOOT_DX + 6, f["post_y"] - 10, f["post_y"] + 10, f["post_foot_z"], f["post_foot_z"] + 3)
-    for sx in (-FOOT_DX, FOOT_DX):
-        foot = foot.cut(Part.makeCylinder(2.75, 10, V(px + sx, f["post_y"], f["post_foot_z"] - 2)))
+    post = box(px - pw, px + pw, f["post_y"] - pw, f["post_y"] + pw, f["post_foot_z"] + FOOT["t"], f["floor_z"] + 0.01)
+    foot = box(px - FOOT["half_x"], px + FOOT["half_x"], f["post_y"] - FOOT["half_y"], f["post_y"] + FOOT["half_y"], f["post_foot_z"], f["post_foot_z"] + FOOT["t"])
+    for sy in (-FOOT["dy"], FOOT["dy"]):        # 인서트 구멍 Ø4 (94459A130: 구멍 최대 Ø4, 최소 두께 5.1 ≤ 6) — 아래에서 박음, 위까지 뚫음
+        foot = foot.cut(Part.makeCylinder(2.0, FOOT["t"] + 2, V(px, f["post_y"] + sy, f["post_foot_z"] - 1)))
     return shp.fuse(post).fuse(foot).removeSplitter()
 
 
@@ -174,14 +178,14 @@ def make_into(doc, G):
     for o in doc.Objects:
         if o.Label.startswith("101_deck"):
             sh = o.Shape
-            for sx in (-FOOT_DX, FOOT_DX):
-                sh = sh.cut(Part.makeCylinder(2.75, 20, V(f["x"] + f["post_dx"] + sx, f["post_y"], f["post_foot_z"] - 10)))
+            for sy in (-FOOT["dy"], FOOT["dy"]):    # (11/10) 발 M3 구멍 Ø3.4 (아래에서 M3 × 8)
+                sh = sh.cut(Part.makeCylinder(1.7, 20, V(f["x"] + f["post_dx"], f["post_y"] + sy, f["post_foot_z"] - 10)))
             for sx in (-1, 1):
                 for sy in (-1, 1):
                     cx, cy, _z, _k = ULN_SPOTS["F"]
                     sh = sh.cut(Part.makeCylinder(1.35, 20, V(cx + sx * ULN["hx"] / 2, cy + sy * ULN["hy"] / 2, f["post_foot_z"] - 10)))
             o.Shape = sh.removeSplitter()
-            o.Label = "101_deck (급이 기둥 M5 구멍 2, F 보드 M2.5 구멍 4)"
+            o.Label = "101_deck (급이 발 M3 구멍 2, F 보드 M2.5 구멍 4)"
     for k, (cx, cy, z0, kind) in ULN_SPOTS.items():
         if kind == "rail":
             br = uln_rail_bracket(cx, cy, z0)
