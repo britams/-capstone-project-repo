@@ -102,19 +102,8 @@ def apply(doc):
             doc.removeObject(o.Name)
     _add(doc, "143i_insert_M3_heatset (McMaster 94459A130 — STEP, 뚜껑 기둥 4개)", Part.makeCompound(I), BRASS)
     _add(doc, "143t_thumbscrew_M3x8 (McMaster 92545A111 — STEP, 4개, 손으로 돌림)", Part.makeCompound(T), STEEL)
-    # --- 2) 발: 옛 볼트·T너트 2개씩 빼고 McMaster로
+    # --- 2) 발
     px = f["x"] + f["post_dx"]
-    spots = [(px + sx, f["post_y"]) for sx in (-FU.FOOT_DX, FU.FOOT_DX)]
-
-    def near(sol):
-        c = sol.BoundBox.Center
-        return any(abs(c.x - x) < 3 and abs(c.y - y) < 3 for x, y in spots) and c.z < 215
-
-    for pre in ("100h_bolt_M5x8_mounts", "100i_tnut_M5_mounts"):
-        for o in [o for o in doc.Objects if o.Label.startswith(pre)]:
-            keep = [s for s in o.Shape.Solids if not near(s)]
-            rep["removed_" + pre[:4]] = len(o.Shape.Solids) - len(keep)
-            o.Shape = Part.makeCompound(keep)
     # (11/10) 발은 데크 아래에서 M3 × 8 (92000A118) → 발 속 인서트 94459A130 (큰 끝이 아래 = 나사 들어오는 쪽)
     deck_bot = f["post_foot_z"] - 5.0                      # 200
     FI, FB = [], []

@@ -34,7 +34,6 @@ FD = dict(x=55.0, roll_r=5.0, tip_y=21.4, tip_z=378.0, end_y=58.28, end_z=368.85
           front_t=2.0, front_hole_r=5.3,                                               # (11/10 상세) 물길 앞벽: 물길이 마킹실 벽에 안 붙어도 물이 안 새게 — 솜 구멍만 (솜 축 따라 Ø10.6)                                                                    # 받침 리브 가운데 반지름 (튜브 입구 살 7.33~9.6 아래)
           bowl_ri=17.5, bowl_t=2.5, bowl_top=400.0, post_y=80.0, post_w=12.0, post_foot_z=205.0,
           post_dx=-3.0)   # (SJ-49) 기둥을 x −3: 막대 로드셀(x 60.15~72.85, y ~77.5) 자리 비움   # 발: 데크(101) 윗면 z 205, 아래 2020 가로대 y +80
-FOOT_DX = 12.0     # (옛 값 — 가로대 T너트 자리, 이제 안 씀)
 # (11/10 상세, CAP-AI-57) 발 고정을 '위에서 M5 + 가로대 T너트' → '데크 아래에서 M3 + 발 속 인서트'로:
 #   위에서는 볼트 바로 위가 그릇(한 덩어리 출력)이라 드라이버가 못 들어가고, 옆으로 옮기면 서보 허브(x 30)·로드셀(x 74)에 막힘 [확실 — 모델 검사]
 #   데크를 프레임에 올리기 전에 급이 방을 데크에 붙임 → 데크 아래가 열려 있어 드라이버가 들어감. 볼트는 가로대 띠(y 70~90) 밖 y 80 ∓ 14
@@ -165,16 +164,9 @@ def make_into(doc, G):
     add.append(("144n_falcon_15mL_inverted (설탕물 15 mL, 코닝 352096, 구매)", falcon_tube_inverted(), (0.85, 0.92, 1.0)))
     add.append(("143_feed_trough (설탕물 방 물길·그릇·기둥, 3D 프린트 PETG)", feed_trough(), None))
     f = FD
-    # 기둥 발 → 데크(5) 지나 아래 2020 가로대(y +80, 윗면 z = 데크 아래 면) T너트, M5 × 12
-    import D5e_module_kinematic as K
-    rail_top = K.FR["deck_z"] + 20.0
+    # (11/10, CAP-AI-58) 기둥 발 M5 볼트·T너트는 만들지 않음 — 발은 데크 아래 M3 (D5g_feeder_mcm). 예전에는 여기서 만든 M5 머리를
+    #   겹침 고침 단계가 발에서 파낸 뒤(홈 2개, 깊이 3) 볼트만 지워져서 홈이 남았음 [확실 — 부품 파일과 비교 129.5 mm³]
     fb, ft = [], []
-    for sx in (-FOOT_DX, FOOT_DX):
-        p = (f["x"] + f["post_dx"] + sx, f["post_y"], f["post_foot_z"] + 3)
-        fb.append(Part.makeCylinder(2.5, 12, V(*p), V(0, 0, -1)).fuse(Part.makeCylinder(4.25, 5, V(*p))))
-        t = G.tnut_local("rail")
-        t.translate(V(f["x"] + f["post_dx"] + sx - G.BR["hole_at"], f["post_y"], rail_top))   # 가로대는 x 방향 → 너트 길이도 x
-        ft.append(t)
     for o in doc.Objects:
         if o.Label.startswith("101_deck"):
             sh = o.Shape
