@@ -468,82 +468,95 @@ def feeder_detail_apply(doc):
     return out
 
 
-# ---------------- (CAP-AI-SJ-49) 막대 로드셀 148: 버튼형 → Adafruit 4540 (1 kg, 80 × 12.7 × 12.7) ----------------
-# 치수 [확실 — Adafruit 상품 페이지 'Product Dimensions 80.0 × 12.7 × 12.7']
-# 구멍 [가능성 높음 — 데이터시트 그림(해상도 낮음)]: 한쪽 끝 2-M4 × 0.7 관통 탭, 다른 끝 2-M5 × 0.8 관통 탭, 끝에서 5·20 (간격 15)
-# 자리: 바닥 구동 상자(151 옆판 x 32~36 / 74~78, y ±23) 안은 x 폭 38 → 80 막대가 x로 못 들어감.
-#   −y 쪽은 커플링 154(중심 (55, −13), 반지름 10)가 막음 → 막대는 +y로 뻗음, x 60.15~72.85 (커플링까지 1.9, 옆판까지 1.15)
-#   자유 끝(M4) y −2.5: 스프링 146이 축 (65, 4)에서 이 끝 블록을 누름 → 받침판 148s(PETG)가 힘을 받아 막대에 전함
-#   고정 끝(M5) y 77.5: 캐리지 158에서 +y로 나온 팔(158a, 캐리지와 한 몸 출력)에 M5 × 12 두 개로 매닮 (McMaster 91292A125)
-#   막대 높이 z 229.3~242 (모터판 152 윗면 228과 1.3 틈), 받침판 242~244 → 스프링 아래 끝 244 (D5f 값 그대로)
-LC = dict(L=80.0, a=12.7, xc=66.5, y_free=-2.5, z_bot=229.3, hole_e=(5.0, 20.0), m4=4.0, m5=5.0,
-          gauge=(25.0, 55.0), seat_t=2.0, arm_gap=1.0)
+# ---------------- (11/10 밤, CAP-AI-60) 로드셀 → 스프링 + 누름 스위치 ----------------
+# 교수님 피드백 '로드셀은 과함' (서현 11/10 21:45) → 로드셀 148·HX711 198x 없앰.
+# 원리: 스프링 146 (k 103.6 N/m, S4 2차)이 캐리지 아래 '받침 칸'(캐리지와 한 몸) 위에 앉고, 축 147 아래 끝을 받친다.
+#   바닥이 말벌에 닿아 F_p 0.5 N이 되면 스프링이 δ = 0.5 / 103.6 = 4.83 mm 더 눌린다 → 축에 붙인 걸쇠 148c 가 그만큼 내려와
+#   받침 칸 옆벽 바깥의 KW11 스위치 227p 레버를 누름 → 펌웨어가 바닥을 멈춤 (A1, NC 접점 — 선이 끊겨도 멈춤 쪽)
+#   힘 맞추기: 스위치 나사 구멍이 세로 긴 구멍(±2 mm) → 저울 위에서 0.5 N(51 g)에 딸깍하도록 한 번 맞춤
+PS = dict(spring_xy=(65.0, 4.0), seat_z=244.0, car_bot=262.0, cage=(59.0, 71.0, -2.0, 12.0), wall_t=2.0, floor_t=2.0,
+          k=103.6, Fp=0.5, collar_r=3.5, collar_z=(258.5, 261.5), tab=(65.0, 79.0, 1.0, 7.0), slot_z=249.0)
 
 
-def loadcell_bar():
-    """판매품 모양: 몸통 + 가운데 구멍 두 개(스트레인 게이지 자리, 흰 덮개는 검정 띠로) + 끝 구멍 4"""
-    c = LC
-    x0, y0, z0 = c["xc"] - c["a"] / 2, c["y_free"], c["z_bot"]
-    body = Part.makeBox(c["a"], c["L"], c["a"], V(x0, y0, z0))
-    for yy in (c["gauge"][0] + 6.0, c["gauge"][1] - 6.0):                     # 굽힘 구멍 2개 (가로 관통, 이어진 모양)
-        body = body.cut(Part.makeCylinder(5.0, c["a"] + 2, V(x0 - 1, y0 + yy, z0 + c["a"] / 2), V(1, 0, 0)))
-    body = body.cut(Part.makeBox(c["a"] + 2, c["gauge"][1] - c["gauge"][0] - 12.0, 4.0, V(x0 - 1, y0 + c["gauge"][0] + 6.0, z0 + c["a"] / 2 - 2)))
-    for e, d in ((c["hole_e"][0], c["m4"]), (c["hole_e"][1], c["m4"])):
-        body = body.cut(Part.makeCylinder(d / 2, c["a"] + 2, V(c["xc"], y0 + e, z0 - 1)))
-    for e in c["hole_e"]:
-        body = body.cut(Part.makeCylinder(c["m5"] / 2, c["a"] + 2, V(c["xc"], y0 + c["L"] - e, z0 - 1)))
-    gauge = Part.makeBox(c["a"] + 0.4, c["gauge"][1] - c["gauge"][0], 1.0, V(x0 - 0.2, y0 + c["gauge"][0], z0 + c["a"]))   # 게이지 덮개(흰 실리콘)
-    return body.removeSplitter(), gauge
+def press_parts(carriage_shape):
+    """반환: 새 캐리지(받침 칸 포함), 걸쇠 148c, 스위치 227p, 스위치 나사, 보고 dict"""
+    import D5g_home_switches as HS
+    p = PS
+    cx, cy = p["spring_xy"]
+    x0, x1, y0, y1 = p["cage"]
+    zs, zb, t = p["seat_z"], p["car_bot"], p["wall_t"]
+    car = carriage_shape.cut(Part.makeCylinder(7.6, 262.0 - 230.0 - 0.01, V(65.0, 4.0, 230.0)))     # D5f 아래 컵 지움 (로드셀 때와 같음)
+    cage = box(x0, x1, y0, y1, zs - p["floor_t"], zs)                                   # 받침판 (스프링이 앉음)
+    cage = cage.fuse(box(x1 - t, x1, y0, y1, zs - p["floor_t"], zb + 0.01))             # +x 옆벽 (스위치가 바깥에)
+    cage = cage.fuse(box(x0, x1, y1 - t, y1, zs - p["floor_t"], zb + 0.01))             # +y 뒷벽
+    cage = cage.cut(box(x1 - t - 0.1, x1 + 0.1, p["tab"][2] - 0.5, p["tab"][3] + 0.5, p["slot_z"], zb - 0.5))   # 걸쇠 지나갈 홈
+    cage = cage.fuse(Part.makeCylinder(1.1, 1.5, V(cx, cy, zs)))                        # 스프링 가운데 핀 Ø2.2
+    car = car.fuse(cage).removeSplitter()
+    # 걸쇠 148c: 축에 끼우는 고리 + 옆벽 홈을 지나 스위치 위로 나온 혀 (3D 프린트, 축에 끼우고 순간접착)
+    c0, c1 = p["collar_z"]
+    collar = Part.makeCylinder(p["collar_r"], c1 - c0, V(cx, cy, c0)).cut(Part.makeCylinder(2.0, 10, V(cx, cy, c0 - 1)))
+    tab = box(p["tab"][0], p["tab"][1], p["tab"][2], p["tab"][3], c0, c1).cut(Part.makeCylinder(2.0, 10, V(cx, cy, c0 - 1)))
+    latch = collar.fuse(tab).removeSplitter()
+    # 스위치 227p: 눌린 레버 면 = 걸쇠 아래 면이 δ 내려온 자리
+    d = p["Fp"] / p["k"] * 1000.0
+    z_lever = c0 - d
+    O = V(x1, -6.0, z_lever - HS.LEVER_TOP)
+    sw, screws, _lv = HS.switch(O, V(0, 1, 0), V(1, 0, 0), V(0, 0, 1), screw_len=8.0)
+    rep = dict(delta_mm=round(d, 2), lever_pressed_z=round(z_lever, 2), latch_rest_bottom=c0, gap_rest=round(c0 - z_lever, 2),
+               spring_len_rest=round(c0 - 0.5 - zs, 2), spring_solid=3.9)
+    return car, latch, sw, Part.makeCompound(screws), rep
 
 
-def loadcell_parts(carriage_shape):
-    """반환: 새 캐리지(아래 컵 지우고 +y 팔), 막대, 덮개, 받침판, M4 볼트, M5 볼트"""
-    c = LC
-    x0, x1 = c["xc"] - c["a"] / 2, c["xc"] + c["a"] / 2
-    ytop = c["z_bot"] + c["a"]                                       # 242
-    # 1) 캐리지: D5f 아래 컵 지움 (축·스프링 자리는 그대로 비움)
-    car = carriage_shape.cut(Part.makeCylinder(7.6, 262.0 - 230.0 - 0.01, V(65.0, 4.0, 230.0)))
-    # 2) 팔 158a: 캐리지 +y 면(y 20) → y 77.5, 아래 면 z 249 (고정 끝 25 mm만 막대 윗면 242까지 내려와 닿음)
-    yf = c["y_free"] + c["L"]                                        # 77.5
-    y_fix0 = yf - 25.0
-    arm = box(x0, x1, 19.0, yf, ytop + c["seat_t"] + 5.0, 274.0)                    # 자유 끝 위는 받침판·M4 머리(244~248) 위로 1 mm
-    arm = arm.fuse(box(x0, x1, y_fix0, yf, ytop, ytop + c["seat_t"] + 5.0))
-    bolts5 = []
-    for e in c["hole_e"]:
-        yy = yf - e
-        arm = arm.cut(Part.makeCylinder(2.75, 40, V(c["xc"], yy, ytop - 1)))                 # M5 지나는 구멍
-        arm = arm.cut(Part.makeCylinder(4.75, 40, V(c["xc"], yy, ytop + 5.0)))              # 머리 자리 (위에서 육각 렌치)
-        p = V(c["xc"], yy, ytop + 5.0)
-        bolts5.append(Part.makeCylinder(2.5, 12, p, V(0, 0, -1)).fuse(Part.makeCylinder(4.25, 5, p)))
-    car = car.fuse(arm).removeSplitter()
-    # 3) 받침판 148s: 자유 끝 위, 끝 턱(아래로 3)으로 돌지 않게, M4 × 10 한 개 (y −2.5 + 20), 스프링 가운데 핀 Ø2.2
-    ys0, ys1 = c["y_free"] - 2.0, c["y_free"] + 23.0
-    seat = box(x0, x1, ys0, ys1, ytop, ytop + c["seat_t"])
-    seat = seat.fuse(box(x0, x1, ys0, c["y_free"], ytop - 3.0, ytop))
-    seat = seat.fuse(Part.makeCylinder(1.1, 1.5, V(65.0, 4.0, ytop + c["seat_t"])))
-    yb = c["y_free"] + c["hole_e"][1]
-    seat = seat.cut(Part.makeCylinder(2.2, 10, V(c["xc"], yb, ytop - 1)))
-    p = V(c["xc"], yb, ytop + c["seat_t"])
-    bolt4 = Part.makeCylinder(2.0, 10, p, V(0, 0, -1)).fuse(Part.makeCylinder(3.5, 4, p))
-    bar, gauge = loadcell_bar()
-    return car, bar, gauge, seat.removeSplitter(), bolt4, Part.makeCompound(bolts5)
+def press_check(doc, rep):
+    """누름 장치 검사: (1) 새 부품 ↔ 다른 부품 겹침 (2) 바닥 0 → 36.5 올리는 동안 움직이는 묶음 ↔ 고정 부품 겹침 (4 mm마다)"""
+    mine = ("158_carriage", "148c_", "227p_", "227ps_")
+    moving = mine + ("140_", "146_", "147_", "149_", "159_")
+    allow = {("227ps_", "158_carriage"), ("148c_", "147_")}
+    objs = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Shape.isNull() and o.Shape.Volume > 0
+            and not o.Label.startswith(("REF", "FitBox")) and "beam" not in o.Label]
+    pre = lambda o, ps: o.Label.startswith(ps)
+    ov = []
+    for a in [o for o in objs if pre(o, mine)]:
+        for b in objs:
+            if b is a or (pre(b, mine) and b.Name < a.Name):
+                continue
+            if a.Shape.BoundBox.intersect(b.Shape.BoundBox):
+                v = a.Shape.common(b.Shape).Volume
+                if v > 0.05:
+                    ka, kb = a.Label.split(" ")[0], b.Label.split(" ")[0]
+                    ok = any(ka.startswith(x) and kb.startswith(y) or kb.startswith(x) and ka.startswith(y) for x, y in allow)
+                    ov.append((ka, kb, round(v, 2), "허용" if ok else "문제"))
+    mv = [o for o in objs if pre(o, moving)]
+    fx = [o for o in objs if not pre(o, moving)]
+    sweep = []
+    for k in range(0, 10):
+        dz = min(36.5, 4.0 * k)
+        for a in mv:
+            s = a.Shape.copy(); s.translate(V(0, 0, dz))
+            for b in fx:
+                if s.BoundBox.intersect(b.Shape.BoundBox):
+                    v = s.common(b.Shape).Volume
+                    if v > 0.5:
+                        sweep.append((dz, a.Label.split(" ")[0], b.Label.split(" ")[0], round(v, 1)))
+    rep = dict(rep, overlaps=ov, bad=[x for x in ov if x[3] == "문제"], sweep_hits=sweep)
+    return rep
 
 
-def loadcell_apply(doc):
+def press_apply(doc):
     car_o = [o for o in doc.Objects if o.Label.startswith("158_carriage")][0]
-    for o in [o for o in doc.Objects if o.Label.startswith(("148_load_cell", "148b_", "148g_", "148s_", "148m"))]:
+    for o in [o for o in doc.Objects if o.Label.startswith(("148_load_cell", "148b_", "148g_", "148s_", "148m", "148c_", "227p"))]:
         doc.removeObject(o.Name)
-    car, bar, gauge, seat, b4, b5 = loadcell_parts(car_o.Shape)
+    car, latch, sw, scr, rep = press_parts(car_o.Shape)
     car_o.Shape = car
-    car_o.Label = "158_carriage (바닥 캐리지 + 로드셀 팔 158a, 3D 프린트 PETG)"
+    car_o.Label = "158_carriage (바닥 캐리지 + 스프링 받침 칸, 3D 프린트 PETG — 로드셀 없앰 CAP-AI-60)"
     out = []
-    for nm, shp, col in (("148_load_cell_bar (Adafruit 4540 1 kg, 80 × 12.7 × 12.7, 구매)", bar, (0.75, 0.77, 0.80)),
-                         ("148g_load_cell_gauge_cover (로드셀에 붙어 옴)", gauge, (0.95, 0.95, 0.95)),
-                         ("148s_spring_seat (스프링 받침판, 3D 프린트 PETG)", seat, None),
-                         ("148m4_bolt_M4x10 (받침판 → 로드셀 자유 끝, McMaster 91292A116)", b4, (0.15, 0.15, 0.15)),
-                         ("148m5_bolt_M5x12 × 2 (팔 → 로드셀 고정 끝, McMaster 91292A125)", b5, (0.15, 0.15, 0.15))):
+    for nm, shp, col in (("148c_spring_latch (걸쇠 — 축 147에 끼워 순간접착, 혀가 누름 스위치를 누름, 3D 프린트 PETG)", latch, None),
+                         ("227p_press_switch (KW11-3Z 누름 스위치 PSW — NC, 스프링 4.8 mm(0.5 N)에서 딸깍, UNO 1 A1)", sw, (0.15, 0.15, 0.15)),
+                         ("227ps_press_switch_screws (M2 × 8 십자 냄비머리 2 — 받침 칸 옆벽에 셀프 탭, 긴 구멍으로 힘 맞춤)", scr, (0.1, 0.1, 0.1))):
         o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
         o.Label, o.Shape = nm, shp
         out.append((o, col))
     doc.recompute()
-    return out
+    return out, rep
+
+

@@ -76,20 +76,11 @@ def apply(doc):
     rep = {}
     for o in [x for x in doc.Objects if x.Label.startswith(("198x_", "198xc_", "198xs_", "194j_"))]:
         doc.removeObject(o.Name)
-    cr, board, screws = _hx711()
-    items = [("198x_hx711_module (녹색 모듈 34 × 21 × 1.6, 4핀 → UNO 1 A1·A2, 6핀 → 로드셀 148 — 치수 실물 재기)", board, (0.10, 0.45, 0.15)),
-             ("198xc_hx711_cradle (3D 프린트 받침 — 바닥 3·레일 1.5·턱 2, 데크 탭에 M3 × 8 접시머리 두 개)", cr, (0.95, 0.45, 0.05)),
-             ("198xs_hx711_screws (M3 × 8 십자 접시머리 2 — 데크 아크릴 탭)", screws, (0.1, 0.1, 0.1))]
+    # (11/10 밤, CAP-AI-60) HX711 모듈·받침·나사·데크 탭 구멍 없앰 — 교수님 '로드셀은 과함' → 누름 스위치 (D5g_feeder_uln.press_apply)
+    items = []
     pl = [o for o in doc.Objects if o.Label.startswith("194b_")]
     if pl:
         items.append(("194j_dc_jack_panel_5.5x2.1 (DC-099류, 판 구멍 Ø8 — 구동 레일 +5V_B 입력, 배터리 상자도 같은 플러그)", _dc_jack(pl[0]), (0.15, 0.15, 0.15)))
-    deck = [o for o in doc.Objects if o.Label.startswith("101_deck")]
-    if deck:                                                               # 데크에 M3 탭 구멍 (Ø2.5)
-        sh = deck[0].Shape
-        for s in screws.Solids:
-            c = s.BoundBox.Center
-            sh = sh.cut(Part.makeCylinder(1.25, 10, V(c.x, c.y, ZD - 7)))
-        deck[0].Shape = sh.removeSplitter()
     for nm, shp, col in items:
         o = doc.addObject("Part::Feature", "C3_" + nm.split(" ")[0])
         o.Label = nm
