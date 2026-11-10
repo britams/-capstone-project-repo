@@ -20,7 +20,7 @@ def views(doc, base):
     v = Gui.getDocument(doc.Name).activeView()
     v.setCameraType("Orthographic")
     out = []
-    for nm, fn in (("등각", v.viewIsometric), ("정면 (−y에서)", v.viewFront), ("윗면", v.viewTop), ("오른쪽 (+x에서)", v.viewRight)):
+    for nm, fn in (("등각", v.viewIsometric), ("정면 (-y에서)", v.viewFront), ("윗면", v.viewTop), ("오른쪽 (+x에서)", v.viewRight)):
         fn(); v.fitAll(); Gui.updateGui()
         p = os.path.join(OUT, "_%s_%d.png" % (base, len(out)))
         v.saveImage(p, VW, VH, "White")
@@ -49,7 +49,7 @@ def rows(doc):
                     vals.append(str(sh.get("%s%d" % (c, i))))
                 except Exception:
                     vals.append("")
-            r.append((str(a), vals[0], vals[1]))
+            r.append(tuple(t.replace("−", "-") for t in (str(a), vals[0], vals[1])))   # 맑은 고딕에 − 글자 없음
             i += 1
     return r
 
