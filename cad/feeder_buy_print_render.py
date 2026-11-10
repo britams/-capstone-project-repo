@@ -28,7 +28,7 @@ ITEMS = [
     ("L_143i", V(0, 0, 25), BUY, "5", "열 압입 인서트 M3 (McMaster 94459A130) — 구매 6개 (뚜껑 4 + 발 2)"),
     ("L_143t", V(0, 0, 70), BUY, "6", "손나사 M3 × 8 (McMaster 92545A111) — 구매 4개, 손으로 돌림"),
     ("L_143fi", V(0, 0, -15), BUY, "", ""),
-    ("L_143f_", V(0, 0, -40), BUY, "7", "냄비머리 나사 M3 × 8 (McMaster 92000A118) — 구매 2개, 데크 아래에서"),
+    ("L_143f_", V(0, 0, -45), BUY, "7", "냄비머리 나사 M3 × 8 (McMaster 92000A118) — 구매 2개, 데크 아래에서"),
 ]
 
 
@@ -78,13 +78,16 @@ def run():
         c = tuple(int(255 * t) for t in col)
         dr.ellipse([bx - 30, by - 30, bx + 30, by + 30], fill=c, outline=(30, 30, 30), width=4)
         dr.text((bx, by), n, fill=(0, 0, 0), font=f3, anchor="mm")
-    y0 = H - 60 - 52 * len(tags)
-    dr.rectangle([30, y0 - 25, 1650, H - 30], fill=(255, 255, 255), outline=(120, 120, 120), width=2)
+    x0, y0 = 1560, 260                       # 표는 오른쪽 위 (아래에 두면 발 나사를 가림)
+    f4 = ImageFont.truetype(FONT, 28)
+    dr.rectangle([x0 - 20, y0 - 25, W - 20, y0 + 92 * len(tags) + 10], fill=(255, 255, 255), outline=(120, 120, 120), width=2)
     for i, (_, n, txt, col) in enumerate(tags):
         c = tuple(int(255 * t) for t in col)
-        yy = y0 + 52 * i
-        dr.rectangle([50, yy + 4, 82, yy + 36], fill=c, outline=(30, 30, 30), width=2)
-        dr.text((100, yy), "%s  %s" % (n, txt), fill=(0, 0, 0), font=f2)
+        yy = y0 + 92 * i
+        dr.rectangle([x0, yy + 4, x0 + 32, yy + 36], fill=c, outline=(30, 30, 30), width=2)
+        a, _, b = txt.partition(" — ")
+        dr.text((x0 + 50, yy), "%s  %s" % (n, a), fill=(0, 0, 0), font=f4)
+        dr.text((x0 + 90, yy + 40), b, fill=(80, 80, 80), font=f4)
     im.save(path)
     json.dump([path], open(os.path.join(OUT, "_bp_done.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
