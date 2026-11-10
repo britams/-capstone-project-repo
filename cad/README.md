@@ -154,3 +154,10 @@
 - 물길을 마킹실 벽에 붙이던 나사 2개를 없애고 앞벽을 추가함. 뚜껑 구멍 깊이 7, 기둥 Ø9, 손나사 자리 y 60.
 - 부품별 파일은 `cad/parts/feeder/` (`feeder_parts.py`): 부품 7종과 App::Link 조립 파일. 검사를 모두 통과했고 `D5g_full`과 같다. 자세한 것은 그 폴더의 README.
 - 남은 결정: 143을 둘로 나눌지 (출력 서포트 문제), 프린터 판 크기.
+
+## 기본 CAD 파일 (서현 11/10 16:26 지정)
+- **기본 파일 = `cad/D5g_full.FCStd`**: 3D 프린트 부품은 파랑, 나머지는 회색 (`D5g_print_color.py`, `make()` 맨 끝에서 칠함). 그림과 검사는 모두 이 파일로 한다.
+  - 레포 판: McMaster 나사·인서트를 표 치수로 만든 단순 모양 (레포가 공개라서)
+  - 서현 PC `CAD files\D5g\D5g_full_McMasterSTEP.FCStd`: 같은 색, 나사는 McMaster STEP 실제 모양 (레포에 안 올림)
+- 급이부 부품 파일 `cad/parts/feeder/`도 같은 색 규칙이다.
+- 예전 D5b~D5f FCStd는 기록용이다. 고치지 않는다.

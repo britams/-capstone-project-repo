@@ -171,6 +171,9 @@ def parts():
         doc = App.newDocument(nm)
         o = doc.addObject("Part::Feature", "Body")
         o.Label, o.Shape = "%s %s" % (num, name), shp
+        if App.GuiUp and getattr(o, "ViewObject", None):      # (16:26 서현) 기본 파일 색 규칙: 3D 프린트 = 파랑, 그 밖 = 회색 (D5g_print_color 와 같음)
+            import D5g_print_color as PCOL
+            o.ViewObject.ShapeColor = PCOL.PRINT if kind.startswith("설계") else PCOL.OTHER
         _sheet(doc, "치수", [("구분", kind, ""), ("출처", src, "")] + dims, ("항목", "값", "비고"))
         _sheet(doc, "맞춤", mates, ("상대", "맞는 자리", "비고"))
         doc.recompute()
