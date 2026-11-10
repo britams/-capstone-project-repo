@@ -328,6 +328,8 @@ def make():
     FIX_REPORT["c3"] = C3.apply(doc)
     import D5g_home_switches as HS     # (CAP-AI-55, 서현) 원점 스위치 F·X·Y + X 집게 226 + 투명 격자 130
     FIX_REPORT["switches"] = HS.apply(doc)
+    import D5g_feeder_mcm as FM        # (CAP-AI-57, 서현) 급이 방 나사·인서트·T너트 = McMaster STEP (cad/vendor_step, 없으면 단순 모양)
+    FIX_REPORT["feeder_mcm"] = FM.apply(doc)
     doc.recompute()
     return doc
 

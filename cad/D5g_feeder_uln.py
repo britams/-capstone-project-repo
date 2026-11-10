@@ -30,7 +30,8 @@ FD = dict(x=55.0, roll_r=5.0, tip_y=21.4, tip_z=378.0, end_y=58.28, end_z=368.85
           wall_hole_r=5.6, wall_hole_z=378.0,
           ch_w=12.0, ch_t=2.0, ch_y0=23.0, ch_y1=95.0, floor_z=361.0, floor_t=3.0, wall_top=388.0,
           tube_y=95.0, tube_r=8.685, tube_L=118.8, cone_L=22.48, tip_r=1.59, tube_wall=0.76, mouth_z=366.0,   # 15 mL 코닝 352096 (제조사 도면) — 50 mL에서 바꿈
-          rib_r=8.3,                                                                    # 받침 리브 가운데 반지름 (튜브 입구 살 7.33~9.6 아래)
+          rib_r=8.3,
+          front_t=2.0, front_hole_r=5.3,                                               # (11/10 상세) 물길 앞벽: 물길이 마킹실 벽에 안 붙어도 물이 안 새게 — 솜 구멍만 (솜 축 따라 Ø10.6)                                                                    # 받침 리브 가운데 반지름 (튜브 입구 살 7.33~9.6 아래)
           bowl_ri=17.5, bowl_t=2.5, bowl_top=400.0, post_y=80.0, post_w=12.0, post_foot_z=205.0,
           post_dx=-3.0)   # (SJ-49) 기둥을 x −3: 막대 로드셀(x 60.15~72.85, y ~77.5) 자리 비움   # 발: 데크(101) 윗면 z 205, 아래 2020 가로대 y +80
 FOOT_DX = 12.0     # 발 볼트 x 간격 (머리 Ø8.5가 기둥 12 × 12에 안 닿게: 12 − 4.25 > 6)
@@ -66,7 +67,7 @@ def feed_trough():
     f = FD
     x0, x1 = f["x"] - f["ch_w"] / 2 - f["ch_t"], f["x"] + f["ch_w"] / 2 + f["ch_t"]
     ch = box(x0, x1, f["ch_y0"], f["ch_y1"], f["floor_z"], f["wall_top"])
-    ch = ch.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] - 1, f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
+    ch = ch.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] + f["front_t"], f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
     ro = f["bowl_ri"] + f["bowl_t"]
     bowl = Part.makeCylinder(ro, f["bowl_top"] - f["floor_z"], V(f["x"], f["tube_y"], f["floor_z"]))
     bowl = bowl.cut(Part.makeCylinder(f["bowl_ri"], f["bowl_top"], V(f["x"], f["tube_y"], f["floor_z"] + f["floor_t"])))
@@ -77,6 +78,7 @@ def feed_trough():
         a = math.radians(90 + 120 * k)
         cx, cy = f["x"] + f["rib_r"] * math.cos(a), f["tube_y"] + f["rib_r"] * math.sin(a)
         shp = shp.fuse(box(cx - 1.5, cx + 1.5, cy - 1.5, cy + 1.5, f["floor_z"] + f["floor_t"] - 0.01, f["mouth_z"]))
+    shp = shp.cut(front_hole())
     pw = f["post_w"] / 2
     px = f["x"] + f["post_dx"]
     post = box(px - pw, px + pw, f["post_y"] - pw, f["post_y"] + pw, f["post_foot_z"] + 3, f["floor_z"] + 0.01)
@@ -84,6 +86,23 @@ def feed_trough():
     for sx in (-FOOT_DX, FOOT_DX):
         foot = foot.cut(Part.makeCylinder(2.75, 10, V(px + sx, f["post_y"], f["post_foot_z"] - 2)))
     return shp.fuse(post).fuse(foot).removeSplitter()
+
+
+def front_hole():
+    """물길 앞벽(y ch_y0 ~ +front_t)의 솜 구멍 — 솜 축을 따라 (11/10)"""
+    f = FD
+    t = V(f["x"], f["tip_y"], f["tip_z"]); e = V(f["x"], f["end_y"], f["end_z"]); d = (e - t).normalize()
+    return Part.makeCylinder(f["front_hole_r"], 30, t - d * 10, d)
+
+
+def front_hole_bottom():
+    """앞벽 구멍 아래 끝 z (물이 넘어가는 높이) — 앞벽 안쪽 면에서"""
+    import math
+    f = FD
+    y = f["ch_y0"] + f["front_t"]
+    th = math.atan2(f["tip_z"] - f["end_z"], f["end_y"] - f["tip_y"])
+    zc = f["tip_z"] - (y - f["tip_y"]) * math.tan(th)
+    return zc - f["front_hole_r"] / math.cos(th)
 
 
 def wall_hole():
@@ -376,13 +395,14 @@ def release_shaft_apply(doc):
 #   육각 구멍 볼트 M3 × 8, 머리 Ø5.5 × 3, 18-8 스테인리스 — 91292A112 (100개 $6.46) [확실 — McMaster 표]
 #   (11/10 바꿈) 15 mL 원뿔 튜브 PP 코닝 352096 Ø17.37 × 118.8, 입구 안 14.66 [확실 — 제조사 도면]. 예전 50 mL 7979T44는 안 씀 (열팽창으로 넘침)
 #   코튼롤: McMaster에 없음 → 치과 재료상 '코튼롤 2호 Ø10 × 38' (국내 판매처 여럿) [가능성 높음]
-INS = dict(hole=4.0, L=4.3, min_wall=5.1, boss_r=4.0, depth=6.0)        # 인서트 구멍은 6 깊이 (4.3 + 여유)
+INS = dict(hole=4.0, L=4.3, min_wall=5.1, boss_r=4.5, depth=7.0)        # (11/10 상세) 기둥 Ø8 → Ø9: 인서트 바깥 Ø4.74(STEP)와 벽 2.1 / 구멍 6 → 7: 손나사 끝(인서트 아래 2.2)이 바닥에 닿던 것
 TS = dict(d=3.0, L=8.0, head_d=8.0, head_h=5.0)                          # 손나사 92545A111
 SC = dict(d=3.0, L=8.0, head_d=5.5, head_h=3.0)                          # M3 × 8 91292A112
 FDX = dict(ear_dx=13.0, ear_z=368.0, ear_y0=29.0, ear_t=3.0,             # 물길 귀 (마킹실 벽 보스에 M3 × 8)
            lid_dx=11.0, lid_y=(40.0, 66.0),                              # 뚜껑 손나사 자리 (물길 양옆 기둥 위)
            clip_z=(424.0, 434.0), clip_open=120.0,                       # 튜브 집게 고리
-           col=(75.6, 79.6), pinch=(44.0, 48.0))                         # 집게 기둥 x, 코튼롤 잡이 y
+           col=(75.6, 79.6), pinch=(44.0, 48.0),                         # 집게 기둥 x, 코튼롤 잡이 y
+           ears=False)                                                   # (11/10) 물길 → 마킹실 벽 나사 2개 없앰: 드라이버가 뚜껑 기둥에 막혀 못 들어감(SJ-53 남은 문제) + 앞벽이 생겨 붙일 이유 없음
 
 
 def _screw(p, d, L, head_d, head_h, down=V(0, 0, -1)):
@@ -402,7 +422,7 @@ def feeder_detail_shapes(chamber_shape):
     ins, ts, sc = [], [], []
     # 1) 벽 보스 + 귀
     wall = chamber_shape
-    for sx in (-1, 1):
+    for sx in ((-1, 1) if e["ears"] else ()):
         cx = f["x"] + sx * e["ear_dx"]
         boss = Part.makeCylinder(INS["boss_r"], e["ear_y0"] - 23.0, V(cx, 23.0 - 0.2, e["ear_z"]), V(0, 1, 0))
         wall = wall.fuse(boss)
@@ -423,7 +443,7 @@ def feeder_detail_shapes(chamber_shape):
             trough = trough.cut(Part.makeCylinder(INS["hole"] / 2, INS["depth"], V(cx, cy, f["wall_top"] - INS["depth"])))
             ins.append(Part.makeCylinder(INS["hole"] / 2, INS["L"], V(cx, cy, f["wall_top"] - INS["L"])).cut(
                 Part.makeCylinder(1.5, 10, V(cx, cy, f["wall_top"] - 6))))
-    trough = trough.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] - 1, f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
+    trough = trough.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] + f["front_t"], f["ch_y1"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
     # 3) 튜브 집게
     ro = f["bowl_ri"] + f["bowl_t"]
     c0, c1 = e["col"]
@@ -465,13 +485,15 @@ def feeder_detail_apply(doc):
     tr.Shape, ld.Shape, ch.Shape = trough, lid, wall
     tr.Label = "143_feed_trough (설탕물 물길·그릇·튜브 집게, 3D 프린트 PETG, 벽 2.0·그릇 2.5)"
     ld.Label = "143l_feed_trough_lid (뚜껑 2, PETG — 손나사 4개로 누름, 공구 없이 열기)"
-    ch.Label = "120_chamber_walls (+y 벽 Ø11.2 급이 구멍, 물길 고정 보스 2)"
+    ch.Label = "120_chamber_walls (+y 벽 Ø11.2 급이 구멍)"
     out = []
     for nm, shp, col in (("143i_insert_M3_heatset (McMaster 94459A130, 6개)", ins, (0.80, 0.65, 0.25)),
                          ("143t_thumbscrew_M3x8 (McMaster 92545A111, 4개)", ts, (0.75, 0.75, 0.78)),
                          ("143s_bolt_M3x8 (McMaster 91292A112, 2개)", sc, (0.15, 0.15, 0.15))):
         for o in [o for o in doc.Objects if o.Label.startswith(nm.split(" ")[0])]:
             doc.removeObject(o.Name)
+        if not shp.Solids:
+            continue
         o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
         o.Label, o.Shape = nm, shp
         out.append((o, col))

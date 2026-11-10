@@ -86,6 +86,10 @@ def check(f, label):
     t, u, L = roll_geom(f)
     th = math.degrees(math.asin((f["tip_z"] - f["end_z"]) / L))
     hole_bot = f["wall_hole_z"] - f["wall_hole_r"]
+    if "front_t" in f:   # (11/10 상세) 물길 앞벽 솜 구멍이 더 낮으면 그쪽이 넘침 높이
+        yb = f["ch_y0"] + f["front_t"]
+        zc = f["tip_z"] - (yb - f["tip_y"]) * (f["tip_z"] - f["end_z"]) / (f["end_y"] - f["tip_y"])
+        hole_bot = min(hole_bot, zc - f["front_hole_r"] / math.cos(math.atan2(f["tip_z"] - f["end_z"], f["end_y"] - f["tip_y"])))
     print("\n== %s ==  튜브 반지름 %.2f, 물 높이 %.1f, 솜 기울기 %.1f°, 솜 길이 %.2f" % (label, f["tube_r"], f["mouth_z"], th, L))
 
     def res(name, ok, txt):
@@ -98,7 +102,7 @@ def check(f, label):
         k, h = rise_mm(f, A, T1, T2, dP); worst = max(worst, h)
         print("      %s: 부피 +%.1f %% → 물 +%.1f mm" % (nm, k * 100, h))
     top = f["mouth_z"] + worst + 1.0
-    res("1 열팽창", top < hole_bot - 0.5, "물 면 %.0f mm², 최악 물 높이 %.1f (표면장력 1 포함) vs 벽 구멍 아래 끝 %.1f (여유 %.1f)" % (A, top, hole_bot, hole_bot - top))
+    res("1 열팽창", top < hole_bot - 0.5, "물 면 %.0f mm², 최악 물 높이 %.1f (표면장력 1 포함) vs 넘침 높이(벽·앞벽 구멍 아래 끝) %.1f (여유 %.1f)" % (A, top, hole_bot, hole_bot - top))
     low = f["end_z"] - f["roll_r"] * math.cos(math.radians(th))
     imm = f["mouth_z"] - low
     res("2 솜 잠김", imm >= 1.5 and low >= f["floor_z"] + f["floor_t"] - 0.3, "솜 바깥 끝 가장 낮은 점 %.2f, 잠김 %.1f mm (물길 바닥 %.0f)" % (low, imm, f["floor_z"] + f["floor_t"]))
@@ -136,7 +140,8 @@ def check(f, label):
 if __name__ == "__main__":
     f = load_fd()
     ok = check(f, "지금 값 (D5g_feeder_uln.py)")
-    old = dict(f, tube_r=14.86, mouth_z=369.0, tip_y=16.0, tip_z=379.0, end_y=54.0, end_z=372.0, wall_hole_z=378.2)
+    old = {k: v for k, v in f.items() if k not in ("front_t", "front_hole_r")}
+    old = dict(old, tube_r=14.86, mouth_z=369.0, tip_y=16.0, tip_z=379.0, end_y=54.0, end_z=372.0, wall_hole_z=378.2)
     check(old, "참고: 11/06 승준 값 (50 mL, 물 369) — 실패해야 맞음")
     print("\n결과:", "모두 통과" if ok else "실패 있음")
     sys.exit(0 if ok else 1)
