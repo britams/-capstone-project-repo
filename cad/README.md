@@ -147,3 +147,10 @@
 - 검사: `python cad/feeder_check.py` 6개 통과 (11/06 값은 1·4번 실패). 서현 PC에서 `G.make()` 다시 → `D5g_full.FCStd` 저장, 급이 부품 ↔ 전체 겹침 0, 바닥 0~36.5 mm 올림 vs 솜·벽·물길 겹침 0
 - 그림: `img/D5g_급이방_단면_x55.png` (모델을 x = 55에서 자른 선, FreeCAD 안 matplotlib), 전체 그림 6장 다시 (`D5g_render.py`). 원리 동영상 `design/img/feeder/급이방_원리.mp4` (`design/calc/feeder_anim.py`)
 - 설명: `design/2026-11-10_급이방_원리_사용법_고침_서현.md`
+
+## 2026-11-10 오후 — 급이 방 McMaster 상세 + 부품별 파일 (서현, CAP-AI-57·58)
+- McMaster STEP 5종을 받아 `cad/vendor_step/`에 둠 (레포에 안 올림). 급이 방 나사·인서트를 실제 모양으로 넣는 것은 `D5g_feeder_mcm.py`.
+- 발 고정을 바꿈: 위에서 조이는 M5 + T너트 → 데크 아래에서 조이는 M3 × 8 (92000A118) + 발 인서트. 위에서는 그릇·서보 허브·로드셀 때문에 드라이버가 안 들어감. 데크를 프레임에 올리기 전에 조인다.
+- 물길을 마킹실 벽에 붙이던 나사 2개를 없애고 앞벽을 추가함. 뚜껑 구멍 깊이 7, 기둥 Ø9, 손나사 자리 y 60.
+- 부품별 파일은 `cad/parts/feeder/` (`feeder_parts.py`): 부품 7종과 App::Link 조립 파일. 검사를 모두 통과했고 `D5g_full`과 같다. 자세한 것은 그 폴더의 README.
+- 남은 결정: 143을 둘로 나눌지 (출력 서포트 문제), 프린터 판 크기.
