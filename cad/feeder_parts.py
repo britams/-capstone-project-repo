@@ -226,6 +226,7 @@ def assemble():
     for num, tag, pl in placements():
         lk = asm.addObject("App::Link", "L_" + tag)
         lk.LinkedObject = src[num].getObject("Body")
+        lk.LinkTransform = True                 # 부품 파일 Body의 자리(자기 원점으로 옮긴 것)를 살림 — 없으면 링크가 그 자리를 버려서 부품이 엉뚱한 곳에 놓임 (11/10 확인)
         lk.Placement = pl
         lk.Label = "%s ← %s" % (tag, os.path.basename(files[num]))
         if getattr(lk, "ViewObject", None):
