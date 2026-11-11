@@ -8,6 +8,12 @@ rep = dict(ok=False)
 try:
     import split3 as S
     rep["merge"] = S.merge_full(os.path.join(HERE, "split"), os.path.join(HERE, "D5g_full.FCStd"))
+    # (11/12 02:24 서현) 최신 전체 CAD 파일 하나를 바탕화면 capstone design 폴더에도 — 전체 수정 때마다 덮어씀
+    import shutil
+    PC = r"C:\Users\Seohyun_Lee\Desktop\capstone design"
+    if os.path.isdir(PC):
+        shutil.copy2(os.path.join(HERE, "D5g_full.FCStd"), os.path.join(PC, "D5g_full.FCStd"))
+        rep["pc_copy"] = os.path.join(PC, "D5g_full.FCStd")
     rep["ok"] = True
 except Exception:
     rep["error"] = traceback.format_exc()

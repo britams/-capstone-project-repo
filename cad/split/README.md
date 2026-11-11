@@ -40,6 +40,7 @@
 ## 전체 도면 (`cad/D5g_full.FCStd`)
 - 서현 규칙 (11/12 01:31): 전체 도면은 서현이 **'전체 수정'**이라고 말할 때만 고친다.
 - 고치는 법: `freecad.exe cad\full_merge.py` → S1·S2·S3을 한 문서로 합침 (묶음 3개, 색 그대로)
+- 합친 뒤 **`C:\Users\Seohyun_Lee\Desktop\capstone design\D5g_full.FCStd`에도 덮어써서** 늘 최신 하나가 그 폴더에 있게 함 (서현 11/12 02:24)
 - 11/12 01:4x 첫 합침: 진짜 모터 도면, 급이부·누름 고친 것 포함 (부품 241개, 13.4 MB). 그 전 D5g_full은 11/10 것이었다.
 - 진짜 모터 도면(Adafruit 858 STEP, MIT) 넣기는 `real_motor.py` 하나로 한다. 쓰는 곳:
   - S2: `s2_motors.py`
