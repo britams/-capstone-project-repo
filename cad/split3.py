@@ -21,6 +21,7 @@ import json
 import os
 
 import FreeCAD as App
+import Part
 
 NAMES = ("S1_급이부", "S2_마킹부", "S3_프레임회로")
 ASM = "S0_전체조립"
@@ -262,7 +263,10 @@ def extract(folder, heads=LIFT, name="S2a_바닥구동"):
     for o in _solid_objects(src):
         if o.Label.startswith(heads):
             c = d.addObject("Part::Feature", o.Name)
-            c.Label, c.Shape = o.Label, o.Shape.copy()
+            shp = o.Shape.copy()
+            if o.Label.startswith(("153b", "153n")):      # 모터 3개 귀 나사가 한 묶음 → 바닥 모터 것만 (z 240 아래)
+                shp = Part.makeCompound([s for s in shp.Solids if s.BoundBox.ZMax < 240])
+            c.Label, c.Shape = o.Label, shp
     App.closeDocument(src.Name)
     color_doc(d)
     d.recompute()
