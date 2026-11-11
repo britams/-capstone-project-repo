@@ -74,6 +74,9 @@ def feed_trough():
     return ch.cut(front_hole()).removeSplitter()
 
 
+PLACES = {}
+
+
 def feeder_hardware():
     """(11/11, CAP-AI-61) 사는 것: 기둥 각관, 앵글 2 (발·위), M3 나사·너트, 공압 M5 바브 니플 2 (노즐·물빠짐)
     발 앵글: 누운 다리 x 40~60 (데크 위, 나사 x 52 · y 80 ± 14 데크 아래에서), 선 다리 x 58~60 (각관 +x 면)
@@ -104,10 +107,13 @@ def feeder_hardware():
     foot, top = foot.cut(Part.makeCompound(holes)), top.cut(Part.makeCompound(holes))
     post = post.cut(Part.makeCompound(holes))
     sc, nu = [], []
+    PLACES.clear(); PLACES.update(screw=[], nut=[], nipple=[])  # (11/12, CAP-AI-62) 산 STEP을 같은 자리에 놓으려고 (s1_vendor.py)
     def screw(p, d, L_, n):                                # 냄비머리 M3: 머리 Ø5.5 × 2, 머리가 p, 몸이 d 방향
         sc.append(Part.makeCylinder(2.75, 2.0, p - d * 2.0, d).fuse(Part.makeCylinder(1.5, L_, p, d)))
         q = p + d * n
         nu.append(Part.makeCylinder(3.15, 2.4, q, d).cut(Part.makeCylinder(1.5, 3, q - d * 0.2, d)))
+        PLACES["screw"].append((p, d, L_))
+        PLACES["nut"].append((q, d))
     for sy in (-FOOT["dy"], FOOT["dy"]):                   # 데크 아래(z 200)에서 위로 M3 × 12 → 앵글 위 너트
         screw(V(px, py + sy, f["post_foot_z"] - 5.0), V(0, 0, 1), 12.0, 5.0 + t)
     screw(V(xa1, py, f["post_foot_z"] + 12), V(-1, 0, 0), 16.0, t + b["sq"] - b["sq_t"])        # 앵글 → 각관 (너트는 각관 안 −x 벽)
@@ -115,6 +121,7 @@ def feeder_hardware():
     screw(V(f["x"], py - 12.0, f["floor_z"] - t), V(0, 0, 1), 8.0, t + f["floor_t"])          # 위 앵글 → 물길 바닥 (y 68, 각관 밖 — 너트는 물길 안, 솜 끝 y 58보다 뒤)
     # 바브 니플 2: 노즐 (+x 벽 받침 → −x 방향 나사), 물빠짐 (바닥 아래 받침 → +z 방향 나사)
     def nipple(p, d):                                      # p = 받침 바깥 면, d = 나사가 들어가는 방향
+        PLACES["nipple"].append((p, d))
         th = Part.makeCylinder(b["fit_thread"] / 2, b["fit_L"], p, d)
         hx = Part.makeCylinder(b["fit_hex"] / 2, b["fit_hex_t"], p - d * b["fit_hex_t"], d)
         bb = Part.makeCylinder(b["fit_barb"] / 2, b["fit_barb_L"], p - d * (b["fit_hex_t"] + b["fit_barb_L"]), d)
