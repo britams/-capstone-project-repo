@@ -290,6 +290,8 @@ def make():
         RP.apply(doc)
     except Exception as e:
         print('실제 부품 CAD 못 받음 (인터넷 확인):', e)
+    global GATE_REPORT
+    GATE_REPORT = FU.gate_holders_fix(doc)           # (CAP-AI-61) 2167로 바꾼 뒤 게이트 받침을 다시 — 송수신기가 통로에서 떠 있던 것
     import D5g_fasten as FA                          # (SJ-49) 얹기만 했던 부품 볼트 체결
     FA.fasten(doc, sys.modules[__name__])
     for o in list(doc.Objects):        # D5f에서 스프링 204 뺀 뒤 남은 바탕 원기둥
@@ -332,7 +334,8 @@ def make():
     # (11/11, CAP-AI-61) 급이 발 인서트·McMaster 나사 없앰 → 앵글 + M3 나사·너트 (D5g_feeder_uln.feeder_hardware) — D5g_feeder_mcm 지움
     import D5g_feeder_pump as FPMP     # (CAP-AI-59, 서현) 급이: 바깥 병 + 연동 펌프 + 관 + 걸이 (사용자 편의)
     FIX_REPORT["feeder_pump"] = FPMP.apply(doc)
-    FIX_REPORT["press"] = FU.press_check(doc, PRESS_REPORT)   # (CAP-AI-60) 누름 장치 겹침·올림 길
+    FIX_REPORT["press"] = FU.press_check(doc, PRESS_REPORT)
+    FIX_REPORT["gates"] = GATE_REPORT   # (CAP-AI-60) 누름 장치 겹침·올림 길
     import D5g_print_color as PCOL     # (CAP-AI-58, 서현) 3D 프린트 부품만 파랑, 나머지 회색 — 맨 끝 (앞 단계 색을 덮음)
     FIX_REPORT["print_color"] = PCOL.apply(doc)
     doc.recompute()

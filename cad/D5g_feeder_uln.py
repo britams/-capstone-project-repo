@@ -311,6 +311,51 @@ def support_fixes(doc):
     return objs
 
 
+def gate_holders_fix(doc):
+    """(11/11, CAP-AI-61) 서현 '네모 회색 부품은 뭐 하는 거야, 똑바로 붙여' — 빛 게이트 송수신기(Adafruit 2167)가 통로에서 떠 있었음.
+    원인 [확실 — 코드]: 받침 199b·c를 옛 상자 모양 송수신기로 먼저 만들고, 그 뒤 D5g_real_parts가 송수신기를 2167 모양으로 바꿔서 틈이 생김.
+    고침: 2167로 바꾼 뒤 받침을 다시 만듦 — 송수신기 렌즈 면 ↔ 통로 바깥 면 사이를 송수신기 면 크기(20 × 10)로 채우는 작은 받침,
+    빔 구멍 Ø3.2. 받침은 통로에 순간접착, 송수신기는 받침에 양면테이프 (작고 단순한 프린트 — 서현 11/11 '작은 건 프린트 OK').
+    입구 G1(114)도 같은 식으로 봄. 반환: [(이름, 틈 mm 전, 후)]"""
+    jobs = (("196_gate_G4_tx_rx", "172_", "199b_gate_holder_G4"), ("196_gate_G6_tx_rx", "174_", "199c_gate_holder_G6"),
+            ("114_entry_sensor_tx", "110_", "199d_gate_holder_G1_tx"), ("114_entry_sensor_rx", "110_", "199e_gate_holder_G1_rx"))
+    rep = []
+    for lab, duct_pre, hname in jobs:
+        g = [o for o in doc.Objects if o.Label.startswith(lab)]
+        duct = [o for o in doc.Objects if o.Label.startswith(duct_pre)]
+        if not g or not duct:
+            continue
+        pieces = []
+        for s in g[0].Shape.Solids:
+            dmin, pts, _ = s.distToShape(duct[0].Shape)
+            if dmin < 0.05:
+                rep.append((lab, round(dmin, 2), "붙어 있음"))
+                continue
+            p_s, p_d = pts[0]
+            sb = s.BoundBox
+            ax = max(range(3), key=lambda i: abs([p_d.x - p_s.x, p_d.y - p_s.y, p_d.z - p_s.z][i]))
+            lo = [sb.XMin, sb.YMin, sb.ZMin]
+            hi = [sb.XMax, sb.YMax, sb.ZMax]
+            a0, a1 = sorted(([p_s.x, p_s.y, p_s.z][ax], [p_d.x, p_d.y, p_d.z][ax]))
+            lo[ax], hi[ax] = a0 - 0.01, a1 + 0.3                       # 통로 면에 0.3 묻힘 (붙음)
+            if [p_d.x, p_d.y, p_d.z][ax] < [p_s.x, p_s.y, p_s.z][ax]:
+                lo[ax], hi[ax] = a0 - 0.3, a1 + 0.01
+            blk = box(lo[0], hi[0], lo[1], hi[1], lo[2], hi[2]).cut(s).cut(duct[0].Shape)
+            c = s.BoundBox.Center
+            d = V(0, 0, 0); setattr(d, "xyz"[ax], 1)
+            blk = blk.cut(Part.makeCylinder(1.6, 200, V(c.x, c.y, c.z) - d * 100, d))
+            pieces.append(blk)
+            rep.append((lab, round(dmin, 2), "받침으로 채움"))
+        for o in [o for o in doc.Objects if o.Label.startswith(hname)]:
+            doc.removeObject(o.Name)
+        if pieces:
+            o = doc.addObject("Part::Feature", "GH_" + hname.split("_")[0])
+            o.Label = hname + " (빛 게이트 받침 — 통로에 붙임, 송수신기 양면테이프, 작은 3D 프린트)"
+            o.Shape = Part.makeCompound(pieces)
+    doc.recompute()
+    return rep
+
+
 # ---------------- (11/06 20시) 벌레 막기 뚜껑 + 방생 출구 일자 ----------------
 def trough_lid():
     """143l: 물길 뚜껑 (3D 프린트). (11/10 밤) 판 하나 + 기둥 자리 4 (자석 2·핀 2는 feeder_detail_shapes) + 손잡이 혀 (+y 끝)"""

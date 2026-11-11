@@ -26,7 +26,8 @@ PUMP = dict(motor_d=27.8, L=66.8, head_d=32.0, head_h=22.0, port_dx=6.0, port_L=
 BOT = dict(d=61.0, h=131.0, wall=1.2, cap_d=48.0, cap_h=15.0)
 TUBE = dict(id=3.5, od=5.0)
 # (11/10 밤) 볼트 x 40 → 27: 머리가 병에 닿음 (6 mm³, 모델 검사)
-HB = dict(x0=20.0, x1=140.0, y_face=180.0, t=4.0, z0=92.0, z1=200.0, bolt_x=(27.0, 125.0), bolt_z=190.0,
+# (11/11) 판 x1 140 → 168: 버림통(50 mL 튜브) 자리
+HB = dict(x0=20.0, x1=168.0, y_face=180.0, t=4.0, z0=92.0, z1=200.0, bolt_x=(27.0, 125.0), bolt_z=190.0,
           bot_x=55.0, gap=2.0, ring_z=(168.0, 178.0), pump_x=112.0)
 COL = dict(PRINT=None, BOT=(0.92, 0.95, 1.0), PUMP=(0.25, 0.25, 0.28), TUBE=(0.95, 0.95, 0.95), STEEL=(0.15, 0.15, 0.15))
 
@@ -96,6 +97,12 @@ def clamps():
         ring = Part.makeCylinder(ro + 1.5, 15.0, V(b.x, b.y, zc)).cut(Part.makeCylinder(ro, 20, V(b.x, b.y, zc - 1)))
         ear = box(b.x - 8, b.x + 8, yf + t, b.y - ro, zc, zc + 15.0)
         out.append(ring.fuse(ear).cut(Part.makeCylinder(ro, 20, V(b.x, b.y, zc - 1))))
+    wc = waste_center()
+    for zc in (wc.z + 30.0, wc.z + 75.0):
+        rw = WASTE["r"]
+        ring = Part.makeCylinder(rw + 1.5, 12.0, V(wc.x, wc.y, zc)).cut(Part.makeCylinder(rw, 20, V(wc.x, wc.y, zc - 1)))
+        ear = box(wc.x - 6, wc.x + 6, yf + t, wc.y - rw, zc, zc + 12.0)
+        out.append(ring.fuse(ear).cut(Part.makeCylinder(rw, 20, V(wc.x, wc.y, zc - 1))))
     pc = pump_center()
     pr = PUMP["motor_d"] / 2
     ties = []
@@ -148,13 +155,35 @@ def tube_paths(z_cross):
     return suck, feed
 
 
+# (11/11, CAP-AI-61) 서현 '떨어져 있는 관 뭐야, 부품이 의미가 있어야지' → 물빠짐 관 끝을 버림통에 꽂음 (서현 '(가)로 하자')
+#   버림통 = 코닝 352070 50 mL 원뿔 튜브 [확실 — 제조사 도면 LSR00042: 바깥 Ø29.72, 길이 114.55, 뚜껑 Ø34.75 × 13.21, 뚜껑 포함 115.8]
+#   걸이 판에 파이프 클램프 Ø30 2개로 세움, 뚜껑에 관 구멍 Ø5 + 공기 구멍 Ø2. 가득 차면 뚜껑 열고 버림
+WASTE = dict(x=150.0, r=14.86, L=115.8, cap_r=17.375, cap_h=13.21, cone=16.0, tip_r=3.0)
+
+
+def waste_center():
+    return V(WASTE["x"], HB["y_face"] + HB["t"] + HB["gap"] + WASTE["cap_r"], HB["z0"] + 3.0)   # 원뿔 끝(아래) 가운데
+
+
+def waste_tube():
+    w = WASTE
+    c = waste_center()
+    cone = Part.makeCone(w["tip_r"], w["r"], w["cone"], c)
+    body = Part.makeCylinder(w["r"], w["L"] - w["cone"] - w["cap_h"], c + V(0, 0, w["cone"]))
+    cap = Part.makeCylinder(w["cap_r"], w["cap_h"], c + V(0, 0, w["L"] - w["cap_h"]))
+    cap = cap.cut(Part.makeCylinder(TUBE["od"] / 2, 30, c + V(0, 0, w["L"] - 20)))
+    return cone.fuse(body).fuse(cap)
+
+
 def drain_path(zr, xo):
-    """물빠짐 관: 바닥 바브 아래 끝 → zr 높이 → x xo로 → 바깥(y 250) → 아래 30 (끝은 열려 있음, 땅으로 떨어짐)"""
+    """물빠짐 관: 바닥 바브 아래 끝 → zr 높이 → x xo로 → 바깥(버림통 위) → 버림통 뚜껑 구멍으로 10 mm 들어감"""
     import D5g_feeder_uln as FU
     f = FU.FD
     b = FU.BUY
     z0 = f["floor_z"] - b["pad_t"] - b["fit_hex_t"] - b["fit_barb_L"] + 6.0
-    return [V(f["x"], f["dr_y"], z0), V(f["x"], f["dr_y"], zr), V(xo, f["dr_y"], zr), V(xo, 250.0, zr), V(xo, 250.0, zr - 30)]
+    wc = waste_center()
+    ztop = wc.z + WASTE["L"]
+    return [V(f["x"], f["dr_y"], z0), V(f["x"], f["dr_y"], zr), V(xo, f["dr_y"], zr), V(xo, wc.y, zr), V(wc.x, wc.y, zr), V(wc.x, wc.y, ztop - 10)]
 
 
 def _hits(shape, others, tol=0.5):
@@ -174,13 +203,15 @@ def _add(doc, label, shp, col):
     o.Label, o.Shape = label, shp
     if col and getattr(o, "ViewObject", None):
         o.ViewObject.ShapeColor = col
+        if label.startswith("144h"):                 # (11/11) 실리콘 고무관 — 반투명 우윳빛
+            o.ViewObject.ShapeColor, o.ViewObject.Transparency = (0.93, 0.90, 0.82), 35
     return o
 
 
 def apply(doc):
     import D5g_frame_detail as G
     rep = {}
-    for o in [o for o in doc.Objects if o.Label.startswith(("144n", "144p", "144b_", "144c_", "144z_", "144h", "144s_", "144t_"))]:
+    for o in [o for o in doc.Objects if o.Label.startswith(("144n", "144p", "144b_", "144c_", "144z_", "144w_", "144h", "144s_", "144t_"))]:
         doc.removeObject(o.Name)
     others = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Shape.isNull() and o.Shape.Volume > 0
               and not o.Label.startswith(("REF_camera", "FitBox"))]
@@ -201,11 +232,11 @@ def apply(doc):
     ts = tube_along(suck)
     dtried = []
     for zr in (330.0, 310.0, 290.0, 345.0):
-        for xo in (85.0, 25.0, 100.0):
+        for xo in (WASTE["x"], 85.0, 100.0):
             dp = drain_path(zr, xo)
             td = tube_along(dp)
             h = [x for x in _hits(td, others + []) if not x[0].startswith(("143_",))]
-            h += [("144b/병", 1)] if td.common(hb).Volume > 0.5 or td.common(bt).Volume > 0.5 else []
+            h += [("144b/병", 1)] if td.common(hb).Volume > 0.5 or td.common(bt).Volume > 0.5 or td.common(pm).Volume > 0.5 else []
             dtried.append((zr, xo, h))
             if not h:
                 break
@@ -218,8 +249,9 @@ def apply(doc):
     rep["feed_tube_tries"] = tried
     rep["feed_tube_len_mm"] = round(sum(e.Length for e in Part.makePolygon(feed).Edges))
     rep["suck_tube_len_mm"] = round(sum(e.Length for e in Part.makePolygon(suck).Edges))
-    new = [("144b_feeder_holder (병·펌프 걸이 — 알루미늄 판 3 mm 120 × 108 자름·구멍, CAP-AI-61)", hb, (0.80, 0.82, 0.85)),
-           ("144c_pipe_clamp_D60 (파이프 클램프 Ø60 2개 — 병, 판에 M4, 구매)", cl, (0.70, 0.70, 0.72)),
+    new = [("144b_feeder_holder (병·펌프 걸이 — 알루미늄 판 3 mm 148 × 108 자름·구멍, CAP-AI-61)", hb, (0.80, 0.82, 0.85)),
+           ("144c_pipe_clamp (파이프 클램프 Ø60 2개 — 병, Ø30 2개 — 버림통, 판에 M4, 구매)", cl, (0.70, 0.70, 0.72)),
+           ("144w_waste_tube_50mL (버림통 — 코닝 352070 50 mL, 뚜껑에 관 구멍, 구매)", waste_tube(), (0.92, 0.95, 1.0)),
            ("144z_cable_ties (케이블 타이 2 — 펌프, 구매)", ti, (0.15, 0.15, 0.15)),
            ("144n_bottle_250mL (Nalgene 2104-0008 HDPE, 구매)", bt, COL["BOT"]),
            ("144nc_bottle_cap (병 뚜껑 — 관 Ø5·공기 Ø2 구멍 뚫음)", cap, COL["BOT"]),
@@ -243,7 +275,7 @@ def check(doc, objs, others):
     allow = {("144hf_tube_feed", "143_feed_trough"), ("144h_tube_suck", "144pp_pump_ports"), ("144hf_tube_feed", "144pp_pump_ports"),
              ("144h_tube_suck", "144nc_bottle_cap"), ("144h_tube_suck", "144n_bottle_250mL"), ("144s_bolt_M5x8", "144t_tnut_M5_dropin"),
              ("144pp_pump_ports", "144p_pump"), ("144hd_tube_drain", "143_feed_trough"),
-             ("144hf_tube_feed", "143n_nipple_M5_barb"), ("144hd_tube_drain", "143n_nipple_M5_barb")}
+             ("144hf_tube_feed", "143n_nipple_M5_barb"), ("144hd_tube_drain", "143n_nipple_M5_barb"), ("144hd_tube_drain", "144w_waste_tube_50mL")}
     ov = []
     names = list(mine)
     for i, a in enumerate(names):
