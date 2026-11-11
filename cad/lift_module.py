@@ -90,7 +90,7 @@ def apply(doc):
         doc.removeObject(o.Name)
     for o in [o for o in doc.Objects if o.Label.startswith(("153b", "153n"))]:          # 바닥 모터 귀 나사만 뺌 (X·Y 모터 것은 남김)
         o.Shape = Part.makeCompound([s for s in o.Shape.Solids if s.BoundBox.ZMax >= 240])
-    for o in [o for o in doc.Objects if o.Label.startswith(("148c_", "227p", "153m", "153s"))]:
+    for o in [o for o in doc.Objects if o.Label.startswith(("148c_", "227p", "153m", "153s", "148_load_cell", "148b_", "148g_", "148s_", "148m"))]:   # 148_load_cell: D5e 옛 로드셀 자리 (press_apply가 지우던 것)
         doc.removeObject(o.Name)
     mod, x_front = module()
     zm = (LD.CAR["z0"] + LD.CAR["z1"]) / 2

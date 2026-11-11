@@ -636,7 +636,7 @@ def press_parts(carriage_shape):
 def press_check(doc, rep):
     """누름 장치 검사: (1) 새 부품 ↔ 다른 부품 겹침 (2) 바닥 0 → 36.5 올리는 동안 움직이는 묶음 ↔ 고정 부품 겹침 (4 mm마다)"""
     mine = ("158_carriage", "148c_", "227p_", "227ps_")
-    moving = mine + ("140_", "146_", "147_", "149_", "159_")
+    moving = mine + ("140_", "146_", "147_", "149_", "159_", "153s")      # 153s·153ss: 리니어 모듈 슬라이더·나사 (11/12)
     allow = {("227ps_", "158_carriage"), ("148c_", "147_")}
     objs = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Shape.isNull() and o.Shape.Volume > 0
             and not o.Label.startswith(("REF", "FitBox")) and "beam" not in o.Label]
