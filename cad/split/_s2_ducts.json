@@ -1,0 +1,109 @@
+{
+ "ok": true,
+ "ducts": {
+  "110_entry_duct": {
+   "pipe_L": 101,
+   "bend_vol": 3671
+  },
+  "172_isolation_duct": {
+   "pipe_L": 195,
+   "bend_vol": 3653
+  }
+ },
+ "gates": [
+  {
+   "gate": "114_entry_sensor_tx",
+   "face_from_center": 12.0,
+   "tube_r": 9.0,
+   "saddle_min": 3.0
+  },
+  {
+   "gate": "196_gate_G4_tx_rx",
+   "face_from_center": 12.0,
+   "tube_r": 9.0,
+   "saddle_min": 3.0
+  },
+  {
+   "gate": "196_gate_G6_tx_rx",
+   "face_from_center": 10.0,
+   "tube_r": null,
+   "saddle_min": 2.0
+  }
+ ],
+ "overlaps": [
+  [
+   "110_entry_duct",
+   "199s_gate_screws",
+   6.19,
+   "허용"
+  ],
+  [
+   "172_isolation_duct",
+   "199s_gate_screws",
+   6.19,
+   "허용"
+  ]
+ ],
+ "gate_overlaps": [
+  [
+   "199d_gate_holder_G1_tx",
+   "199s_gate_screws",
+   3.42,
+   "허용"
+  ],
+  [
+   "199e_gate_holder_G1_rx",
+   "199s_gate_screws",
+   3.42,
+   "허용"
+  ],
+  [
+   "199s_gate_screws",
+   "110_entry_duct",
+   6.2,
+   "허용"
+  ],
+  [
+   "199s_gate_screws",
+   "172_isolation_duct",
+   6.2,
+   "허용"
+  ],
+  [
+   "199b_gate_holder_G4",
+   "199s_gate_screws",
+   6.84,
+   "허용"
+  ]
+ ],
+ "touch": [
+  [
+   "199d",
+   [
+    0.0
+   ]
+  ],
+  [
+   "199e",
+   [
+    0.0
+   ]
+  ],
+  [
+   "199b",
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  [
+   "199c",
+   [
+    0.0,
+    0.0
+   ]
+  ]
+ ],
+ "bad": [],
+ "saved": true
+}
