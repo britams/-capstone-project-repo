@@ -31,8 +31,8 @@ TRAP = dict(body_r=100, body_h=145, awning_top=180, awning_r=130, hole_r=27.5, r
 FR = dict(s=20, c=170, deck_z=180, top_z=590, cross_y=80, gantry_z=452, gantry_x=-18)   # 갠트리 받침 레일 x 25 → -18: 마커가 격자 -x 끝(xm 37.4)에 가면 레일과 겹침 (D5e 이동 검사), 격리 세로 통로(x ±8)도 피함
 DECK = dict(t=5, x0=-130, x1=100, y=90)
 TOP = dict(t=5, x=70, y=90)
-CH = dict(cx=55, inner=40, wall=3, base_t=5, h=50, z_base=330)
-GRID = dict(t=1.5, n=9, pitch=4.4, hole=3.0)
+CH = dict(cx=55, inner=32, wall=3, base_t=5, h=50, z_base=330)   # (11/12 서현) 안 40 → 32: 여왕벌 30 + 틈 1 × 2 (design/2026-11-12_마킹실_최소크기_계산)
+GRID = dict(t=1.5, n=7, pitch=4.4, hole=3.0)   # (11/12) 안 32 → 7 × 7
 FLOOR = dict(t=6, clear=0.5, stroke=36.5)
 PORT_R, DUCT_R = 6, 8
 BEND_R = 20.0                                # 통로 굽힘 중심 반지름 (안지름 12의 1.67배) — D5d는 관 두 개를 겹쳐 붙여 꺾인 곳이 막힘 덩어리였음
@@ -251,7 +251,8 @@ def build():
     fixed("120_chamber_walls", walls)
     sy = -13.0                                              # 바닥 나사 축 y
     gy = 13.0                                               # 바닥 가이드봉 y
-    fixed("121_chamber_base", box(cx - W / 2 - w, cx + W / 2 + w, -W / 2 - w, W / 2 + w, zb, zc0).cut(
+    Wb = max(W, 40)                                         # (11/12) 바닥판은 옛 46 그대로 — 바닥 구동 옆판 위에 얹히고 베어링 플랜지(y −22)가 들어감
+    fixed("121_chamber_base", box(cx - Wb / 2 - w, cx + Wb / 2 + w, -Wb / 2 - w, Wb / 2 + w, zb, zc0).cut(
         cyl(2.5, 10, V(cx, 0, zb - 1))).cut(cyl(2.0, 3, V(cx, gy, zb))))
     g = box(cx - W / 2 - w, cx + W / 2 + w, -W / 2 - w, W / 2 + w, z_grid_bot, z_grid_bot + GRID["t"])
     k = GRID["n"] // 2

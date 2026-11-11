@@ -292,6 +292,9 @@ def make():
     except Exception as e:
         print('실제 부품 CAD 못 받음 (인터넷 확인):', e)
     global GATE_REPORT
+    import ducts_pvc as DPVC, funnels as FUNL           # (CAP-AI-62) 통로 PVC + 산 깔때기 — 게이트 받침(관 Ø18) 전에
+    DPVC.apply(doc)
+    FUNL.apply(doc)
     import gate2167 as G2167                         # (CAP-AI-62, 서현 11/12) 2167 실제 치수 + 둥근 관 안장 받침 (gate_holders_fix는 0.4 mm 조각이 됐음)
     _gm, GATE_REPORT = G2167.apply(doc)
     import D5g_fasten as FA                          # (SJ-49) 얹기만 했던 부품 볼트 체결

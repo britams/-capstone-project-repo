@@ -42,7 +42,12 @@ FD = dict(x=55.0, roll_r=5.0, tip_y=21.4, tip_z=378.0, end_y=58.28, end_z=368.85
 # (11/10 상세, CAP-AI-57) 발 고정을 '위에서 M5 + 가로대 T너트' → '데크 아래에서 M3 + 발 속 인서트'로:
 #   위에서는 볼트 바로 위가 그릇(한 덩어리 출력)이라 드라이버가 못 들어가고, 옆으로 옮기면 서보 허브(x 30)·로드셀(x 74)에 막힘 [확실 — 모델 검사]
 #   데크를 프레임에 올리기 전에 급이 방을 데크에 붙임 → 데크 아래가 열려 있어 드라이버가 들어감. 볼트는 가로대 띠(y 70~90) 밖 y 80 ∓ 14
-FOOT = dict(t=2.0, half_x=10.0, half_y=20.0, dy=14.0)   # (11/11, CAP-AI-61) 발 = 알루미늄 앵글 20 × 20 × 2 (길이 40)의 누운 다리 — 프린트 발 대신
+# (11/12 서현 '마킹실 최소로') 마킹실 안 40 → 32: +y 벽이 y −4 → 급이 물길·솜·기둥을 같이 y −4 (DYF)
+import D5e_module_kinematic as _K
+DYF = (_K.CH["inner"] - 40.0) / 2.0
+for _k in ("tip_y", "end_y", "ch_y0", "ch_y1", "nz_y", "dr_y", "post_y"):
+    FD[_k] += DYF
+FOOT = dict(t=2.0, half_x=10.0, half_y=20.0, dy=17.0)   # (11/12) dy 14 → 17: 기둥이 y −4 옮겨도 나사가 데크 아래 가로대(y 70~90) 밖   # (11/11, CAP-AI-61) 발 = 알루미늄 앵글 20 × 20 × 2 (길이 40)의 누운 다리 — 프린트 발 대신
 # (11/11, CAP-AI-61) 서현 "3D 프린트 최대한 없게, 살 수 있으면 사" → 급이부 = 포맥스 판 접착 물길 + 알루미늄 각관 기둥 + 앵글 2 + M3 나사·너트 + 공압 M5 바브 니플 2
 BUY = dict(sq=12.0, sq_t=1.0,                      # 알루미늄 각관 12 × 12 × 1 [가능성 높음 — 일반 규격]
            ang=20.0, ang_t=2.0, ang_L=40.0,         # 알루미늄 앵글 20 × 20 × 2 [가능성 높음]
@@ -153,7 +158,7 @@ def front_hole_bottom():
 
 def wall_hole():
     f = FD
-    return Part.makeCylinder(f["wall_hole_r"], 12, V(f["x"], 15.0, f["wall_hole_z"]), V(0, 1, 0))
+    return Part.makeCylinder(f["wall_hole_r"], 12, V(f["x"], 15.0 + DYF, f["wall_hole_z"]), V(0, 1, 0))
 
 
 # ---------------- ULN2003 보드 (판매품 외형) ----------------
@@ -465,8 +470,8 @@ def release_shaft_apply(doc):
 INS = dict(hole=4.0, L=4.3, min_wall=5.1, boss_r=4.5, depth=7.0)        # (11/10 상세) 기둥 Ø8 → Ø9: 인서트 바깥 Ø4.74(STEP)와 벽 2.1 / 구멍 6 → 7: 손나사 끝(인서트 아래 2.2)이 바닥에 닿던 것
 TS = dict(d=3.0, L=8.0, head_d=8.0, head_h=5.0)                          # 손나사 92545A111
 SC = dict(d=3.0, L=8.0, head_d=5.5, head_h=3.0)                          # M3 × 8 91292A112
-FDX = dict(ear_dx=13.0, ear_z=368.0, ear_y0=29.0, ear_t=3.0,             # 물길 귀 (마킹실 벽 보스에 M3 × 8)
-           lid_dx=13.0, lid_y=(40.0, 60.0),                              # 뚜껑 블록 자리 (x 55 ± 13 — (11/11) 블록이 벽 바깥 면 x 63에 붙음)
+FDX = dict(ear_dx=13.0, ear_z=368.0, ear_y0=29.0 + DYF, ear_t=3.0,             # 물길 귀 (마킹실 벽 보스에 M3 × 8)
+           lid_dx=13.0, lid_y=(40.0 + DYF, 60.0 + DYF),                              # 뚜껑 블록 자리 (x 55 ± 13 — (11/11) 블록이 벽 바깥 면 x 63에 붙음)
            pinch=(44.0, 48.0),                                           # 코튼롤 잡이 y
            boss_r=5.0, tab=8.0,                                          # (11/10 밤) 기둥 Ø10 (자석 Ø6.2 자리 둘레 1.9), 뚜껑 손잡이 혀 8 — (11/11) 기둥 → 포맥스 블록 10 × 10
            mag_d=6.0, mag_t=2.0, pin_d=3.6, pin_L=4.0,                   # 자석 Ø6 × 2 N35 니켈 도금 4개 [가능성 높음 — 일반 규격], 핀 Ø3.6 → 구멍 Ø4
@@ -493,7 +498,7 @@ def feeder_detail_shapes(chamber_shape):
     wall = chamber_shape
     for sx in ((-1, 1) if e["ears"] else ()):
         cx = f["x"] + sx * e["ear_dx"]
-        boss = Part.makeCylinder(INS["boss_r"], e["ear_y0"] - 23.0, V(cx, 23.0 - 0.2, e["ear_z"]), V(0, 1, 0))
+        boss = Part.makeCylinder(INS["boss_r"], e["ear_y0"] - (23.0 + DYF), V(cx, 23.0 + DYF - 0.2, e["ear_z"]), V(0, 1, 0))
         wall = wall.fuse(boss)
         wall = wall.cut(Part.makeCylinder(INS["hole"] / 2, INS["depth"], V(cx, e["ear_y0"] - INS["depth"], e["ear_z"]), V(0, 1, 0)))
         ins.append(Part.makeCylinder(INS["hole"] / 2, INS["L"], V(cx, e["ear_y0"] - INS["L"], e["ear_z"]), V(0, 1, 0)).cut(

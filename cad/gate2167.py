@@ -24,12 +24,14 @@ A = dict(L=20.0, W=10.0, T=8.0, led_end=5.0, led_d=3.0, ring_d=8.0, ring_t=0.5, 
 SCREW = dict(d=2.0, L=12.0, head_d=3.8, head_t=1.3)
 # (11/12) 통로가 PVC 13A(바깥 18)로 바뀜 → G1·G4 관 반지름 9 (받침 가운데 3 mm)
 # 게이트: (송수신기 라벨, 빔 가운데, 빔 방향 n, 몸 길이 방향 u(LED 끝 쪽), 앞면 거리(빔 가운데 → 앞면), 통로 라벨, 관 반지름(둥근 관) 또는 None, 받침 라벨, 빔 라벨)
+import D5e_module_kinematic as _K
+DX6 = (_K.CH["inner"] - 40.0) / 2.0              # (11/12) 마킹실 안 40 → 32: +x 벽·방생 목이 x −4
 GATES = (
     (("114_entry_sensor_tx", "114_entry_sensor_rx"), V(0, 0, 275), V(1, 0, 0), V(0, 0, 1), 12.0, "110_", 9.0,
      ("199d_gate_holder_G1_tx", "199e_gate_holder_G1_rx"), None),
     (("196_gate_G4_tx_rx",), V(1.5, 0, 570), V(1, 0, 0), V(0, 0, 1), 12.0, "172_", 9.0, ("199b_gate_holder_G4",), "196_gate_G4_beam"),
     # G6: 몸 길이를 y로 (11/12 — x로 두면 LED 끝 5 때문에 몸이 x 93~113 → 문 하우징 176·G5b와 겹침, x 103~123 → 굴뚝 175와 겹침. y −15~5는 비어 있음)
-    (("196_gate_G6_tx_rx",), V(108, 0, 377), V(0, 0, 1), V(0, 1, 0), 10.0, "174_", None, ("199c_gate_holder_G6",), "196_gate_G6_beam"),
+    (("196_gate_G6_tx_rx",), V(108 + DX6, 0, 377), V(0, 0, 1), V(0, 1, 0), 10.0, "174_", None, ("199c_gate_holder_G6",), "196_gate_G6_beam"),
 )
 
 
