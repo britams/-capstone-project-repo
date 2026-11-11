@@ -12,8 +12,22 @@ D5g_frame_detail.make() 끝에서 부름. 열린 문서에 바로 써도 됨: im
 """
 import FreeCAD as App
 
-PRINT = (0.20, 0.50, 0.95)
+# (11/12 04:58 서현) 색 3가지: 3D 프린트 = 초록, 사서 내가 자르거나 고치는 것 = 파랑, 그냥 사는 것 = 회색
+PRINT = (0.20, 0.70, 0.30)
+MODIFY = (0.20, 0.50, 0.95)
 OTHER = (0.80, 0.80, 0.82)
+CUT_WORDS = ("자름", "잘라", "자른", "뚫", "드릴", "재단")   # '구멍'은 '구멍 미검증' 같은 말에 걸려서 뺌
+
+
+def color_of(label):
+    """반환 (색, 'print'|'modify'|'buy') — 부품표(D5g_parts_table) 종류·규격 글로 판정"""
+    import D5g_parts_table as PT
+    head, ko, kind, spec = PT.name_of(label)
+    if "3D 프린트" in spec:
+        return PRINT, "print"
+    if kind in ("판 재단", "설계") or any(w in spec for w in CUT_WORDS):
+        return MODIFY, "modify"
+    return OTHER, "buy"
 PETG = 1.27   # g/cm³ [가능성 높음]
 
 
@@ -39,12 +53,9 @@ def apply(doc):
         if not App.GuiUp or not getattr(o, "ViewObject", None):
             continue
         vo = o.ViewObject
+        vo.ShapeColor = color_of(o.Label)[0]
         if pr:
-            vo.ShapeColor, vo.Transparency = PRINT, 0
-            vo.LineColor = (0.10, 0.20, 0.45)
-        else:
-            vo.ShapeColor = OTHER
-            vo.LineColor = (0.35, 0.35, 0.38)
+            vo.Transparency = 0
     return rep
 
 

@@ -140,8 +140,7 @@ def color_doc(d):
         for head_, tt in TRANSP:
             if o.Label.startswith(head_):
                 t = tt
-        for k, v in (("ShapeColor", PCOL.PRINT if pr else PCOL.OTHER),
-                     ("LineColor", (0.10, 0.20, 0.45) if pr else (0.35, 0.35, 0.38)), ("Transparency", t)):
+        for k, v in (("ShapeColor", PCOL.color_of(o.Label)[0]), ("Transparency", t)):
             try:                      # 보기 객체 종류에 따라 없는 속성이 있음 (FreeCAD 1.1, 11/11)
                 setattr(o.ViewObject, k, v)
             except Exception:
