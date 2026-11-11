@@ -77,13 +77,18 @@ try:
                 continue
             if o in mine and o.Name < a.Name:
                 continue
-            v = a.Shape.common(o.Shape).Volume
+            try:
+                v = a.Shape.common(o.Shape).Volume
+            except Exception as e:                         # 모양 연산 실패 → 보고 (11/12)
+                hits.append((a.Label.split(" ")[0], o.Label.split(" ")[0], "ERR %s" % e, "확인"))
+                continue
             if v > 0.05:
                 ka, kb = a.Label.split(" ")[0], o.Label.split(" ")[0]
                 ok = any((ka.startswith(p) and kb.startswith(q)) or (kb.startswith(p) and ka.startswith(q)) for p, q in allow)
                 hits.append((ka, kb, round(v, 2), "허용" if ok else "문제"))
     rep["overlaps"] = hits
-    rep["bad"] = [h for h in hits if h[3] == "문제"]
+    rep["bad"] = [h for h in hits if h[3] in ("문제", "확인")]
+    rep["null"] = [o.Label.split(" ")[0] for o in mine if o.Shape.isNull()]
     S.remove_context(d)
     S.color_doc(d)
     d.recompute()
