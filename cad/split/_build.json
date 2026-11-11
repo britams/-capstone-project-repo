@@ -1,5 +1,5 @@
 {
- "ok": false,
+ "ok": true,
  "fix": {
   "bolts": [
    [
@@ -48,46 +48,30 @@
    ]
   ],
   "gates": [
-   [
-    "196_gate_G4_tx_rx",
-    0.1,
-    "받침으로 채움"
-   ],
-   [
-    "196_gate_G4_tx_rx",
-    0.1,
-    "받침으로 채움"
-   ],
-   [
-    "196_gate_G6_tx_rx",
-    2.0,
-    "받침으로 채움"
-   ],
-   [
-    "196_gate_G6_tx_rx",
-    2.0,
-    "받침으로 채움"
-   ],
-   [
-    "114_entry_sensor_tx",
-    0.0,
-    "붙어 있음"
-   ],
-   [
-    "114_entry_sensor_rx",
-    0.0,
-    "붙어 있음"
-   ]
+   {
+    "gate": "114_entry_sensor_tx",
+    "face_from_center": 12.0,
+    "tube_r": 9.0,
+    "saddle_min": 3.0
+   },
+   {
+    "gate": "196_gate_G4_tx_rx",
+    "face_from_center": 12.0,
+    "tube_r": 9.0,
+    "saddle_min": 3.0
+   },
+   {
+    "gate": "196_gate_G6_tx_rx",
+    "face_from_center": 10.0,
+    "tube_r": null,
+    "saddle_min": 2.0
+   }
   ],
   "steppers": [
-   "153: M3 × 8 접시머리 + 너트 (판+귀 4.0)",
-   "153: M3 × 8 접시머리 + 너트 (판+귀 4.0)",
    "209: M3 × 8 냄비머리 + 너트 (판+귀 4.0)",
    "209: M3 × 8 냄비머리 + 너트 (판+귀 4.0)",
    "215: M3 × 8 냄비머리 + 너트 (판+귀 4.0)",
-   "215: M3 × 8 냄비머리 + 너트 (판+귀 4.0)",
-   "151L: 드라이버 홈 1 (안쪽 면, 반지름 2.55)",
-   "151R: 드라이버 홈 1 (안쪽 면, 반지름 2.55)"
+   "215: M3 × 8 냄비머리 + 너트 (판+귀 4.0)"
   ],
   "camera_dist": 153.5,
   "pockets": [
@@ -97,7 +81,9 @@
    "102_collar",
    "104_dome_coupling",
    "110_entry_duct",
+   "110b_entry_bend",
    "111_entry_funnel",
+   "111h_heat_shrink",
    "112_entry_gate_flap",
    "112_entry_gate_housing",
    "120_chamber_walls",
@@ -115,12 +101,16 @@
    "148c_spring_latch",
    "151_drive_side_L",
    "151_drive_side_R",
-   "152_motor_plate",
+   "153m_lift_module",
+   "153s_lift_slider",
+   "153ss_slider_screws",
    "158_carriage",
    "170_isolation_gate_flap",
    "170_isolation_gate_housing",
    "172_isolation_duct",
+   "172b_isolation_bend",
    "173_isolation_funnel",
+   "173h_heat_shrink",
    "174_release_neck",
    "175_release_shaft",
    "176_release_gate_flap",
@@ -133,6 +123,9 @@
    "199a_pi_shelf",
    "199b_gate_holder_G4",
    "199c_gate_holder_G6",
+   "199d_gate_holder_G1_tx",
+   "199e_gate_holder_G1_rx",
+   "199s_gate_screws",
    "202_marker_holder_vblock",
    "203_clamp_strap",
    "206_y_carriage",
@@ -226,190 +219,25 @@
   },
   "feeder_pump": {
    "drain_tube": [
-    345.0,
-    100.0
+    330.0,
+    150.0
    ],
    "drain_tube_tries": [
     [
      330.0,
      150.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     330.0,
-     85.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     330.0,
-     100.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     310.0,
-     150.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     310.0,
-     85.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     310.0,
-     100.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     290.0,
-     150.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     290.0,
-     85.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     290.0,
-     100.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     345.0,
-     150.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       19.2
-      ]
-     ]
-    ],
-    [
-     345.0,
-     85.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       19.2
-      ]
-     ]
-    ],
-    [
-     345.0,
-     100.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       19.2
-      ]
-     ]
+     []
     ]
    ],
-   "drain_tube_len_mm": 359,
-   "feed_tube_z": 360.0,
+   "drain_tube_len_mm": 362,
+   "feed_tube_z": 300.0,
    "feed_tube_tries": [
     [
      300.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     320.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     280.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     340.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     260.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
-    ],
-    [
-     360.0,
-     [
-      [
-       "143n_nipple_M5_barb",
-       21.6
-      ]
-     ]
+     []
     ]
    ],
-   "feed_tube_len_mm": 402,
+   "feed_tube_len_mm": 406,
    "suck_tube_len_mm": 261,
    "overlaps": [
     [
@@ -426,12 +254,6 @@
     ],
     [
      "144hf_tube_feed",
-     "144hd_tube_drain",
-     12.32,
-     "문제"
-    ],
-    [
-     "144hf_tube_feed",
      "143n_nipple_M5_barb",
      21.63,
      "허용"
@@ -439,18 +261,11 @@
     [
      "144hd_tube_drain",
      "143n_nipple_M5_barb",
-     19.16,
+     21.63,
      "허용"
     ]
    ],
-   "bad": [
-    [
-     "144hf_tube_feed",
-     "144hd_tube_drain",
-     12.32,
-     "문제"
-    ]
-   ],
+   "bad": [],
    "bottle_lift_blockers": [],
    "cap_hand_blockers": [],
    "holder_on_rail_mm": 0.0
@@ -462,84 +277,86 @@
    "gap_rest": 4.83,
    "spring_len_rest": 14.0,
    "spring_solid": 3.9,
+   "carriage_valid": true,
+   "carriage_vol": 15845,
+   "removed": [
+    "159_floor_nut_T8",
+    "152_motor_plate",
+    "153_floor_stepper_28BYJ48",
+    "153r_floor_motor_shaft",
+    "154_coupling",
+    "155_lead_screw_T8",
+    "157_guide_rod"
+   ],
    "overlaps": [
     [
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0,
+     "158_carriage",
+     "148_load_cell",
+     226.19,
      "문제"
+    ],
+    [
+     "158_carriage",
+     "227ps_press_switch_screws",
+     18.85,
+     "허용"
     ]
    ],
    "bad": [
     [
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0,
+     "158_carriage",
+     "148_load_cell",
+     226.19,
      "문제"
     ]
    ],
    "sweep_hits": [
     [
      0.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
+     "158_carriage",
+     "148_load_cell",
+     226.2
     ],
     [
      4.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     8.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     12.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     16.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     20.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     24.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     28.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     32.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
-    ],
-    [
-     36.0,
-     "148c_spring_latch",
-     "151_drive_side_R",
-     72.0
+     "158_carriage",
+     "153ss_slider_screws",
+     78.5
     ]
    ]
+  },
+  "real_motor": {
+   "153_floor_stepper": "없음",
+   "209_y_stepper": {
+    "origin": [
+     91.39,
+     -103.9,
+     453.0
+    ],
+    "z": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "body_off": 8.0,
+    "old_vol": 12712,
+    "new_vol": 13627
+   },
+   "215_x_stepper": {
+    "origin": [
+     145.0,
+     -65.0,
+     425.0
+    ],
+    "z": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "body_off": 8.0,
+    "old_vol": 12712,
+    "new_vol": 13627
+   }
   },
   "print_color": {
    "printed": [
@@ -558,46 +375,18 @@
      "mass_g": 19.7
     },
     {
-     "num": "111",
-     "name": "입구 깔때기",
-     "label": "111_entry_funnel",
-     "spec": "3D 프린트",
-     "solids": 1,
-     "size": [
-      61.0,
-      61.0,
-      30.0
-     ],
-     "volume_cm3": 8.8,
-     "mass_g": 11.2
-    },
-    {
-     "num": "110",
-     "name": "입구 통로",
-     "label": "110_entry_duct",
-     "spec": "3D 프린트",
-     "solids": 1,
-     "size": [
-      28.0,
-      16.0,
-      121.9
-     ],
-     "volume_cm3": 11.0,
-     "mass_g": 14.0
-    },
-    {
      "num": "120",
      "name": "마킹실 벽",
      "label": "120_chamber_walls",
      "spec": "3D 프린트",
      "solids": 1,
      "size": [
-      46.0,
-      46.0,
+      38.0,
+      38.0,
       50.0
      ],
-     "volume_cm3": 24.5,
-     "mass_g": 31.1
+     "volume_cm3": 19.7,
+     "mass_g": 25.0
     },
     {
      "num": "121",
@@ -620,26 +409,26 @@
      "spec": "3D 프린트",
      "solids": 1,
      "size": [
-      39.0,
-      39.0,
+      31.0,
+      31.0,
       6.0
      ],
-     "volume_cm3": 9.1,
-     "mass_g": 11.5
+     "volume_cm3": 5.7,
+     "mass_g": 7.3
     },
     {
      "num": "158",
      "name": "바닥 캐리지 + 스프링 받침 칸",
      "label": "158_carriage",
-     "spec": "3D 프린트 PETG",
+     "spec": "3D 프린트 PETG (작은 상자, LM4UU 2·너트 M3 4)",
      "solids": 1,
      "size": [
       36.0,
-      40.0,
-      32.0
+      57.0,
+      34.5
      ],
-     "volume_cm3": 16.5,
-     "mass_g": 21.0
+     "volume_cm3": 15.8,
+     "mass_g": 20.1
     },
     {
      "num": "151",
@@ -652,8 +441,8 @@
       47.0,
       125.0
      ],
-     "volume_cm3": 22.9,
-     "mass_g": 29.1
+     "volume_cm3": 23.2,
+     "mass_g": 29.5
     },
     {
      "num": "151",
@@ -666,22 +455,8 @@
       47.0,
       125.0
      ],
-     "volume_cm3": 22.9,
-     "mass_g": 29.1
-    },
-    {
-     "num": "152",
-     "name": "바닥 모터판",
-     "label": "152_motor_plate",
-     "spec": "3D 프린트",
-     "solids": 1,
-     "size": [
-      38.0,
-      46.0,
-      3.0
-     ],
-     "volume_cm3": 4.9,
-     "mass_g": 6.2
+     "volume_cm3": 23.2,
+     "mass_g": 29.5
     },
     {
      "num": "112",
@@ -694,8 +469,8 @@
       54.4,
       23.0
      ],
-     "volume_cm3": 9.9,
-     "mass_g": 12.6
+     "volume_cm3": 10.1,
+     "mass_g": 12.8
     },
     {
      "num": "gate_flap",
@@ -722,8 +497,8 @@
       54.4,
       23.0
      ],
-     "volume_cm3": 9.9,
-     "mass_g": 12.6
+     "volume_cm3": 10.1,
+     "mass_g": 12.8
     },
     {
      "num": "gate_flap",
@@ -750,8 +525,8 @@
       54.4,
       23.0
      ],
-     "volume_cm3": 9.9,
-     "mass_g": 12.6
+     "volume_cm3": 10.1,
+     "mass_g": 12.8
     },
     {
      "num": "gate_flap",
@@ -766,34 +541,6 @@
      ],
      "volume_cm3": 0.6,
      "mass_g": 0.8
-    },
-    {
-     "num": "172",
-     "name": "격리 통로 (위 포획통으로)",
-     "label": "172_isolation_duct",
-     "spec": "3D 프린트",
-     "solids": 1,
-     "size": [
-      28.0,
-      15.9,
-      216.0
-     ],
-     "volume_cm3": 19.3,
-     "mass_g": 24.5
-    },
-    {
-     "num": "173",
-     "name": "격리 깔때기",
-     "label": "173_isolation_funnel",
-     "spec": "3D 프린트",
-     "solids": 1,
-     "size": [
-      61.0,
-      61.0,
-      25.0
-     ],
-     "volume_cm3": 7.4,
-     "mass_g": 9.3
     },
     {
      "num": "104",
@@ -957,11 +704,11 @@
      "solids": 1,
      "size": [
       20.0,
-      25.0,
+      29.0,
       5.0
      ],
-     "volume_cm3": 2.5,
-     "mass_g": 3.2
+     "volume_cm3": 2.9,
+     "mass_g": 3.7
     },
     {
      "num": "181",
@@ -1020,18 +767,46 @@
      "mass_g": 33.6
     },
     {
+     "num": "199b",
+     "name": "G4 게이트 안장 받침 2 (관 Ø16 둘레, 가운데 4 mm)",
+     "label": "199b_gate_holder_G4",
+     "spec": "3D 프린트 (작음), 관에 순간접착",
+     "solids": 2,
+     "size": [
+      24.0,
+      10.0,
+      20.0
+     ],
+     "volume_cm3": 1.3,
+     "mass_g": 1.7
+    },
+    {
+     "num": "199c",
+     "name": "G6 게이트 받침판 2 (목 위아래 2 mm)",
+     "label": "199c_gate_holder_G6",
+     "spec": "3D 프린트 (작음), 순간접착",
+     "solids": 2,
+     "size": [
+      10.0,
+      20.0,
+      20.0
+     ],
+     "volume_cm3": 0.8,
+     "mass_g": 1.0
+    },
+    {
      "num": "148c",
      "name": "스프링 걸쇠 (축 147에 끼움, 누름 스위치를 누름)",
      "label": "148c_spring_latch",
      "spec": "3D 프린트 PETG (CAP-AI-60 — 로드셀 대신)",
      "solids": 1,
      "size": [
-      17.5,
       7.0,
+      21.5,
       3.0
      ],
      "volume_cm3": 0.3,
-     "mass_g": 0.4
+     "mass_g": 0.3
     },
     {
      "num": "193h",
@@ -1062,32 +837,60 @@
      "mass_g": 21.4
     },
     {
-     "num": "199b",
-     "name": "G4 게이트 받침",
-     "label": "199b_gate_holder_G4",
-     "spec": "3D 프린트",
-     "solids": 2,
+     "num": "110b",
+     "name": "입구 통로 꺾임 조각 (PVC 소켓)",
+     "label": "110b_entry_bend",
+     "spec": "3D 프린트 (작음)",
+     "solids": 1,
      "size": [
-      20.0,
-      10.0,
-      0.4
+      35.0,
+      22.0,
+      33.0
      ],
-     "volume_cm3": 0.0,
-     "mass_g": 0.0
+     "volume_cm3": 4.0,
+     "mass_g": 5.1
     },
     {
-     "num": "199c",
-     "name": "G6 게이트 받침",
-     "label": "199c_gate_holder_G6",
-     "spec": "3D 프린트",
-     "solids": 2,
+     "num": "172b",
+     "name": "격리 통로 꺾임 조각 (PVC 소켓)",
+     "label": "172b_isolation_bend",
+     "spec": "3D 프린트 (작음)",
+     "solids": 1,
      "size": [
-      20.0,
+      33.5,
+      22.0,
+      33.0
+     ],
+     "volume_cm3": 3.7,
+     "mass_g": 4.6
+    },
+    {
+     "num": "199d",
+     "name": "G1 게이트 안장 받침 (송신, 관 Ø16)",
+     "label": "199d_gate_holder_G1_tx",
+     "spec": "3D 프린트 (작음)",
+     "solids": 1,
+     "size": [
+      4.0,
       10.0,
       20.0
      ],
-     "volume_cm3": 0.9,
-     "mass_g": 1.1
+     "volume_cm3": 0.7,
+     "mass_g": 0.8
+    },
+    {
+     "num": "199e",
+     "name": "G1 게이트 안장 받침 (수신, 관 Ø16)",
+     "label": "199e_gate_holder_G1_rx",
+     "spec": "3D 프린트 (작음)",
+     "solids": 1,
+     "size": [
+      4.0,
+      10.0,
+      20.0
+     ],
+     "volume_cm3": 0.7,
+     "mass_g": 0.8
     },
     {
      "num": "226",
@@ -1105,6 +908,7 @@
     }
    ],
    "missing": [
+    "148_load_cell",
     "112s_gate_servo_screws",
     "153b_stepper_ear_bolts",
     "153n_stepper_ear_nuts",
@@ -1116,5 +920,24 @@
    ]
   }
  },
- "error": "Traceback (most recent call last):\n  File \"C:\\capstone/-capstone-project-repo/cad\\split3_build.py\", line 36, in <module>\n    rep[\"split\"] = S.export(doc, OUT)\n                   ^^^^^^^^^^^^^^^^^^\n  File \"C:\\capstone\\-capstone-project-repo\\cad\\split3.py\", line 106, in export\n    lk.LinkedObject = pt\n    ^^^^^^^^^^^^^^^\nRuntimeError: Owner document not saved\n"
+ "split": {
+  "count": [
+   24,
+   107,
+   93
+  ],
+  "unknown": [],
+  "volume_cm3": [
+   310.7,
+   730.4,
+   6994.5
+  ],
+  "files": {
+   "S1_급이부": 0.09,
+   "S2_마킹부": 0.71,
+   "S3_프레임회로": 12.23,
+   "S0_전체조립": 0.0
+  }
+ },
+ "seconds": 612
 }
