@@ -173,7 +173,7 @@ def columns(doc):
           _bracket(xi, yL, 312.0, c["z1"], c["z1"] - 2, +1),               # L 위 (안쪽, 캐리지 최고 310.5 위)
           _bracket(xo, yR, c["z0"], c["z0"] + 20, c["z0"], +1),          # R 아래 (바깥)
           _bracket(xo, yR, c["z1"] - 20, c["z1"], c["z1"] - 2, +1)]      # R 위 (바깥)
-    bolts, nuts, deck_h, base_h = [], [], [], []
+    bolts, nuts, deck_h, base_h, leg_h = [], [], [], [], []
     # (dx, dy) = 꺾쇠 안 나사 자리. L 아래 (6, 6): 칼라 고리(r 47~50, 데크 아래) 안쪽 r 43 / L 위 dy 17: 승강 바닥(y ≤ 15.5) 밖 (11/12 검사)
     SEAT = ((xi, yL, c["z0"] + 10, True, 6.0, 6.0), (xi, yL, 321.0, False, 12.0, 17.0),
             (xo, yR, c["z0"] + 10, True, 12.0, 10.0), (xo, yR, c["z1"] - 10, False, 12.0, 10.0))
@@ -183,15 +183,18 @@ def columns(doc):
         bar_out = xb - c["t"] if xb == xi else xb - c["t"]
         b_, n_ = _m3(V(bar_out, ym, zv), V(1, 0, 0), 8.0)
         bolts.append(b_); nuts.append(n_)
-        # 누운 다리 ↔ 데크(아래에서) / 바닥판(위에서)
+        # 누운 다리 ↔ 데크 / 바닥판 (둘 다 아래에서)
         xm = xb + dx
         if up:
             b_, n_ = _m3(V(xm, ym, c["z0"] - 5.0), V(0, 0, 1), 10.0)       # 데크 아래 z 200에서 위로
             deck_h.append(Part.makeCylinder(1.7, 10, V(xm, ym, c["z0"] - 8)))
-        else:
-            b_, n_ = _m3(V(xm, ym, c["z1"] + 5.0), V(0, 0, -1), 10.0)      # 바닥판 위 z 335에서 아래로
-            base_h.append(Part.makeCylinder(1.7, 10, V(xm, ym, c["z1"] - 3)))
-        bolts.append(b_); nuts.append(n_)
+            bolts.append(b_); nuts.append(n_)
+        else:                                                            # 바닥판 위는 마킹실 벽 자리 → 아래(누운 다리 밑)에서 M3 × 6, 바닥판에 열압입 인서트 (11/12 검사 벽 12 mm³)
+            b_, _n = _m3(V(xm, ym, c["z1"] - 2.0), V(0, 0, 1), 6.0)
+            base_h.append(Part.makeCylinder(2.0, 4.3, V(xm, ym, c["z1"])))
+            leg_h.append(Part.makeCylinder(1.7, 4, V(xm, ym, c["z1"] - 3)))
+            bolts.append(b_)
+            nuts.append(Part.makeCylinder(2.0, 4.3, V(xm, ym, c["z1"])).cut(Part.makeCylinder(1.5, 5, V(xm, ym, c["z1"] - 0.5))))
     # 모듈 → R 평철 (바깥에서 M3 × 6, 모듈 바닥 탭)
     zc = Z0 + MOD["motor_t"] + (MOD["L"] - MOD["motor_t"]) / 2
     for dz in (-MOD["hole_p"] / 2, MOD["hole_p"] / 2):
@@ -205,7 +208,7 @@ def columns(doc):
         else:
             barR = barR.cut(hole)
     br = [b.cut(Part.makeCompound([Part.makeCylinder(1.7, 30, V(x0 - 15, y0 + dy, zv), V(1, 0, 0)) for x0, y0, zv, _u, _dx, dy in SEAT]))
-          .cut(Part.makeCompound(deck_h + base_h)) for b in br]
+          .cut(Part.makeCompound(deck_h + leg_h)) for b in br]
     out = []
     for key, shp, lab in (("151_drive_side_L", barL, "151_drive_side_L (알루미늄 평철 20 × 3 — 125 자름·구멍 4, 원점 스위치 227f M2 탭, 구매)"),
                           ("151_drive_side_R", barR, "151_drive_side_R (알루미늄 평철 20 × 3 — 125 자름·구멍 4, 리니어 모듈 M3 × 2, 구매)")):
@@ -215,7 +218,7 @@ def columns(doc):
         o.Shape, o.Label = shp, lab
         out.append(o)
     for key, shp, lab in (("151k", Part.makeCompound(br), "151k_column_brackets (꺾쇠 4 — 알루미늄 앵글 20 × 20 × 2를 20씩 자름·구멍, 구매)"),
-                          ("151s", Part.makeCompound(bolts + nuts), "151s_column_screws (M3 냄비머리 + 너트 — 평철·꺾쇠·데크·바닥판, 모듈 M3 × 4 2, 구매)")):
+                          ("151s", Part.makeCompound(bolts + nuts), "151s_column_screws (M3 냄비머리 + 너트 — 평철·꺾쇠·데크, 바닥판은 아래에서 M3 × 6 + 열압입 인서트, 모듈 M3 × 4 2, 구매)")):
         for x in [x for x in doc.Objects if x.Label.startswith(key)]:
             doc.removeObject(x.Name)
         o = doc.addObject("Part::Feature", "LM_" + key)
