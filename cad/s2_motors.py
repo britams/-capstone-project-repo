@@ -77,8 +77,8 @@ try:
                 continue
             if o in mine and o.Name < a.Name:
                 continue
-            try:
-                v = a.Shape.common(o.Shape).Volume
+            try:                                           # 고체 하나씩 (묶음째 common은 닿는 면에서 Null shape — 211 브래킷, 11/12)
+                v = sum(sa.common(o.Shape).Volume for sa in a.Shape.Solids if sa.BoundBox.intersect(o.Shape.BoundBox))
             except Exception as e:                         # 모양 연산 실패 → 보고 (11/12)
                 hits.append((a.Label.split(" ")[0], o.Label.split(" ")[0], "ERR %s" % e, "확인"))
                 continue
