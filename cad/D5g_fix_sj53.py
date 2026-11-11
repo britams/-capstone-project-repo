@@ -211,6 +211,8 @@ def stepper_ear_bolts(doc):
     0.5 mm 걸림 [확실 — 17.5 − 4 < 14] → M3 × 10 십자 냄비머리(반지름 2.8)를 판 쪽에서, M3 너트를 귀 쪽에 (서현 M4 결정과 다름 — 확인 요청)"""
     bolts, nuts, rep, csk, grooves = [], [], [], [], []
     for mot, plate in (("153_floor_stepper", "152_motor_plate"), ("209_y_stepper", "211_y_motor_bracket"), ("215_x_stepper", "217_x_motor_plate")):
+        if not _get(doc, mot) or not _get(doc, plate):         # (11/12) 바닥 153·152는 리니어 모듈로 없어짐
+            continue
         mo = _get(doc, mot)[0]
         m, pl = mo.Shape, _get(doc, plate)[0].Shape
         for f in [f for f in m.Faces if f.Surface.__class__.__name__ == "Cylinder" and abs(f.Surface.Radius - 2.1) < 0.05]:
