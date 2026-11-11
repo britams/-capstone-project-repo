@@ -37,7 +37,7 @@ def box(x0, x1, y0, y1, z0, z1):
 
 def bottle_center():
     h = HB
-    return V(h["bot_x"], h["y_face"] + h["t"] + h["gap"] + BOT["d"] / 2, h["z0"] + 3.0)     # 병 바닥 가운데
+    return V(h["bot_x"], h["y_face"] + h["t"] + h["gap"] + BOT["d"] / 2, h["z0"] + 3.0)     # 병 바닥 가운데 (11/11: 클램프 2개가 잡음, 바닥은 떠 있음)
 
 
 def pump_center():
@@ -75,27 +75,35 @@ def port(side):
 
 
 def holder():
-    """144b: 레일 바깥 면(y 180)에 붙는 판 + 병 바닥 컵 + 병 고리 + 펌프 받침(케이블 타이 홈 2) — 3D 프린트 PETG"""
+    """144b (11/11, CAP-AI-61 — 프린트 대신): 알루미늄 판 3 mm (120 × 108 자름·구멍) — 레일 바깥 면 y 180에 M5 2
+    병은 파이프 클램프 Ø60 2개(구매, 판에 M4), 펌프는 케이블 타이 2개(구매)로 판에 묶음"""
     h = HB
     yf, t = h["y_face"], h["t"]
     pl = box(h["x0"], h["x1"], yf, yf + t, h["z0"], h["z1"])
     for bx in h["bolt_x"]:
         pl = pl.cut(Part.makeCylinder(2.75, 20, V(bx, yf - 5, h["bolt_z"]), V(0, 1, 0)))
+    return pl.removeSplitter()
+
+
+def clamps():
+    """사는 것: 파이프 클램프 2 (병 둘레, 폭 15 · 두께 1.5, 판에 붙는 귀) + 케이블 타이 2 (펌프 둘레, 폭 4 · 두께 1.2)"""
+    h = HB
+    yf, t = h["y_face"], h["t"]
     b = bottle_center()
-    ro = BOT["d"] / 2 + h["gap"]
-    cup = Part.makeCylinder(ro + 2.5, 15.0, V(b.x, b.y, h["z0"])).fuse(box(b.x - 12, b.x + 12, yf + t - 0.01, b.y, h["z0"], h["z0"] + 15))
-    cup = cup.cut(Part.makeCylinder(ro, 20, V(b.x, b.y, h["z0"] + 3.0)))          # (11/10 밤) 팔을 붙인 뒤 안을 파냄 — 팔이 병 자리를 채우던 것
-    ring = Part.makeCylinder(ro + 2.5, h["ring_z"][1] - h["ring_z"][0], V(b.x, b.y, h["ring_z"][0])).cut(
-        Part.makeCylinder(ro, 30, V(b.x, b.y, h["ring_z"][0] - 1)))
-    ring = ring.fuse(box(b.x - 8, b.x + 8, yf + t - 0.01, b.y - ro, h["ring_z"][0], h["ring_z"][1]))
+    ro = BOT["d"] / 2
+    out = []
+    for zc in (h["z0"] + 20.0, h["ring_z"][0]):
+        ring = Part.makeCylinder(ro + 1.5, 15.0, V(b.x, b.y, zc)).cut(Part.makeCylinder(ro, 20, V(b.x, b.y, zc - 1)))
+        ear = box(b.x - 8, b.x + 8, yf + t, b.y - ro, zc, zc + 15.0)
+        out.append(ring.fuse(ear).cut(Part.makeCylinder(ro, 20, V(b.x, b.y, zc - 1))))
     pc = pump_center()
-    pr = PUMP["motor_d"] / 2 + 0.5
-    seat = Part.makeCylinder(pr + 2.5, 3.0, V(pc.x, pc.y, h["z0"])).fuse(box(pc.x - 10, pc.x + 10, yf + t - 0.01, pc.y, h["z0"], h["z0"] + 3))
-    cradle = box(pc.x - 12, pc.x + 12, yf + t - 0.01, pc.y - 4, h["z0"], h["z0"] + 40)
-    cradle = cradle.cut(Part.makeCylinder(pr, 50, V(pc.x, pc.y, h["z0"] + 3)))
-    for zz in (h["z0"] + 12, h["z0"] + 30):                         # 케이블 타이 홈 (폭 4 × 2)
-        cradle = cradle.cut(box(pc.x - 13, pc.x + 13, yf + t + 2, yf + t + 4, zz, zz + 4))
-    return pl.fuse(cup).fuse(ring).fuse(seat).fuse(cradle).removeSplitter()
+    pr = PUMP["motor_d"] / 2
+    ties = []
+    for zz in (pc.z + 8, pc.z + 30):
+        band = Part.makeCylinder(pr + 1.2, 4.0, V(pc.x, pc.y, zz)).cut(Part.makeCylinder(pr, 6, V(pc.x, pc.y, zz - 1)))
+        band = band.fuse(box(pc.x - 3, pc.x + 3, yf + t, pc.y - pr, zz, zz + 4))
+        ties.append(band.cut(Part.makeCylinder(pr, 6, V(pc.x, pc.y, zz - 1))))
+    return Part.makeCompound(out), Part.makeCompound(ties)
 
 
 def bolts(G):
@@ -133,7 +141,8 @@ def tube_paths(z_cross):
     top = b.z + BOT["h"]
     pin, pout = port(-1), port(1)
     suck = [b + V(0, 0, 6), V(b.x, b.y, top + 12), V(pin.x, pin.y, top + 12), pin + V(0, 0, -3)]
-    xn = f["x"] + f["ch_w"] / 2 + f["ch_t"] + f["nz_L"] - 7.0      # 노즐 바브에 7 mm 끼움
+    b = FU.BUY                                                       # (11/11) 산 니플: 받침 5 + 육각 3 + 바브 8 → 관을 바브에 6 mm 끼움
+    xn = f["x"] + f["ch_w"] / 2 + f["ch_t"] + b["pad_t"] + b["fit_hex_t"] + b["fit_barb_L"] - 6.0
     xr = pout.x
     feed = [pout + V(0, 0, -3), V(xr, pout.y, z_cross), V(xr, f["nz_y"], z_cross), V(xr, f["nz_y"], f["nz_z"]), V(xn, f["nz_y"], f["nz_z"])]
     return suck, feed
@@ -143,7 +152,8 @@ def drain_path(zr, xo):
     """물빠짐 관: 바닥 바브 아래 끝 → zr 높이 → x xo로 → 바깥(y 250) → 아래 30 (끝은 열려 있음, 땅으로 떨어짐)"""
     import D5g_feeder_uln as FU
     f = FU.FD
-    z0 = f["floor_z"] - f["nz_L"] + 7.0
+    b = FU.BUY
+    z0 = f["floor_z"] - b["pad_t"] - b["fit_hex_t"] - b["fit_barb_L"] + 6.0
     return [V(f["x"], f["dr_y"], z0), V(f["x"], f["dr_y"], zr), V(xo, f["dr_y"], zr), V(xo, 250.0, zr), V(xo, 250.0, zr - 30)]
 
 
@@ -170,11 +180,12 @@ def _add(doc, label, shp, col):
 def apply(doc):
     import D5g_frame_detail as G
     rep = {}
-    for o in [o for o in doc.Objects if o.Label.startswith(("144n", "144p", "144b_", "144h", "144s_", "144t_"))]:
+    for o in [o for o in doc.Objects if o.Label.startswith(("144n", "144p", "144b_", "144c_", "144z_", "144h", "144s_", "144t_"))]:
         doc.removeObject(o.Name)
     others = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Shape.isNull() and o.Shape.Volume > 0
               and not o.Label.startswith(("REF_camera", "FitBox"))]
     hb = holder()
+    cl, ti = clamps()
     bt, cap = bottle()
     pm, ports = pump()
     bo, tn = bolts(G)
@@ -207,7 +218,9 @@ def apply(doc):
     rep["feed_tube_tries"] = tried
     rep["feed_tube_len_mm"] = round(sum(e.Length for e in Part.makePolygon(feed).Edges))
     rep["suck_tube_len_mm"] = round(sum(e.Length for e in Part.makePolygon(suck).Edges))
-    new = [("144b_feeder_holder (병·펌프 걸이, 3D 프린트 PETG)", hb, COL["PRINT"]),
+    new = [("144b_feeder_holder (병·펌프 걸이 — 알루미늄 판 3 mm 120 × 108 자름·구멍, CAP-AI-61)", hb, (0.80, 0.82, 0.85)),
+           ("144c_pipe_clamp_D60 (파이프 클램프 Ø60 2개 — 병, 판에 M4, 구매)", cl, (0.70, 0.70, 0.72)),
+           ("144z_cable_ties (케이블 타이 2 — 펌프, 구매)", ti, (0.15, 0.15, 0.15)),
            ("144n_bottle_250mL (Nalgene 2104-0008 HDPE, 구매)", bt, COL["BOT"]),
            ("144nc_bottle_cap (병 뚜껑 — 관 Ø5·공기 Ø2 구멍 뚫음)", cap, COL["BOT"]),
            ("144p_pump (연동 펌프 Adafruit 3910, 5~6 V 0.5 A, 구매)", pm, COL["PUMP"]),
@@ -229,7 +242,8 @@ def check(doc, objs, others):
     mine = {o.Label.split(" ")[0]: o for o in objs}
     allow = {("144hf_tube_feed", "143_feed_trough"), ("144h_tube_suck", "144pp_pump_ports"), ("144hf_tube_feed", "144pp_pump_ports"),
              ("144h_tube_suck", "144nc_bottle_cap"), ("144h_tube_suck", "144n_bottle_250mL"), ("144s_bolt_M5x8", "144t_tnut_M5_dropin"),
-             ("144pp_pump_ports", "144p_pump"), ("144hd_tube_drain", "143_feed_trough")}
+             ("144pp_pump_ports", "144p_pump"), ("144hd_tube_drain", "143_feed_trough"),
+             ("144hf_tube_feed", "143n_nipple_M5_barb"), ("144hd_tube_drain", "143n_nipple_M5_barb")}
     ov = []
     names = list(mine)
     for i, a in enumerate(names):
