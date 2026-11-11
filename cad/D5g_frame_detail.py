@@ -284,7 +284,7 @@ def make():
     _lid = doc.addObject('Part::Feature', 'SJ_lid'); _lid.Label = '143l_feed_trough_lid (뚜껑, 3D 프린트 PETG — 벌레 막기)'; _lid.Shape = FU.trough_lid()
     FU.feeder_detail_apply(doc)                     # (SJ-49) 급이 방 상세: 벽 보스·인서트·손나사·튜브 집게·코튼롤 잡이
     global PRESS_REPORT
-    import lift_drive as LIFT                       # (CAP-AI-62, 서현 11/12) 바닥 구동 다시: 깨끗한 캐리지 + F688ZZ + 봉 칼라 (press_apply는 깨진 캐리지를 잃었음)
+    import lift_module as LIFT                      # (CAP-AI-62, 서현 11/12 05:15) 바닥 구동 → 산 리니어 모듈 15BY25 (lift_drive는 그 전 단계)
     _o, PRESS_REPORT = LIFT.apply(doc)          # (CAP-AI-60, 교수님 피드백) 로드셀 → 스프링 받침 칸 + 걸쇠 + 누름 스위치 (SJ-49 로드셀 대신)
     import D5g_real_parts as RP                      # 전기 부품 실제 CAD (KiCad STEP·Pi 5 공식 STEP, 인터넷 필요)
     try:

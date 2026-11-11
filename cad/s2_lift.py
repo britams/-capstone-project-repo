@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""S2: 바닥 올리는 장치 다시 (lift_drive.py) — freecad.exe cad/s2_lift.py → split/_s2_lift.json (CAP-AI-62)"""
+"""S2: 바닥 올리는 장치 → 산 리니어 모듈 (lift_module.py) — freecad.exe cad/s2_lift.py → split/_s2_lift.json (CAP-AI-62)"""
 import json, os, sys, traceback
 HERE = os.getcwd()
 sys.path.insert(0, HERE)
@@ -8,7 +8,7 @@ rep = dict(ok=False)
 try:
     import FreeCAD as App
     import split3 as S
-    import lift_drive as LD
+    import lift_module as LD
     d = App.openDocument(os.path.join(OUT, "S2_마킹부.FCStd"))
     S.add_context(d, OUT)
     made, rep["press"] = LD.apply(d)
