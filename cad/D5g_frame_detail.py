@@ -291,7 +291,8 @@ def make():
     except Exception as e:
         print('실제 부품 CAD 못 받음 (인터넷 확인):', e)
     global GATE_REPORT
-    GATE_REPORT = FU.gate_holders_fix(doc)           # (CAP-AI-61) 2167로 바꾼 뒤 게이트 받침을 다시 — 송수신기가 통로에서 떠 있던 것
+    import gate2167 as G2167                         # (CAP-AI-62, 서현 11/12) 2167 실제 치수 + 둥근 관 안장 받침 (gate_holders_fix는 0.4 mm 조각이 됐음)
+    _gm, GATE_REPORT = G2167.apply(doc)
     import D5g_fasten as FA                          # (SJ-49) 얹기만 했던 부품 볼트 체결
     FA.fasten(doc, sys.modules[__name__])
     for o in list(doc.Objects):        # D5f에서 스프링 204 뺀 뒤 남은 바탕 원기둥
