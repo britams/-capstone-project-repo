@@ -97,20 +97,29 @@ def export(doc, folder):
         f = os.path.join(folder, d.Name + ".FCStd")
         d.saveAs(f)
         rep["files"][d.Name] = round(os.path.getsize(f) / 1e6, 2)
+    rep["files"][ASM] = make_asm(folder, subs, parts)
+    rep["volume_cm3"] = [round(v, 1) for v in rep["volume_cm3"]]
+    return rep
+
+
+def make_asm(folder, subs=None, parts=None):
+    """S0: 세 파일의 App::Part를 링크로 건다 (옮기지 않음). 조립 문서를 먼저 저장해야 다른 문서로 링크가 걸림 (11/11 오류)."""
+    if subs is None:
+        subs = [App.getDocument(nm) if nm in App.listDocuments() else App.openDocument(os.path.join(folder, nm + ".FCStd")) for nm in NAMES]
+        parts = [d.getObject("Part") for d in subs]
     if ASM in App.listDocuments():
         App.closeDocument(ASM)
     a = App.newDocument(ASM)
+    fa = os.path.join(folder, ASM + ".FCStd")
+    a.saveAs(fa)
     for d, pt in zip(subs, parts):
         lk = a.addObject("App::Link", "L_" + d.Name.split("_")[0])
         lk.Label = d.Name
         lk.LinkedObject = pt
         lk.LinkTransform = True
     a.recompute()
-    fa = os.path.join(folder, ASM + ".FCStd")
-    a.saveAs(fa)
-    rep["files"][ASM] = round(os.path.getsize(fa) / 1e6, 2)
-    rep["volume_cm3"] = [round(v, 1) for v in rep["volume_cm3"]]
-    return rep
+    a.save()
+    return round(os.path.getsize(fa) / 1e6, 2)
 
 
 def color_doc(d):
