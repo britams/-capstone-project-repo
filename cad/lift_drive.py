@@ -129,10 +129,11 @@ def apply(doc):
     made.append(_set(doc, "157c", Part.makeCompound([collar(Z["plate"][1], ROD), collar(Z["base"][0] - COL["W"], ROD)])))
     made.append(_set(doc, "157b", lm4(ROD, CAR["z0"])))
     made.append(_set(doc, "159s", nut_screws()))
-    # 4) 판 구멍: 모터판 152 (봉 Ø4.1), 121 (베어링 Ø16 관통, 봉 막힌 구멍 Ø4.1 깊이 3)
+    # 4) 판 구멍: 모터판 152 (봉 Ø4.1 + 모터 귀 접시머리 자리), 121 (베어링 Ø16 관통, 봉 막힌 구멍 Ø4.1 깊이 3)
     p152 = [o for o in doc.Objects if o.Label.startswith("152_")]
     if p152:
         p152[0].Shape = p152[0].Shape.cut(cyl(2.05, Z["plate"][0] - 1, Z["plate"][1] + 1, ROD))
+        plate_bolt_holes(doc)
     b121 = [o for o in doc.Objects if o.Label.startswith("121_")]
     if b121:
         s = b121[0].Shape.cut(cyl(BRG["D"] / 2, Z["base"][0] - 1, Z["base"][1] + 1, SCR))
@@ -140,6 +141,19 @@ def apply(doc):
         b121[0].Shape = s
     doc.recompute()
     return made, rep
+
+
+def plate_bolt_holes(doc):
+    """(11/12 05:10 서현 사진) 모터 귀 접시머리 M3가 모터판 152를 구멍 없이 지나고 있었음 → 나사 모양대로 파고 몸통 Ø3.4"""
+    p = [o for o in doc.Objects if o.Label.startswith("152_")][0]
+    bo = [o for o in doc.Objects if o.Label.startswith("153b")]
+    s = p.Shape
+    for b in (bo[0].Shape.Solids if bo else []):
+        if b.BoundBox.ZMax < 240 and b.BoundBox.intersect(s.BoundBox):
+            c = b.BoundBox.Center
+            s = s.cut(b).cut(cyl(1.7, Z["plate"][0] - 1, Z["plate"][1] + 1, (c.x, c.y)))
+    p.Shape = s
+    return round(sum(b.common(s).Volume for b in (bo[0].Shape.Solids if bo else [])), 3)   # 0 이어야 함
 
 
 MOVING = ("158_", "159", "157b", "149_", "146_", "147_", "148c_", "140_", "227p", "227ps")
