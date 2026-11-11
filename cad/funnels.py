@@ -15,7 +15,10 @@ import FreeCAD as App
 import Part
 
 V = App.Vector
-F = dict(top_r=30.5, neck_or=7.15, neck_ir=6.1, cone_h=37.4, neck_L=5.0, wall=1.5)
+F = dict(top_r=30.5, neck_or=7.15, neck_ir=6.1, cone_h=37.4, neck_L=5.0, wall=1.5, slope=0.625)
+# (11/12) 173은 윗테를 더 잘라 원뿔 높이 30 (윗지름 51.8): 위판 105·돔 연결부 104 구멍(Ø55)을 지나 z 620에서 끝남
+#   (높이 37.4면 104와 397 mm³ 겹침). 깔때기 끝이 돔 안으로 들어가 말벌이 되돌아오기 어려움 [가능성 높음]
+CONE_H = {"111_entry_funnel": 37.4, "173_isolation_funnel": 30.0}
 HS = dict(L=20.0, t=0.5)                 # 열수축 튜브 (수축 뒤 두께 [추측])
 JOBS = (  # (깔때기 라벨, 축 x, 넓은 끝 z, 방향(+1: 위로 좁아짐), 관 라벨, 열수축 라벨)
     ("111_entry_funnel", 0.0, 205.0, +1, "110_entry_duct", "111h_heat_shrink"),
@@ -23,21 +26,23 @@ JOBS = (  # (깔때기 라벨, 축 x, 넓은 끝 z, 방향(+1: 위로 좁아짐)
 )
 LABEL = {
     "111_entry_funnel": "111_entry_funnel (McMaster 9017T211 PP 깔때기 — 윗테 잘라 Ø61, 목 5 남김, 구매)",
-    "173_isolation_funnel": "173_isolation_funnel (McMaster 9017T211 PP 깔때기 — 윗테 잘라 Ø61, 목 5 남김, 구매)",
+    "173_isolation_funnel": "173_isolation_funnel (McMaster 9017T211 PP 깔때기 — 윗테 잘라 Ø52 (위판·104 구멍 Ø55 지남), 목 5 남김, 구매)",
     "111h_heat_shrink": "111h_heat_shrink (열수축 튜브 Ø25 2:1, 20 mm — 깔때기 목 ↔ PVC, 구매)",
     "173h_heat_shrink": "173h_heat_shrink (열수축 튜브 Ø25 2:1, 20 mm — PVC ↔ 깔때기 목, 구매)",
 }
 
 
-def funnel(ax, z_neck_end, d):
+def funnel(ax, z_neck_end, d, cone_h=None):
     """d = +1: 목이 위(z_neck_end가 목 위 끝), 원뿔은 아래로 넓어짐. d = −1: 목이 아래(z_neck_end가 목 아래 끝)"""
     f = F
+    ch = cone_h or f["cone_h"]
+    top_r = f["neck_or"] + f["slope"] * ch                # 산 깔때기 기울기 그대로 자르면 윗지름이 정해짐
     zj = z_neck_end - d * f["neck_L"]                     # 목 ↔ 원뿔
-    zw = zj - d * f["cone_h"]                             # 넓은 끝
+    zw = zj - d * ch                                      # 넓은 끝
     neck = Part.makeCylinder(f["neck_or"], f["neck_L"], V(ax, 0, min(zj, z_neck_end)))
     neck = neck.cut(Part.makeCylinder(f["neck_ir"], f["neck_L"] + 2, V(ax, 0, min(zj, z_neck_end) - 1)))
     zlo, zhi = min(zj, zw), max(zj, zw)
-    r_lo, r_hi = (f["top_r"], f["neck_or"]) if d > 0 else (f["neck_or"], f["top_r"])
+    r_lo, r_hi = (top_r, f["neck_or"]) if d > 0 else (f["neck_or"], top_r)
     outer = Part.makeCone(r_lo, r_hi, zhi - zlo, V(ax, 0, zlo))
     inner = Part.makeCone(r_lo - f["wall"], r_hi - f["wall"], zhi - zlo + 0.02, V(ax, 0, zlo - 0.01))
     inner = inner.fuse(Part.makeCylinder(f["neck_ir"], zhi - zlo + 2, V(ax, 0, zlo - 1)))
@@ -65,12 +70,12 @@ def apply(doc):
         po = [o for o in doc.Objects if o.Label.startswith(plab)][0]
         pb = po.Shape.BoundBox
         if d > 0:              # 111: 넓은 끝 z 205 → 목 위 끝 = 관 아래 끝
-            zj = z_wide + F["cone_h"] + F["neck_L"]
-            shp, _ = funnel(ax, zj, d)
+            zj = z_wide + CONE_H[flab] + F["neck_L"]
+            shp, _ = funnel(ax, zj, d, CONE_H[flab])
             po.Shape = po.Shape.common(Part.makeBox(400, 400, 1000, V(-200, -200, zj)))   # 관 아래를 깔때기 목 끝까지 자름
         else:                  # 173: 관 위 끝 = 목 아래 끝
             zj = pb.ZMax
-            shp, _ = funnel(ax, zj, d)
+            shp, _ = funnel(ax, zj, d, CONE_H[flab])
         fo.Shape, fo.Label = shp, LABEL[flab]
         for x in [x for x in doc.Objects if x.Label.startswith(hlab)]:
             doc.removeObject(x.Name)
@@ -85,7 +90,7 @@ def apply(doc):
 
 
 def check(doc, made):
-    allow = (("111h", "110_"), ("111h", "111_"), ("173h", "172_"), ("173h", "173_"))
+    allow = (("111h", "110_"), ("111h", "111_"), ("173h", "172_"), ("173h", "173_"), ("199s", "110_"), ("199s", "172_"))
     hits = []
     for a in made:
         for o in doc.Objects:
