@@ -290,7 +290,9 @@ def make():
     try:
         RP.apply(doc)
     except Exception as e:
+        import traceback
         print('실제 부품 CAD 못 받음 (인터넷 확인):', e)
+        traceback.print_exc(file=sys.stdout)
     global GATE_REPORT
     import ducts_pvc as DPVC, funnels as FUNL           # (CAP-AI-62) 통로 PVC + 산 깔때기 — 게이트 받침(관 Ø18) 전에
     DPVC.apply(doc)

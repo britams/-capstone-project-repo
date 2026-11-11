@@ -24,6 +24,7 @@ def log(*a):
 
 
 open(LOG, "w").close()
+sys.stdout = open(os.path.join(OUT, "_build_stdout.txt"), "w", encoding="utf-8")   # GUI 창에서는 print가 안 보여서 (RP 실패 이유 등)
 rep = dict(ok=False)
 try:
     t0 = time.time()
