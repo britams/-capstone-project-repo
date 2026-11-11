@@ -22,11 +22,12 @@ import Part
 V = App.Vector
 A = dict(L=20.0, W=10.0, T=8.0, led_end=5.0, led_d=3.0, ring_d=8.0, ring_t=0.5, hole_d=2.4, pitch=10.0, cable_d=3.0, cable_L=10.0)
 SCREW = dict(d=2.0, L=12.0, head_d=3.8, head_t=1.3)
+# (11/12) 통로가 PVC 13A(바깥 18)로 바뀜 → G1·G4 관 반지름 9 (받침 가운데 3 mm)
 # 게이트: (송수신기 라벨, 빔 가운데, 빔 방향 n, 몸 길이 방향 u(LED 끝 쪽), 앞면 거리(빔 가운데 → 앞면), 통로 라벨, 관 반지름(둥근 관) 또는 None, 받침 라벨, 빔 라벨)
 GATES = (
-    (("114_entry_sensor_tx", "114_entry_sensor_rx"), V(0, 0, 275), V(1, 0, 0), V(0, 0, 1), 12.0, "110_", 8.0,
+    (("114_entry_sensor_tx", "114_entry_sensor_rx"), V(0, 0, 275), V(1, 0, 0), V(0, 0, 1), 12.0, "110_", 9.0,
      ("199d_gate_holder_G1_tx", "199e_gate_holder_G1_rx"), None),
-    (("196_gate_G4_tx_rx",), V(0, 0, 570), V(1, 0, 0), V(0, 0, 1), 12.0, "172_", 8.0, ("199b_gate_holder_G4",), "196_gate_G4_beam"),
+    (("196_gate_G4_tx_rx",), V(0, 0, 570), V(1, 0, 0), V(0, 0, 1), 12.0, "172_", 9.0, ("199b_gate_holder_G4",), "196_gate_G4_beam"),
     # G6: 몸 길이를 y로 (11/12 — x로 두면 LED 끝 5 때문에 몸이 x 93~113 → 문 하우징 176·G5b와 겹침, x 103~123 → 굴뚝 175와 겹침. y −15~5는 비어 있음)
     (("196_gate_G6_tx_rx",), V(108, 0, 377), V(0, 0, 1), V(0, 1, 0), 10.0, "174_", None, ("199c_gate_holder_G6",), "196_gate_G6_beam"),
 )
@@ -115,10 +116,10 @@ NAMES = {
     "114_entry_sensor_rx": "114_entry_sensor_rx (Adafruit 2167 수신 — 20 × 10 × 8, LED 끝에서 5, 실제 치수)",
     "196_gate_G4_tx_rx": "196_gate_G4_tx_rx (Adafruit 2167 송·수신 — 20 × 10 × 8, 실제 치수)",
     "196_gate_G6_tx_rx": "196_gate_G6_tx_rx (Adafruit 2167 송·수신 — 20 × 10 × 8, 실제 치수)",
-    "199b_gate_holder_G4": "199b_gate_holder_G4 (안장 받침 2 — 관 Ø16 둘레로 파냄, 가운데 4 mm, 관에 순간접착, 작은 3D 프린트)",
+    "199b_gate_holder_G4": "199b_gate_holder_G4 (안장 받침 2 — 관 PVC 13A Ø18 둘레로 파냄, 가운데 3 mm, 관에 순간접착, 작은 3D 프린트)",
     "199c_gate_holder_G6": "199c_gate_holder_G6 (받침판 2 — 목 위아래 2 mm, 순간접착, 작은 3D 프린트)",
-    "199d_gate_holder_G1_tx": "199d_gate_holder_G1_tx (안장 받침 — 관 Ø16 둘레로 파냄, 가운데 4 mm, 작은 3D 프린트)",
-    "199e_gate_holder_G1_rx": "199e_gate_holder_G1_rx (안장 받침 — 관 Ø16 둘레로 파냄, 가운데 4 mm, 작은 3D 프린트)",
+    "199d_gate_holder_G1_tx": "199d_gate_holder_G1_tx (안장 받침 — 관 PVC 13A Ø18 둘레로 파냄, 가운데 3 mm, 작은 3D 프린트)",
+    "199e_gate_holder_G1_rx": "199e_gate_holder_G1_rx (안장 받침 — 관 PVC 13A Ø18 둘레로 파냄, 가운데 3 mm, 작은 3D 프린트)",
     "199s_gate_screws": "199s_gate_screws (M2 × 12 십자 냄비머리 4 — 2167 구멍 Ø2.4 → 안장 받침에 셀프 탭, 구매)",
     "196_gate_G4_beam": "196_gate_G4_beam",
     "196_gate_G6_beam": "196_gate_G6_beam",
@@ -145,7 +146,7 @@ def apply(doc):
 
 def check(doc, made):
     """새 부품 ↔ 문서 전부 (고체 하나씩). 허용: 나사 ↔ 송수신기·받침 (셀프 탭), 받침 ↔ 통로 (순간접착 면)"""
-    allow = (("199s", "114_"), ("199s", "196_gate"), ("199s", "199"), ("199", "110_"), ("199", "172_"), ("199", "174_"))
+    allow = (("199s", "114_"), ("199s", "196_gate"), ("199s", "199"), ("199", "110_"), ("199", "172_"), ("199", "174_"))   # 199s ↔ 110·172: 나사 끝이 PVC 벽에 1 mm 물림 (11/12)
     hits = []
     for a in made:
         if "beam" in a.Label:
