@@ -585,8 +585,11 @@ def feeder_detail_apply(doc):
 #   바닥이 말벌에 닿아 F_p 0.5 N이 되면 스프링이 δ = 0.5 / 103.6 = 4.83 mm 더 눌린다 → 축에 붙인 걸쇠 148c 가 그만큼 내려와
 #   받침 칸 옆벽 바깥의 KW11 스위치 227p 레버를 누름 → 펌웨어가 바닥을 멈춤 (A1, NC 접점 — 선이 끊겨도 멈춤 쪽)
 #   힘 맞추기: 스위치 나사 구멍이 세로 긴 구멍(±2 mm) → 저울 위에서 0.5 N(51 g)에 딸깍하도록 한 번 맞춤
+# (11/12, CAP-AI-62) 혀·스위치를 +x → +y 쪽으로: +x에선 혀가 옆판 151_R(x 74~)과 72 mm³ 겹치고 스위치 본체(x 71~77.4)도 151_R 자리.
+#   +y 쪽(x 59~74, y 12~42, z 236~300)은 S1·S2·S3 모두 비어 있음 (11/12 모양 검사). 스위치는 L이 +y, 받침판(캐리지와 한 몸) x 59~62에 M2 × 10.
 PS = dict(spring_xy=(65.0, 4.0), seat_z=244.0, car_bot=262.0, cage=(59.0, 71.0, -2.0, 12.0), wall_t=2.0, floor_t=2.0,
-          k=103.6, Fp=0.5, collar_r=3.5, collar_z=(258.5, 261.5), tab=(65.0, 79.0, 1.0, 7.0), slot_z=249.0)
+          k=103.6, Fp=0.5, collar_r=3.5, collar_z=(258.5, 261.5), tab=(63.0, 67.0, 4.0, 22.0), slot_z=249.0,
+          sw_x=62.0, sw_y=16.0, mount=(59.0, 62.0, 12.0, 37.0, 239.5))
 
 
 def press_parts(carriage_shape):
@@ -600,7 +603,9 @@ def press_parts(carriage_shape):
     cage = box(x0, x1, y0, y1, zs - p["floor_t"], zs)                                   # 받침판 (스프링이 앉음)
     cage = cage.fuse(box(x1 - t, x1, y0, y1, zs - p["floor_t"], zb + 0.01))             # +x 옆벽 (스위치가 바깥에)
     cage = cage.fuse(box(x0, x1, y1 - t, y1, zs - p["floor_t"], zb + 0.01))             # +y 뒷벽
-    cage = cage.cut(box(x1 - t - 0.1, x1 + 0.1, p["tab"][2] - 0.5, p["tab"][3] + 0.5, p["slot_z"], zb - 0.5))   # 걸쇠 지나갈 홈
+    cage = cage.cut(box(p["tab"][0] - 0.5, p["tab"][1] + 0.5, y1 - t - 0.1, y1 + 0.1, p["slot_z"], zb - 0.5))   # 걸쇠 혀가 지나갈 홈 (+y 뒷벽, 11/12)
+    mx0, mx1, my0, my1, mz0 = p["mount"]
+    cage = cage.fuse(box(mx0, mx1, my0 - 0.01, my1, mz0, zb + 0.01))                   # 스위치 받침판 (뒷벽·캐리지 판에 붙음, 11/12)
     cage = cage.fuse(Part.makeCylinder(1.1, 1.5, V(cx, cy, zs)))                        # 스프링 가운데 핀 Ø2.2
     car = car.fuse(cage).removeSplitter()
     # 걸쇠 148c: 축에 끼우는 고리 + 옆벽 홈을 지나 스위치 위로 나온 혀 (3D 프린트, 축에 끼우고 순간접착)
@@ -611,8 +616,8 @@ def press_parts(carriage_shape):
     # 스위치 227p: 눌린 레버 면 = 걸쇠 아래 면이 δ 내려온 자리
     d = p["Fp"] / p["k"] * 1000.0
     z_lever = c0 - d
-    O = V(x1, -6.0, z_lever - HS.LEVER_TOP)
-    sw, screws, _lv = HS.switch(O, V(0, 1, 0), V(1, 0, 0), V(0, 0, 1), screw_len=8.0)
+    O = V(p["sw_x"], p["sw_y"], z_lever - HS.LEVER_TOP)                                  # (11/12) 본체 x 62~68.4, y 16~36 — 받침판 x 62 면에
+    sw, screws, _lv = HS.switch(O, V(0, 1, 0), V(1, 0, 0), V(0, 0, 1), screw_len=10.0)
     rep = dict(delta_mm=round(d, 2), lever_pressed_z=round(z_lever, 2), latch_rest_bottom=c0, gap_rest=round(c0 - z_lever, 2),
                spring_len_rest=round(c0 - 0.5 - zs, 2), spring_solid=3.9)
     return car, latch, sw, Part.makeCompound(screws), rep
@@ -661,9 +666,9 @@ def press_apply(doc):
     car_o.Shape = car
     car_o.Label = "158_carriage (바닥 캐리지 + 스프링 받침 칸, 3D 프린트 PETG — 로드셀 없앰 CAP-AI-60)"
     out = []
-    for nm, shp, col in (("148c_spring_latch (걸쇠 — 축 147에 끼워 순간접착, 혀가 누름 스위치를 누름, 3D 프린트 PETG)", latch, None),
+    for nm, shp, col in (("148c_spring_latch (걸쇠 — 축 147에 끼워 순간접착, +y 혀가 누름 스위치를 누름, 3D 프린트 PETG 작은 것)", latch, None),
                          ("227p_press_switch (KW11-3Z 누름 스위치 PSW — NC, 스프링 4.8 mm(0.5 N)에서 딸깍, UNO 1 A1)", sw, (0.15, 0.15, 0.15)),
-                         ("227ps_press_switch_screws (M2 × 8 십자 냄비머리 2 — 받침 칸 옆벽에 셀프 탭, 긴 구멍으로 힘 맞춤)", scr, (0.1, 0.1, 0.1))):
+                         ("227ps_press_switch_screws (M2 × 10 십자 냄비머리 2 — 받침판에 셀프 탭, 긴 구멍으로 힘 맞춤)", scr, (0.1, 0.1, 0.1))):
         o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
         o.Label, o.Shape = nm, shp
         out.append((o, col))
