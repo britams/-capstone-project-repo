@@ -216,3 +216,35 @@ def remove_context(doc):
         pt = doc.getObject("Part")
         if pt:
             pt.addObject(o)
+
+
+def merge_full(folder, path):
+    """전체 도면: 세 파일을 한 문서로 합쳐 저장 (서현 '전체 수정' 때만). 묶음 3개 = 세 부분, 색·투명도 그대로."""
+    name = os.path.splitext(os.path.basename(path))[0]
+    if name in App.listDocuments():
+        App.closeDocument(name)
+    full = App.newDocument(name)
+    rep = {}
+    for nm in NAMES:
+        src = App.openDocument(os.path.join(folder, nm + ".FCStd"))
+        g = full.addObject("App::DocumentObjectGroup", "G_" + nm.split("_")[0])
+        g.Label = nm
+        n = 0
+        for o in _solid_objects(src):
+            c = full.addObject("Part::Feature", o.Name)
+            c.Label = o.Label
+            c.Shape = o.Shape.copy()
+            g.addObject(c)
+            if App.GuiUp and o.ViewObject and c.ViewObject:
+                for k in ("ShapeColor", "LineColor", "Transparency", "Visibility"):
+                    try:
+                        setattr(c.ViewObject, k, getattr(o.ViewObject, k))
+                    except Exception:
+                        pass
+            n += 1
+        rep[nm] = n
+        App.closeDocument(src.Name)
+    full.recompute()
+    full.saveAs(path)
+    rep["MB"] = round(os.path.getsize(path) / 1e6, 2)
+    return rep
