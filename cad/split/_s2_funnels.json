@@ -1,0 +1,61 @@
+{
+ "ok": true,
+ "funnels": {
+  "111_entry_funnel": {
+   "joint_z": 247.4,
+   "funnel_z": [
+    205.0,
+    247.4
+   ],
+   "pipe_L": 89
+  },
+  "173_isolation_funnel": {
+   "joint_z": 585.0,
+   "funnel_z": [
+    585.0,
+    620.0
+   ],
+   "pipe_L": 195
+  }
+ },
+ "overlaps": [
+  [
+   "111h_heat_shrink",
+   "111_entry_funnel",
+   66.52,
+   "허용"
+  ],
+  [
+   "111h_heat_shrink",
+   "110_entry_duct",
+   30.43,
+   "허용"
+  ],
+  [
+   "110_entry_duct",
+   "199s_gate_screws",
+   6.19,
+   "허용"
+  ],
+  [
+   "173h_heat_shrink",
+   "172_isolation_duct",
+   30.43,
+   "허용"
+  ],
+  [
+   "173h_heat_shrink",
+   "173_isolation_funnel",
+   66.53,
+   "허용"
+  ],
+  [
+   "172_isolation_duct",
+   "199s_gate_screws",
+   6.19,
+   "허용"
+  ]
+ ],
+ "bad": [],
+ "saved": true
+}
