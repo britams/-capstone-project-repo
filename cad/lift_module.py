@@ -176,7 +176,7 @@ def columns(doc):
     bolts, nuts, deck_h, base_h = [], [], [], []
     for xb, y0, zv, zh, up in ((xi, yL, c["z0"] + 10, c["z0"], True), (xi, yL, 321.0, c["z1"] - 2, False),
                                (xo, yR, c["z0"] + 10, c["z0"], True), (xo, yR, c["z1"] - 10, c["z1"] - 2, False)):
-        ym = y0 + 10.0
+        ym = y0 + (17.0 if (xb == xi and not up) else 10.0)             # L 위: 나사 머리가 승강 바닥(y ≤ 15.5) 밖으로 (11/12 검사 54 mm³)
         # 세운 다리 ↔ 평철: 평철 바깥(머리) → 꺾쇠 쪽 너트
         bar_out = xb - c["t"] if xb == xi else xb - c["t"]
         b_, n_ = _m3(V(bar_out, ym, zv), V(1, 0, 0), 8.0)
@@ -193,7 +193,7 @@ def columns(doc):
     # 모듈 → R 평철 (바깥에서 M3 × 6, 모듈 바닥 탭)
     zc = Z0 + MOD["motor_t"] + (MOD["L"] - MOD["motor_t"]) / 2
     for dz in (-MOD["hole_p"] / 2, MOD["hole_p"] / 2):
-        b_, _n = _m3(V(xo, Y_C, zc + dz), V(-1, 0, 0), 6.0)
+        b_, _n = _m3(V(xo, Y_C, zc + dz), V(-1, 0, 0), 4.0)             # 4 = 평철 3 + 모듈 바닥 1 → 끝이 슬라이더 길(x ≤ 73)에 안 나옴
         bolts.append(b_)
         barR = barR.cut(Part.makeCylinder(1.7, 10, V(xo + 1, Y_C, zc + dz), V(-1, 0, 0)))
     for (xb, y0, zv) in ((xi, yL, c["z0"] + 10), (xi, yL, 321.0), (xo, yR, c["z0"] + 10), (xo, yR, c["z1"] - 10)):
@@ -214,7 +214,7 @@ def columns(doc):
         o.Shape, o.Label = shp, lab
         out.append(o)
     for key, shp, lab in (("151k", Part.makeCompound(br), "151k_column_brackets (꺾쇠 4 — 알루미늄 앵글 20 × 20 × 2를 20씩 자름·구멍, 구매)"),
-                          ("151s", Part.makeCompound(bolts + nuts), "151s_column_screws (M3 냄비머리 + 너트 — 평철·꺾쇠·데크·바닥판, 모듈 M3 × 6 2, 구매)")):
+                          ("151s", Part.makeCompound(bolts + nuts), "151s_column_screws (M3 냄비머리 + 너트 — 평철·꺾쇠·데크·바닥판, 모듈 M3 × 4 2, 구매)")):
         for x in [x for x in doc.Objects if x.Label.startswith(key)]:
             doc.removeObject(x.Name)
         o = doc.addObject("Part::Feature", "LM_" + key)
