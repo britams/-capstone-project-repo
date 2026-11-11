@@ -45,10 +45,11 @@ def _parts():
 
 
 def _place(shp, org, x, y, z):
-    s = shp.copy()
-    s.translate(V(0, -8, 0))
-    s.transformShape(App.Matrix(x.x, y.x, z.x, org.x, x.y, y.y, z.y, org.y, x.z, y.z, z.z, org.z, 0, 0, 0, 1))
-    return s
+    """(11/12) 모양 안에 좌표를 구워 넣음 (Placement는 단위) — 다시 만들기에서 209만 원점으로 돌아간 일이 있었음 (원인 못 찾음)"""
+    m = App.Matrix(x.x, y.x, z.x, org.x, x.y, y.y, z.y, org.y, x.z, y.z, z.z, org.z, 0, 0, 0, 1)
+    t = App.Matrix()
+    t.move(V(0, -8, 0))
+    return shp.transformGeometry(m.multiply(t))
 
 
 def replace(doc):
@@ -65,9 +66,11 @@ def replace(doc):
             continue
         org, x, y, z, off = frame(so.Shape)
         old = round(so.Shape.Volume)
+        so.Placement = App.Placement()
         so.Shape = _place(stator, org, x, y, z)
         so.Label = so.Label.split(" ")[0] + " (28BYJ-48 5 V — %s STEP, MIT)" % TAG
         for sh in [o for o in doc.Objects if o.Label.startswith(sh_pre)]:
+            sh.Placement = App.Placement()
             sh.Shape = _place(shaft, org, x, y, z)
         rep[st_pre] = dict(origin=[round(org.x, 2), round(org.y, 2), round(org.z, 2)], z=[round(z.x, 3), round(z.y, 3), round(z.z, 3)],
                            body_off=off, old_vol=old, new_vol=round(so.Shape.Volume))

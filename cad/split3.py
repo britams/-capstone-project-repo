@@ -25,7 +25,7 @@ import Part
 
 NAMES = ("S1_급이부", "S2_마킹부", "S3_프레임회로")
 ASM = "S0_전체조립"
-GATE_HOLD = ("199b", "199c", "199d", "199e")
+GATE_HOLD = ("199b", "199c", "199d", "199e", "199s")      # 199s: 게이트 나사 (11/12)
 # 헤드리스에서 잃는 투명도 (GUI에서 다시 넣음)
 TRANSP = (("REF_trap", 60), ("130_grid", 50), ("144h", 35), ("REF_camera_view", 80), ("196_gate", 70))
 
@@ -161,7 +161,7 @@ def color_all(folder):
 def boundary_check(folder, tol=0.5):
     """서로 다른 부분끼리 겹침 (mm³). 상자가 겹치는 쌍만 common을 계산한다."""
     docs = [App.openDocument(os.path.join(folder, nm + ".FCStd")) for nm in NAMES]
-    objs = [list(_solid_objects(d)) for d in docs]
+    objs = [[o for o in _solid_objects(d) if not o.Label.startswith("REF_camera")] for d in docs]   # 카메라 시야 원뿔은 물건이 아님
     hits = []
     for i in range(3):
         for j in range(i + 1, 3):
