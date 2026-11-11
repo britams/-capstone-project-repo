@@ -9,7 +9,7 @@
 | P07 | 와고 → ULN2003 Y | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → ULN +<br>와고 GND → ULN − | 770 mm | 와고 221-415 (선 끝 8 mm 벗김) / 듀폰 암 (ULN 전원 핀) |  |
 | P08 | 와고 → 서보 허브 | +5V_B (빨강, 20 AWG)<br>GND (검정, 20 AWG) | 와고 +5V → 허브 +<br>와고 GND → 허브 − | 260 mm | 와고 221-415 (선 끝 8 mm 벗김) / 허브 기판 납땜 |  |
 | P09 | 와고 → 게이트 허브 | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → 허브 +<br>와고 GND → 허브 − | 280 mm | 와고 221-415 (선 끝 8 mm 벗김) / 허브 기판 납땜 |  |
-| P10 | 와고 → MOSFET 보드 (조명 전원) | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → 보드 V+<br>와고 GND → 보드 GND | 350 mm | 와고 221-415 (선 끝 8 mm 벗김) / 보드 나사 단자 |  |
+| P10 | 와고 → MOSFET 보드 (조명·펌프 전원) | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → 보드 V+<br>와고 GND → 보드 GND | 350 mm | 와고 221-415 (선 끝 8 mm 벗김) / 보드 나사 단자 |  |
 | P11 | UNO 1·2 GND → 와고 GND | GND U1 (검정, 22 AWG)<br>GND U2 (검정, 22 AWG) | UNO 1 GND → 와고 GND<br>UNO 2 GND → 와고 GND | 210 mm | 듀폰 암 1핀 (UNO 헤더) / 와고 221-415 (선 끝 8 mm 벗김) |  |
 | P12 | 레일 감지 (+5V_B → 10 kΩ → UNO 2 D2) | RAIL (주황, 28 AWG) | 허브 10 kΩ 끝 → UNO 2 D2 | 160 mm | 허브 기판 납땜 / 듀폰 암 1핀 (UNO 헤더) |  |
 | S01 | UNO 1 → ULN2003 F (IN1~4) | IN1 (파랑, 26 AWG)<br>IN2 (초록, 26 AWG)<br>IN3 (노랑, 26 AWG)<br>IN4 (주황, 26 AWG) | D2 → IN1<br>D3 → IN2<br>D4 → IN3<br>D5 → IN4 | 280 mm | 듀폰 암 1핀 (UNO 헤더) / 듀폰 암 (ULN IN 핀) |  |
@@ -41,7 +41,9 @@
 | S11 | UNO 2 D3·D5 → MOSFET 보드 (조명 켜기) | L_TOP (노랑, 26 AWG)<br>L_BOT (노랑, 26 AWG) | D3 → Q1 TRIG<br>D5 → Q2 TRIG | 230 mm | 듀폰 암 1핀 (UNO 헤더) / 보드 핀 |  |
 | L01 | MOSFET → 위 조명 182 | +5V (빨강, 24 AWG)<br>Q1 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q1 OUT− → 조명 − | 770 mm | 보드 나사 단자 / 조명 납땜 |  |
 | L02 | MOSFET → 아래 조명 | +5V (빨강, 24 AWG)<br>Q2 OUT− (검정, 24 AWG) | 보드 V+ → 조명 +<br>Q2 OUT− → 조명 − | 470 mm | 보드 나사 단자 / 조명 납땜 |  |
-| S12 | J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음) | 3.3V (빨강, 28 AWG)<br>GND (검정, 28 AWG)<br>SDA (파랑, 28 AWG)<br>SCL (노랑, 28 AWG) | J_I2C 1 VS → Pi 핀 1 (3V3)<br>J_I2C 2 GND → Pi 핀 6 (GND)<br>J_I2C 3 SDA → Pi 핀 3 (GPIO2)<br>J_I2C 4 SCL → Pi 핀 5 (GPIO3) | 610 mm | JST XH 4P 하우징 (193j에 꽂음) / 듀폰 암 1핀 (Pi 헤더) |  |
+| S12 | UNO 2 D6 → MOSFET 보드 (급이 펌프 켜기) | PUMP (노랑, 26 AWG) | D6 → Q3 TRIG | 230 mm | 듀폰 암 1핀 (UNO 헤더) / 보드 핀 |  |
+| L03 | MOSFET → 급이 펌프 144p (프레임 밖, 다이오드 1N5819를 펌프 다리에) | +5V (빨강, 22 AWG)<br>Q3 OUT− (검정, 22 AWG) | 보드 V+ → 펌프 +<br>Q3 OUT− → 펌프 − | 600 mm | 보드 나사 단자 / 펌프 납땜 + 수축튜브 |  |
+| S13 | J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음) | 3.3V (빨강, 28 AWG)<br>GND (검정, 28 AWG)<br>SDA (파랑, 28 AWG)<br>SCL (노랑, 28 AWG) | J_I2C 1 VS → Pi 핀 1 (3V3)<br>J_I2C 2 GND → Pi 핀 6 (GND)<br>J_I2C 3 SDA → Pi 핀 3 (GPIO2)<br>J_I2C 4 SCL → Pi 핀 5 (GPIO3) | 610 mm | JST XH 4P 하우징 (193j에 꽂음) / 듀폰 암 1핀 (Pi 헤더) |  |
 
 **사서 쓰는 케이블 길이 확인** (경로 + 10 %)
 

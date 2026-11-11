@@ -13,8 +13,8 @@ P08,와고 → 서보 허브,+5V_B,빨강,20,WAGO,와고 +5V,와고 221-415 (선
 P08,와고 → 서보 허브,GND,검정,20,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),SERVO_HUB,허브 −,허브 기판 납땜,229,260,0,False,0.031
 P09,와고 → 게이트 허브,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),GATE_HUB,허브 +,허브 기판 납땜,250,280,0,False,0.011
 P09,와고 → 게이트 허브,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),GATE_HUB,허브 −,허브 기판 납땜,250,280,0,False,0.011
-P10,와고 → MOSFET 보드 (조명 전원),+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),MOSFET,보드 V+,보드 나사 단자,310,350,0,False,0.016
-P10,와고 → MOSFET 보드 (조명 전원),GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),MOSFET,보드 GND,보드 나사 단자,310,350,0,False,0.016
+P10,와고 → MOSFET 보드 (조명·펌프 전원),+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),MOSFET,보드 V+,보드 나사 단자,310,350,0,False,0.033
+P10,와고 → MOSFET 보드 (조명·펌프 전원),GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),MOSFET,보드 GND,보드 나사 단자,310,350,0,False,0.033
 P11,UNO 1·2 GND → 와고 GND,GND U1,검정,22,UNO1,UNO 1 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),191,210,0,False,0.002
 P11,UNO 1·2 GND → 와고 GND,GND U2,검정,22,UNO1,UNO 2 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),191,210,0,False,0.002
 P12,레일 감지 (+5V_B → 10 kΩ → UNO 2 D2),RAIL,주황,28,GATE_HUB,허브 10 kΩ 끝,허브 기판 납땜,UNO2,UNO 2 D2,듀폰 암 1핀 (UNO 헤더),139,160,0,False,
@@ -104,7 +104,10 @@ L01,MOSFET → 위 조명 182,+5V,빨강,24,MOSFET,보드 V+,보드 나사 단�
 L01,MOSFET → 위 조명 182,Q1 OUT−,검정,24,MOSFET,Q1 OUT−,보드 나사 단자,L_TOP,조명 −,조명 납땜,694,770,0,False,0.023
 L02,MOSFET → 아래 조명,+5V,빨강,24,MOSFET,보드 V+,보드 나사 단자,L_BOT,조명 +,조명 납땜,427,470,0,False,0.007
 L02,MOSFET → 아래 조명,Q2 OUT−,검정,24,MOSFET,Q2 OUT−,보드 나사 단자,L_BOT,조명 −,조명 납땜,427,470,0,False,0.007
-S12,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",3.3V,빨강,28,J_I2C,J_I2C 1 VS,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 1 (3V3),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
-S12,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",GND,검정,28,J_I2C,J_I2C 2 GND,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 6 (GND),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
-S12,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",SDA,파랑,28,J_I2C,J_I2C 3 SDA,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 3 (GPIO2),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
-S12,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",SCL,노랑,28,J_I2C,J_I2C 4 SCL,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 5 (GPIO3),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
+S12,UNO 2 D6 → MOSFET 보드 (급이 펌프 켜기),PUMP,노랑,26,UNO2,D6,듀폰 암 1핀 (UNO 헤더),MOSFET,Q3 TRIG,보드 핀,204,230,0,False,
+L03,"MOSFET → 급이 펌프 144p (프레임 밖, 다이오드 1N5819를 펌프 다리에)",+5V,빨강,22,MOSFET,보드 V+,보드 나사 단자,PUMP,펌프 +,펌프 납땜 + 수축튜브,540,600,0,False,0.029
+L03,"MOSFET → 급이 펌프 144p (프레임 밖, 다이오드 1N5819를 펌프 다리에)",Q3 OUT−,검정,22,MOSFET,Q3 OUT−,보드 나사 단자,PUMP,펌프 −,펌프 납땜 + 수축튜브,540,600,0,False,0.029
+S13,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",3.3V,빨강,28,J_I2C,J_I2C 1 VS,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 1 (3V3),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
+S13,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",GND,검정,28,J_I2C,J_I2C 2 GND,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 6 (GND),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
+S13,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",SDA,파랑,28,J_I2C,J_I2C 3 SDA,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 3 (GPIO2),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
+S13,"J_I2C → Pi I2C (배터리 상자 INA226, 콘센트일 때는 비어 있음)",SCL,노랑,28,J_I2C,J_I2C 4 SCL,JST XH 4P 하우징 (193j에 꽂음),PI_B,Pi 핀 5 (GPIO3),듀폰 암 1핀 (Pi 헤더),551,610,0,False,
