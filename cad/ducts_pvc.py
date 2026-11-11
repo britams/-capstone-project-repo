@@ -18,9 +18,10 @@ import Part
 V = App.Vector
 PVC = dict(od=18.0, id=13.0)
 SOCK = dict(id=18.4, od=22.0, depth=12.0, shoulder=1.0, bore=12.0)
-DUCTS = (  # (라벨 머리, 관 z0, 관 z1, 꺾임 쪽 'up'/'down', 꺾임 경계 z, 빔 z)
-    ("110_entry_duct", 235.0, None, "up", 337.0, 275.0),
-    ("172_isolation_duct", None, 585.0, "down", 389.0, 570.0),
+# (11/12) 172 세로 관 축을 x +1.5: 바깥 18이면 갠트리 레일 100d(면 x −8)에 1 mm 묻힘 (77 mm³) → 틈 0.5. 꺾임 조각 소켓이 1.5 어긋남을 받음
+DUCTS = (  # (라벨 머리, 관 z0, 관 z1, 꺾임 쪽 'up'/'down', 꺾임 경계 z, 빔 z, 세로 관 축 x)
+    ("110_entry_duct", 235.0, None, "up", 337.0, 275.0, 0.0),
+    ("172_isolation_duct", None, 585.0, "down", 389.0, 570.0, 1.5),
 )
 LABEL = {
     "110_entry_duct": "110_entry_duct (수도용 PVC 13A — 바깥 18·안 13, %d mm 자름, 빔 구멍 Ø3.2 2, 구매)",
@@ -30,37 +31,38 @@ LABEL = {
 }
 
 
-def build(old_shape, z0, z1, side, zb, zbeam):
+def build(old_shape, z0, z1, side, zb, zbeam, ax=0.0):
     s = SOCK
     big = 2000.0
     if side == "up":                   # 꺾임이 위 (110)
         bend = old_shape.common(Part.makeBox(big, big, big, V(-big / 2, -big / 2, zb)))
         zs0, zs1 = zb - s["depth"] - s["shoulder"], zb
-        sock = Part.makeCylinder(s["od"] / 2, zs1 - zs0, V(0, 0, zs0))
-        sock = sock.cut(Part.makeCylinder(s["id"] / 2, s["depth"], V(0, 0, zs0)))
-        sock = sock.cut(Part.makeCylinder(s["bore"] / 2, 50, V(0, 0, zs0)))
+        sock = Part.makeCylinder(s["od"] / 2, zs1 - zs0, V(ax, 0, zs0))
+        sock = sock.cut(Part.makeCylinder(s["id"] / 2, s["depth"], V(ax, 0, zs0)))
+        sock = sock.cut(Part.makeCylinder(s["bore"] / 2, 50, V(ax, 0, zs0)))
         p0, p1 = z0, zb - s["shoulder"]
     else:                              # 꺾임이 아래 (172)
         bend = old_shape.common(Part.makeBox(big, big, big, V(-big / 2, -big / 2, zb - big)))
         zs0, zs1 = zb, zb + s["depth"] + s["shoulder"]
-        sock = Part.makeCylinder(s["od"] / 2, zs1 - zs0, V(0, 0, zs0))
-        sock = sock.cut(Part.makeCylinder(s["id"] / 2, s["depth"], V(0, 0, zs0 + s["shoulder"])))
-        sock = sock.cut(Part.makeCylinder(s["bore"] / 2, 50, V(0, 0, zs0 - 1)))
+        sock = Part.makeCylinder(s["od"] / 2, zs1 - zs0, V(ax, 0, zs0))
+        sock = sock.cut(Part.makeCylinder(s["id"] / 2, s["depth"], V(ax, 0, zs0 + s["shoulder"])))
+        sock = sock.cut(Part.makeCylinder(s["bore"] / 2, 50, V(ax, 0, zs0 - 1)))
+        sock = sock.cut(Part.makeCylinder(s["bore"] / 2, 50, V(0, 0, zs0 - 1)))       # 꺾임 쪽 구멍 (축 x 0)과도 통하게
         p0, p1 = zb + s["shoulder"], z1
     bendp = bend.fuse(sock).removeSplitter()
-    pipe = Part.makeCylinder(PVC["od"] / 2, p1 - p0, V(0, 0, p0)).cut(Part.makeCylinder(PVC["id"] / 2, p1 - p0 + 2, V(0, 0, p0 - 1)))
+    pipe = Part.makeCylinder(PVC["od"] / 2, p1 - p0, V(ax, 0, p0)).cut(Part.makeCylinder(PVC["id"] / 2, p1 - p0 + 2, V(ax, 0, p0 - 1)))
     pipe = pipe.cut(Part.makeCylinder(1.6, 40, V(-20, 0, zbeam), V(1, 0, 0)))
     return pipe, bendp, round(p1 - p0)
 
 
 def apply(doc):
     rep, made = {}, []
-    for head, z0, z1, side, zb, zbeam in DUCTS:
+    for head, z0, z1, side, zb, zbeam, ax in DUCTS:
         o = [x for x in doc.Objects if x.Label.startswith(head)][0]
         if "PVC 13A" in o.Label:
             rep[head] = "이미 PVC"
             continue
-        pipe, bendp, L = build(o.Shape, z0, z1, side, zb, zbeam)
+        pipe, bendp, L = build(o.Shape, z0, z1, side, zb, zbeam, ax)
         o.Shape = pipe
         o.Label = LABEL[head] % L
         bh = head[:3] + "b"
