@@ -1,0 +1,30 @@
+{
+ "ok": true,
+ "press": {
+  "delta_mm": 4.83,
+  "lever_pressed_z": 253.67,
+  "latch_rest_bottom": 258.5,
+  "gap_rest": 4.83,
+  "spring_len_rest": 14.0,
+  "spring_solid": 3.9,
+  "carriage_valid": true,
+  "carriage_vol": 17627
+ },
+ "overlaps": [
+  [
+   "158_carriage",
+   "227ps_press_switch_screws",
+   18.85,
+   "허용"
+  ],
+  [
+   "159s_nut_screws",
+   "158_carriage",
+   37.61,
+   "허용"
+  ]
+ ],
+ "sweep": [],
+ "bad": [],
+ "saved": true
+}
