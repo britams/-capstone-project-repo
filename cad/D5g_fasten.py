@@ -128,9 +128,8 @@ def fasten(doc, G):
     dz = K.FR["deck_z"] + 25.0                                           # 데크 윗면 205
     m3, ins = [], []
     dsh = deck.Shape
-    for pre, pts, side in (("151_drive_side_L", [(29.0, 20.0), (29.0, -20.0)], "up"),
-                           ("151_drive_side_R", [(81.0, 20.0), (81.0, -20.0)], "up"),
-                           ("102_collar", [(45.47, 26.25), (45.47, -26.25), (-45.47, 26.25), (-45.47, -26.25)], "down")):
+    for pre, pts, side in (                           # (11/12) 151 L/R는 평철 + 꺾쇠 (lift_module.columns) — 보스·인서트 없음
+                           ("102_collar", [(45.47, 26.25), (45.47, -26.25), (-45.47, 26.25), (-45.47, -26.25)], "down"),):
         o = get(pre)
         sh = o.Shape
         for x, y in pts:
