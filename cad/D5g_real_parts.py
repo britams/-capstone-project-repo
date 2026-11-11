@@ -181,7 +181,7 @@ def pi5(x0, y0, z_shelf):
 def apply(doc):
     """D5g 문서의 ULN2003 3장, 193 단자대·퓨즈 상자, Pi 5 외곽을 실제 CAD로"""
     out = []
-    for o in [x for x in doc.Objects if x.Label.startswith("195p_uln2003_")]:
+    for o in [x for x in doc.Objects if x.Label.startswith("195p_uln2003_") and "DRV8833" not in x.Label]:   # (11/12) F는 DRV8833 (lift_module)
         b = o.Shape.BoundBox
         k = o.Label.split("_")[2].split(" ")[0]
         zb = min(f.CenterOfMass.z for f in o.Shape.Faces if abs(f.normalAt(0, 0).z) > 0.99 and f.Area > 900)
