@@ -73,7 +73,7 @@ try:
     mine = [o for o in d.Objects if o.Label.startswith(tuple(a for a, _ in MOTORS) + tuple(b for _, b in MOTORS))]
     for a in mine:
         for o in d.Objects:
-            if o is a or o.TypeId != "Part::Feature" or not a.Shape.BoundBox.intersect(o.Shape.BoundBox):
+            if o is a or o.TypeId != "Part::Feature" or o.Shape.isNull() or not a.Shape.BoundBox.intersect(o.Shape.BoundBox):
                 continue
             if o in mine and o.Name < a.Name:
                 continue
