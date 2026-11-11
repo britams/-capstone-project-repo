@@ -102,7 +102,8 @@ def make_parts():
 
 
 def apply(doc):
-    for o in [x for x in doc.Objects if x.Label.startswith(("226_", "226s_", "227"))]:
+    # (11/12, CAP-AI-62) "227"로 지우면 누름 스위치 227p·227ps(press_apply가 먼저 만듦)까지 지워졌음 — 11/10부터 모델에 없었음
+    for o in [x for x in doc.Objects if x.Label.startswith(("226_", "226s_", "227f", "227x", "227y"))]:
         doc.removeObject(o.Name)
     out, _lv = make_parts()
     rep = {}
