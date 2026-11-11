@@ -103,7 +103,6 @@ def feeder_hardware():
         holes.append(Part.makeCylinder(1.7, 10, V(px, py + sy, f["post_foot_z"] - 5)))
     holes.append(Part.makeCylinder(1.7, 30, V(xa1 + 5, py, f["post_foot_z"] + 12), V(-1, 0, 0)))
     holes.append(Part.makeCylinder(1.7, 30, V(xa1 + 5, py - 1.0, f["floor_z"] - 12), V(-1, 0, 0)))
-    holes.append(Part.makeCylinder(1.7, 10, V(f["x"], py - 12.0, f["floor_z"] - 5)))
     foot, top = foot.cut(Part.makeCompound(holes)), top.cut(Part.makeCompound(holes))
     post = post.cut(Part.makeCompound(holes))
     sc, nu = [], []
@@ -120,7 +119,7 @@ def feeder_hardware():
     #   → M3 × 18이 앵글 2 + 각관 12를 다 지나고, 너트는 각관 −x 바깥 면에 (나사 끝이 너트 밖으로 1.6)
     screw(V(xa1, py, f["post_foot_z"] + 12), V(-1, 0, 0), 18.0, t + b["sq"])
     screw(V(xa1, py - 1.0, f["floor_z"] - 12), V(-1, 0, 0), 18.0, t + b["sq"])
-    screw(V(f["x"], py - 12.0, f["floor_z"] - t), V(0, 0, 1), 8.0, t + f["floor_t"])          # 위 앵글 → 물길 바닥 (y 68, 각관 밖 — 너트는 물길 안, 솜 끝 y 58보다 뒤)
+    # (11/12, 서현 '에폭시 접착') 위 앵글 → 물길 바닥은 나사 대신 2액 에폭시 — 바닥에 구멍이 없어 설탕물이 새거나 너트에 닿지 않음
     # 바브 니플 2: 노즐 (+x 벽 받침 → −x 방향 나사), 물빠짐 (바닥 아래 받침 → +z 방향 나사)
     def nipple(p, d):                                      # p = 받침 바깥 면, d = 나사가 들어가는 방향
         PLACES["nipple"].append((p, d))
@@ -528,8 +527,7 @@ def feeder_detail_shapes(chamber_shape):
     #   (11/12, CAP-AI-62) 받침 −y 끝이 각관 +y 면(y 86)과 27 mm³ 겹쳐 있었음 (11/11까지 검사 안 함) → 받침은 y 86부터
     py_face = f["post_y"] + BUY["sq"] / 2
     trough = trough.fuse(box(f["x"] - b["pad"] / 2, f["x"] + b["pad"] / 2, max(f["dr_y"] - b["pad"] / 2, py_face), f["dr_y"] + b["pad"] / 2, f["floor_z"] - b["pad_t"], f["floor_z"]))
-    #   (11/12) 위 앵글 → 물길 바닥 M3 × 8 자리 구멍 Ø3.4 (구멍 없이 나사가 바닥 판을 지나고 있었음 21 mm³). 너트는 물길 안 → 실리콘 실런트로 막음
-    trough = trough.cut(Part.makeCylinder(1.7, 10, V(f["x"], f["post_y"] - 12.0, f["floor_z"] - 5)))
+    #   (11/12) 위 앵글 ↔ 물길 바닥: 나사가 구멍 없이 바닥 판을 지나고 있었음 (21 mm³) → 서현 결정 '에폭시 접착' — 나사·구멍 없앰
     trough = trough.cut(Part.makeCylinder(2.1, b["fit_L"], V(f["x"], f["dr_y"], f["floor_z"] - b["pad_t"])))
     trough = trough.cut(Part.makeCylinder(b["fit_bore"] / 2, 20, V(f["x"], f["dr_y"], f["floor_z"] - 1)))
     trough = trough.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] + f["front_t"], f["ch_y1"] - f["ch_t"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
@@ -566,8 +564,8 @@ def feeder_detail_apply(doc):
                          ("143mm_magnet_lid (네오디뮴 Ø6 × 2 N35, 뚜껑 2개, 구매)", ts, (0.55, 0.55, 0.60)),
                          ("143s_bolt_M3x8 (McMaster 91292A112, 2개)", sc, (0.15, 0.15, 0.15))) + tuple(zip(
                              ("143p_post_sq12 (기둥 — 알루미늄 각관 12 × 12 × 1 자름, 구매)", "143a_angle_foot (발 — 알루미늄 앵글 20 × 20 × 2 × 40 자름·구멍, 구매)",
-                              "143b_angle_top (위 — 알루미늄 앵글 20 × 20 × 2 × 40 자름·구멍, 구매)", "143h_screws_M3 (M3 냄비머리 12 ×2 · 18 ×2 · 8 ×1, 구매)",
-                              "143hn_nuts_M3 (M3 너트 5, 구매)", "143n_nipple_M5_barb (공압 M5 호스 니플 2 — 노즐·물빠짐, 구매)"),
+                              "143b_angle_top (위 — 알루미늄 앵글 20 × 20 × 2 × 20 자름·구멍, 물길 바닥에 에폭시, 구매)", "143h_screws_M3 (M3 냄비머리 12 ×2 · 18 ×2, 구매)",
+                              "143hn_nuts_M3 (M3 너트 4, 구매)", "143n_nipple_M5_barb (공압 M5 호스 니플 2 — 노즐·물빠짐, 구매)"),
                              feeder_hardware(),
                              ((0.80, 0.82, 0.85), (0.80, 0.82, 0.85), (0.80, 0.82, 0.85), (0.15, 0.15, 0.15), (0.15, 0.15, 0.15), (0.85, 0.75, 0.30)))):
         for o in [o for o in doc.Objects if o.Label.startswith(nm.split(" ")[0])]:

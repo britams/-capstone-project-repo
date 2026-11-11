@@ -8,7 +8,7 @@
 넣는 것 (받은도면 step파일):
   143n  니플 2 — McMaster 6220N79 (니켈 도금 황동, M5 × 0.8, 관 안 4 mm, 길이 14) [확실 — 판매처 표]
         STEP 좌표: 축 x, 섬유 패킹 바깥 면 x −0.24 = 받침 면, 나사는 −x, 바브는 +x
-  143hn 너트 5 — McMaster 90592A085 (M3, 폭 5.5, 높이 2.4 표 / STEP 2.73 — 모따기 포함) [확실 — 판매처 표]
+  143hn 너트 4 — McMaster 90592A085 (M3, 폭 5.5, 높이 2.4 표 / STEP 2.73 — 모따기 포함) [확실 — 판매처 표]
         STEP 좌표: 축 z, z −1.39 ~ 1.34
 나사(M3 × 12·16·8)는 아직 단순 모양 — 길이별 STEP을 받은 뒤.
 """
@@ -47,7 +47,7 @@ try:
     old["143n_nipple_M5_barb"].Shape = Part.makeCompound(nips)
     old["143n_nipple_M5_barb"].Label = "143n_nipple_M5_barb (McMaster 6220N79 STEP — 니켈 황동 M5, 관 안 4, 2개)"
     old["143hn_nuts_M3"].Shape = Part.makeCompound(nuts)
-    old["143hn_nuts_M3"].Label = "143hn_nuts_M3 (McMaster 90592A085 STEP — M3 너트 5)"
+    old["143hn_nuts_M3"].Label = "143hn_nuts_M3 (McMaster 90592A085 STEP — M3 너트 4)"
     rep["nipples"], rep["nuts"] = len(nips), len(nuts)
     # 겹침: 새 두 부품 ↔ S1 전부 + 둘레 (허용 = 나사산 물림)
     S.add_context(d, OUT)
