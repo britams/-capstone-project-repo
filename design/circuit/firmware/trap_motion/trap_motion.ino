@@ -6,7 +6,7 @@
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
 //
 // 핀 (UNO 1, 18/18)
-//   F 바닥 승강 153 : D2  D3  D4  D5   (ULN2003)
+//   F 바닥 승강 153 : D2  D3  D4  D5   (DRV8833 AIN1 AIN2 BIN1 BIN2 — 11/12 산 리니어 모듈 15BY25, 양극 2상)
 //   X 마커 X   215 : D6  D7  D8  D9
 //   Y 마커 Y   209 : D10 D11 D12 D13
 //   PEN 펜 서보 205 : A0  (SG90, 전원 +5V_B)
@@ -44,7 +44,8 @@
 #include <Servo.h>
 
 // ---------------- 값 (미검증은 실물에서 맞춤) ----------------
-#define STEPS_PER_MM      (4075.7728f / 8.0f)  // 28BYJ-48 반걸음 4075.77/회전 [가능성 높음] ÷ T8 리드 8 mm
+#define STEPS_PER_MM      (4075.7728f / 8.0f)  // X·Y: 28BYJ-48 반걸음 4075.77/회전 [가능성 높음] ÷ T8 리드 8 mm
+#define STEPS_PER_MM_F    (40.0f / 0.5f)       // F (11/12): 15BY25 18°/걸음 → 반걸음 40/회전 ÷ M3 리드 0.5 mm [확실 — Keshuo 치수도]
 #define HALF_US_DEFAULT   1000UL   // 반걸음 간격 µs (≈ 1.96 mm/s) — v0.1 값
 #define HALF_US_MIN       800UL
 #define SURGE_LO_US       1080UL   // 686~928 Hz 스프링 서지 띠 (역학계산 2차, b4_axis 주석) — 이 사이 SPEED 거부
@@ -67,6 +68,8 @@
 
 // 28BYJ-48 반걸음 순서
 const uint8_t HALF[8][4] = {{1,0,0,0},{1,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,1},{0,0,0,1},{1,0,0,1}};
+// F (11/12): 양극 반걸음 — DRV8833 AIN1 AIN2 (코일 A) · BIN1 BIN2 (코일 B), 0 0 = 그 코일 끔
+const uint8_t HALF_BI[8][4] = {{1,0,0,0},{1,0,1,0},{0,0,1,0},{0,1,1,0},{0,1,0,0},{0,1,0,1},{0,0,0,1},{1,0,0,1}};
 
 enum HomePhase { H_NONE = 0, H_SEEK, H_BACK, H_SLOW };
 
@@ -124,10 +127,12 @@ Axis* findAxis(const char* t) {
 }
 
 void coils(Axis& a, bool on) {
-  for (int k = 0; k < 4; k++) digitalWrite(a.pins[k], on ? HALF[a.phase][k] : 0);
+  const uint8_t (*seq)[4] = (a.name == 'F') ? HALF_BI : HALF;
+  for (int k = 0; k < 4; k++) digitalWrite(a.pins[k], on ? seq[a.phase][k] : 0);
 }
-float posMm(const Axis& a) { return a.pos / STEPS_PER_MM; }
-long mmToSteps(float mm) { return lround(mm * STEPS_PER_MM); }
+float spm(const Axis& a) { return a.name == 'F' ? STEPS_PER_MM_F : STEPS_PER_MM; }
+float posMm(const Axis& a) { return a.pos / spm(a); }
+long mmToSteps(const Axis& a, float mm) { return lround(mm * spm(a)); }
 bool swPressed(const Axis& a) { return digitalRead(a.sw) == LOW; }
 
 bool pswPressed() { return digitalRead(PSW_PIN) == HIGH; }
@@ -142,7 +147,7 @@ void doneMove(const Axis& a) {
 
 void startMove(Axis& a, float mm) {
   a.offPending = false;
-  a.target = mmToSteps(mm);
+  a.target = mmToSteps(a, mm);
   a.moving = (a.target != a.pos);
   a.lastUs = micros();
   if (!a.moving) doneMove(a);
@@ -221,7 +226,7 @@ const char* penName() {
 }
 
 // ---------------- 원점 ----------------
-long homeMaxSteps(const Axis& a) { return mmToSteps(a.maxMm - a.homeMm + HOME_MARGIN_MM); }
+long homeMaxSteps(const Axis& a) { return mmToSteps(a, a.maxMm - a.homeMm + HOME_MARGIN_MM); }
 // HOME_MAX: 사양은 '반걸음 20480번'(b4의 40 mm = F 행정 기준). Y는 행정 58 mm라 +18에서 켜지면 20480으로는
 //   스위치에 못 닿아 거짓 NOSWITCH가 남 → 축마다 (행정 + 4 mm): F 20,634 · X 20,379 · Y 31,587 반걸음 (AI 판단, CAP-AI-40)
 
@@ -246,7 +251,7 @@ void homeStep(Axis& a) {
   // 스위치 읽기 (걸음마다 한 번, 연속 SWITCH_SAMPLES번 LOW면 눌림)
   if (swPressed(a)) { if (a.swLow < 255) a.swLow++; } else a.swLow = 0;
   bool hit = a.swLow >= SWITCH_SAMPLES;
-  long back = mmToSteps(HOME_BACKOFF_MM);
+  long back = mmToSteps(a, HOME_BACKOFF_MM);
 
   if (a.home == H_SEEK) {
     if (hit) { a.home = H_BACK; a.homeLeg = 0; a.swLow = 0; return; }
@@ -261,7 +266,7 @@ void homeStep(Axis& a) {
     stepOnce(a, +1); a.homeLeg++;
   } else if (a.home == H_SLOW) {
     if (hit) {
-      a.pos = a.target = mmToSteps(a.homeMm);
+      a.pos = a.target = mmToSteps(a, a.homeMm);
       a.homed = true;
       long n = a.homeCount;
       endAxis(a);
@@ -324,7 +329,7 @@ void handle(char* cmd) {
     if (mm < a->minMm || mm > a->maxMm) { reply("ERR LIMIT"); return; }
     // R1 (검토 문서 CAP-AI-42): 바닥을 '올리는' MOVE는 펜 UP일 때만. 내리기는 언제나 허용 (말벌에서 멀어짐)
     // R1′ (CAP-AI-48): 펜이 내려가 있고 마킹실 위에 있으면 막음. 대기 자리(캡 컵, Y ≤ -20.5)에 꽂혀 있으면 허용 (재방문 급이)
-    if (a->name == 'F' && mmToSteps(mm) > a->pos && penState != PEN_IS_UP && posMm(axes[2]) > PEN_CHAMBER_Y_MM) { reply("ERR PEN_DOWN"); return; }
+    if (a->name == 'F' && mmToSteps(*a, mm) > a->pos && penState != PEN_IS_UP && posMm(axes[2]) > PEN_CHAMBER_Y_MM) { reply("ERR PEN_DOWN"); return; }
     if (a->name == 'F') pressActive = false;
     Serial.print(F("OK MOVE ")); Serial.print(a->name); Serial.print(' '); Serial.println(mm, 3);
     startMove(*a, mm);
@@ -337,7 +342,7 @@ void handle(char* cmd) {
     Axis* a = findAxis(tok[1]);
     if (!a) { reply("ERR AXIS"); return; }
     if (a->moving) { reply("ERR BUSY"); return; }
-    a->pos = a->target = mmToSteps(atof(tok[2]));
+    a->pos = a->target = mmToSteps(*a, atof(tok[2]));
     a->homed = true;
     reply("OK ZERO");
     return;

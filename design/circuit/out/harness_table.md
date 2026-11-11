@@ -4,7 +4,7 @@
 | P02 | 어댑터 DC 잭 GND → 와고 GND | GND (검정, 20 AWG) | 잭 − → 와고 GND 1번 | 370 mm | DC 잭 단자 납땜/나사 / 와고 221-415 (선 끝 8 mm 벗김) |  |
 | P03 | 퓨즈 → 비상 정지 | +5V 퓨즈 뒤 (빨강, 20 AWG) | 퓨즈 2 → 비상 정지 NC 1 | 120 mm | 퓨즈홀더 납땜 / 비상 정지 나사 단자 |  |
 | P04 | 비상 정지 → 와고 +5V | +5V_B (빨강, 20 AWG) | NC 2 → 와고 +5V 1번 | 410 mm | 비상 정지 나사 단자 / 와고 221-415 (선 끝 8 mm 벗김) |  |
-| P05 | 와고 → ULN2003 F | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → ULN + (5-12V)<br>와고 GND → ULN − | 180 mm | 와고 221-415 (선 끝 8 mm 벗김) / 듀폰 암 (ULN 전원 핀) |  |
+| P05 | 와고 → DRV8833 F | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → DRV VM<br>와고 GND → DRV GND | 180 mm | 와고 221-415 (선 끝 8 mm 벗김) / 듀폰 암 (ULN 전원 핀) |  |
 | P06 | 와고 → ULN2003 X | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → ULN +<br>와고 GND → ULN − | 700 mm | 와고 221-415 (선 끝 8 mm 벗김) / 듀폰 암 (ULN 전원 핀) |  |
 | P07 | 와고 → ULN2003 Y | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → ULN +<br>와고 GND → ULN − | 770 mm | 와고 221-415 (선 끝 8 mm 벗김) / 듀폰 암 (ULN 전원 핀) |  |
 | P08 | 와고 → 서보 허브 | +5V_B (빨강, 20 AWG)<br>GND (검정, 20 AWG) | 와고 +5V → 허브 +<br>와고 GND → 허브 − | 260 mm | 와고 221-415 (선 끝 8 mm 벗김) / 허브 기판 납땜 |  |
@@ -12,10 +12,10 @@
 | P10 | 와고 → MOSFET 보드 (조명·펌프 전원) | +5V_B (빨강, 22 AWG)<br>GND (검정, 22 AWG) | 와고 +5V → 보드 V+<br>와고 GND → 보드 GND | 350 mm | 와고 221-415 (선 끝 8 mm 벗김) / 보드 나사 단자 |  |
 | P11 | UNO 1·2 GND → 와고 GND | GND U1 (검정, 22 AWG)<br>GND U2 (검정, 22 AWG) | UNO 1 GND → 와고 GND<br>UNO 2 GND → 와고 GND | 210 mm | 듀폰 암 1핀 (UNO 헤더) / 와고 221-415 (선 끝 8 mm 벗김) |  |
 | P12 | 레일 감지 (+5V_B → 10 kΩ → UNO 2 D2) | RAIL (주황, 28 AWG) | 허브 10 kΩ 끝 → UNO 2 D2 | 160 mm | 허브 기판 납땜 / 듀폰 암 1핀 (UNO 헤더) |  |
-| S01 | UNO 1 → ULN2003 F (IN1~4) | IN1 (파랑, 26 AWG)<br>IN2 (초록, 26 AWG)<br>IN3 (노랑, 26 AWG)<br>IN4 (주황, 26 AWG) | D2 → IN1<br>D3 → IN2<br>D4 → IN3<br>D5 → IN4 | 280 mm | 듀폰 암 1핀 (UNO 헤더) / 듀폰 암 (ULN IN 핀) |  |
+| S01 | UNO 1 → DRV8833 F (AIN1·AIN2·BIN1·BIN2) | IN1 (파랑, 26 AWG)<br>IN2 (초록, 26 AWG)<br>IN3 (노랑, 26 AWG)<br>IN4 (주황, 26 AWG) | D2 → AIN1<br>D3 → AIN2<br>D4 → BIN1<br>D5 → BIN2 | 280 mm | 듀폰 암 1핀 (UNO 헤더) / 듀폰 암 (ULN IN 핀) |  |
 | S02 | UNO 1 → ULN2003 X (IN1~4) | IN1 (파랑, 26 AWG)<br>IN2 (초록, 26 AWG)<br>IN3 (노랑, 26 AWG)<br>IN4 (주황, 26 AWG) | D6 → IN1<br>D7 → IN2<br>D8 → IN3<br>D9 → IN4 | 790 mm | 듀폰 암 1핀 (UNO 헤더) / 듀폰 암 (ULN IN 핀) |  |
 | S03 | UNO 1 → ULN2003 Y (IN1~4) | IN1 (파랑, 26 AWG)<br>IN2 (초록, 26 AWG)<br>IN3 (노랑, 26 AWG)<br>IN4 (주황, 26 AWG) | D10 → IN1<br>D11 → IN2<br>D12 → IN3<br>D13 → IN4 | 860 mm | 듀폰 암 1핀 (UNO 헤더) / 듀폰 암 (ULN IN 핀) |  |
-| M01 | ULN2003 F → 바닥 모터 153 | 모터 5선 (모터에 달린 선) (파랑·분홍·노랑·주황·빨강, 26 AWG) | ULN JST-XH 5 → 모터 | 기본 240 (연장 없음) | JST-XH 5핀 (모터 기본) / 모터 (기본) |  |
+| M01 | DRV8833 F → 바닥 리니어 모듈 | 모터 4선 (모듈에 달린 선) (빨강·흰·갈색·검정, 28 AWG) | DRV AOUT1·2 BOUT1·2 → 모터 A A− B B− | 기본 240 (연장 없음) | JST-XH 5핀 (모터 기본) / 모터 (기본) |  |
 | M02 | ULN2003 X → X 모터 215 | 모터 5선 (파랑·분홍·노랑·주황·빨강, 26 AWG) | ULN JST-XH 5 → 모터 | 기본 240 (연장 없음) | JST-XH 5핀 / 모터 (기본) |  |
 | M03 | ULN2003 Y → Y 모터 209 (X로 움직임) | 모터 5선 (파랑·분홍·노랑·주황·빨강, 26 AWG) | ULN JST-XH 5 → 모터 | 기본 240 + 연장 180 | JST-XH 5핀 / 모터 (기본) | 휨 고리 |
 | V01 | 서보 허브 → 펜 서보 SG90 205 (X·Y로 움직임) | 서보 3선 (갈색 GND·빨강 +5V·주황 신호, 26 AWG) | 허브 헤더 S1 → 서보 | 기본 250 + 연장 500 | 듀폰 2.54 헤더 (허브 기판) / 서보 3핀 (기본) | 휨 고리 |

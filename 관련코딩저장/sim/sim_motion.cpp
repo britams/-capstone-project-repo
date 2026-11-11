@@ -23,6 +23,7 @@ struct AxisW {
 };
 static AxisW W[3] = {{2, A3}, {6, A4}, {10, A5}};
 static const int HALF_T[8][4] = {{1,0,0,0},{1,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,1},{0,0,0,1},{1,0,0,1}};
+static const int HALF_BI_T[8][4] = {{1,0,0,0},{1,0,1,0},{0,0,1,0},{0,1,1,0},{0,1,0,0},{0,1,0,1},{0,0,0,1},{1,0,0,1}};   // F (11/12) DRV8833
 static double w_psw_at = 10.5;     // 바닥(F)이 원점 스위치 위 이 mm 에 오면 스프링이 4.8 mm 눌려 누름 스위치가 눌림 (말벌 닿음 10 + 0.5)
 static bool w_psw_broken = false;  // 선 끊김 (NC라 HIGH)
 static std::function<void()> w_script;
@@ -34,7 +35,8 @@ static void sample_axes() {
     for (int k = 0; k < 4; k++) { v[k] = g_pins[w.pin0 + k]; if (v[k]) all0 = false; }
     if (all0) continue;                                    // 코일 꺼짐 (위치 유지)
     int idx = -1;
-    for (int i = 0; i < 8; i++) if (v[0]==HALF_T[i][0] && v[1]==HALF_T[i][1] && v[2]==HALF_T[i][2] && v[3]==HALF_T[i][3]) { idx = i; break; }
+    const int (*T)[4] = a == 0 ? HALF_BI_T : HALF_T;
+    for (int i = 0; i < 8; i++) if (v[0]==T[i][0] && v[1]==T[i][1] && v[2]==T[i][2] && v[3]==T[i][3]) { idx = i; break; }
     if (idx < 0 || idx == w.lastIdx) continue;
     int d = (idx - w.lastIdx + 8) % 8;
     if (d == 1) w.mech++; else if (d == 7) w.mech--; else w.lost++;
@@ -48,7 +50,7 @@ static void world_setup() {
   g_world = []() { sample_axes(); if (w_script) w_script(); };
   g_dread = [](int p) -> int {
     for (int a = 0; a < 3; a++) if (p == W[a].swPin) return (W[a].swConnected && W[a].mech <= W[a].swPos) ? 0 : 1;   // 눌리면 LOW (풀업)
-    if (p == A1) return (w_psw_broken || (W[0].mech - W[0].swPos) / STEPS_PER_MM >= w_psw_at) ? 1 : 0;   // 누름 스위치 (NC: 평소 LOW)
+    if (p == A1) return (w_psw_broken || (W[0].mech - W[0].swPos) / STEPS_PER_MM_F >= w_psw_at) ? 1 : 0;   // 누름 스위치 (NC: 평소 LOW)
     return g_pins[p];
   };
 }
@@ -56,7 +58,8 @@ static void world_setup() {
 static void axes_reset() {
   for (int a = 0; a < 3; a++) { W[a].mech = 0; W[a].swPos = 0; W[a].swConnected = true; W[a].lastIdx = 0; W[a].minMech = W[a].maxMech = 0; W[a].lost = 0; W[a].steps = 0; }
 }
-static double mm_of(int a) { return (W[a].mech - W[a].swPos) / STEPS_PER_MM; }   // 스위치 자리 기준 mm
+static double SPM(int a) { return a == 0 ? STEPS_PER_MM_F : STEPS_PER_MM; }   // (11/12) F = 산 리니어 모듈
+static double mm_of(int a) { return (W[a].mech - W[a].swPos) / SPM(a); }   // 스위치 자리 기준 mm
 static int last_write(int pin) { return g_servo_angle[pin]; }
 // 마지막 걸음 뒤 대기 시간(COIL_OFF_DWELL_MS)이 지난 다음 코일을 본다
 static bool coils_off() {
@@ -84,11 +87,11 @@ static int serve(int argc, char** argv) {
     else if (!strcmp(argv[i], "--no-switch") && i + 1 < argc) { int a = argv[++i][0] - 'F'; a = (a == 0) ? 0 : (a == 'X' - 'F' ? 1 : 2); W[a].swConnected = false; }
   }
   world_setup(); axes_reset();
-  for (int a = 0; a < 3; a++) W[a].mech = W[a].swPos + (long)(start[a] * STEPS_PER_MM);
+  for (int a = 0; a < 3; a++) W[a].mech = W[a].swPos + (long)(start[a] * SPM(a));
   return t_serve(speed, [](const std::string& l) {
     char ax; int v; double mm;
     if (sscanf(l.c_str(), "#SWITCH %c %d", &ax, &v) == 2) { int a = ax == 'F' ? 0 : ax == 'X' ? 1 : 2; W[a].swConnected = v != 0; }
-    else if (sscanf(l.c_str(), "#SHIFT %c %lf", &ax, &mm) == 2) { int a = ax == 'F' ? 0 : ax == 'X' ? 1 : 2; W[a].swPos += (long)(mm * STEPS_PER_MM); }
+    else if (sscanf(l.c_str(), "#SHIFT %c %lf", &ax, &mm) == 2) { int a = ax == 'F' ? 0 : ax == 'X' ? 1 : 2; W[a].swPos += (long)(mm * SPM(a)); }
   });
 }
 
@@ -107,7 +110,7 @@ int main(int argc, char** argv) {
   m = t_cmd("MOVE F 5"); CHECK(t_has(m, "ERR NOT_HOMED"), "HOME 전 MOVE → ERR NOT_HOMED");
 
   printf("[1] HOME F: 스위치 7.8 mm 위에서 켜짐 → 찾고, 물러났다 천천히 다시 닿고, 0 으로 정함\n");
-  W[0].mech = 4000;                                  // 스위치 위 약 7.85 mm
+  W[0].mech = (long)(7.85 * STEPS_PER_MM_F);         // 스위치 위 약 7.85 mm (11/12 F = 리니어 모듈)
   m = t_cmd("HOME F", 10);
   CHECK(t_has(m, "OK HOME F"), "OK HOME F");
   CHECK(wait_home("F", 60000, m), "끝남 (60 s 안)");
@@ -205,13 +208,13 @@ int main(int argc, char** argv) {
 
   printf("[9] V5: 스위치 쪽으로 가다 원점보다 한참 위에서 눌리면(걸음 잃음) 정지 + EVT SWITCH\n");
   m = t_cmd("MOVE F 10", 10); t_wait(m, "DONE MOVE F", 40000);
-  W[0].swPos += (long)(2 * STEPS_PER_MM);           // 기계가 2 mm 어긋남 → 스위치가 2 mm 일찍 눌림
+  W[0].swPos += (long)(2 * STEPS_PER_MM_F);           // 기계가 2 mm 어긋남 → 스위치가 2 mm 일찍 눌림
   m = t_cmd("MOVE F 0", 10); t_wait(m, "EVT SWITCH F", 40000);
   CHECK(t_has(m, "EVT SWITCH F"), "EVT SWITCH F <mm>");
   CHECK(!t_has(m, "DONE MOVE F"), "도착 보고 없음");
   t_run(100); m = t_cmd("STATUS"); CHECK(!t_has(m, "HOMED=F") && t_has(m, "MOVING=-"), "F 는 HOMED 해제, 정지");
   CHECK(coils_off(), "코일 꺼짐");
-  W[0].swPos -= (long)(2 * STEPS_PER_MM);
+  W[0].swPos -= (long)(2 * STEPS_PER_MM_F);
   m = t_cmd("HOME F", 10); CHECK(wait_home("F", 60000, m) && t_has(m, "DONE HOME F"), "HOME F 로 다시 맞춤");
 
   printf("[10] HOLD 기본 0 / HOLD F 1 / 이동 끝나면 코일 꺼짐\n");

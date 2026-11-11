@@ -3,8 +3,8 @@ P01,어댑터 DC 잭 → 퓨즈,+5V 들어옴,빨강,20,DCIN,잭 +,DC 잭 단자
 P02,어댑터 DC 잭 GND → 와고 GND,GND,검정,20,DCIN,잭 −,DC 잭 단자 납땜/나사,WAGO,와고 GND 1번,와고 221-415 (선 끝 8 mm 벗김),330,370,0,False,0.055
 P03,퓨즈 → 비상 정지,+5V 퓨즈 뒤,빨강,20,FUSE,퓨즈 2,퓨즈홀더 납땜,ESTOP,비상 정지 NC 1,비상 정지 나사 단자,103,120,0,False,0.017
 P04,비상 정지 → 와고 +5V,+5V_B,빨강,20,ESTOP,NC 2,비상 정지 나사 단자,WAGO,와고 +5V 1번,와고 221-415 (선 끝 8 mm 벗김),372,410,0,False,0.062
-P05,와고 → ULN2003 F,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_F,ULN + (5-12V),듀폰 암 (ULN 전원 핀),156,180,0,False,0.003
-P05,와고 → ULN2003 F,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),ULN_F,ULN −,듀폰 암 (ULN 전원 핀),156,180,0,False,0.003
+P05,와고 → DRV8833 F,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_F,DRV VM,듀폰 암 (ULN 전원 핀),156,180,0,False,0.003
+P05,와고 → DRV8833 F,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),ULN_F,DRV GND,듀폰 암 (ULN 전원 핀),156,180,0,False,0.003
 P06,와고 → ULN2003 X,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_X,ULN +,듀폰 암 (ULN 전원 핀),635,700,0,False,0.011
 P06,와고 → ULN2003 X,GND,검정,22,WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),ULN_X,ULN −,듀폰 암 (ULN 전원 핀),635,700,0,False,0.011
 P07,와고 → ULN2003 Y,+5V_B,빨강,22,WAGO,와고 +5V,와고 221-415 (선 끝 8 mm 벗김),ULN_Y,ULN +,듀폰 암 (ULN 전원 핀),697,770,0,False,0.012
@@ -18,10 +18,10 @@ P10,와고 → MOSFET 보드 (조명·펌프 전원),GND,검정,22,WAGO,와고 G
 P11,UNO 1·2 GND → 와고 GND,GND U1,검정,22,UNO1,UNO 1 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),191,210,0,False,0.002
 P11,UNO 1·2 GND → 와고 GND,GND U2,검정,22,UNO1,UNO 2 GND,듀폰 암 1핀 (UNO 헤더),WAGO,와고 GND,와고 221-415 (선 끝 8 mm 벗김),191,210,0,False,0.002
 P12,레일 감지 (+5V_B → 10 kΩ → UNO 2 D2),RAIL,주황,28,GATE_HUB,허브 10 kΩ 끝,허브 기판 납땜,UNO2,UNO 2 D2,듀폰 암 1핀 (UNO 헤더),139,160,0,False,
-S01,UNO 1 → ULN2003 F (IN1~4),IN1,파랑,26,UNO1,D2,듀폰 암 1핀 (UNO 헤더),ULN_F,IN1,듀폰 암 (ULN IN 핀),246,280,0,False,
-S01,UNO 1 → ULN2003 F (IN1~4),IN2,초록,26,UNO1,D3,듀폰 암 1핀 (UNO 헤더),ULN_F,IN2,듀폰 암 (ULN IN 핀),246,280,0,False,
-S01,UNO 1 → ULN2003 F (IN1~4),IN3,노랑,26,UNO1,D4,듀폰 암 1핀 (UNO 헤더),ULN_F,IN3,듀폰 암 (ULN IN 핀),246,280,0,False,
-S01,UNO 1 → ULN2003 F (IN1~4),IN4,주황,26,UNO1,D5,듀폰 암 1핀 (UNO 헤더),ULN_F,IN4,듀폰 암 (ULN IN 핀),246,280,0,False,
+S01,UNO 1 → DRV8833 F (AIN1·AIN2·BIN1·BIN2),IN1,파랑,26,UNO1,D2,듀폰 암 1핀 (UNO 헤더),ULN_F,AIN1,듀폰 암 (ULN IN 핀),246,280,0,False,
+S01,UNO 1 → DRV8833 F (AIN1·AIN2·BIN1·BIN2),IN2,초록,26,UNO1,D3,듀폰 암 1핀 (UNO 헤더),ULN_F,AIN2,듀폰 암 (ULN IN 핀),246,280,0,False,
+S01,UNO 1 → DRV8833 F (AIN1·AIN2·BIN1·BIN2),IN3,노랑,26,UNO1,D4,듀폰 암 1핀 (UNO 헤더),ULN_F,BIN1,듀폰 암 (ULN IN 핀),246,280,0,False,
+S01,UNO 1 → DRV8833 F (AIN1·AIN2·BIN1·BIN2),IN4,주황,26,UNO1,D5,듀폰 암 1핀 (UNO 헤더),ULN_F,BIN2,듀폰 암 (ULN IN 핀),246,280,0,False,
 S02,UNO 1 → ULN2003 X (IN1~4),IN1,파랑,26,UNO1,D6,듀폰 암 1핀 (UNO 헤더),ULN_X,IN1,듀폰 암 (ULN IN 핀),718,790,0,False,
 S02,UNO 1 → ULN2003 X (IN1~4),IN2,초록,26,UNO1,D7,듀폰 암 1핀 (UNO 헤더),ULN_X,IN2,듀폰 암 (ULN IN 핀),718,790,0,False,
 S02,UNO 1 → ULN2003 X (IN1~4),IN3,노랑,26,UNO1,D8,듀폰 암 1핀 (UNO 헤더),ULN_X,IN3,듀폰 암 (ULN IN 핀),718,790,0,False,
@@ -30,7 +30,7 @@ S03,UNO 1 → ULN2003 Y (IN1~4),IN1,파랑,26,UNO1,D10,듀폰 암 1핀 (UNO 헤�
 S03,UNO 1 → ULN2003 Y (IN1~4),IN2,초록,26,UNO1,D11,듀폰 암 1핀 (UNO 헤더),ULN_Y,IN2,듀폰 암 (ULN IN 핀),780,860,0,False,
 S03,UNO 1 → ULN2003 Y (IN1~4),IN3,노랑,26,UNO1,D12,듀폰 암 1핀 (UNO 헤더),ULN_Y,IN3,듀폰 암 (ULN IN 핀),780,860,0,False,
 S03,UNO 1 → ULN2003 Y (IN1~4),IN4,주황,26,UNO1,D13,듀폰 암 1핀 (UNO 헤더),ULN_Y,IN4,듀폰 암 (ULN IN 핀),780,860,0,False,
-M01,ULN2003 F → 바닥 모터 153,모터 5선 (모터에 달린 선),파랑·분홍·노랑·주황·빨강,26,ULN_F,ULN JST-XH 5,JST-XH 5핀 (모터 기본),M_F,모터,모터 (기본),113,0,240,False,0.005
+M01,DRV8833 F → 바닥 리니어 모듈,모터 4선 (모듈에 달린 선),빨강·흰·갈색·검정,28,ULN_F,DRV AOUT1·2 BOUT1·2,JST-XH 5핀 (모터 기본),M_F,모터 A A− B B−,모터 (기본),113,0,240,False,0.008
 M02,ULN2003 X → X 모터 215,모터 5선,파랑·분홍·노랑·주황·빨강,26,ULN_X,ULN JST-XH 5,JST-XH 5핀,M_X,모터,모터 (기본),196,0,240,False,0.009
 M03,ULN2003 Y → Y 모터 209 (X로 움직임),모터 5선,파랑·분홍·노랑·주황·빨강,26,ULN_Y,ULN JST-XH 5,JST-XH 5핀,M_Y,모터,모터 (기본),398,180,240,True,0.017
 V01,서보 허브 → 펜 서보 SG90 205 (X·Y로 움직임),서보 3선,갈색 GND·빨강 +5V·주황 신호,26,SERVO_HUB,허브 헤더 S1,듀폰 2.54 헤더 (허브 기판),PEN,서보,서보 3핀 (기본),704,500,250,True,0.123

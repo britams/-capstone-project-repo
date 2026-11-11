@@ -5,9 +5,9 @@
 +5V_B,C2.1,20,비상 정지 NC 뒤 = 구동 레일
 +5V_B,R_RS.1,20,비상 정지 NC 뒤 = 구동 레일
 +5V_B,D_RP.K,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,ULN_F.VCC,22,
 +5V_B,ULN_X.VCC,22,
 +5V_B,ULN_Y.VCC,22,
++5V_B,DRV_F.VM,22,모듈 정격 9 V — 5 V면 힘이 줄지만 바닥 0.5 N에는 넉넉 [가능성 높음]
 +5V_B,SG90.V+,26,빨강 — 레일에서 (UNO 5V 아님)
 +5V_B,MG_IN.V+,26,
 +5V_B,MG_CAP.V+,26,
@@ -56,9 +56,9 @@ GND,C2.2,20,GND 한 점 (와고 GND 묶음)
 GND,D_RP.A,20,GND 한 점 (와고 GND 묶음)
 GND,U1.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
 GND,U2.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
-GND,ULN_F.GND,22,
 GND,ULN_X.GND,22,
 GND,ULN_Y.GND,22,
+GND,DRV_F.GND,22,
 GND,SG90.GND,26,갈색
 GND,PSW.NC_B,28,
 GND,SW_HF.COM,28,
@@ -103,8 +103,14 @@ L_BOT_LO,L_BOT.V-,24,
 L_BOT_LO,Q2.OUT-,24,
 L_TOP_LO,L_TOP.V-,24,
 L_TOP_LO,Q1.OUT-,24,
-M_F,ULN_F.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
-M_F,M_F.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
+M_F_A,DRV_F.AOUT1,28,빨강 A · 흰 A− (Keshuo 치수도)
+M_F_A,M_F.A,28,빨강 A · 흰 A− (Keshuo 치수도)
+M_F_An,DRV_F.AOUT2,28,
+M_F_An,M_F.An,28,
+M_F_B,DRV_F.BOUT1,28,갈색 B · 검정 B−
+M_F_B,M_F.B,28,갈색 B · 검정 B−
+M_F_Bn,DRV_F.BOUT2,28,
+M_F_Bn,M_F.Bn,28,
 M_X,ULN_X.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
 M_X,M_X.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
 M_Y,ULN_Y.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
@@ -117,13 +123,13 @@ PUMP_LO,PUMP.V-,22,
 PUMP_LO,D_P.A,22,
 PUMP_LO,Q3.OUT-,22,
 U1_F_IN1,U1.D2,26,
-U1_F_IN1,ULN_F.IN1,26,
+U1_F_IN1,DRV_F.AIN1,26,
 U1_F_IN2,U1.D3,26,
-U1_F_IN2,ULN_F.IN2,26,
+U1_F_IN2,DRV_F.AIN2,26,
 U1_F_IN3,U1.D4,26,
-U1_F_IN3,ULN_F.IN3,26,
+U1_F_IN3,DRV_F.BIN1,26,
 U1_F_IN4,U1.D5,26,
-U1_F_IN4,ULN_F.IN4,26,
+U1_F_IN4,DRV_F.BIN2,26,
 U1_HOME_F,U1.A3,28,"내부 풀업, 눌리면 LOW, 100 nF"
 U1_HOME_F,SW_HF.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
 U1_HOME_F,C_HF.1,28,"내부 풀업, 눌리면 LOW, 100 nF"

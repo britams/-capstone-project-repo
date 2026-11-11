@@ -61,12 +61,21 @@ con("PI_3V3", "PI.3V3", "J_I2C.VCC", awg=28)
 con("PI_GND", "PI.GND", "J_I2C.GND", awg=28)
 
 # UNO 1 — 스테핑 3개
-for ax, pins in (("F", "D2 D3 D4 D5"), ("X", "D6 D7 D8 D9"), ("Y", "D10 D11 D12 D13")):
+for ax, pins in (("X", "D6 D7 D8 D9"), ("Y", "D10 D11 D12 D13")):
     for k, p in enumerate(pins.split(), 1):
         con("U1_%s_IN%d" % (ax, k), "U1.%s" % p, "ULN_%s.IN%d" % (ax, k), awg=26)
     con("+5V_B", "ULN_%s.VCC" % ax, awg=22)
     con("GND", "ULN_%s.GND" % ax, awg=22)
     con("M_%s" % ax, "ULN_%s.XH5" % ax, "M_%s.XH5" % ax, awg=26, note="28BYJ-48 기본 선 (JST-XH 5핀)")
+# (11/12 서현 '리프팅 살 수 있으면 사') 바닥 F = 산 리니어 모듈 15BY25 (양극 2상 4선) → DRV8833, 같은 핀 D2~D5
+for k, (p, i) in enumerate((("D2", "AIN1"), ("D3", "AIN2"), ("D4", "BIN1"), ("D5", "BIN2")), 1):
+    con("U1_F_IN%d" % k, "U1.%s" % p, "DRV_F.%s" % i, awg=26)
+con("+5V_B", "DRV_F.VM", awg=22, note="모듈 정격 9 V — 5 V면 힘이 줄지만 바닥 0.5 N에는 넉넉 [가능성 높음]")
+con("GND", "DRV_F.GND", awg=22)
+con("M_F_A", "DRV_F.AOUT1", "M_F.A", awg=28, note="빨강 A · 흰 A− (Keshuo 치수도)")
+con("M_F_An", "DRV_F.AOUT2", "M_F.An", awg=28)
+con("M_F_B", "DRV_F.BOUT1", "M_F.B", awg=28, note="갈색 B · 검정 B−")
+con("M_F_Bn", "DRV_F.BOUT2", "M_F.Bn", awg=28)
 # 펜 서보
 con("U1_PEN", "U1.A0", "SG90.SIG", awg=26, note="주황")
 con("+5V_B", "SG90.V+", awg=26, note="빨강 — 레일에서 (UNO 5V 아님)")
@@ -125,7 +134,9 @@ BOM = [
     ("Raspberry Pi 5 + AI HAT+ + AI 카메라", 1, "판단", "보유"),
     ("Pi 5 카메라 케이블 22↔15핀 500 mm (FFC)", 1, "Pi 선반 199a → 카메라: 필요 약 320 mm > 동봉 300 mm (CAP-AI-38)", "살 것 (구매확정표 E18)"),
     ("USB A-B 케이블 0.5 m", 2, "Pi → UNO", "보유 확인"),
-    ("28BYJ-48 + ULN2003 세트", 3, "바닥 F, 마커 X, Y", "보유 1 → 살 것 2 (구매목록 B1)"),
+    ("28BYJ-48 + ULN2003 세트", 2, "마커 X, Y (바닥 F는 리니어 모듈로, 11/12)", "보유 1 → 살 것 1"),
+    ("리니어 모듈 15 mm 스테핑 + M3 리드 슬라이더 (Keshuo 15BY25-77, 행정 62)", 1, "바닥 F — 모터·커플링·리드스크루·너트·봉·베어링 대신 (11/12)", "살 것 [치수도 대표값 — 사서 잼]"),
+    ("DRV8833 2채널 모터 드라이버 모듈", 1, "바닥 F (양극) — UNO 1 D2~D5", "살 것"),
     ("SG90", 1, "펜 들기 205", "보유 1 (학습 키트, 실물 확인)"),
     ("MG90S (혼 포함)", 3, "문 112·170·176", "보유 1 (혼 없음, 예비) → 살 것 3 (B2)"),
     ("마이크로 스위치 KW11-3Z 레버형 (누름 스위치 PSW, NC 접점 씀)", 1, "로드셀·HX711 대신 — 스프링 146이 4.8 mm(0.5 N) 눌리면 축 걸쇠가 누름 (CAP-AI-60, 교수님 피드백)", "추가 (원점 스위치와 같은 것)"),
