@@ -248,3 +248,23 @@ def merge_full(folder, path):
     full.saveAs(path)
     rep["MB"] = round(os.path.getsize(path) / 1e6, 2)
     return rep
+
+
+LIFT = ("140_", "146_", "147_", "148c", "149_", "151_", "152_", "153", "154_", "155", "157", "158_", "159", "121_", "227f", "227p")
+
+
+def extract(folder, heads=LIFT, name="S2a_바닥구동"):
+    """S2에서 바닥 올리는 장치만 떼어 따로 저장 (서현 11/12 04:52 '위로 올리는 부품만 떼어서'). 좌표는 그대로."""
+    src = App.openDocument(os.path.join(folder, "S2_마킹부.FCStd"), hidden=True)
+    if name in App.listDocuments():
+        App.closeDocument(name)
+    d = App.newDocument(name)
+    for o in _solid_objects(src):
+        if o.Label.startswith(heads):
+            c = d.addObject("Part::Feature", o.Name)
+            c.Label, c.Shape = o.Label, o.Shape.copy()
+    App.closeDocument(src.Name)
+    color_doc(d)
+    d.recompute()
+    d.saveAs(os.path.join(folder, name + ".FCStd"))
+    return d
