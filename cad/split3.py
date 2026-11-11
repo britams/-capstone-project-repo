@@ -169,3 +169,36 @@ def boundary_check(folder, tol=0.5):
 def save_json(rep, path):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(rep, f, ensure_ascii=False, indent=1, default=str)
+
+
+def add_context(doc, folder, margin=40.0):
+    """다른 두 파일에서 이 부분 둘레(margin mm) 안에 드는 부품만 복사해 넣음 — 이름은 CTX_ 로 시작, 라벨은 그대로.
+    한 부분을 고칠 때 벽·프레임에 부딪히는지 보려고. 고친 뒤 remove_context로 꼭 지운다."""
+    bb = None
+    for o in _solid_objects(doc):
+        bb = o.Shape.BoundBox if bb is None else bb.united(o.Shape.BoundBox)
+    bb.enlarge(margin)
+    names = []
+    for nm in NAMES:
+        if nm == doc.Name:
+            continue
+        opened = nm not in App.listDocuments()
+        d = App.openDocument(os.path.join(folder, nm + ".FCStd"), hidden=True) if opened else App.getDocument(nm)
+        for o in _solid_objects(d):
+            if o.Shape.BoundBox.intersect(bb):
+                c = doc.addObject("Part::Feature", "CTX_" + o.Name)
+                c.Label = o.Label
+                c.Shape = o.Shape.copy()
+                names.append(c.Name)
+        if opened:
+            App.closeDocument(d.Name)
+    return names
+
+
+def remove_context(doc):
+    for o in [o for o in doc.Objects if o.Name.startswith("CTX_")]:
+        doc.removeObject(o.Name)
+    for o in [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.InList]:   # 고친 단계가 새로 만든 것 → Part 안으로
+        pt = doc.getObject("Part")
+        if pt:
+            pt.addObject(o)

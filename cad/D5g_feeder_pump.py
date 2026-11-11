@@ -225,7 +225,7 @@ def apply(doc):
     for zc in (300.0, 320.0, 280.0, 340.0, 260.0, 360.0):
         suck, feed = tube_paths(zc)
         tf = tube_along(feed)
-        h = [x for x in _hits(tf, others) if not x[0].startswith(("143_",))]
+        h = [x for x in _hits(tf, others) if not x[0].startswith(("143_", "143n_"))]   # (11/12) 바브에 꽂힌 것은 허용 — 전엔 늘 걸려서 마지막 높이를 골랐음
         tried.append((zc, h))
         if not h:
             break
@@ -235,7 +235,8 @@ def apply(doc):
         for xo in (WASTE["x"], 85.0, 100.0):
             dp = drain_path(zr, xo)
             td = tube_along(dp)
-            h = [x for x in _hits(td, others + []) if not x[0].startswith(("143_",))]
+            h = [x for x in _hits(td, others + []) if not x[0].startswith(("143_", "143n_"))]
+            h += [("144hf 먹이 관", 1)] if td.common(tf).Volume > 0.05 else []                # (11/12) 먹이 관과 교차 12.3 mm³ (11/11 검사)
             h += [("144b/병", 1)] if td.common(hb).Volume > 0.5 or td.common(bt).Volume > 0.5 or td.common(pm).Volume > 0.5 else []
             dtried.append((zr, xo, h))
             if not h:
