@@ -54,7 +54,7 @@ def _solid_objects(doc):
     for o in doc.Objects:
         if o.TypeId in ("App::DocumentObjectGroup", "App::Part", "App::Link") or not hasattr(o, "Shape"):
             continue
-        if o.Shape.isNull():
+        if o.Shape.isNull() or not o.Shape.Solids:         # (11/12) 원점 평면(XZ-평면 등) 같은 고체 없는 것 빼기
             continue
         yield o
 

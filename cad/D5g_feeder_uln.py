@@ -599,7 +599,10 @@ def press_parts(carriage_shape):
     cx, cy = p["spring_xy"]
     x0, x1, y0, y1 = p["cage"]
     zs, zb, t = p["seat_z"], p["car_bot"], p["wall_t"]
-    car = carriage_shape.cut(Part.makeCylinder(7.6, 262.0 - 230.0 - 0.01, V(65.0, 4.0, 230.0)))     # D5f 아래 컵 지움 (로드셀 때와 같음)
+    if carriage_shape.BoundBox.ZMin < 261.9:                                            # D5f 아래 컵 지움 (로드셀 때와 같음)
+        car = carriage_shape.cut(Part.makeCylinder(7.6, 262.0 - 230.0 - 0.01, V(65.0, 4.0, 230.0)))
+    else:                                                                               # (11/12) lift_drive의 깨끗한 캐리지 — 컵 없음, 0.01 틈 자르기가 고체를 깨뜨림
+        car = carriage_shape
     cage = box(x0, x1, y0, y1, zs - p["floor_t"], zs)                                   # 받침판 (스프링이 앉음)
     cage = cage.fuse(box(x1 - t, x1, y0, y1, zs - p["floor_t"], zb + 0.01))             # +x 옆벽 (스위치가 바깥에)
     cage = cage.fuse(box(x0, x1, y1 - t, y1, zs - p["floor_t"], zb + 0.01))             # +y 뒷벽
@@ -607,7 +610,9 @@ def press_parts(carriage_shape):
     mx0, mx1, my0, my1, mz0 = p["mount"]
     cage = cage.fuse(box(mx0, mx1, my0 - 0.01, my1, mz0, zb + 0.01))                   # 스위치 받침판 (뒷벽·캐리지 판에 붙음, 11/12)
     cage = cage.fuse(Part.makeCylinder(1.1, 1.5, V(cx, cy, zs)))                        # 스프링 가운데 핀 Ø2.2
-    car = car.fuse(cage).removeSplitter()
+    car = car.fuse(cage)
+    _rs = car.removeSplitter()                         # (11/12) removeSplitter가 고체를 깨뜨리는 경우가 있음 → 유효할 때만
+    car = _rs if _rs.isValid() else car
     # 걸쇠 148c: 축에 끼우는 고리 + 옆벽 홈을 지나 스위치 위로 나온 혀 (3D 프린트, 축에 끼우고 순간접착)
     c0, c1 = p["collar_z"]
     collar = Part.makeCylinder(p["collar_r"], c1 - c0, V(cx, cy, c0)).cut(Part.makeCylinder(2.0, 10, V(cx, cy, c0 - 1)))

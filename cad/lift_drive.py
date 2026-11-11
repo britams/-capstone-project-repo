@@ -149,7 +149,8 @@ def check(doc, made, travel=36.5):
     """(1) 새·바뀐 부품 ↔ 전부 겹침 (2) 바닥 0 → 36.5 올리는 동안 움직이는 것 ↔ 고정된 것 (4 mm마다)"""
     allow = (("159s", "158_"), ("159s", "159_"), ("157b", "158_"), ("149_", "158_"), ("155_", "159_"), ("155_", "154_"), ("155_", "155b"),
              ("157_", "157c"), ("157_", "157b"), ("157_", "152_"), ("157_", "121_"), ("155b", "121_"), ("227ps", "158_"), ("148c", "147_"))
-    objs = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Shape.isNull() and "beam" not in o.Label and not o.Label.startswith("REF_camera")]
+    objs = [o for o in doc.Objects if o.TypeId == "Part::Feature" and not o.Shape.isNull() and o.Shape.Solids and "beam" not in o.Label
+            and not o.Label.startswith("REF_")]          # REF_hornet·mark_dot: 바닥이 말벌을 격자로 누르는 것이 목적이라 뺌
 
     def vol(a, b):
         return sum(s.common(b).Volume for s in a.Solids if s.BoundBox.intersect(b.BoundBox))
