@@ -1,0 +1,45 @@
+{
+ "ok": true,
+ "t": "23:53:00",
+ "ctx": 208,
+ "feeder_pump": {
+  "drain_tube": [
+   330.0,
+   150.0
+  ],
+  "feed_tube_z": 300.0,
+  "feed_tube_len_mm": 402,
+  "drain_tube_len_mm": 359,
+  "bad": [],
+  "bottle_lift_blockers": [],
+  "cap_hand_blockers": [],
+  "holder_on_rail_mm": 0.0
+ },
+ "overlaps": [
+  [
+   "144pp_pump_ports",
+   "144h_tube_suck",
+   30.04,
+   "허용"
+  ],
+  [
+   "144pp_pump_ports",
+   "144hf_tube_feed",
+   30.04,
+   "허용"
+  ],
+  [
+   "144hf_tube_feed",
+   "143n_nipple_M5_barb",
+   21.63,
+   "허용"
+  ],
+  [
+   "144hd_tube_drain",
+   "143n_nipple_M5_barb",
+   21.63,
+   "허용"
+  ]
+ ],
+ "objects": 24
+}
