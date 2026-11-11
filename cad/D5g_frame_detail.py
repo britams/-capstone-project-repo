@@ -336,6 +336,8 @@ def make():
     FIX_REPORT["feeder_pump"] = FPMP.apply(doc)
     FIX_REPORT["press"] = FU.press_check(doc, PRESS_REPORT)
     FIX_REPORT["gates"] = GATE_REPORT   # (CAP-AI-60) 누름 장치 겹침·올림 길
+    import real_motor as RMOT          # (CAP-AI-62, 서현 11/12) 28BYJ-48 3개 → 진짜 도면 (Adafruit 858 STEP, MIT)
+    FIX_REPORT["real_motor"] = RMOT.replace(doc)
     import D5g_print_color as PCOL     # (CAP-AI-58, 서현) 3D 프린트 부품만 파랑, 나머지 회색 — 맨 끝 (앞 단계 색을 덮음)
     FIX_REPORT["print_color"] = PCOL.apply(doc)
     doc.recompute()
