@@ -27,7 +27,8 @@ GATES = (
     (("114_entry_sensor_tx", "114_entry_sensor_rx"), V(0, 0, 275), V(1, 0, 0), V(0, 0, 1), 12.0, "110_", 8.0,
      ("199d_gate_holder_G1_tx", "199e_gate_holder_G1_rx"), None),
     (("196_gate_G4_tx_rx",), V(0, 0, 570), V(1, 0, 0), V(0, 0, 1), 12.0, "172_", 8.0, ("199b_gate_holder_G4",), "196_gate_G4_beam"),
-    (("196_gate_G6_tx_rx",), V(108, 0, 377), V(0, 0, 1), V(1, 0, 0), 10.0, "174_", None, ("199c_gate_holder_G6",), "196_gate_G6_beam"),
+    # G6: 몸 길이를 y로 (11/12 — x로 두면 LED 끝 5 때문에 몸이 x 93~113 → 문 하우징 176·G5b와 겹침, x 103~123 → 굴뚝 175와 겹침. y −15~5는 비어 있음)
+    (("196_gate_G6_tx_rx",), V(108, 0, 377), V(0, 0, 1), V(0, 1, 0), 10.0, "174_", None, ("199c_gate_holder_G6",), "196_gate_G6_beam"),
 )
 
 
