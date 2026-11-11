@@ -123,14 +123,25 @@ def make_asm(folder, subs=None, parts=None):
 
 
 def color_doc(d):
-    """GUI에서: 프린트 = 파랑, 그 밖 = 회색 (D5g_print_color 규칙) + 투명도"""
+    """GUI에서: 프린트 = 파랑, 그 밖 = 회색 (D5g_print_color 규칙) + 투명도.
+    PCOL.apply는 App::Part(모양 있음, 색 없음)에서 오류 → 부품만 골라 같은 규칙으로 (11/11)"""
     import D5g_print_color as PCOL
-    rep = PCOL.apply(d)
-    if App.GuiUp:
-        for o in _solid_objects(d):
-            for head, t in TRANSP:
-                if o.Label.startswith(head):
-                    o.ViewObject.Transparency = t
+    rep = dict(printed=[], missing=[])
+    for o in _solid_objects(d):
+        head, ko, pr, spec = PCOL.is_print(o.Label)
+        if head is None:
+            rep["missing"].append(o.Label.split(" ")[0])
+        if pr:
+            rep["printed"].append(o.Label.split(" ")[0])
+        if not App.GuiUp or not getattr(o, "ViewObject", None):
+            continue
+        vo = o.ViewObject
+        vo.ShapeColor = PCOL.PRINT if pr else PCOL.OTHER
+        vo.LineColor = (0.10, 0.20, 0.45) if pr else (0.35, 0.35, 0.38)
+        vo.Transparency = 0
+        for head_, t in TRANSP:
+            if o.Label.startswith(head_):
+                vo.Transparency = t
     return rep
 
 
