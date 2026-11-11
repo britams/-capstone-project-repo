@@ -13,8 +13,8 @@
 
 세 파일 모두 같은 원점(전체 모델 좌표)을 쓴다 → 조립 S0은 위치를 옮기지 않고 링크만 건다.
 쓰는 법:
-  1) 헤드리스: split3_build.py (G.make() → export) — GUI가 멈추지 않게 따로 돈다
-  2) GUI: import split3 as S; S.color_all(folder)  — 헤드리스에선 색을 못 넣어서
+  1) 따로 띄운 freecad.exe: split3_build.py (G.make() → export, 색 그대로 복사) — 쓰는 창이 멈추지 않게
+  2) (색을 다시 넣을 때만) GUI: import split3 as S; S.color_all(folder)
   3) 경계 검사: S.boundary_check(folder) — 서로 다른 부분끼리만, 상자 겹치는 쌍만 (모든 쌍 거리 계산 금지 — 11/11 FreeCAD 멈춤)
 """
 import json
@@ -81,6 +81,12 @@ def export(doc, folder):
         c.Label = o.Label
         c.Shape = o.Shape.copy()
         parts[g].addObject(c)
+        if App.GuiUp and o.ViewObject and c.ViewObject:      # 색·투명도·숨김 그대로
+            for k in ("ShapeColor", "LineColor", "Transparency", "Visibility"):
+                try:
+                    setattr(c.ViewObject, k, getattr(o.ViewObject, k))
+                except Exception:
+                    pass
         rep["count"][g] += 1
         try:
             rep["volume_cm3"][g] += o.Shape.Volume / 1000

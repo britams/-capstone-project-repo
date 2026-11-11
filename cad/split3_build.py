@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""헤드리스(freecadcmd)로 전체를 한 번 만들고 3부분 파일로 나눠 저장 (CAP-AI-62)
+"""따로 띄운 FreeCAD 창에서 전체를 한 번 만들고 3부분 파일로 나눠 저장 (CAP-AI-62)
 
-  freecadcmd cad/split3_build.py      → cad/split/ 에 S0~S3 .FCStd, cad/split/_build.json, _build.log
-GUI FreeCAD를 쓰지 않아서 무거운 다시 만들기가 GUI를 멈추게 하지 않는다.
+  freecad.exe cad/split3_build.py     → cad/split/ 에 S0~S3 .FCStd, cad/split/_build.json, _build.log
+쓰는 FreeCAD 창과 다른 프로세스라 무거운 다시 만들기가 멈춰도 그 창은 안전하다.
+freecadcmd(GUI 없음)는 못 씀 — D5f 등 옛 스크립트가 ViewObject를 바로 써서 오류 (11/11 확인).
 """
 import json
 import os
@@ -42,3 +43,6 @@ except Exception:
 with open(os.path.join(OUT, "_build.json"), "w", encoding="utf-8") as f:
     json.dump(rep, f, ensure_ascii=False, indent=1, default=str)
 log("끝")
+import FreeCAD as App
+if App.GuiUp:          # 따로 띄운 freecad.exe 창은 스스로 닫는다
+    os._exit(0)
