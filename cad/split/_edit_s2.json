@@ -1,0 +1,23 @@
+{
+ "ok": true,
+ "t": "00:45:54",
+ "ctx": 130,
+ "press": {
+  "delta_mm": 4.83,
+  "lever_pressed_z": 253.67,
+  "latch_rest_bottom": 258.5,
+  "gap_rest": 4.83,
+  "spring_len_rest": 14.0,
+  "spring_solid": 3.9,
+  "overlaps": [
+   [
+    "158_carriage",
+    "227ps_press_switch_screws",
+    18.85,
+    "허용"
+   ]
+  ],
+  "bad": [],
+  "sweep_hits": []
+ }
+}
