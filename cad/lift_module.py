@@ -174,15 +174,17 @@ def columns(doc):
           _bracket(xo, yR, c["z0"], c["z0"] + 20, c["z0"], +1),          # R 아래 (바깥)
           _bracket(xo, yR, c["z1"] - 20, c["z1"], c["z1"] - 2, +1)]      # R 위 (바깥)
     bolts, nuts, deck_h, base_h = [], [], [], []
-    for xb, y0, zv, zh, up in ((xi, yL, c["z0"] + 10, c["z0"], True), (xi, yL, 321.0, c["z1"] - 2, False),
-                               (xo, yR, c["z0"] + 10, c["z0"], True), (xo, yR, c["z1"] - 10, c["z1"] - 2, False)):
-        ym = y0 + (17.0 if (xb == xi and not up) else 10.0)             # L 위: 나사 머리가 승강 바닥(y ≤ 15.5) 밖으로 (11/12 검사 54 mm³)
+    # (dx, dy) = 꺾쇠 안 나사 자리. L 아래 (6, 6): 칼라 고리(r 47~50, 데크 아래) 안쪽 r 43 / L 위 dy 17: 승강 바닥(y ≤ 15.5) 밖 (11/12 검사)
+    SEAT = ((xi, yL, c["z0"] + 10, True, 6.0, 6.0), (xi, yL, 321.0, False, 12.0, 17.0),
+            (xo, yR, c["z0"] + 10, True, 12.0, 10.0), (xo, yR, c["z1"] - 10, False, 12.0, 10.0))
+    for xb, y0, zv, up, dx, dy in SEAT:
+        ym = y0 + dy
         # 세운 다리 ↔ 평철: 평철 바깥(머리) → 꺾쇠 쪽 너트
         bar_out = xb - c["t"] if xb == xi else xb - c["t"]
         b_, n_ = _m3(V(bar_out, ym, zv), V(1, 0, 0), 8.0)
         bolts.append(b_); nuts.append(n_)
         # 누운 다리 ↔ 데크(아래에서) / 바닥판(위에서)
-        xm = xb + 12.0
+        xm = xb + dx
         if up:
             b_, n_ = _m3(V(xm, ym, c["z0"] - 5.0), V(0, 0, 1), 10.0)       # 데크 아래 z 200에서 위로
             deck_h.append(Part.makeCylinder(1.7, 10, V(xm, ym, c["z0"] - 8)))
@@ -196,14 +198,13 @@ def columns(doc):
         b_, _n = _m3(V(xo, Y_C, zc + dz), V(-1, 0, 0), 4.0)             # 4 = 평철 3 + 모듈 바닥 1 → 끝이 슬라이더 길(x ≤ 73)에 안 나옴
         bolts.append(b_)
         barR = barR.cut(Part.makeCylinder(1.7, 10, V(xo + 1, Y_C, zc + dz), V(-1, 0, 0)))
-    for (xb, y0, zv) in ((xi, yL, c["z0"] + 10), (xi, yL, 321.0), (xo, yR, c["z0"] + 10), (xo, yR, c["z1"] - 10)):
-        hole = Part.makeCylinder(1.7, 20, V(xb - 10, y0 + 10, zv), V(1, 0, 0))
+    for xb, y0, zv, _u, _dx, dy in SEAT:
+        hole = Part.makeCylinder(1.7, 20, V(xb - 10, y0 + dy, zv), V(1, 0, 0))
         if xb == xi:
             barL = barL.cut(hole)
         else:
             barR = barR.cut(hole)
-    br = [b.cut(Part.makeCompound([Part.makeCylinder(1.7, 30, V(x0 - 15, y0 + 10, zv), V(1, 0, 0)) for x0, y0, zv in
-                                   ((xi, yL, c["z0"] + 10), (xi, yL, 321.0), (xo, yR, c["z0"] + 10), (xo, yR, c["z1"] - 10))]))
+    br = [b.cut(Part.makeCompound([Part.makeCylinder(1.7, 30, V(x0 - 15, y0 + dy, zv), V(1, 0, 0)) for x0, y0, zv, _u, _dx, dy in SEAT]))
           .cut(Part.makeCompound(deck_h + base_h)) for b in br]
     out = []
     for key, shp, lab in (("151_drive_side_L", barL, "151_drive_side_L (알루미늄 평철 20 × 3 — 125 자름·구멍 4, 원점 스위치 227f M2 탭, 구매)"),
