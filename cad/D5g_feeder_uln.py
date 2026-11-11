@@ -524,8 +524,12 @@ def feeder_detail_shapes(chamber_shape):
     trough = trough.fuse(box(xw, xw + b["pad_t"], f["nz_y"] - b["pad"] / 2, f["nz_y"] + b["pad"] / 2, f["nz_z"] - b["pad"] / 2, min(f["nz_z"] + b["pad"] / 2, f["wall_top"])))
     trough = trough.cut(Part.makeCylinder(2.1, b["fit_L"], V(xw + b["pad_t"], f["nz_y"], f["nz_z"]), V(-1, 0, 0)))
     trough = trough.cut(Part.makeCylinder(b["fit_bore"] / 2, 20, V(xw + 1, f["nz_y"], f["nz_z"]), V(-1, 0, 0)))
-    # 3b) 물빠짐 받침: 바닥 아래 포맥스 12 × 12 × 5 (y 90, 각관 y 74~86 밖)
-    trough = trough.fuse(box(f["x"] - b["pad"] / 2, f["x"] + b["pad"] / 2, f["dr_y"] - b["pad"] / 2, f["dr_y"] + b["pad"] / 2, f["floor_z"] - b["pad_t"], f["floor_z"]))
+    # 3b) 물빠짐 받침: 바닥 아래 포맥스 12 × 11 × 5
+    #   (11/12, CAP-AI-62) 받침 −y 끝이 각관 +y 면(y 86)과 27 mm³ 겹쳐 있었음 (11/11까지 검사 안 함) → 받침은 y 86부터
+    py_face = f["post_y"] + BUY["sq"] / 2
+    trough = trough.fuse(box(f["x"] - b["pad"] / 2, f["x"] + b["pad"] / 2, max(f["dr_y"] - b["pad"] / 2, py_face), f["dr_y"] + b["pad"] / 2, f["floor_z"] - b["pad_t"], f["floor_z"]))
+    #   (11/12) 위 앵글 → 물길 바닥 M3 × 8 자리 구멍 Ø3.4 (구멍 없이 나사가 바닥 판을 지나고 있었음 21 mm³). 너트는 물길 안 → 실리콘 실런트로 막음
+    trough = trough.cut(Part.makeCylinder(1.7, 10, V(f["x"], f["post_y"] - 12.0, f["floor_z"] - 5)))
     trough = trough.cut(Part.makeCylinder(2.1, b["fit_L"], V(f["x"], f["dr_y"], f["floor_z"] - b["pad_t"])))
     trough = trough.cut(Part.makeCylinder(b["fit_bore"] / 2, 20, V(f["x"], f["dr_y"], f["floor_z"] - 1)))
     trough = trough.cut(box(f["x"] - f["ch_w"] / 2, f["x"] + f["ch_w"] / 2, f["ch_y0"] + f["front_t"], f["ch_y1"] - f["ch_t"], f["floor_z"] + f["floor_t"], f["wall_top"] + 1))
