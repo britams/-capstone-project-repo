@@ -1,62 +1,134 @@
 {
- "missing_step": [],
- "overlaps": [
-  [
-   "143i_insert_M3_heatset",
-   "143_feed_trough",
-   17.49
+ "feeder_mcm": {
+  "missing_step": [],
+  "overlaps": [
+   [
+    "143fi_insert_M3_foot",
+    "143_feed_trough",
+    8.75
+   ],
+   [
+    "143f_screw_M3x8_pan",
+    "143fi_insert_M3_foot",
+    3.85
+   ]
   ],
-  [
-   "143i_insert_M3_heatset",
-   "143t_thumbscrew_M3x8",
-   11.43
-  ],
-  [
-   "143fi_insert_M3_foot",
-   "143_feed_trough",
-   8.75
-  ],
-  [
-   "143f_screw_M3x8_pan",
-   "143fi_insert_M3_foot",
-   3.85
-  ]
- ],
- "lid": {
-  "insert": [
-   383.7,
-   388.0
-  ],
-  "screw_tip": 382.0,
-  "hole_bottom": 381.0,
-  "engage": 4.3,
-  "tip_to_bottom": 1.0,
-  "insert_wall": 2.13,
-  "boss_depth": 7.0,
-  "need_depth": 5.1
+  "foot": {
+   "deck": [
+    200.0,
+    205.0
+   ],
+   "insert": [
+    205.0,
+    209.3
+   ],
+   "screw_tip": 208.0,
+   "engage": 3,
+   "foot_top": 211.0,
+   "tip_to_foot_top": 3.0,
+   "need_depth": 5.1
+  },
+  "driver_blockers": []
  },
- "foot": {
-  "deck": [
-   200.0,
-   205.0
+ "feeder_pump": {
+  "drain_tube": [
+   330.0,
+   85.0
   ],
-  "insert": [
-   205.0,
-   209.3
+  "drain_tube_tries": [
+   [
+    330.0,
+    85.0,
+    []
+   ]
   ],
-  "screw_tip": 208.0,
-  "engage": 3,
-  "foot_top": 211.0,
-  "tip_to_foot_top": 3.0,
-  "need_depth": 5.1
+  "drain_tube_len_mm": 248,
+  "feed_tube_z": 300.0,
+  "feed_tube_tries": [
+   [
+    300.0,
+    []
+   ]
+  ],
+  "feed_tube_len_mm": 409,
+  "suck_tube_len_mm": 261,
+  "overlaps": [
+   [
+    "144b_feeder_holder",
+    "144n_bottle_250mL",
+    1175.24,
+    "문제"
+   ],
+   [
+    "144b_feeder_holder",
+    "144h_tube_suck",
+    30.04,
+    "문제"
+   ],
+   [
+    "144n_bottle_250mL",
+    "144s_bolt_M5x8",
+    6.08,
+    "문제"
+   ],
+   [
+    "144pp_pump_ports",
+    "144h_tube_suck",
+    30.04,
+    "허용"
+   ],
+   [
+    "144pp_pump_ports",
+    "144hf_tube_feed",
+    30.04,
+    "허용"
+   ],
+   [
+    "144hf_tube_feed",
+    "143_feed_trough",
+    30.51,
+    "허용"
+   ],
+   [
+    "144hd_tube_drain",
+    "143_feed_trough",
+    30.51,
+    "허용"
+   ]
+  ],
+  "bad": [
+   [
+    "144b_feeder_holder",
+    "144n_bottle_250mL",
+    1175.24,
+    "문제"
+   ],
+   [
+    "144b_feeder_holder",
+    "144h_tube_suck",
+    30.04,
+    "문제"
+   ],
+   [
+    "144n_bottle_250mL",
+    "144s_bolt_M5x8",
+    6.08,
+    "문제"
+   ]
+  ],
+  "bottle_lift_blockers": [],
+  "cap_hand_blockers": [],
+  "holder_on_rail_mm": 0.0
  },
- "finger_blockers": [],
- "driver_blockers": [],
- "part_vs_full_143": [
-  58250.71,
-  58250.71,
-  0.0,
-  0.0
+ "print_missing": [
+  "112s_gate_servo_screws",
+  "153b_stepper_ear_bolts",
+  "153n_stepper_ear_nuts",
+  "180s_camera_screws",
+  "181i_bracket_inserts",
+  "181s_bracket_bolts",
+  "198n_board_spacers",
+  "198s_board_screws"
  ],
- "asm_bad": []
+ "n_printed": 44
 }

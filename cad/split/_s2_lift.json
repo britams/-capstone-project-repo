@@ -8,7 +8,7 @@
   "spring_len_rest": 14.0,
   "spring_solid": 3.9,
   "carriage_valid": true,
-  "carriage_vol": 15845,
+  "carriage_vol": 17067,
   "removed": []
  },
  "overlaps": [
@@ -21,7 +21,25 @@
   [
    "153s_lift_slider",
    "153ss_slider_screws",
-   7.07,
+   12.09,
+   "허용"
+  ],
+  [
+   "151_drive_side_L",
+   "227fs_switch_screws_F",
+   18.85,
+   "허용"
+  ],
+  [
+   "151k_column_brackets",
+   "151s_column_screws",
+   22.05,
+   "허용"
+  ],
+  [
+   "151s_column_screws",
+   "153m_lift_module",
+   23.76,
    "허용"
   ]
  ],
