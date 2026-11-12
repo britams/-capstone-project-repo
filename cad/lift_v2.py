@@ -307,8 +307,20 @@ def check(doc, steps=(0.0, 4.0, 8.0, 12.0, STROKE)):
                 v = a.Shape.common(b.Shape).Volume
                 if v > 0.01:
                     inner.append((ka, kb, round(v, 2)))
+    static = []                                                               # 틀·센서 (고정) ↔ 모두
+    fix_new = [o for o in obs if o.Label.startswith(("306", "307", "308", "309"))]
+    for a in fix_new:
+        for b in obs:
+            if b is a or (b in fix_new and b.Name < a.Name):
+                continue
+            ka, kb = a.Label.split(" ")[0], b.Label.split(" ")[0]
+            if ok(ka, kb) or not a.Shape.BoundBox.intersect(b.Shape.BoundBox):
+                continue
+            v = a.Shape.common(b.Shape).Volume
+            if v > 0.01:
+                static.append((ka, kb, round(v, 2)))
     car = [o for o in obs if o.Label.startswith("301c")][0].Shape.BoundBox
     lo, hi = car.ZMin - ZR, car.ZMax - ZR + STROKE                            # 국부 x (쉴 때 아래 끝, 누를 때 위 끝)
-    return dict(stroke=round(STROKE, 2), sweep=hits, inner=inner, carriage_local=(round(lo, 2), round(hi, 2)),
+    return dict(stroke=round(STROKE, 2), sweep=hits, inner=inner, static=static, carriage_local=(round(lo, 2), round(hi, 2)),
                 carriage_in_rail=(lo >= CAR_RANGE[0] and hi <= CAR_RANGE[1]), pen=pen_reach(doc),
                 nipple_g=round(NIP["rho"] * math.pi / 4 * (NIP["od"] ** 2 - NIP["id"] ** 2) * NIP["L"] / 1000, 1))
