@@ -132,7 +132,8 @@ def make(doc=None, dz=0.0):
 
 
 MOVING = ("301c", "302", "303", "304")
-ALLOW = (("302s", "301c"), ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
+ALLOW = (("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
+          ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
 
 
 def check(doc, steps=(0.0, 4.0, 8.0, 12.0, STROKE)):
@@ -147,6 +148,8 @@ def check(doc, steps=(0.0, 4.0, 8.0, 12.0, STROKE)):
             s = a.Shape.copy()
             s.translate(V(0, 0, dz))
             for b in fx:
+                if ok(a.Label.split(" ")[0], b.Label.split(" ")[0]):
+                    continue
                 if s.BoundBox.intersect(b.Shape.BoundBox):
                     v = s.common(b.Shape).Volume
                     if v > 0.01:
