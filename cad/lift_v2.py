@@ -93,6 +93,77 @@ def top_weight():
     return mesh, nip, mag, chip.fuse(board)
 
 
+# (11/12 16:00) 리프트부 틀 — 기성품만, 나사로: 2020 프로파일 100 mm (정해진 길이 제품) 3개 (다른 틀에는 아직 안 붙임)
+#   가운데·아래 막대: MiniSlide 끝 블록 바닥 M3 탭 2개 (28.5 간격) ↔ 막대 앞 홈 T너트 — M3 × 10 무두 볼트(양쪽 나사)로 [확실 — 판매처 STEP 구멍 자리]
+#   위 막대 (z 22~42, 앞면 y −21 = 위 소켓 뒷면): 1-1/4" EMT 2구멍 새들 (바깥 41.6 관용 ≈ 소켓 바깥 42 [추측]) M4 × 8 두 개 + T너트
+#     + 메카노 앵글 브래킷 #12 (½" × ½", 구멍 1씩)를 막대 윗면 홈에 M3, 다른 다리에 홀 모듈 KY-024를 M3 + 너트 (모듈 구멍 자리 [추측])
+BAR = dict(L=100.0, a=20.0, slot=6.2, slot_d=6.0)
+Z_BAR = (32.0, -2.5 + ZR, -89.69 + ZR)                  # 위 · 가운데(레일 위 블록 구멍 높이) · 아래(레일 아래 블록 구멍 높이)
+Y_BAR_FRONT = (-X["od"] / 2, -23.95, -23.95)            # 레일 바닥면 y = 국부 −11 + YC − 6.35
+
+
+def bar(zc, yf, slots=("front",)):
+    x0 = 6.35 - BAR["L"] / 2
+    b = box(x0, x0 + BAR["L"], yf - BAR["a"], yf, zc - BAR["a"] / 2, zc + BAR["a"] / 2)
+    w, dpt = BAR["slot"], BAR["slot_d"]
+    if "front" in slots:
+        b = b.cut(box(x0 - 1, x0 + BAR["L"] + 1, yf - dpt, yf + 1, zc - w / 2, zc + w / 2))
+    if "top" in slots:
+        yc = yf - BAR["a"] / 2
+        b = b.cut(box(x0 - 1, x0 + BAR["L"] + 1, yc - w / 2, yc + w / 2, zc + BAR["a"] / 2 - dpt, zc + BAR["a"] / 2 + 1))
+    return b
+
+
+def tnut(p, n):
+    """2020 T너트 대표 (10 × 6 × 4) — p = 홈 바닥 가운데, n = 바깥 방향"""
+    if abs(n.y) > 0.5:
+        return box(p.x - 5, p.x + 5, min(p.y, p.y - n.y * 4), max(p.y, p.y - n.y * 4), p.z - 3, p.z + 3)
+    return box(p.x - 5, p.x + 5, p.y - 3, p.y + 3, min(p.z, p.z - n.z * 4), max(p.z, p.z - n.z * 4))
+
+
+def frame():
+    out = {}
+    out["bars"] = Part.makeCompound([bar(Z_BAR[0], Y_BAR_FRONT[0], ("front", "top")), bar(Z_BAR[1], Y_BAR_FRONT[1]), bar(Z_BAR[2], Y_BAR_FRONT[2])])
+    studs, nuts = [], []
+    for zb in Z_BAR[1:]:
+        for xh in (6.35 - 14.25, 6.35 + 14.25):
+            yf = Y_BAR_FRONT[1]
+            studs.append(cyl(1.5, 10.0, V(xh, yf - 6.0, zb), V(0, 1, 0)))                 # 블록 안 4, 홈 안 6
+            nuts.append(tnut(V(xh, yf - BAR["slot_d"] + 4.0, zb), V(0, 1, 0)))
+    out["rail_studs"] = Part.makeCompound(studs + nuts)
+    # 새들: 소켓 앞 반원 + 다리 + 날개 (두께 1.2, 폭 12)
+    r0, t, wz = X["od"] / 2, 1.2, 12.0
+    z0 = Z_BAR[0] - wz / 2
+    ring = cyl(r0 + t, wz, V(0, 0, z0)).cut(cyl(r0, wz + 2, V(0, 0, z0 - 1))).common(box(-30, 30, 0, 30, z0 - 1, z0 + wz + 1))
+    legs = box(-r0 - t, -r0, -r0 + t, 0, z0, z0 + wz).fuse(box(r0, r0 + t, -r0 + t, 0, z0, z0 + wz))
+    yf = Y_BAR_FRONT[0]
+    wings = box(-r0 - 12.0, -r0, yf, yf + t, z0, z0 + wz).fuse(box(r0, r0 + 12.0, yf, yf + t, z0, z0 + wz))
+    strap = ring.fuse(legs).fuse(wings)
+    xs = r0 + 6.0
+    for sx in (-xs, xs):
+        strap = strap.cut(cyl(2.2, 5, V(sx, yf - 1, Z_BAR[0]), V(0, 1, 0)))
+    out["saddle"] = strap.removeSplitter()
+    sc = []
+    for sx in (-xs, xs):
+        sc.append(cyl(3.5, 2.8, V(sx, yf + t, Z_BAR[0]), V(0, 1, 0)).fuse(cyl(2.0, 8.0, V(sx, yf + t - 8.0, Z_BAR[0]), V(0, 1, 0))))
+        sc.append(tnut(V(sx, yf - BAR["slot_d"] + 4.0, Z_BAR[0]), V(0, 1, 0)))
+    out["saddle_screws"] = Part.makeCompound(sc)
+    # 홀 모듈 브래킷 (메카노 #12): 선 다리 = 모듈 판 뒤, 누운 다리 = 위 막대 윗면
+    _m, _n, _g, hall = top_weight()
+    hb = hall.BoundBox
+    yb = hb.YMin                                                            # 모듈 판 뒷면
+    ztop = Z_BAR[0] + BAR["a"] / 2
+    br = box(-6.35, 6.35, yb - 1.0, yb, ztop, ztop + 12.7).fuse(box(-6.35, 6.35, yb - 12.7, yb, ztop, ztop + 1.0))
+    zh_board = hb.ZMin + 3.5                                                # 모듈 구멍 [추측]
+    br = br.cut(cyl(1.7, 5, V(0, yb - 2, zh_board), V(0, 1, 0))).cut(cyl(1.7, 5, V(0, yb - 6.35, ztop - 1)))
+    out["hall_bracket"] = br
+    hs = [cyl(2.75, 1.65, V(0, yb - 1.0 - 1.65, zh_board), V(0, 1, 0)).fuse(cyl(1.5, 8.0, V(0, yb - 1.0, zh_board), V(0, 1, 0))),
+          cyl(2.75, 1.65, V(0, yb - 6.35, ztop + 1.0)).fuse(cyl(1.5, 8.0, V(0, yb - 6.35, ztop + 1.0 - 8.0))),
+          tnut(V(0, yb - 6.35, ztop - BAR["slot_d"] + 4.0), V(0, 0, 1))]
+    out["hall_screws"] = Part.makeCompound(hs)
+    return out
+
+
 def pen(dx, dy, z_tip):
     """샤피 크리에이티브 불렛 (승준 11/02 실측) — 팁 끝 z_tip, 축 (dx, dy)"""
     p = V(dx, dy, z_tip)
@@ -173,6 +244,7 @@ def make(doc=None, dz=0.0):
     rail, car, src = slide(dz, z_row)
     gray, dark = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37)
     tw = top_weight()
+    fr = frame()
     shapes = [("C_cross", "300_chamber_cross (US Plastic 34566 DuraClear 3/4\" 투명 PVC 5방향 크로스, 구매) [치수 대표]", cross(), (0.75, 0.9, 1.0), 70),
               ("L_rail", "301_minislide (Haydon Kerk MSA02S-C0039-805 — 레일·모터·블록, 구매) [%s]" % src, rail, gray, 0),
               ("L_car", "301c_minislide_carriage (MiniSlide 캐리지 — 움직임) [%s]" % src, car, gray, 0),
@@ -186,7 +258,13 @@ def make(doc=None, dz=0.0):
               ("T_mesh", "305_top_mesh (스테인리스 타공 원판 Ø33 × 0.5, 구멍 2.6 간격 3.2, 위 소켓 턱에 걸침, 구매) [상품 미정]", tw[0], gray, 0),
               ("T_nip", "305n_nipple (McMaster 44615K416 1\" 강철 짧은 니플 38.1 — 망 위 무게 약 95 g, 구매)", tw[1], dark, 0),
               ("T_mag", "305m_magnet (네오디뮴 원판 6 × 3 — 니플 바깥에 붙음, 구매) [상품 미정]", tw[2], (0.6, 0.6, 0.65), 0),
-              ("T_hall", "306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 위 소켓 −y 바깥, 받침은 틀에 나사로 [미정], 구매)", tw[3], (0.2, 0.4, 0.8), 0)]
+              ("T_hall", "306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 메카노 브래킷에 M3, 구매)", tw[3], (0.2, 0.4, 0.8), 0),
+              ("F_bar", "307_bar_2020_100 (2020 알루미늄 프로파일 100 mm 3개 — 정해진 길이 제품, 구매)", fr["bars"], (0.8, 0.8, 0.82), 0),
+              ("F_rs", "307s_rail_studs (M3 × 10 무두 볼트 4 + 2020 M3 T너트 4 — 레일 블록 ↔ 막대, 구매)", fr["rail_studs"], dark, 0),
+              ("F_sad", "308_saddle_EMT_1-1/4 (2구멍 새들 — 위 소켓을 위 막대에, 구매) [관 바깥 41.6 ≈ 소켓 42 추측]", fr["saddle"], gray, 0),
+              ("F_ss", "308s_saddle_screws (M4 × 8 2 + 2020 M4 T너트 2, 구매)", fr["saddle_screws"], dark, 0),
+              ("F_hb", "309_hall_bracket (메카노 앵글 브래킷 #12 ½\" × ½\", 구매)", fr["hall_bracket"], gray, 0),
+              ("F_hs", "309s_hall_screws (M3 × 8 2 + 2020 M3 T너트 1, 구매)", fr["hall_screws"], dark, 0)]
     for name, lab, shp, col, tr in shapes:
         o = doc.addObject("Part::Feature", name)
         o.Shape, o.Label = shp, lab
@@ -199,7 +277,8 @@ def make(doc=None, dz=0.0):
 
 MOVING = ("301c", "302", "303", "304")
 ALLOW = (("305", "300_"), ("305", "305"), ("306", "305m"), ("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
-          ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
+          ("307s", "307_"), ("307s", "301_"), ("308s", "307_"), ("308s", "308_"), ("308_", "300_"), ("309s", "307_"), ("309s", "309_"),
+          ("309s", "306_"), ("309_", "306_"), ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
 
 
 def check(doc, steps=(0.0, 4.0, 8.0, 12.0, STROKE)):
