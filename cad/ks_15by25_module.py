@@ -19,6 +19,11 @@ D = dict(L=88.0, md=15.0, mt=13.0, W=14.5, H=15.0, t=0.8, hp=48.0, sl=10.0, top=
          ax=7.5, rod=3.0, rod_y=-4.5, rod_z=4.0, lip=2.5, stroke=62.0)
 
 
+# 슬라이더 가운데 x: 행정 0 (모터 쪽) — 판 안쪽 길이 73.4 − 슬라이더 10 = 63.4 ≥ 행정 62, 양 끝 0.7씩 남김
+X_START = D["mt"] + D["t"] + 0.7 + D["sl"] / 2
+STEPS_PER_MM = 360 / 18 / 0.5 * 2        # 18°/걸음 → 20 걸음/바퀴, 리드 0.5 mm → 40 걸음/mm, 반걸음 80 [확실 — 판매처 표]
+
+
 def box(x0, x1, y0, y1, z0, z1):
     return Part.makeBox(x1 - x0, y1 - y0, z1 - z0, V(x0, y0, z0))
 
@@ -58,8 +63,7 @@ def parts(slider_x=None):
     screw = cylx(1.5, d["mt"], xf1 - t - 0.2, 0, d["ax"])
     rod = cylx(d["rod"] / 2, xf0, xf1, d["rod_y"], d["rod_z"])
     # 구리 슬라이더
-    x0 = xf0 + t + 6.0                                              # 행정 시작 (모터 쪽 끝) [추측]
-    xc = x0 + d["sl"] / 2 + d["stroke"] / 2 if slider_x is None else slider_x
+    xc = X_START + d["stroke"] / 2 if slider_x is None else slider_x
     s = box(xc - d["sl"] / 2, xc + d["sl"] / 2, -W2 + 1.0, W2 - 1.0, d["slz"], d["top"])
     s = s.cut(cylx(1.5, xc - 6, xc + 6, 0, d["ax"])).cut(cylx(d["rod"] / 2, xc - 6, xc + 6, d["rod_y"], d["rod_z"]))
     s = s.cut(cylx(3.0, xc - 6, xc - d["sl"] / 2 + 1.5, d["rod_y"], d["rod_z"]))                  # 봉 쪽 베어링 자리 (사진의 검은 고리)
@@ -100,3 +104,20 @@ def check(doc):
     sl = [o for o in obs if "슬라이더 10" in o.Label][0].Shape.BoundBox
     return dict(hits=hits, size=(round(bb.XLength, 2), round(bb.YLength, 2), round(bb.ZLength, 2)), slider_top=round(sl.ZMax, 2),
                 valid=[o.Label for o in obs if not o.Shape.isValid()])
+
+
+def move(doc, s_mm):
+    """슬라이더·베어링을 행정 s_mm (0~62) 자리로 — 반환 움직이는 것과 고정된 것의 겹침"""
+    mov = [o for o in doc.Objects if "슬라이더" in o.Label]
+    fix = [o for o in doc.Objects if o not in mov]
+    for o in mov:
+        o.Placement = App.Placement(V(s_mm - D["stroke"] / 2, 0, 0), App.Rotation())
+    hits = []
+    for a in mov:
+        sa = a.Shape.copy()
+        sa.Placement = a.Placement
+        for f in fix:
+            v = sa.common(f.Shape).Volume
+            if v > 0.01:
+                hits.append((a.Label, f.Label, round(v, 3)))
+    return hits
