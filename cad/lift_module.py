@@ -25,32 +25,25 @@ def box(x0, x1, y0, y1, z0, z1):
     return Part.makeBox(x1 - x0, y1 - y0, z1 - z0, V(x0, y0, z0))
 
 
+def _ks_place():
+    """따로 그린 모듈(ks_15by25_module, 11/12 12:42 움직임 검사 0~62 겹침 0)을 조립 자리로:
+    모듈 x(축) → z, 모듈 z(바닥 → 슬라이더 위) → −x, 모듈 y → y. 원점 = (X_BACK, Y_C, Z0)"""
+    return App.Placement(V(X_BACK, Y_C, Z0), App.Rotation(V(0, 1, 0), -90))
+
+
 def module():
-    """반환 (모듈 고정부: 모터 + 채널(바닥판 + 옆벽 2) + 리드, 슬라이더 윗면 x)"""
-    m = MOD
-    xb = X_BACK                                            # 바닥 면 (옆판 151_R 안쪽 면에 닿음)
-    y0, y1 = Y_C - m["ch_w"] / 2, Y_C + m["ch_w"] / 2
-    zc0, zc1 = Z0 + m["motor_t"], Z0 + m["L"]
-    xa = xb - m["axis_h"]                                  # 모터·리드 축
-    motor = Part.makeCylinder(m["motor_d"] / 2, m["motor_t"], V(xa, Y_C, Z0))
-    ch = box(xb - m["wall"], xb, y0, y1, zc0, zc1)                                                     # 바닥판
-    for ya in (y0, y1 - m["wall"]):
-        ch = ch.fuse(box(xb - m["wall_h"], xb, ya, ya + m["wall"], zc0, zc1))                           # 옆벽
-    for ze in (zc0, zc1 - m["wall"]):
-        ch = ch.fuse(box(xb - m["motor_d"], xb, y0, y1, ze, ze + m["wall"]))                            # 끝판 (리드 받침)
-    for dz in (-m["hole_p"] / 2, m["hole_p"] / 2):
-        ch = ch.cut(Part.makeCylinder(1.5, 5, V(xb - 2, Y_C, (zc0 + zc1) / 2 + dz), V(1, 0, 0)))          # 바닥 2-M3
-    screw = Part.makeCylinder(1.5, zc1 - zc0 - 2 * m["wall"], V(xa, Y_C, zc0 + m["wall"]))
-    return motor.fuse(ch).fuse(screw).removeSplitter(), xb - m["sl_top"]
+    """반환 (모듈 고정부, 슬라이더 윗면 x) — 서현 12:37 '도면 토대로 제대로' → 13:00 '이 만든 것을 전체 수정'"""
+    import ks_15by25_module as KS
+    pl = _ks_place()
+    fixed = [shp for k, (shp, c) in KS.parts().items() if "슬라이더" not in k]
+    return Part.makeCompound(fixed).transformed(pl.toMatrix()), X_BACK - KS.D["top"]
 
 
 def slider(z_mid, x_front):
-    m = MOD
-    s = box(x_front, X_BACK - m["wall"], Y_C - m["sl_w"] / 2, Y_C + m["sl_w"] / 2, z_mid - m["sl_L"] / 2, z_mid + m["sl_L"] / 2)
-    s = s.cut(Part.makeCylinder(1.5, 40, V(X_BACK - m["axis_h"], Y_C, z_mid - 20)))                     # 리드 M3 (너트 나사산은 단순화)
-    for dy in (-m["sl_hole_p"] / 2, m["sl_hole_p"] / 2):
-        s = s.cut(Part.makeCylinder(1.0, 6, V(x_front - 0.01, Y_C + dy, z_mid), V(1, 0, 0)))              # M2.5 탭 Ø2
-    return s
+    """구리 슬라이더 + 봉 베어링, 가운데 z = z_mid"""
+    import ks_15by25_module as KS
+    sl = [shp for k, (shp, c) in KS.parts(slider_x=z_mid - Z0).items() if "슬라이더" in k]
+    return Part.makeCompound(sl).transformed(_ks_place().toMatrix())
 
 
 def carriage_base(x_front):
@@ -77,7 +70,7 @@ def slider_screws(x_front, zm):
 
 
 LABELS = {
-    "153m": "153m_lift_module (리니어 모듈 Keshuo 15BY25-77 — 15 mm 2상 4선 + M3×0.5 리드, 행정 62, 151_R에 M3 × 2, 구매) [치수 대표값 — 사서 잼]",
+    "153m": "153m_lift_module (리니어 모듈 Keshuo 15BY25-77 — 15 mm 2상 4선 + M3×0.5 리드, 행정 62, 151_R에 M3 × 2, 구매) [치수도·사진대로 따로 그린 것 ks_15by25_module — 판 두께·봉 자리는 추측]",
     "153s": "153s_lift_slider (모듈 구리 슬라이더 — 캐리지에 M2.5 × 2, 모듈 일부)",
     "153ss": "153ss_slider_screws (M2.5 × 12 2 — 캐리지 팔 → 슬라이더, 구매)",
     "158": "158_carriage (바닥 캐리지 — 받침 칸 몸통 + 슬라이더 팔, LM4UU 1 (누름 축), 작은 3D 프린트 PETG)",
