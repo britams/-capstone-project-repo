@@ -7,7 +7,7 @@ GrabCAD의 비슷한 것(DVD 픽업 이송 모듈 B-04E 등)은 로그인해야 
 좌표 (모듈 혼자): x = 축 방향 (모터 뒤 0 → 끝 88), y = 폭 가운데 0, z = 바닥판 아랫면 0
 [확실 — 치수도/사진]  전체 88 · 모터 Ø15 · 모터 + 단자판 폭 18 · 판 폭 14.5 · 끝판 높이 15 · 바닥 2-M3 간격 48
                       · 슬라이더 길이 10 · 바닥 아랫면 → 슬라이더 윗면 10.5 · 슬라이더 위 2-M2.5 (간격 10) · 리드 M3 × 0.5 · 행정 62
-[추측 — 도면에 없음, 사서 잼] 판 두께 0.8 · 모터 길이 13 · 가이드 봉 Ø3 자리 (리드 옆 −4.5, 아래) · 옆 턱 높이 2.5 · 슬라이더 바닥 높이 1.5
+[추측 — 도면에 없음, 사서 잼] 판 두께 0.8 · 모터 길이 13 · 가이드 봉 Ø3 자리 (리드 옆 −3.5, 아래) · 봉 베어링 Ø5 · 옆 턱 높이 2.5 · 슬라이더 바닥 높이 1.5
   freecad.exe 창에서: exec(open("cad/ks_15by25_module.py").read()); make(save_dir)
 """
 import os
@@ -16,7 +16,7 @@ import Part
 
 V = App.Vector
 D = dict(L=88.0, md=15.0, mt=13.0, W=14.5, H=15.0, t=0.8, hp=48.0, sl=10.0, top=10.5, slz=1.5, sh=10.0,
-         ax=7.5, rod=3.0, rod_y=-4.5, rod_z=4.0, lip=2.5, stroke=62.0)
+         ax=7.5, rod=3.0, rod_y=-3.5, rod_z=4.0, lip=2.5, stroke=62.0)
 
 
 # 슬라이더 가운데 x: 행정 0 (모터 쪽) — 판 안쪽 길이 73.4 − 슬라이더 10 = 63.4 ≥ 행정 62, 양 끝 0.7씩 남김
@@ -56,20 +56,20 @@ def parts(slider_x=None):
         fr = fr.cut(Part.makeCylinder(1.25, 3, V(xm + dx, 0, -1)))                                 # 2-M3 (탭 Ø2.5)
     fr = fr.cut(box(xm - 12, xm + 12, -2.5, 2.5, -1, 2))                                            # 바닥 창 (치수도 아래 그림)
     fr = fr.cut(cylx(1.6, xf0 - 1, xf0 + 2, 0, d["ax"])).cut(cylx(d["rod"] / 2, xf0 - 1, xf1 + 1, d["rod_y"], d["rod_z"]))
-    fr = fr.cut(cylx(1.6, xf1 - 2, xf1 + 1, 0, d["ax"]))
+    fr = fr.cut(cylx(2.5, xf1 - 2, xf1 + 1, 0, d["ax"]))                                          # 끝판에 받침 끼우는 구멍
     fr = fr.removeSplitter()
-    bush = cylx(2.5, xf1 - t - 1.5, xf1 - t, 0, d["ax"]).cut(cylx(1.5, xf1 - 3, xf1, 0, d["ax"]))   # 리드 끝 받침 (흰 플라스틱, 사진)
+    bush = cylx(2.5, xf1 - t, xf1, 0, d["ax"]).cut(cylx(1.5, xf1 - 3, xf1 + 1, 0, d["ax"]))         # 리드 끝 받침 — 끝판 구멍에 끼움 (안쪽에 튀어나오면 행정 62가 안 나옴, 11/12 움직임 검사)
     # 리드 M3 (나사산은 그리지 않음) + 가이드 봉
-    screw = cylx(1.5, d["mt"], xf1 - t - 0.2, 0, d["ax"])
+    screw = cylx(1.5, d["mt"], xf1 - 0.2, 0, d["ax"])
     rod = cylx(d["rod"] / 2, xf0, xf1, d["rod_y"], d["rod_z"])
     # 구리 슬라이더
     xc = X_START + d["stroke"] / 2 if slider_x is None else slider_x
     s = box(xc - d["sl"] / 2, xc + d["sl"] / 2, -W2 + 1.0, W2 - 1.0, d["slz"], d["top"])
     s = s.cut(cylx(1.5, xc - 6, xc + 6, 0, d["ax"])).cut(cylx(d["rod"] / 2, xc - 6, xc + 6, d["rod_y"], d["rod_z"]))
-    s = s.cut(cylx(3.0, xc - 6, xc - d["sl"] / 2 + 1.5, d["rod_y"], d["rod_z"]))                  # 봉 쪽 베어링 자리 (사진의 검은 고리)
+    s = s.cut(cylx(2.5, xc - 6, xc - d["sl"] / 2 + 1.5, d["rod_y"], d["rod_z"]))                  # 봉 쪽 베어링 자리 (사진의 검은 고리)
     for dy in (-d["sh"] / 2, d["sh"] / 2):
         s = s.cut(Part.makeCylinder(1.0, 5, V(xc, dy, d["top"] - 4)))                              # 2-M2.5 (탭 Ø2)
-    brg = cylx(3.0, xc - d["sl"] / 2 + 0.2, xc - d["sl"] / 2 + 1.5, d["rod_y"], d["rod_z"]).cut(cylx(d["rod"] / 2, xc - 6, xc + 6, d["rod_y"], d["rod_z"]))
+    brg = cylx(2.5, xc - d["sl"] / 2 + 0.2, xc - d["sl"] / 2 + 1.5, d["rod_y"], d["rod_z"]).cut(cylx(d["rod"] / 2, xc - 6, xc + 6, d["rod_y"], d["rod_z"]))
     G, G2, G3 = (0.62, 0.62, 0.64), (0.75, 0.75, 0.77), (0.45, 0.45, 0.47)      # 산 그대로 = 회색 (서현 색 규칙)
     return {"모터 15BY25 (Ø15 × 13)": (motor, G2), "단자판·선 납땜 4": (pcb, G3), "접은 판 (바닥 + 끝판 2 + 옆 턱)": (fr, G),
             "리드 M3 × 0.5": (screw, G3), "가이드 봉 Ø3": (rod, G3), "리드 끝 받침": (bush, G2),
