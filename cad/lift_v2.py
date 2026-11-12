@@ -99,7 +99,7 @@ def top_weight():
 #     + 메카노 앵글 브래킷 #12 (½" × ½", 구멍 1씩)를 막대 윗면 홈에 M3, 다른 다리에 홀 모듈 KY-024를 M3 + 너트 (모듈 구멍 자리 [추측])
 BAR = dict(L=100.0, a=20.0, slot=6.2, slot_d=6.0)
 Z_BAR = (32.0, -2.5 + ZR, -89.69 + ZR)                  # 위 · 가운데(레일 위 블록 구멍 높이) · 아래(레일 아래 블록 구멍 높이)
-Y_BAR_FRONT = (-X["od"] / 2, -23.95, -23.95)            # 레일 바닥면 y = 국부 −11 + YC − 6.35
+Y_BAR_FRONT = (-X["od"] / 2, -24.0, -24.0)              # 레일 바닥면 y = 국부 −11 + YC − 6.35 = −23.95, 0.05 띄움 (모터와 0.04 mm³ 겹침, 11/12 검사)
 
 
 def bar(zc, yf, slots=("front",)):
@@ -157,7 +157,7 @@ def frame():
     zh_board = hb.ZMin + 3.5                                                # 모듈 구멍 [추측]
     br = br.cut(cyl(1.7, 5, V(0, yb - 2, zh_board), V(0, 1, 0))).cut(cyl(1.7, 5, V(0, yb - 6.35, ztop - 1)))
     out["hall_bracket"] = br
-    hs = [cyl(2.75, 1.65, V(0, yb - 1.0 - 1.65, zh_board), V(0, 1, 0)).fuse(cyl(1.5, 8.0, V(0, yb - 1.0, zh_board), V(0, 1, 0))),
+    hs = [cyl(2.75, 1.65, V(0, yb - 1.0 - 1.65, zh_board), V(0, 1, 0)).fuse(cyl(1.5, 4.0, V(0, yb - 1.0, zh_board), V(0, 1, 0))),   # M3 × 4 + 너트 (8은 자석·크로스에 닿음, 11/12 검사)
           cyl(2.75, 1.65, V(0, yb - 6.35, ztop + 1.0)).fuse(cyl(1.5, 8.0, V(0, yb - 6.35, ztop + 1.0 - 8.0))),
           tnut(V(0, yb - 6.35, ztop - BAR["slot_d"] + 4.0), V(0, 0, 1))]
     out["hall_screws"] = Part.makeCompound(hs)
@@ -264,7 +264,7 @@ def make(doc=None, dz=0.0):
               ("F_sad", "308_saddle_EMT_1-1/4 (2구멍 새들 — 위 소켓을 위 막대에, 구매) [관 바깥 41.6 ≈ 소켓 42 추측]", fr["saddle"], gray, 0),
               ("F_ss", "308s_saddle_screws (M4 × 8 2 + 2020 M4 T너트 2, 구매)", fr["saddle_screws"], dark, 0),
               ("F_hb", "309_hall_bracket (메카노 앵글 브래킷 #12 ½\" × ½\", 구매)", fr["hall_bracket"], gray, 0),
-              ("F_hs", "309s_hall_screws (M3 × 8 2 + 2020 M3 T너트 1, 구매)", fr["hall_screws"], dark, 0)]
+              ("F_hs", "309s_hall_screws (M3 × 4 + 너트 · M3 × 8 + 2020 M3 T너트, 구매)", fr["hall_screws"], dark, 0)]
     for name, lab, shp, col, tr in shapes:
         o = doc.addObject("Part::Feature", name)
         o.Shape, o.Label = shp, lab
