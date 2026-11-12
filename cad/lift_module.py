@@ -4,7 +4,7 @@
 모듈: Keshuo 15BY25-77 (15 mm 2상 4선 스테핑 + M3×0.5 리드 + 구리 슬라이더, 행정 62)
   [확실 — 판매처 치수도 6af992a1….webp]: 전체 88 · 모터 Ø15 · 폭 14.5 · 바닥 2-M3 간격 48 · 슬라이더 2-M2.5 (가로 간격 10.0)
      · 슬라이더 길이 10.0 · 바닥 면 → 슬라이더 윗면 10.5 ± 0.05 · 리드 M3 × 0.5 · 선 120 ± 10
-  [치수도에 없음 → 사서 잼]: 바닥판 두께 (1로 그림), 가이드 봉 Ø3·자리 [추측]. 슬라이더 폭 = 모듈 폭 14.5 (사진). 모터 축 높이 = Ø15 가운데 7.5 [가능성 높음]
+  [치수도에 없음 → 사서 잼]: 채널 판 두께 (1로 그림), 채널 옆벽 높이 (6), 슬라이더 폭 (12). 모터 축 높이 = Ø15 가운데 7.5 [가능성 높음]
 없애는 것 (모듈 하나로): 모터판 152, 28BYJ 153·축 153r·귀 나사, 커플링 154, T8 리드 155·베어링 155b, 봉 157·부싱 157b·칼라 157c, T8 너트 159·나사 159s
 놓는 자리: 모듈 바닥(채널 뒷면)을 옆판 151_R 안쪽 면 x 74에 M3 × 2, 모터가 아래 (z 241~254), 채널 z 254~329 (위판 121 아래 1 mm)
   y 가운데 −10 (스프링 칸 y −2부터를 비킴), 슬라이더 윗면 x 74 − 10.5 = 63.5
@@ -16,8 +16,7 @@ import Part
 
 V = App.Vector
 MOD = dict(L=88.0, motor_d=15.0, motor_t=13.0, ch_w=14.5, ch_h=15.0, wall=1.0, wall_h=6.0, hole_p=48.0, stroke=62.0,
-           sl_L=10.0, sl_w=14.5, sl_top=10.5, axis_h=7.5, sl_hole_p=10.0,
-           rod_d=3.0, rod_h=4.0, rod_dy=-4.5)   # 봉: 사진으로 본 자리 (리드 옆, 더 낮음) [추측 — 치수도에 없음]
+           sl_L=10.0, sl_w=12.0, sl_top=10.5, axis_h=7.5, sl_hole_p=10.0)
 X_BACK, Y_C, Z0 = 74.0, -10.0, 241.0          # 채널 뒷면 x, 가운데 y, 모터 아래 끝 z
 REMOVE = ("152_", "153_", "153r", "154_", "155", "157", "159")
 
@@ -27,9 +26,7 @@ def box(x0, x1, y0, y1, z0, z1):
 
 
 def module():
-    """반환 (모듈 고정부: 모터 + 바닥판 + 끝판 2 + 리드 + 가이드 봉, 슬라이더 윗면 x)
-    (11/12 12:30 서현 '시제품 모양이 아님') 판매처 사진 49c7eadc….webp대로: 옆벽 없는 바닥판, 양 끝만 접어 올림,
-    리드(가운데)와 나란한 매끈한 가이드 봉, 구리 슬라이더가 둘 다에 걸림. 판매처 3D(STEP)는 없음 — 치수도·사진만 [확실 — motormicro.com]"""
+    """반환 (모듈 고정부: 모터 + 채널(바닥판 + 옆벽 2) + 리드, 슬라이더 윗면 x)"""
     m = MOD
     xb = X_BACK                                            # 바닥 면 (옆판 151_R 안쪽 면에 닿음)
     y0, y1 = Y_C - m["ch_w"] / 2, Y_C + m["ch_w"] / 2
@@ -37,21 +34,20 @@ def module():
     xa = xb - m["axis_h"]                                  # 모터·리드 축
     motor = Part.makeCylinder(m["motor_d"] / 2, m["motor_t"], V(xa, Y_C, Z0))
     ch = box(xb - m["wall"], xb, y0, y1, zc0, zc1)                                                     # 바닥판
+    for ya in (y0, y1 - m["wall"]):
+        ch = ch.fuse(box(xb - m["wall_h"], xb, ya, ya + m["wall"], zc0, zc1))                           # 옆벽
     for ze in (zc0, zc1 - m["wall"]):
-        ch = ch.fuse(box(xb - m["ch_h"], xb, y0, y1, ze, ze + m["wall"]))                               # 끝판 (접어 올림 15 × 14.5)
+        ch = ch.fuse(box(xb - m["motor_d"], xb, y0, y1, ze, ze + m["wall"]))                            # 끝판 (리드 받침)
     for dz in (-m["hole_p"] / 2, m["hole_p"] / 2):
         ch = ch.cut(Part.makeCylinder(1.5, 5, V(xb - 2, Y_C, (zc0 + zc1) / 2 + dz), V(1, 0, 0)))          # 바닥 2-M3
     screw = Part.makeCylinder(1.5, zc1 - zc0 - 2 * m["wall"], V(xa, Y_C, zc0 + m["wall"]))
-    rod = Part.makeCylinder(m["rod_d"] / 2, zc1 - zc0 - 2 * m["wall"], V(xb - m["rod_h"], Y_C + m["rod_dy"], zc0 + m["wall"]))
-    return motor.fuse(ch).fuse(screw).fuse(rod).removeSplitter(), xb - m["sl_top"]
+    return motor.fuse(ch).fuse(screw).removeSplitter(), xb - m["sl_top"]
 
 
 def slider(z_mid, x_front):
-    """구리 슬라이더: 길이 10 (z) × 폭 14.5 (y), 윗면 = 바닥 면 + 10.5 [확실], 바닥판 위 0.5 띄움 [추측]"""
     m = MOD
-    s = box(x_front, X_BACK - m["wall"] - 0.5, Y_C - m["ch_w"] / 2, Y_C + m["ch_w"] / 2, z_mid - m["sl_L"] / 2, z_mid + m["sl_L"] / 2)
+    s = box(x_front, X_BACK - m["wall"], Y_C - m["sl_w"] / 2, Y_C + m["sl_w"] / 2, z_mid - m["sl_L"] / 2, z_mid + m["sl_L"] / 2)
     s = s.cut(Part.makeCylinder(1.5, 40, V(X_BACK - m["axis_h"], Y_C, z_mid - 20)))                     # 리드 M3 (너트 나사산은 단순화)
-    s = s.cut(Part.makeCylinder(m["rod_d"] / 2, 40, V(X_BACK - m["rod_h"], Y_C + m["rod_dy"], z_mid - 20)))  # 가이드 봉
     for dy in (-m["sl_hole_p"] / 2, m["sl_hole_p"] / 2):
         s = s.cut(Part.makeCylinder(1.0, 6, V(x_front - 0.01, Y_C + dy, z_mid), V(1, 0, 0)))              # M2.5 탭 Ø2
     return s
@@ -81,7 +77,7 @@ def slider_screws(x_front, zm):
 
 
 LABELS = {
-    "153m": "153m_lift_module (리니어 모듈 Keshuo 15BY25-77 — 15 mm 2상 4선 + M3×0.5 리드, 행정 62, 151_R에 M3 × 2, 구매) [판매처 치수도·사진대로, 판 두께·봉 자리만 추측]",
+    "153m": "153m_lift_module (리니어 모듈 Keshuo 15BY25-77 — 15 mm 2상 4선 + M3×0.5 리드, 행정 62, 151_R에 M3 × 2, 구매) [치수 대표값 — 사서 잼]",
     "153s": "153s_lift_slider (모듈 구리 슬라이더 — 캐리지에 M2.5 × 2, 모듈 일부)",
     "153ss": "153ss_slider_screws (M2.5 × 12 2 — 캐리지 팔 → 슬라이더, 구매)",
     "158": "158_carriage (바닥 캐리지 — 받침 칸 몸통 + 슬라이더 팔, LM4UU 1 (누름 축), 작은 3D 프린트 PETG)",
