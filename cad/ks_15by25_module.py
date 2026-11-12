@@ -40,9 +40,9 @@ def parts(slider_x=None):
     # 모터: 캔 + 뒤 뚜껑 (조금 작게) + 단자판 (옆으로 3 나옴 → 폭 18)
     motor = cylx(d["md"] / 2, 0.6, d["mt"], 0, d["ax"]).fuse(cylx(d["md"] / 2 - 0.6, 0, 0.6, 0, d["ax"]))
     motor = motor.cut(box(2.0, 9.0, -1, 1, d["ax"] + 6.8, d["ax"] + 8))                          # 캔 위 홈 (사진)
-    pcb = box(1.0, 8.0, d["md"] / 2, d["md"] / 2 + 0.8, d["ax"] - 4.5, d["ax"] + 2.5)
+    pcb = box(1.0, 8.0, -d["md"] / 2 - 0.8, -d["md"] / 2, d["ax"] - 4.5, d["ax"] + 2.5)       # 봉과 같은 쪽 (사진 — 조립에서 캐리지 아래 칸을 비킴, 11/12 13:12 검사)
     for i, z in enumerate((-3.5, -1.5, 0.5, 2.0)):
-        pcb = pcb.fuse(Part.makeCylinder(0.6, 2.2, V(3.0 + 1.3 * i, d["md"] / 2 + 0.8, d["ax"] + z - 0.5), V(0, 1, 0)))   # 선 납땜 4 (18 − 15 = 3)
+        pcb = pcb.fuse(Part.makeCylinder(0.6, 2.2, V(3.0 + 1.3 * i, -d["md"] / 2 - 0.8, d["ax"] + z - 0.5), V(0, -1, 0)))   # 선 납땜 4 (18 − 15 = 3)
     # 접은 판: 바닥 + 양 끝판 + 옆 턱 (홈 3개씩)
     fr = box(xf0, xf1, -W2, W2, 0, t)
     fr = fr.fuse(box(xf0, xf0 + t, -W2, W2, 0, d["H"])).fuse(box(xf1 - t, xf1, -W2, W2, 0, d["H"]))
