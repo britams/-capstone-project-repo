@@ -72,9 +72,97 @@ def slider_screws(x_front, zm):
 LABELS = {
     "153m": "153m_lift_module (리니어 모듈 Keshuo 15BY25-77 — 15 mm 2상 4선 + M3×0.5 리드, 행정 62, 151_R에 M3 × 2, 구매) [치수도·사진대로 따로 그린 것 ks_15by25_module — 판 두께·봉 자리는 추측]",
     "153s": "153s_lift_slider (모듈 구리 슬라이더 — 캐리지에 M2.5 × 2, 모듈 일부)",
-    "153ss": "153ss_slider_screws (M2.5 × 12 2 — 캐리지 팔 → 슬라이더, 구매)",
+    "153ss": "153ss_slider_screws (McMaster 92000A107 M2.5 × 12 냄비머리 2 — 캐리지 팔 → 슬라이더, 구매)",
     "158": "158_carriage (바닥 캐리지 — 받침 칸 몸통 + 슬라이더 팔, LM4UU 1 (누름 축), 작은 3D 프린트 PETG)",
 }
+
+
+# ---- (11/12 14:00 서현) 리프트 회색 부품을 카탈로그 부품으로 — "수정도 3D 프린트도 진짜 안 되는 경우에만" ----
+#   축 147  McMaster 5033N108  Ø4 × 75 경화 (모따기) — 자르지 않음 → 아래 끝 z 263 (위 끝 338, 바닥 140에 3 박힘 그대로)
+#   부싱 149 McMaster 61205K72 4 × 8 × 12 (LM4UU와 같은 치수) — 캐리지 z 262~274
+#   스프링 146 McMaster 8969T117 316 스테인리스, 바깥 0.12" (3.05) · 선 0.01" (0.254) · 자유 길이 1" (25.4) · 0.6 lbf/in (105.1 N/m)
+#            · 최대 하중 때 길이 0.49" (12.45) [확실 — 판매처 표]. 설치 길이 = 25.4 − 바닥 무게 0.188 N / k = 23.61 → 받침 z 239.39
+#            (design/calc/spring146_catalog_check.py 7조건 통과 — 강도는 음악선 값으로 본 것, 316은 조금 약함 [가능성 높음])
+#   칼라 148k McMaster 57485K64 Ø4 · 바깥 10 · 폭 5 멈춤 나사 — 프린트 걸쇠 148c 대신. 캐리지 위 z 287~292
+#            (축이 짧아져 캐리지 아래에 걸쇠 자리가 없음. 위 끝: 287 + 5 + 올림 36.5 = 328.5 < 바닥판 121 아랫면 330)
+#   스위치 227p KW11-3Z: 캐리지 윗면 홈에 서서 (L = −y, W = +x), 레버 끝(y 6.5)이 칼라 테두리 밑. 눌린 레버 윗면 = 287 − δ 4.76
+#   나사 227ps McMaster 92000A017 M2 × 10 / 227fs 92000A019 M2 × 12 / 153ss 92000A107 M2.5 × 12 (18-8 냄비머리 십자)
+#   (STEP 모양은 PC판 s2_vendor.py만 — 레포는 판매처 표 치수 모양)
+HW = dict(sh_z=(263.0, 338.0), bush_z=(262.0, 274.0), k=0.6 * 175.127, L0=25.4, W=0.188, OD=3.048, d=0.254, Lmax=12.45,
+          col_z=287.0, col_w=5.0, col_D=10.0, xy=(65.0, 4.0))
+HW["L_inst"] = HW["L0"] - HW["W"] / HW["k"] * 1000.0
+HW["seat"] = HW["sh_z"][0] - HW["L_inst"]
+HW["delta"] = 0.5 / HW["k"] * 1000.0
+
+
+def _chamfered_rod(r, z0, z1, c=0.3, xy=None):
+    cx, cy = xy or HW["xy"]
+    body = Part.makeCylinder(r, z1 - z0 - 2 * c, V(cx, cy, z0 + c))
+    return body.fuse(Part.makeCone(r - c, r, c, V(cx, cy, z0))).fuse(Part.makeCone(r, r - c, c, V(cx, cy, z1 - c))).removeSplitter()
+
+
+def shaft():
+    return _chamfered_rod(2.0, *HW["sh_z"])
+
+
+def bushing():
+    """61205K72: 바깥 Ø8 × 12, 안 Ø4, 양 끝 리테이너 턱 (깊이 0.5, Ø6.6 ~ Ø4.6) — 모양 대표 [추측 — 표에는 바깥·안·길이만]"""
+    cx, cy = HW["xy"]
+    z0, z1 = HW["bush_z"]
+    b = _chamfered_rod(4.0, z0, z1, 0.3).cut(Part.makeCylinder(2.0, 20, V(cx, cy, z0 - 4)))
+    for z in (z0 - 0.01, z1 - 0.49):
+        b = b.cut(Part.makeCylinder(3.3, 0.5, V(cx, cy, z)).cut(Part.makeCylinder(2.3, 0.5, V(cx, cy, z))))
+    return b
+
+
+def spring():
+    """8969T117 설치 상태: 닫힌 끝(양 끝 한 바퀴 평평) + 가운데 고른 피치, 나선 쓸기"""
+    cx, cy = HW["xy"]
+    Dm, d = HW["OD"] - HW["d"], HW["d"]
+    z0, L = HW["seat"], HW["L_inst"]
+    n_act = 18.8                                                                 # spring146_catalog_check (Na)
+    body_h = L - 2 * d
+    helix = Part.makeHelix(body_h / n_act, body_h, Dm / 2)
+    helix.translate(V(cx, cy, z0 + d))
+    prof = Part.Wire([Part.makeCircle(d / 2, V(cx + Dm / 2, cy, z0 + d), V(0, 1, 0))])
+    coil = Part.Wire(helix).makePipeShell([prof], True, True)
+    ends = [Part.makeTorus(Dm / 2, d / 2, V(cx, cy, z)) for z in (z0 + d / 2, z0 + L - d / 2)]
+    return Part.makeCompound([coil] + ends)
+
+
+def collar():
+    """57485K64: 바깥 Ø10 × 5, 안 Ø4, 멈춤 나사 M3 (구멍만)"""
+    cx, cy = HW["xy"]
+    z0 = HW["col_z"]
+    c = Part.makeCylinder(HW["col_D"] / 2, HW["col_w"], V(cx, cy, z0)).cut(Part.makeCylinder(2.0, 20, V(cx, cy, z0 - 5)))
+    return c.cut(Part.makeCylinder(1.25, 6, V(cx, cy, z0 + HW["col_w"] / 2), V(1, 0, 0)))
+
+
+def press2(carriage_shape):
+    """반환 (캐리지, 칼라, 스위치, 스위치 나사, 보고). 받침 칸 (바닥·+x벽·+y벽·가운데 핀) + 스위치 홈 + 받침 혀"""
+    import D5g_feeder_uln as FU
+    import D5g_home_switches as HS
+    p = FU.PS
+    x0, x1, y0, y1 = p["cage"]
+    zs, zb, t = HW["seat"], p["car_bot"], p["wall_t"]
+    cx, cy = HW["xy"]
+    car = carriage_shape
+    cage = box(x0, x1, y0, y1, zs - p["floor_t"], zs)
+    cage = cage.fuse(box(x1 - t, x1, y0, y1, zs - p["floor_t"], zb + 0.01)).fuse(box(x0, x1, y1 - t, y1, zs - p["floor_t"], zb + 0.01))
+    cage = cage.fuse(Part.makeCylinder(1.1, 12.0, V(cx, cy, zs)))                                   # 스프링 안내 핀 Ø2.2 (안 2.54) — 눌린 축 끝 258.2보다 아래
+    car = car.fuse(cage)
+    # 스위치: 본체 x 61.8~68.2, y 10.5~30.5, 밑면 = 눌린 레버 윗면 − 12.2
+    z_lev = HW["col_z"] - HW["delta"]
+    O = V(61.8, 30.5, z_lev - HS.LEVER_TOP)
+    sw, screws, _lv = HS.switch(O, V(0, -1, 0), V(1, 0, 0), V(0, 0, 1), screw_len=10.0)
+    car = car.fuse(box(37.0, 73.0, 20.0 - 0.01, 32.0, 262.0, 274.0))                                # 받침 혀 (스위치 +y 쪽이 캐리지 밖으로 나감)
+    car = car.cut(box(61.3, 70.0, 10.0, 31.0, O.z - 0.3, 274.5))                                    # 스위치 홈 (머리 자리까지)
+    r = car.removeSplitter()
+    car = r if r.isValid() else car
+    rep = dict(delta_mm=round(HW["delta"], 2), seat_z=round(zs, 2), L_inst=round(HW["L_inst"], 2), lever_pressed_z=round(z_lev, 2),
+               gap_rest=round(HW["col_z"] - z_lev, 2), switch_base_z=round(O.z, 2), collar_top_max=round(HW["col_z"] + HW["col_w"] + 36.5, 1),
+               spring_at_press=round(HW["L_inst"] - HW["delta"], 2), spring_min=HW["Lmax"])
+    return car, collar(), sw, Part.makeCompound(screws), rep
 
 
 def apply(doc):
@@ -87,11 +175,11 @@ def apply(doc):
         doc.removeObject(o.Name)
     for o in [o for o in doc.Objects if o.Label.startswith(("153b", "153n"))]:          # 바닥 모터 귀 나사만 뺌 (X·Y 모터 것은 남김)
         o.Shape = Part.makeCompound([s for s in o.Shape.Solids if s.BoundBox.ZMax >= 240])
-    for o in [o for o in doc.Objects if o.Label.startswith(("148c_", "227p", "153m", "153s", "148_load_cell", "148b_", "148g_", "148s_", "148m"))]:   # 148_load_cell: D5e 옛 로드셀 자리 (press_apply가 지우던 것)
+    for o in [o for o in doc.Objects if o.Label.startswith(("148c_", "148k_", "227p", "153m", "153s", "148_load_cell", "148b_", "148g_", "148s_", "148m"))]:   # 148_load_cell: D5e 옛 로드셀 자리 (press_apply가 지우던 것)
         doc.removeObject(o.Name)
     mod, x_front = module()
     zm = (LD.CAR["z0"] + LD.CAR["z1"]) / 2
-    car, latch, sw, scr, rep = FU.press_parts(carriage_base(x_front))
+    car, latch, sw, scr, rep = press2(carriage_base(x_front))
     rep["carriage_valid"], rep["carriage_vol"], rep["removed"] = car.isValid(), round(car.Volume), removed
     made = [LD._set(doc, "158", car)]
     for key, shp in (("153m", mod), ("153s", slider(zm, x_front)), ("153ss", slider_screws(x_front, zm))):
@@ -99,12 +187,23 @@ def apply(doc):
         o.Label, o.Shape = LABELS[key], shp
         made.append(o)
     made[0].Label = LABELS["158"]
-    for nm, shp in (("148c_spring_latch (걸쇠 — 축 147에 끼워 순간접착, +y 혀가 누름 스위치를 누름, 3D 프린트 PETG 작은 것)", latch),
-                    ("227p_press_switch (KW11-3Z 누름 스위치 PSW — NC, 스프링 4.8 mm(0.5 N)에서 딸깍, UNO 1 A1)", sw),
-                    ("227ps_press_switch_screws (M2 × 10 십자 냄비머리 2 — 받침판에 셀프 탭, 긴 구멍으로 힘 맞춤)", scr)):
+    for nm, shp in (("148k_shaft_collar (McMaster 57485K64 — Ø4 축 칼라, 바깥 10 × 5, 멈춤 나사, 구매) — 칼라 아래 테두리가 누름 스위치 레버를 누름", latch),
+                    ("227p_press_switch (KW11-3Z 누름 스위치 PSW — NC, 캐리지 윗면 홈, 스프링 4.76 mm(0.5 N)에서 딸깍, UNO 1 A1)", sw),
+                    ("227ps_press_switch_screws (McMaster 92000A017 M2 × 10 냄비머리 2 — 캐리지에 셀프 탭, 구매)", scr)):
         o = doc.addObject("Part::Feature", "P" + nm.split(" ")[0])
         o.Label, o.Shape = nm, shp
         made.append(o)
+    for pre, shp, lab in (("146_", spring(), "146_spring (McMaster 8969T117 — 316 스테인리스 바깥 3.05 · 선 0.254 · 자유 25.4 · 105 N/m, 설치 23.61, 구매)"),
+                          ("147_", shaft(), "147_shaft_D4x75 (McMaster 5033N108 — 52100 경화 Ø4 × 75, 모따기, 자르지 않음, 구매)"),
+                          ("149_", bushing(), "149_LM4UU (McMaster 61205K72 — 직선 볼 부싱 4 × 8 × 12, 구매)")):
+        o = [x for x in doc.Objects if x.Label.startswith(pre)]
+        o = o[0] if o else doc.addObject("Part::Feature", "HW_" + pre[:3])
+        o.Placement = App.Placement()
+        o.Shape, o.Label = shp, lab
+        made.append(o)
+    for o in doc.Objects:
+        if o.Label.startswith("227fs"):
+            o.Label = "227fs_switch_screws_F (McMaster 92000A019 M2 × 12 냄비머리 2 — 151_L에 셀프 탭, 구매)"
     made += columns(doc)
     for o in doc.Objects:                                                                # F 드라이버: ULN2003 → DRV8833 (자리 그대로)
         if o.Label.startswith("195p_uln2003_F"):
@@ -117,9 +216,9 @@ def apply(doc):
 
 def check(doc, made):
     import lift_drive as LD
-    LD.MOVING = ("158_", "153s", "153ss", "149_", "146_", "147_", "148c_", "140_", "227p", "227ps")
+    LD.MOVING = ("158_", "153s", "153ss", "149_", "146_", "147_", "148k_", "140_", "227p", "227ps")
     hits, sweep = LD.check(doc, made)
-    ok = (("153s", "153m"), ("153ss", "153s"), ("153ss", "158_"), ("153m", "151_"), ("151s", "151"), ("151s", "101_"), ("151s", "121_"),
+    ok = (("148k", "147_"), ("153s", "153m"), ("153ss", "153s"), ("153ss", "158_"), ("153m", "151_"), ("151s", "151"), ("151s", "101_"), ("151s", "121_"),
           ("151s", "153m"), ("227fs", "151_"))
     keep = lambda h: not any((h[0].startswith(p) and h[1].startswith(q)) or (h[1].startswith(p) and h[0].startswith(q)) for p, q in ok)
     hits = [h if keep(h) else (h[0], h[1], h[2], "허용") for h in hits]
