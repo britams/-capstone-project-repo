@@ -23,7 +23,13 @@ V = App.Vector
 STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파일"
 # (11/12 15:54 서현 '추천 방향') 마킹실 1" 로: US Plastic 34567 (DuraClear 1" 투명 PVC 5방향 크로스, C&S DCF1005WNSF, $10.12, 소켓 깊이 1-1/4")
 #   안 = 1" 관 안지름 26.64 · 소켓 = 1" 관 바깥 33.4 + 0.2 · 바깥·팔 길이는 대표 [추측 — 판매처가 소켓 깊이만 줌, 사서 잼]
-X = dict(bore=26.64, sock=33.6, sock_d=31.75, arm=48.0, od=42.0)
+X = dict(bore=31.0, sock=33.6, sock_d=20.0, arm=27.0, od=40.0)
+# (11/12 16:09 서현 '마킹실 상자 하나만 예외') PVC 크로스 → 마킹실 상자 300 (예외: 프린트 또는 판매처 가공 한 개)
+#   크로스는 문(구멍 끝)에서 바닥까지 관이 약 36 mm라 벌이 바닥에 안 감 (서현 16:07) → 문 구멍이 바닥 바로 옆 벽에 뚫린 상자
+#   안: 둥근 Ø31 × 높이 14 (z −7 ~ 7), 바닥 쪽은 뚫림(바닥 와셔가 올라옴). 입구 Ø13 (−x 벽) · 격리 Ø13 (+y 벽) — 구멍 아래 끝 = 바닥 윗면 z −7
+#   위: 망 턱 z 7, 니플 소켓 Ø33.6 (z 7 ~ 27). 바깥 40 × 40, 뒤(−y) 날개 2개에 M4 구멍 → 위 2020 막대 T너트
+#   행정 = 14 − 눌린 말벌 5 = 9 mm. 문은 벽 바깥에 바로 (벽 두께 4.5) [문 자리는 아직 안 그림]
+BOXH = dict(z0=-7.0, z1=7.0, hole=13.0, bottom_t=3.0, wing=(20.0, 32.0), wing_z=(15.0, 25.0))
 # 누르는 힘 = 위 망 + 강철 짧은 니플 무게 (망 위에 얹음, 묶지 않음 — 힘이 넘으면 통째로 들림)
 #   니플 McMaster 44615K416 (1" NPT 짧은 니플, 길이 1-1/2", 강철 sch40, $3.13) — 바깥 33.4 · 안 26.64 [확실 — 판매처 표·관 규격]
 #   무게 ≈ π/4 (33.4² − 26.64²) × 38.1 × 7.85 = 95 g (나사산만큼 덜함) → 약 0.93 N [가능성 높음 — 저울로 잼]
@@ -34,15 +40,15 @@ NIP = dict(od=33.4, id=26.64, L=38.1, rho=7.85)
 MAG = dict(d=6.0, t=3.0)
 HALL = dict(L=32.0, W=14.0, t=1.6, chip=(4.0, 1.6, 3.0))     # 모듈 판 대표 [추측]
 PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.6)
-Z_SHELF = X["arm"] - X["sock_d"]                        # 16.25 위 소켓 바닥 턱
-H = dict(rest=-X["bore"] / 2, press=Z_SHELF - 5.0)       # 바닥 −13.32 → 11.25 (눌린 말벌 5)
+Z_SHELF = BOXH["z1"]                                     # 7 망 턱
+H = dict(rest=BOXH["z0"], press=Z_SHELF - 5.0)          # 바닥 −7 → 2 (눌린 말벌 5)
 STROKE = H["press"] - H["rest"]
-W6 = dict(od=24.0, id=8.4, t=2.0)                       # 바닥 = M8 DIN 9021 (바깥 24 — 안 26.64와 틈 1.3)
-W3 = dict(od=9.0, id=3.2, t=0.8)
-SO = (40.0, 30.0)                      # 스페이서 길이 (캐리지가 레일 행정 안에 있게, 11/12 계산)
+W6 = dict(od=30.0, id=10.5, t=2.5)                      # 바닥 = M10 DIN 9021 (바깥 30 — 안 31과 틈 0.5)
+W3 = dict(od=12.0, id=4.3, t=1.0)                       # 가운데 = M4 DIN 9021 (구멍 10.5를 덮음) + M3 나사
+SO = (25.0,)                           # 스페이서 (캐리지가 레일 행정 안·거더가 상자 아래, 11/12 16:10 계산)
 G = dict(L=38.1, w=12.7, t=1.0, hole=4.1, p=12.7, hole_from_out=6.6)
 YC = -G["hole_from_out"]                # 캐리지 앞면 y (거더 구멍이 축 위에 오게)
-ZR = -51.0                              # 레일 국부 x → 세계 z 더하는 값 (레일 위 블록이 아래 팔 끝 −48 아래)
+ZR = -13.0                              # 레일 국부 x → 세계 z 더하는 값 (레일 위 블록 위 끝 −11.5 < 상자 아래 −10)
 CAR_RANGE = (-85.69, -9.0)              # 캐리지가 움직일 수 있는 국부 x (두 블록 사이) [확실 — 판매처 STEP]
 
 
@@ -54,18 +60,22 @@ def box(x0, x1, y0, y1, z0, z1):
     return Part.makeBox(x1 - x0, y1 - y0, z1 - z0, V(x0, y0, z0))
 
 
-def cross():
-    """대표 모양: 팔 6개 중 5개 (−y 없음)"""
-    r = X["od"] / 2
-    body = None
-    for d in (V(1, 0, 0), V(-1, 0, 0), V(0, 0, 1), V(0, 0, -1), V(0, 1, 0)):
-        a = cyl(r, X["arm"], V(0, 0, 0), d)
-        body = a if body is None else body.fuse(a)
-    body = body.fuse(Part.makeSphere(r))
-    for d in (V(1, 0, 0), V(-1, 0, 0), V(0, 0, 1), V(0, 0, -1), V(0, 1, 0)):
-        body = body.cut(cyl(X["bore"] / 2, X["arm"] + 1, V(0, 0, 0), d))
-        body = body.cut(cyl(X["sock"] / 2, X["sock_d"] + 1, d * (X["arm"] - X["sock_d"]), d))
-    return body.removeSplitter()
+def marking_box():
+    """마킹실 상자 300 (예외 부품 한 개)"""
+    h = X["od"] / 2
+    zb = BOXH["z0"] - BOXH["bottom_t"]
+    b = box(-h, h, -h, h, zb, X["arm"])
+    w0, w1 = BOXH["wing"]
+    for sx in (-1, 1):
+        b = b.fuse(box(min(sx * w0, sx * w1), max(sx * w0, sx * w1), -h, -h + 3.0, BOXH["wing_z"][0], BOXH["wing_z"][1]))
+    b = b.cut(cyl(X["bore"] / 2, Z_SHELF - zb + 1, V(0, 0, zb - 1)))
+    b = b.cut(cyl(X["sock"] / 2, X["arm"] - Z_SHELF + 1, V(0, 0, Z_SHELF)))
+    zc = BOXH["z0"] + BOXH["hole"] / 2
+    b = b.cut(cyl(BOXH["hole"] / 2, h + 1, V(0, 0, zc), V(-1, 0, 0)))          # 입구 (−x)
+    b = b.cut(cyl(BOXH["hole"] / 2, h + 1, V(0, 0, zc), V(0, 1, 0)))           # 격리 (+y)
+    for sx in (-1, 1):
+        b = b.cut(cyl(2.25, 5, V(sx * (w0 + w1) / 2, -h - 1, sum(BOXH["wing_z"]) / 2), V(0, 1, 0)))
+    return b.removeSplitter()
 
 
 def top_weight():
@@ -98,7 +108,7 @@ def top_weight():
 #   위 막대 (z 22~42, 앞면 y −21 = 위 소켓 뒷면): 1-1/4" EMT 2구멍 새들 (바깥 41.6 관용 ≈ 소켓 바깥 42 [추측]) M4 × 8 두 개 + T너트
 #     + 메카노 앵글 브래킷 #12 (½" × ½", 구멍 1씩)를 막대 윗면 홈에 M3, 다른 다리에 홀 모듈 KY-024를 M3 + 너트 (모듈 구멍 자리 [추측])
 BAR = dict(L=100.0, a=20.0, slot=6.2, slot_d=6.0)
-Z_BAR = (32.0, -2.5 + ZR, -89.69 + ZR)                  # 위 · 가운데(레일 위 블록 구멍 높이) · 아래(레일 아래 블록 구멍 높이)
+Z_BAR = (20.0, -2.5 + ZR, -89.69 + ZR)                  # 위 · 가운데(레일 위 블록 구멍 높이) · 아래(레일 아래 블록 구멍 높이)
 Y_BAR_FRONT = (-X["od"] / 2, -24.0, -24.0)              # 레일 바닥면 y = 국부 −11 + YC − 6.35 = −23.95, 0.05 띄움 (모터와 0.04 mm³ 겹침, 11/12 검사)
 
 
@@ -131,23 +141,13 @@ def frame():
             studs.append(cyl(1.5, 10.0, V(xh, yf - 6.0, zb), V(0, 1, 0)))                 # 블록 안 4, 홈 안 6
             nuts.append(tnut(V(xh, yf - BAR["slot_d"] + 4.0, zb), V(0, 1, 0)))
     out["rail_studs"] = Part.makeCompound(studs + nuts)
-    # 새들: 소켓 앞 반원 + 다리 + 날개 (두께 1.2, 폭 12)
-    r0, t, wz = X["od"] / 2, 1.2, 12.0
-    z0 = Z_BAR[0] - wz / 2
-    ring = cyl(r0 + t, wz, V(0, 0, z0)).cut(cyl(r0, wz + 2, V(0, 0, z0 - 1))).common(box(-30, 30, 0, 30, z0 - 1, z0 + wz + 1))
-    legs = box(-r0 - t, -r0, -r0 + t, 0, z0, z0 + wz).fuse(box(r0, r0 + t, -r0 + t, 0, z0, z0 + wz))
     yf = Y_BAR_FRONT[0]
-    wings = box(-r0 - 12.0, -r0, yf, yf + t, z0, z0 + wz).fuse(box(r0, r0 + 12.0, yf, yf + t, z0, z0 + wz))
-    strap = ring.fuse(legs).fuse(wings)
-    xs = r0 + 6.0
-    for sx in (-xs, xs):
-        strap = strap.cut(cyl(2.2, 5, V(sx, yf - 1, Z_BAR[0]), V(0, 1, 0)))
-    out["saddle"] = strap.removeSplitter()
     sc = []
-    for sx in (-xs, xs):
-        sc.append(cyl(3.5, 2.8, V(sx, yf + t, Z_BAR[0]), V(0, 1, 0)).fuse(cyl(2.0, 8.0, V(sx, yf + t - 8.0, Z_BAR[0]), V(0, 1, 0))))
-        sc.append(tnut(V(sx, yf - BAR["slot_d"] + 4.0, Z_BAR[0]), V(0, 1, 0)))
-    out["saddle_screws"] = Part.makeCompound(sc)
+    for sx in (-1, 1):
+        x = sx * sum(BOXH["wing"]) / 2
+        sc.append(cyl(3.5, 2.8, V(x, yf + 3.0, Z_BAR[0]), V(0, 1, 0)).fuse(cyl(2.0, 8.0, V(x, yf + 3.0 - 8.0, Z_BAR[0]), V(0, 1, 0))))
+        sc.append(tnut(V(x, yf - BAR["slot_d"] + 4.0, Z_BAR[0]), V(0, 1, 0)))
+    out["box_screws"] = Part.makeCompound(sc)
     # 홀 모듈 브래킷 (메카노 #12): 선 다리 = 모듈 판 뒤, 누운 다리 = 위 막대 윗면
     _m, _n, _g, hall = top_weight()
     hb = hall.BoundBox
@@ -155,11 +155,12 @@ def frame():
     ztop = Z_BAR[0] + BAR["a"] / 2
     br = box(-6.35, 6.35, yb - 1.0, yb, ztop, ztop + 12.7).fuse(box(-6.35, 6.35, yb - 12.7, yb, ztop, ztop + 1.0))
     zh_board = hb.ZMin + 3.5                                                # 모듈 구멍 [추측]
-    br = br.cut(cyl(1.7, 5, V(0, yb - 2, zh_board), V(0, 1, 0))).cut(cyl(1.7, 5, V(0, yb - 6.35, ztop - 1)))
+    yh = Y_BAR_FRONT[0] - BAR["a"] / 2                                      # 막대 윗면 홈 가운데
+    br = br.cut(cyl(1.7, 5, V(0, yb - 2, zh_board), V(0, 1, 0))).cut(cyl(1.7, 5, V(0, yh, ztop - 1)))
     out["hall_bracket"] = br
     hs = [cyl(2.75, 1.65, V(0, yb - 1.0 - 1.65, zh_board), V(0, 1, 0)).fuse(cyl(1.5, 4.0, V(0, yb - 1.0, zh_board), V(0, 1, 0))),   # M3 × 4 + 너트 (8은 자석·크로스에 닿음, 11/12 검사)
-          cyl(2.75, 1.65, V(0, yb - 6.35, ztop + 1.0)).fuse(cyl(1.5, 8.0, V(0, yb - 6.35, ztop + 1.0 - 8.0))),
-          tnut(V(0, yb - 6.35, ztop - BAR["slot_d"] + 4.0), V(0, 0, 1))]
+          cyl(2.75, 1.65, V(0, yh, ztop + 1.0)).fuse(cyl(1.5, 8.0, V(0, yh, ztop + 1.0 - 8.0))),
+          tnut(V(0, yh, ztop - BAR["slot_d"] + 4.0), V(0, 0, 1))]
     out["hall_screws"] = Part.makeCompound(hs)
     return out
 
@@ -174,7 +175,7 @@ def pen(dx, dy, z_tip):
 
 def pen_reach(doc, step=0.25):
     """팁 끝을 망 아랫면(말벌 등)까지 내렸을 때 니플·크로스·자석에 안 닿는 가장 큰 옆 거리 (x·y·대각)"""
-    fx = [o.Shape for o in doc.Objects if o.Label.split(" ")[0] in ("300_chamber_cross", "305n_nipple", "305m_magnet")]
+    fx = [o.Shape for o in doc.Objects if o.Label.split(" ")[0] in ("300_marking_box", "305n_nipple", "305m_magnet")]
     out = {}
     for name, u in (("x", V(1, 0, 0)), ("y", V(0, 1, 0)), ("diag", V(0.7071, 0.7071, 0))):
         r = 0.0
@@ -245,15 +246,15 @@ def make(doc=None, dz=0.0):
     gray, dark = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37)
     tw = top_weight()
     fr = frame()
-    shapes = [("C_cross", "300_chamber_cross (US Plastic 34566 DuraClear 3/4\" 투명 PVC 5방향 크로스, 구매) [치수 대표]", cross(), (0.75, 0.9, 1.0), 70),
+    shapes = [("C_box", "300_marking_box (마킹실 상자 — 예외 부품: 3D 프린트 또는 판매처 가공 1개, 안 Ø31 × 14, 문 구멍 Ø13 바닥 높이)", marking_box(), (0.2, 0.7, 0.3), 60),
               ("L_rail", "301_minislide (Haydon Kerk MSA02S-C0039-805 — 레일·모터·블록, 구매) [%s]" % src, rail, gray, 0),
               ("L_car", "301c_minislide_carriage (MiniSlide 캐리지 — 움직임) [%s]" % src, car, gray, 0),
               ("L_gird", "302_meccano_angle_girder (메카노 앵글 거더 1½\" 구멍 3, 구매)", parts["girder"], gray, 0),
               ("L_gs", "302s_screws (M3 × 6 냄비머리 — 거더 → 캐리지 2, 구매)", parts["carriage_screws"], dark, 0),
-              ("L_so", "303_standoffs (M3 육각 스페이서 암-암 40 + 수-암 30, 구매)", parts["standoffs"], gray, 0),
+              ("L_so", "303_standoffs (M3 육각 스페이서 암-암 25, 구매)", parts["standoffs"], gray, 0),
               ("L_bs", "303s_screw (M3 × 6 — 거더 아래에서 스페이서로, 구매)", parts["girder_screw"], dark, 0),
-              ("L_w6", "304_floor_washer_M8_DIN9021 (바닥 — 바깥 24 × 2, 구매)", parts["floor_w6"], gray, 0),
-              ("L_w3", "304a_washer_M3_DIN9021 (바깥 9 × 0.8, 구매)", parts["floor_w3"], gray, 0),
+              ("L_w6", "304_floor_washer_M10_DIN9021 (바닥 — 바깥 30 × 2.5, 구매)", parts["floor_w6"], gray, 0),
+              ("L_w3", "304a_washer_M4_DIN9021 (바깥 12 × 1.0, 구매)", parts["floor_w3"], gray, 0),
               ("L_ts", "304s_screw (M3 낮은 머리 × 6 — 바닥 → 스페이서, 구매)", parts["floor_screw"], dark, 0),
               ("T_mesh", "305_top_mesh (스테인리스 타공 원판 Ø33 × 0.5, 구멍 2.6 간격 3.2, 위 소켓 턱에 걸침, 구매) [상품 미정]", tw[0], gray, 0),
               ("T_nip", "305n_nipple (McMaster 44615K416 1\" 강철 짧은 니플 38.1 — 망 위 무게 약 95 g, 구매)", tw[1], dark, 0),
@@ -261,8 +262,7 @@ def make(doc=None, dz=0.0):
               ("T_hall", "306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 메카노 브래킷에 M3, 구매)", tw[3], (0.2, 0.4, 0.8), 0),
               ("F_bar", "307_bar_2020_100 (2020 알루미늄 프로파일 100 mm 3개 — 정해진 길이 제품, 구매)", fr["bars"], (0.8, 0.8, 0.82), 0),
               ("F_rs", "307s_rail_studs (M3 × 10 무두 볼트 4 + 2020 M3 T너트 4 — 레일 블록 ↔ 막대, 구매)", fr["rail_studs"], dark, 0),
-              ("F_sad", "308_saddle_EMT_1-1/4 (2구멍 새들 — 위 소켓을 위 막대에, 구매) [관 바깥 41.6 ≈ 소켓 42 추측]", fr["saddle"], gray, 0),
-              ("F_ss", "308s_saddle_screws (M4 × 8 2 + 2020 M4 T너트 2, 구매)", fr["saddle_screws"], dark, 0),
+              ("F_ss", "308s_box_screws (M4 × 8 2 + 2020 M4 T너트 2 — 상자 날개 → 위 막대, 구매)", fr["box_screws"], dark, 0),
               ("F_hb", "309_hall_bracket (메카노 앵글 브래킷 #12 ½\" × ½\", 구매)", fr["hall_bracket"], gray, 0),
               ("F_hs", "309s_hall_screws (M3 × 4 + 너트 · M3 × 8 + 2020 M3 T너트, 구매)", fr["hall_screws"], dark, 0)]
     for name, lab, shp, col, tr in shapes:
@@ -277,7 +277,7 @@ def make(doc=None, dz=0.0):
 
 MOVING = ("301c", "302", "303", "304")
 ALLOW = (("305", "300_"), ("305", "305"), ("306", "305m"), ("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
-          ("307s", "307_"), ("307s", "301_"), ("308s", "307_"), ("308s", "308_"), ("308_", "300_"), ("309s", "307_"), ("309s", "309_"),
+          ("307s", "307_"), ("307s", "301_"), ("308s", "307_"), ("308s", "300_"), ("309s", "307_"), ("309s", "309_"),
           ("309s", "306_"), ("309_", "306_"), ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
 
 
