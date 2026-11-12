@@ -3,15 +3,15 @@
 14:41 "마킹실 낮춰", 14:45 MiniSlide로, 15:10 "시제품 중 제일 싼 걸로"). 다른 부분과 아직 맞추지 않음 — 리프트부만.
 
 좌표 (이 파일 혼자): 마킹실(PVC 크로스) 가운데 = 원점, z 위.
-  마킹실  US Plastic 34566 (DuraClear 3/4" 투명 PVC 5방향 크로스, 소켓 깊이 1") — 구멍 ±x(입구·격리), ±z(위 망·아래 바닥 길), +y
-          안지름 20.9 (3/4" 관 안) · 소켓 26.9 · 팔 끝까지 38 [추측 — 판매처가 소켓 깊이만 줌, 사서 잼]
+  마킹실  US Plastic 34567 (DuraClear 1" 투명 PVC 5방향 크로스, 소켓 깊이 1-1/4") — 구멍 ±x(입구·격리), ±z(위 망·아래 바닥 길), +y
+          안지름 26.64 (1" 관 안) · 소켓 33.6 · 팔 끝까지 48 [추측 — 판매처가 소켓 깊이만 줌, 사서 잼] (11/12 15:54 3/4" → 1")
   리프트  Haydon Kerk MiniSlide MSA02S-C0039-805 (50 mm 행정, 리드 1 mm, 20 mm 캔스택 7.5°, 5 V 350 mA) — 세워서, 모터 아래
           캐리지 M3 인서트 4개 16.0 × 12.7 [확실 — 판매처 STEP]. STEP은 PC에만 (받은도면 step파일)
   연결    메카노 앵글 거더 1½" (구멍 3, 간격 12.7, 구멍 Ø4.1, 날개 12.7) — 캐리지 위 구멍 줄 2개에 M3 × 6
           두께 1.0, 구멍 줄은 날개 가운데 [추측 — 메카노 표준 간격 ½"만 확실]
-  기둥    M3 육각 스페이서 암-암 40 + 수-암 20 (6각 5.5) — 거더 아래에서 M3 × 6
-  바닥    M6 DIN 9021 와셔 (바깥 18, 안 6.4, 두께 1.6) + M3 DIN 9021 와셔 (바깥 9, 0.8) + M3 낮은 머리 나사 (머리 1.65)
-  행정    말벌이 옆 구멍 바닥 높이로 걸어 들어옴 → 바닥 윗면 z −10.45. 위 망(z 12.6) − 눌린 말벌 5 → 바닥 윗면 7.6 → 18.05 mm
+  기둥    M3 육각 스페이서 암-암 40 + 수-암 30 (6각 5.5) — 거더 아래에서 M3 × 6
+  바닥    M8 DIN 9021 와셔 (바깥 24, 안 8.4, 두께 2) + M3 DIN 9021 와셔 (바깥 9, 0.8) + M3 낮은 머리 나사 (머리 1.65)
+  행정    말벌이 옆 구멍 바닥 높이로 걸어 들어옴 → 바닥 윗면 z −13.32. 위 망(z 16.25) − 눌린 말벌 5 → 11.25 → 24.57 mm
 """
 import os
 import glob
@@ -21,26 +21,29 @@ import Part
 
 V = App.Vector
 STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파일"
-X = dict(bore=20.9, sock=26.9, sock_d=25.4, arm=38.0, od=33.4)
-# (11/12 15:29 서현 '일단 넣어둬') 누르는 힘 = 위 망 + 와셔 무게로 막음: 위 소켓 바닥(턱, z 12.6)에 망을 걸치고 M12 DIN 125 와셔 8장
-#   (바깥 24 · 안 13 · 두께 2.5, 강철 약 6.27 g → 50.2 g = 0.49 N [가능성 높음 — 밀도 7.85로 계산]). 힘이 넘으면 망·와셔가 들림.
-#   쌓은 높이 20 → 소켓 끝(38)까지 4.4 더 들릴 여유. 마커는 와셔 구멍 Ø13 안에서만 찍음.
-MESH = dict(d=25.0, t=0.5, hole=3.0, p=4.4)              # 스테인리스 타공 원판 [추측 — 상품 못 고름]
-WS = dict(od=24.0, id=13.0, t=2.5, n=7, m=6.27)
-# (11/12 15:39) 맨 위 1장 → 네오디뮴 링 자석 (24 × 13 × 3, 약 7.2 g [추측 — 상품 미정]) → 합 51.1 g = 0.50 N.
-#   홀 모듈 KY-024 (SS49E + LM393 비교기, DO → UNO A1)를 위 소켓 바깥(−y) 자석 높이에: 망이 1 mm 들리면 DO HIGH → 멈춤
-MAG = dict(od=24.0, id=13.0, t=3.0)
+# (11/12 15:54 서현 '추천 방향') 마킹실 1" 로: US Plastic 34567 (DuraClear 1" 투명 PVC 5방향 크로스, C&S DCF1005WNSF, $10.12, 소켓 깊이 1-1/4")
+#   안 = 1" 관 안지름 26.64 · 소켓 = 1" 관 바깥 33.4 + 0.2 · 바깥·팔 길이는 대표 [추측 — 판매처가 소켓 깊이만 줌, 사서 잼]
+X = dict(bore=26.64, sock=33.6, sock_d=31.75, arm=48.0, od=42.0)
+# 누르는 힘 = 위 망 + 강철 짧은 니플 무게 (망 위에 얹음, 묶지 않음 — 힘이 넘으면 통째로 들림)
+#   니플 McMaster 44615K416 (1" NPT 짧은 니플, 길이 1-1/2", 강철 sch40, $3.13) — 바깥 33.4 · 안 26.64 [확실 — 판매처 표·관 규격]
+#   무게 ≈ π/4 (33.4² − 26.64²) × 38.1 × 7.85 = 95 g (나사산만큼 덜함) → 약 0.93 N [가능성 높음 — 저울로 잼]
+#   펜 (승준 11/02 실측: 팁 2.2·8.0, 앞코 7.2, 몸통 14.7은 팁 끝 15.6 뒤부터) 몸통이 니플 안(26.64)에 들어가 옆으로 ±5.97
+#   홀 감지: 니플 바깥(−y) 소켓 위로 나온 곳에 원판 자석 6 × 3 (강철에 붙음) + 홀 모듈 KY-024 → UNO A1, 1 mm 들리면 멈춤
+MESH = dict(d=33.0, t=0.5, hole=2.6, p=3.2)              # 스테인리스 타공 원판 [추측 — 상품 미정]. 펜 팁 2.2가 구멍 2.6을 지남
+NIP = dict(od=33.4, id=26.64, L=38.1, rho=7.85)
+MAG = dict(d=6.0, t=3.0)
 HALL = dict(L=32.0, W=14.0, t=1.6, chip=(4.0, 1.6, 3.0))     # 모듈 판 대표 [추측]
-Z_SHELF = X["arm"] - X["sock_d"]                        # 12.6 위 소켓 바닥 턱
-H = dict(rest=-10.45, press=Z_SHELF - 5.0)               # 눌린 말벌 5 → 바닥 윗면 7.6
+PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.6)
+Z_SHELF = X["arm"] - X["sock_d"]                        # 16.25 위 소켓 바닥 턱
+H = dict(rest=-X["bore"] / 2, press=Z_SHELF - 5.0)       # 바닥 −13.32 → 11.25 (눌린 말벌 5)
 STROKE = H["press"] - H["rest"]
-W6 = dict(od=18.0, id=6.4, t=1.6)
+W6 = dict(od=24.0, id=8.4, t=2.0)                       # 바닥 = M8 DIN 9021 (바깥 24 — 안 26.64와 틈 1.3)
 W3 = dict(od=9.0, id=3.2, t=0.8)
-SO = (40.0, 20.0)                      # 스페이서 길이
+SO = (40.0, 30.0)                      # 스페이서 길이 (캐리지가 레일 행정 안에 있게, 11/12 계산)
 G = dict(L=38.1, w=12.7, t=1.0, hole=4.1, p=12.7, hole_from_out=6.6)
 YC = -G["hole_from_out"]                # 캐리지 앞면 y (거더 구멍이 축 위에 오게)
-ZR = -41.0                              # 레일 국부 x → 세계 z 더하는 값 (레일 위 블록이 아래 팔 끝 −38 아래)
-S0 = 27.7                               # 쉴 때 캐리지 위치 (레일 국부 0~53.8 중)
+ZR = -51.0                              # 레일 국부 x → 세계 z 더하는 값 (레일 위 블록이 아래 팔 끝 −48 아래)
+CAR_RANGE = (-85.69, -9.0)              # 캐리지가 움직일 수 있는 국부 x (두 블록 사이) [확실 — 판매처 STEP]
 
 
 def cyl(r, h, p, d=V(0, 0, 1)):
@@ -66,28 +69,51 @@ def cross():
 
 
 def top_weight():
-    """위 망 + M12 와셔 8장 (고정 아님 — 걸쳐 둠)"""
-    import math
+    """위 망 + 강철 니플 + 자석 + 홀 모듈 (망·니플·자석은 얹혀 있을 뿐 — 들릴 수 있음)"""
     zm = Z_SHELF
     mesh = cyl(MESH["d"] / 2, MESH["t"], V(0, 0, zm))
-    n = 3
+    holes = []
+    n = int(MESH["d"] / 2 / MESH["p"]) + 1
     for i in range(-n, n + 1):
         for j in range(-n, n + 1):
             x, y = i * MESH["p"], j * MESH["p"]
             if math.hypot(x, y) < MESH["d"] / 2 - 2:
-                mesh = mesh.cut(cyl(MESH["hole"] / 2, 2, V(x, y, zm - 0.5)))
-    ws = []
-    z = zm + MESH["t"]
-    for k in range(WS["n"]):
-        ws.append(cyl(WS["od"] / 2, WS["t"], V(0, 0, z)).cut(cyl(WS["id"] / 2, 4, V(0, 0, z - 1))))
-        z += WS["t"]
-    mag = cyl(MAG["od"] / 2, MAG["t"], V(0, 0, z)).cut(cyl(MAG["id"] / 2, 5, V(0, 0, z - 1)))
-    zc = z + MAG["t"] / 2                                                    # 자석 가운데 높이 = 홀 칩 가운데
-    y0 = -X["od"] / 2 - 0.5                                                  # 소켓 바깥 벽에서 0.5 띄움
+                holes.append(cyl(MESH["hole"] / 2, 2, V(x, y, zm - 0.5)))
+    mesh = mesh.cut(Part.makeCompound(holes))
+    z0 = zm + MESH["t"]
+    nip = cyl(NIP["od"] / 2, NIP["L"], V(0, 0, z0)).cut(cyl(NIP["id"] / 2, NIP["L"] + 2, V(0, 0, z0 - 1)))
+    z_top = z0 + NIP["L"]
+    zc = (X["arm"] + z_top) / 2                                               # 소켓 위로 나온 곳 가운데
+    y_out = -NIP["od"] / 2
+    mag = cyl(MAG["d"] / 2, MAG["t"], V(0, y_out, zc), V(0, -1, 0))
+    y0 = y_out - MAG["t"] - 1.0                                               # 자석과 1 띄움
     cw, ct, ch = HALL["chip"]
     chip = box(-cw / 2, cw / 2, y0 - ct, y0, zc - ch / 2, zc + ch / 2)
     board = box(-HALL["W"] / 2, HALL["W"] / 2, y0 - ct - 1.0 - HALL["t"], y0 - ct - 1.0, zc - 6.0, zc - 6.0 + HALL["L"])
-    return mesh, Part.makeCompound(ws), mag, chip.fuse(board)
+    return mesh, nip, mag, chip.fuse(board)
+
+
+def pen(dx, dy, z_tip):
+    """샤피 크리에이티브 불렛 (승준 11/02 실측) — 팁 끝 z_tip, 축 (dx, dy)"""
+    p = V(dx, dy, z_tip)
+    s = cyl(PEN["tip_d"] / 2, PEN["tip_L"], p)
+    s = s.fuse(cyl(PEN["nose_d"] / 2, PEN["body_from"] - PEN["tip_L"], p + V(0, 0, PEN["tip_L"])))
+    return s.fuse(cyl(PEN["body_d"] / 2, PEN["L"] - PEN["body_from"], p + V(0, 0, PEN["body_from"])))
+
+
+def pen_reach(doc, step=0.25):
+    """팁 끝을 망 아랫면(말벌 등)까지 내렸을 때 니플·크로스·자석에 안 닿는 가장 큰 옆 거리 (x·y·대각)"""
+    fx = [o.Shape for o in doc.Objects if o.Label.split(" ")[0] in ("300_chamber_cross", "305n_nipple", "305m_magnet")]
+    out = {}
+    for name, u in (("x", V(1, 0, 0)), ("y", V(0, 1, 0)), ("diag", V(0.7071, 0.7071, 0))):
+        r = 0.0
+        while r < 20:
+            pn = pen(u.x * r, u.y * r, Z_SHELF)
+            if any(pn.common(f).Volume > 0.001 for f in fx):
+                break
+            r += step
+        out[name] = round(r - step, 2)
+    return out
 
 
 def floor_stack(dz):
@@ -146,20 +172,21 @@ def make(doc=None, dz=0.0):
     z_row = z_g - G["w"] / 2
     rail, car, src = slide(dz, z_row)
     gray, dark = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37)
+    tw = top_weight()
     shapes = [("C_cross", "300_chamber_cross (US Plastic 34566 DuraClear 3/4\" 투명 PVC 5방향 크로스, 구매) [치수 대표]", cross(), (0.75, 0.9, 1.0), 70),
               ("L_rail", "301_minislide (Haydon Kerk MSA02S-C0039-805 — 레일·모터·블록, 구매) [%s]" % src, rail, gray, 0),
               ("L_car", "301c_minislide_carriage (MiniSlide 캐리지 — 움직임) [%s]" % src, car, gray, 0),
               ("L_gird", "302_meccano_angle_girder (메카노 앵글 거더 1½\" 구멍 3, 구매)", parts["girder"], gray, 0),
               ("L_gs", "302s_screws (M3 × 6 냄비머리 — 거더 → 캐리지 2, 구매)", parts["carriage_screws"], dark, 0),
-              ("L_so", "303_standoffs (M3 육각 스페이서 암-암 40 + 수-암 20, 구매)", parts["standoffs"], gray, 0),
+              ("L_so", "303_standoffs (M3 육각 스페이서 암-암 40 + 수-암 30, 구매)", parts["standoffs"], gray, 0),
               ("L_bs", "303s_screw (M3 × 6 — 거더 아래에서 스페이서로, 구매)", parts["girder_screw"], dark, 0),
-              ("L_w6", "304_floor_washer_M6_DIN9021 (바닥 — 바깥 18 × 1.6, 구매)", parts["floor_w6"], gray, 0),
+              ("L_w6", "304_floor_washer_M8_DIN9021 (바닥 — 바깥 24 × 2, 구매)", parts["floor_w6"], gray, 0),
               ("L_w3", "304a_washer_M3_DIN9021 (바깥 9 × 0.8, 구매)", parts["floor_w3"], gray, 0),
               ("L_ts", "304s_screw (M3 낮은 머리 × 6 — 바닥 → 스페이서, 구매)", parts["floor_screw"], dark, 0),
-              ("T_mesh", "305_top_mesh (스테인리스 타공 원판 Ø25 × 0.5, 위 소켓 턱에 걸침, 구매) [상품 미정]", top_weight()[0], gray, 0),
-              ("T_ws", "305w_weight_washers (M12 DIN 125 와셔 7장 43.9 g — 누르는 힘 상한, 구매)", top_weight()[1], dark, 0),
-              ("T_mag", "305m_ring_magnet (네오디뮴 링 24 × 13 × 3, 약 7.2 g — 와셔 맨 위, 구매) [상품 미정]", top_weight()[2], (0.6, 0.6, 0.65), 0),
-              ("T_hall", "306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 위 소켓 −y 바깥, 받침은 틀에 나사로 [미정], 구매)", top_weight()[3], (0.2, 0.4, 0.8), 0)]
+              ("T_mesh", "305_top_mesh (스테인리스 타공 원판 Ø33 × 0.5, 구멍 2.6 간격 3.2, 위 소켓 턱에 걸침, 구매) [상품 미정]", tw[0], gray, 0),
+              ("T_nip", "305n_nipple (McMaster 44615K416 1\" 강철 짧은 니플 38.1 — 망 위 무게 약 95 g, 구매)", tw[1], dark, 0),
+              ("T_mag", "305m_magnet (네오디뮴 원판 6 × 3 — 니플 바깥에 붙음, 구매) [상품 미정]", tw[2], (0.6, 0.6, 0.65), 0),
+              ("T_hall", "306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 위 소켓 −y 바깥, 받침은 틀에 나사로 [미정], 구매)", tw[3], (0.2, 0.4, 0.8), 0)]
     for name, lab, shp, col, tr in shapes:
         o = doc.addObject("Part::Feature", name)
         o.Shape, o.Label = shp, lab
@@ -171,7 +198,7 @@ def make(doc=None, dz=0.0):
 
 
 MOVING = ("301c", "302", "303", "304")
-ALLOW = (("305", "300_"), ("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
+ALLOW = (("305", "300_"), ("305", "305"), ("306", "305m"), ("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
           ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
 
 
@@ -201,4 +228,8 @@ def check(doc, steps=(0.0, 4.0, 8.0, 12.0, STROKE)):
                 v = a.Shape.common(b.Shape).Volume
                 if v > 0.01:
                     inner.append((ka, kb, round(v, 2)))
-    return dict(stroke=round(STROKE, 2), sweep=hits, inner=inner)
+    car = [o for o in obs if o.Label.startswith("301c")][0].Shape.BoundBox
+    lo, hi = car.ZMin - ZR, car.ZMax - ZR + STROKE                            # 국부 x (쉴 때 아래 끝, 누를 때 위 끝)
+    return dict(stroke=round(STROKE, 2), sweep=hits, inner=inner, carriage_local=(round(lo, 2), round(hi, 2)),
+                carriage_in_rail=(lo >= CAR_RANGE[0] and hi <= CAR_RANGE[1]), pen=pen_reach(doc),
+                nipple_g=round(NIP["rho"] * math.pi / 4 * (NIP["od"] ** 2 - NIP["id"] ** 2) * NIP["L"] / 1000, 1))
