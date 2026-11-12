@@ -10,7 +10,8 @@
 //   X 마커 X   215 : D6  D7  D8  D9
 //   Y 마커 Y   209 : D10 D11 D12 D13
 //   PEN 펜 서보 205 : A0  (SG90, 전원 +5V_B)
-//   누름 스위치 PSW : A1 (INPUT_PULLUP, NC 접점 → GND: 평소 LOW, 눌림·선 끊김 = HIGH → 멈춤 쪽으로 안전)   A2 예비
+//   누름 감지 PSW : A1 (INPUT_PULLUP) — (11/12 리프트 v2) 홀 모듈 KY-024 DO: 위 망 와셔 묶음의 링 자석이 센서 앞 = LOW,
+//                  망이 들림(누르는 힘 ≥ 와셔 무게 0.49 N)·선 끊김 = HIGH → 멈춤 쪽으로 안전. 문턱은 모듈 가변저항으로 맞춤   A2 예비
 //   원점 F / X / Y : A3 / A4 / A5  (INPUT_PULLUP, 눌리면 LOW, 100 nF)
 //
 // 시리얼 115200, 한 줄 = 명령 하나 (대문자로 바꿔 읽음)
@@ -45,7 +46,7 @@
 
 // ---------------- 값 (미검증은 실물에서 맞춤) ----------------
 #define STEPS_PER_MM      (4075.7728f / 8.0f)  // X·Y: 28BYJ-48 반걸음 4075.77/회전 [가능성 높음] ÷ T8 리드 8 mm
-#define STEPS_PER_MM_F    (40.0f / 0.5f)       // F (11/12): 15BY25 18°/걸음 → 반걸음 40/회전 ÷ M3 리드 0.5 mm [확실 — Keshuo 치수도]
+#define STEPS_PER_MM_F    (96.0f / 1.0f)       // F (11/12 15:39 리프트 v2): MiniSlide MSA02S-C0039 7.5°/걸음 → 반걸음 96/회전 ÷ 리드 1 mm [확실 — 판매처 표]
 #define HALF_US_DEFAULT   1000UL   // 반걸음 간격 µs (≈ 1.96 mm/s) — v0.1 값
 #define HALF_US_MIN       800UL
 #define SURGE_LO_US       1080UL   // 686~928 Hz 스프링 서지 띠 (역학계산 2차, b4_axis 주석) — 이 사이 SPEED 거부

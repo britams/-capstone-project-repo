@@ -26,7 +26,11 @@ X = dict(bore=20.9, sock=26.9, sock_d=25.4, arm=38.0, od=33.4)
 #   (바깥 24 · 안 13 · 두께 2.5, 강철 약 6.27 g → 50.2 g = 0.49 N [가능성 높음 — 밀도 7.85로 계산]). 힘이 넘으면 망·와셔가 들림.
 #   쌓은 높이 20 → 소켓 끝(38)까지 4.4 더 들릴 여유. 마커는 와셔 구멍 Ø13 안에서만 찍음.
 MESH = dict(d=25.0, t=0.5, hole=3.0, p=4.4)              # 스테인리스 타공 원판 [추측 — 상품 못 고름]
-WS = dict(od=24.0, id=13.0, t=2.5, n=8, m=6.27)
+WS = dict(od=24.0, id=13.0, t=2.5, n=7, m=6.27)
+# (11/12 15:39) 맨 위 1장 → 네오디뮴 링 자석 (24 × 13 × 3, 약 7.2 g [추측 — 상품 미정]) → 합 51.1 g = 0.50 N.
+#   홀 모듈 KY-024 (SS49E + LM393 비교기, DO → UNO A1)를 위 소켓 바깥(−y) 자석 높이에: 망이 1 mm 들리면 DO HIGH → 멈춤
+MAG = dict(od=24.0, id=13.0, t=3.0)
+HALL = dict(L=32.0, W=14.0, t=1.6, chip=(4.0, 1.6, 3.0))     # 모듈 판 대표 [추측]
 Z_SHELF = X["arm"] - X["sock_d"]                        # 12.6 위 소켓 바닥 턱
 H = dict(rest=-10.45, press=Z_SHELF - 5.0)               # 눌린 말벌 5 → 바닥 윗면 7.6
 STROKE = H["press"] - H["rest"]
@@ -77,7 +81,13 @@ def top_weight():
     for k in range(WS["n"]):
         ws.append(cyl(WS["od"] / 2, WS["t"], V(0, 0, z)).cut(cyl(WS["id"] / 2, 4, V(0, 0, z - 1))))
         z += WS["t"]
-    return mesh, Part.makeCompound(ws)
+    mag = cyl(MAG["od"] / 2, MAG["t"], V(0, 0, z)).cut(cyl(MAG["id"] / 2, 5, V(0, 0, z - 1)))
+    zc = z + MAG["t"] / 2                                                    # 자석 가운데 높이 = 홀 칩 가운데
+    y0 = -X["od"] / 2 - 0.5                                                  # 소켓 바깥 벽에서 0.5 띄움
+    cw, ct, ch = HALL["chip"]
+    chip = box(-cw / 2, cw / 2, y0 - ct, y0, zc - ch / 2, zc + ch / 2)
+    board = box(-HALL["W"] / 2, HALL["W"] / 2, y0 - ct - 1.0 - HALL["t"], y0 - ct - 1.0, zc - 6.0, zc - 6.0 + HALL["L"])
+    return mesh, Part.makeCompound(ws), mag, chip.fuse(board)
 
 
 def floor_stack(dz):
@@ -147,7 +157,9 @@ def make(doc=None, dz=0.0):
               ("L_w3", "304a_washer_M3_DIN9021 (바깥 9 × 0.8, 구매)", parts["floor_w3"], gray, 0),
               ("L_ts", "304s_screw (M3 낮은 머리 × 6 — 바닥 → 스페이서, 구매)", parts["floor_screw"], dark, 0),
               ("T_mesh", "305_top_mesh (스테인리스 타공 원판 Ø25 × 0.5, 위 소켓 턱에 걸침, 구매) [상품 미정]", top_weight()[0], gray, 0),
-              ("T_ws", "305w_weight_washers (M12 DIN 125 와셔 8장 50 g = 0.49 N — 누르는 힘 상한, 구매)", top_weight()[1], dark, 0)]
+              ("T_ws", "305w_weight_washers (M12 DIN 125 와셔 7장 43.9 g — 누르는 힘 상한, 구매)", top_weight()[1], dark, 0),
+              ("T_mag", "305m_ring_magnet (네오디뮴 링 24 × 13 × 3, 약 7.2 g — 와셔 맨 위, 구매) [상품 미정]", top_weight()[2], (0.6, 0.6, 0.65), 0),
+              ("T_hall", "306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 위 소켓 −y 바깥, 받침은 틀에 나사로 [미정], 구매)", top_weight()[3], (0.2, 0.4, 0.8), 0)]
     for name, lab, shp, col, tr in shapes:
         o = doc.addObject("Part::Feature", name)
         o.Shape, o.Label = shp, lab
