@@ -281,8 +281,9 @@ ALLOW = (("305", "300_"), ("305", "305"), ("306", "305m"), ("301c", "301_"), ("3
           ("309s", "306_"), ("309_", "306_"), ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
 
 
-def check(doc, steps=(0.0, 4.0, 8.0, 12.0, STROKE)):
+def check(doc, steps=None):
     """쉬는 자리 → 누른 자리까지 움직이는 묶음 ↔ 고정 (마킹실·레일) 겹침, 그리고 움직이는 것끼리 (나사 물림 허용)"""
+    steps = steps or sorted({min(STROKE, 3.0 * k) for k in range(int(STROKE // 3) + 2)})       # 행정 넘는 자리는 안 봄 (11/12)
     obs = [o for o in doc.Objects if hasattr(o, "Shape")]
     mv = [o for o in obs if o.Label.startswith(MOVING)]
     fx = [o for o in obs if o not in mv]
