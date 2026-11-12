@@ -11,7 +11,7 @@
           두께 1.0, 구멍 줄은 날개 가운데 [추측 — 메카노 표준 간격 ½"만 확실]
   기둥    M3 육각 스페이서 암-암 40 + 수-암 20 (6각 5.5) — 거더 아래에서 M3 × 6
   바닥    M6 DIN 9021 와셔 (바깥 18, 안 6.4, 두께 1.6) + M3 DIN 9021 와셔 (바깥 9, 0.8) + M3 낮은 머리 나사 (머리 1.65)
-  행정    말벌이 옆 구멍 바닥 높이로 걸어 들어옴 → 바닥 윗면 z −10.45. 눌린 말벌 5 → 바닥 윗면 5.45 → 15.9 mm
+  행정    말벌이 옆 구멍 바닥 높이로 걸어 들어옴 → 바닥 윗면 z −10.45. 위 망(z 12.6) − 눌린 말벌 5 → 바닥 윗면 7.6 → 18.05 mm
 """
 import os
 import glob
@@ -22,7 +22,13 @@ import Part
 V = App.Vector
 STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파일"
 X = dict(bore=20.9, sock=26.9, sock_d=25.4, arm=38.0, od=33.4)
-H = dict(rest=-10.45, press=5.45)
+# (11/12 15:29 서현 '일단 넣어둬') 누르는 힘 = 위 망 + 와셔 무게로 막음: 위 소켓 바닥(턱, z 12.6)에 망을 걸치고 M12 DIN 125 와셔 8장
+#   (바깥 24 · 안 13 · 두께 2.5, 강철 약 6.27 g → 50.2 g = 0.49 N [가능성 높음 — 밀도 7.85로 계산]). 힘이 넘으면 망·와셔가 들림.
+#   쌓은 높이 20 → 소켓 끝(38)까지 4.4 더 들릴 여유. 마커는 와셔 구멍 Ø13 안에서만 찍음.
+MESH = dict(d=25.0, t=0.5, hole=3.0, p=4.4)              # 스테인리스 타공 원판 [추측 — 상품 못 고름]
+WS = dict(od=24.0, id=13.0, t=2.5, n=8, m=6.27)
+Z_SHELF = X["arm"] - X["sock_d"]                        # 12.6 위 소켓 바닥 턱
+H = dict(rest=-10.45, press=Z_SHELF - 5.0)               # 눌린 말벌 5 → 바닥 윗면 7.6
 STROKE = H["press"] - H["rest"]
 W6 = dict(od=18.0, id=6.4, t=1.6)
 W3 = dict(od=9.0, id=3.2, t=0.8)
@@ -53,6 +59,25 @@ def cross():
         body = body.cut(cyl(X["bore"] / 2, X["arm"] + 1, V(0, 0, 0), d))
         body = body.cut(cyl(X["sock"] / 2, X["sock_d"] + 1, d * (X["arm"] - X["sock_d"]), d))
     return body.removeSplitter()
+
+
+def top_weight():
+    """위 망 + M12 와셔 8장 (고정 아님 — 걸쳐 둠)"""
+    import math
+    zm = Z_SHELF
+    mesh = cyl(MESH["d"] / 2, MESH["t"], V(0, 0, zm))
+    n = 3
+    for i in range(-n, n + 1):
+        for j in range(-n, n + 1):
+            x, y = i * MESH["p"], j * MESH["p"]
+            if math.hypot(x, y) < MESH["d"] / 2 - 2:
+                mesh = mesh.cut(cyl(MESH["hole"] / 2, 2, V(x, y, zm - 0.5)))
+    ws = []
+    z = zm + MESH["t"]
+    for k in range(WS["n"]):
+        ws.append(cyl(WS["od"] / 2, WS["t"], V(0, 0, z)).cut(cyl(WS["id"] / 2, 4, V(0, 0, z - 1))))
+        z += WS["t"]
+    return mesh, Part.makeCompound(ws)
 
 
 def floor_stack(dz):
@@ -120,7 +145,9 @@ def make(doc=None, dz=0.0):
               ("L_bs", "303s_screw (M3 × 6 — 거더 아래에서 스페이서로, 구매)", parts["girder_screw"], dark, 0),
               ("L_w6", "304_floor_washer_M6_DIN9021 (바닥 — 바깥 18 × 1.6, 구매)", parts["floor_w6"], gray, 0),
               ("L_w3", "304a_washer_M3_DIN9021 (바깥 9 × 0.8, 구매)", parts["floor_w3"], gray, 0),
-              ("L_ts", "304s_screw (M3 낮은 머리 × 6 — 바닥 → 스페이서, 구매)", parts["floor_screw"], dark, 0)]
+              ("L_ts", "304s_screw (M3 낮은 머리 × 6 — 바닥 → 스페이서, 구매)", parts["floor_screw"], dark, 0),
+              ("T_mesh", "305_top_mesh (스테인리스 타공 원판 Ø25 × 0.5, 위 소켓 턱에 걸침, 구매) [상품 미정]", top_weight()[0], gray, 0),
+              ("T_ws", "305w_weight_washers (M12 DIN 125 와셔 8장 50 g = 0.49 N — 누르는 힘 상한, 구매)", top_weight()[1], dark, 0)]
     for name, lab, shp, col, tr in shapes:
         o = doc.addObject("Part::Feature", name)
         o.Shape, o.Label = shp, lab
@@ -132,7 +159,7 @@ def make(doc=None, dz=0.0):
 
 
 MOVING = ("301c", "302", "303", "304")
-ALLOW = (("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
+ALLOW = (("305", "300_"), ("301c", "301_"), ("302s", "301c"),     # 301c↔301_: 판매처 STEP 자체가 캐리지 부싱과 안내 봉을 1.97 mm³씩 겹쳐 그림 (11/12 확인)
           ("302s", "302_"), ("303s", "302_"), ("303s", "303_"), ("304s", "303_"), ("304s", "304"), ("304_", "304a"))
 
 
