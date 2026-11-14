@@ -15,7 +15,7 @@ sys.path.insert(0, HERE)
 OUT = os.path.join(HERE, "split")
 REPLACED = ("120_", "121_", "130_", "140_", "146_", "147_", "148", "149_", "151", "152_", "153m", "153s", "154_", "155", "157", "158_", "159",
             "227f", "227p", "REF_hornet", "REF_mark_dot", "172_isolation_duct", "172b_isolation_bend", "220_cup_bracket")
-DPARK = 30.0
+DPARK = 10.0                                   # (11/14 1차 검사) +30이면 빔 끝 블록·X 너트가 X 커플링(216)에, 캐리지가 방생 굴뚝(175)에 닿음 → +10
 MARKER = ("201_", "202_", "203_", "204_", "205", "206_", "207_", "208_", "209", "210_", "211_", "212_", "219_", "221_", "222_", "223_",
           "224_", "225_", "227y")
 rep = dict(ok=False)
@@ -70,8 +70,10 @@ try:
         k = key(o)
         if k.startswith(REPLACED):
             d.removeObject(o.Name)
-        elif k.startswith(("112_entry_gate", "196_gate_G2")):
+        elif k.startswith("112_entry_gate"):
             tr(o, M_ENTRY, "entry")
+        elif k.startswith("196_gate_G2"):
+            tr(o, M_UP, "entry")                                     # 센서는 거울 안 함 (다리가 +y로 굽어 꺾임 조각을 비킴)
         elif k.startswith(("170_isolation_gate", "196_gate_G3")):
             tr(o, M_ISO, "iso")
         elif k.startswith(("176_release_gate", "196_gate_G5")):
@@ -85,9 +87,9 @@ try:
         elif k.startswith("112s_gate_servo_screws"):
             split(o, lambda b: (M_REL, "rel") if b.Center.x > 50 else ((M_ISO, "iso") if b.Center.z > 365 else (M_ENTRY, "entry")))
         elif k.startswith(("196_gate_G4", "199b_gate_holder_G4")):
-            tr(o, mat(((1, 0, 0, 53.5), (0, 1, 0, -95), (0, 0, 1, -60))), "iso_duct")
+            tr(o, mat(((1, 0, 0, 53.5), (0, 1, 0, -95), (0, 0, 1, -35))), "iso_duct")
         elif k.startswith("199s_gate_screws"):
-            split(o, lambda b: (mat(((1, 0, 0, 53.5), (0, 1, 0, -95), (0, 0, 1, -60))), "iso_duct") if b.Center.z > 540 else (None, "fixed"))
+            split(o, lambda b: (mat(((1, 0, 0, 53.5), (0, 1, 0, -95), (0, 0, 1, -35))), "iso_duct") if b.Center.z > 540 else (None, "fixed"))
         elif k.startswith(("153b_", "153n_")):
             split(o, lambda b: (M_PARK, "marker") if b.Center.x < 125 else (None, "fixed"))
         elif k.startswith(MARKER):
@@ -95,6 +97,11 @@ try:
         else:
             group[o.Name] = "fixed"
 
+    # 방생 하우징 (+y로 뒤집음) 먼 모서리를 급이 노즐 니플·관(S1) 자리만큼 깎음
+    for o in d.Objects:
+        if group.get(o.Name) == "rel" and key(o).startswith("176_release_gate_housing"):
+            o.Shape = o.Shape.cut(K.box(73.9, 80.5, 40.0, 46.0, 355.0, 395.0))
+            o.Label = o.Label + " [11/14: +y로 뒤집음, 먼 모서리 x 74~80·y 40~ 깎음 — 급이 니플·관]"
     # 새 마킹실 + 리프트 v3
     v = App.newDocument("_v3tmp")
     L3.make(v)
@@ -136,16 +143,17 @@ try:
     e1, C = elbow(B, V(0, -1, 0), V(0, 0, 1))
     Zt = 545.0
     D_ = V(C.x, C.y, Zt)
-    h = V(-D_.x, -D_.y, 0).normalize()
+    XT = 1.5                                                      # 깔때기 쪽 세로 축 x (옛 172와 같음 — 갠트리 레일 틈)
+    h = V(XT - D_.x, -D_.y, 0).normalize()
     e2, E = elbow(D_, V(0, 0, 1), h)
-    G = V(0, 0, E.z + R)
+    G = V(XT, 0, E.z + R)
     F = G - h * R - V(0, 0, R)
     e3, G2 = elbow(F, h, V(0, 0, 1))
-    duct = [pvc(A, B), pvc(C, D_), pvc(E, F), pvc(G2, V(0, 0, 585.0))]
+    duct = [pvc(A, B), pvc(C, D_), pvc(E, F), pvc(G2, V(XT, 0, 585.0))]
     bends = [e1.fuse(sock(B, V(0, 1, 0))), e2, e3]
     n = d.addObject("Part::Feature", "IsoDuct")
     n.Shape = Part.makeCompound(duct)
-    lens = [round((A - B).Length), round((C - D_).Length), round((E - F).Length), round((G2 - V(0, 0, 585)).Length)]
+    lens = [round((A - B).Length), round((C - D_).Length), round((E - F).Length), round((G2 - V(XT, 0, 585)).Length)]
     n.Label = "172_isolation_duct (11/14 새 길 — 수도용 PVC 13A 바깥 18·안 13, %s mm 4토막, 구매)" % "·".join(str(x) for x in lens)
     group[n.Name] = "iso_duct"
     n = d.addObject("Part::Feature", "IsoBends")
@@ -175,6 +183,8 @@ try:
                 continue
             if ga in ("iso_duct",) and gb == "iso":
                 pass
+            if a.Label.startswith("110_entry_duct") and lb.startswith(("111h_", "199s_")):
+                continue                                             # 원래 S2에도 같은 양 (30.4·6.2) — 열수축관·안장 나사
             if not a.Shape.BoundBox.intersect(sb.BoundBox):
                 continue
             vv = a.Shape.common(sb).Volume

@@ -139,6 +139,7 @@ def marking_box():
     if b.get("tongue"):
         tx, ty, tt, td = b["tongue"]
         s = s.fuse(box(tx - 5, tx + 5, ty, ty + tt, b["z_bot"] - td, b["z_bot"] + 0.01))
+        s = s.cut(box(18.6, tx + 6, ty - 0.1, ty + tt + 0.1, b["z_bot"] - 5.6, b["z_bot"] + 0.02))   # (11/14) 혀 위 모서리: 방생 문 하우징(전체 x 74~, z 362.5~) 자리
     if b.get("grid"):
         s = s.cut(cyl(b["bore"] / 2, b["z_mesh"] - b["z_bot"] + 1, V(0, 0, b["z_bot"] - 1)))
         n = int(GRID_R / MESH["p"]) + 1
