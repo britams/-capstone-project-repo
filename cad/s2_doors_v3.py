@@ -36,7 +36,8 @@ try:
     M_PARK = mat(((1, 0, 0, DPARK), (0, 1, 0, 0), (0, 0, 1, 0)))
     M_UP = mat(((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 27.5)))
 
-    d = App.openDocument(os.path.join(OUT, "S2_마킹부.FCStd"))
+    src = os.path.join(OUT, "S2_마킹부_before_v3.FCStd")              # 한 번 바꾼 뒤에는 옛 S2(백업)에서 다시 시작 — 두 번 옮기지 않게
+    d = App.openDocument(src if os.path.exists(src) else os.path.join(OUT, "S2_마킹부.FCStd"))
     key = lambda o: o.Label.split(" ")[0]
     group = {}                                                      # 이름 → 묶음
 
