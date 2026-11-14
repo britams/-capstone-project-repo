@@ -5,7 +5,7 @@
 S2(체인 결과)를 다시 만들지 않고 고쳐 씀 (s2_lift.py와 같은 방식). 옮긴 묶음은 모양 그대로 Placement만 바꿈:
   입구 (112·G2): y 거울 (서보 −y → +y) + z +27.5 (축 349 → 376.5). 110b 꺾임 +27.5, 110 PVC 위 끝 336 → 363.5
   격리 (170·G3): (x−55, y) → (y, x−55) 거울 (−x 벽 → −y 벽, 서보는 −x 쪽) + z −0.5. 옛 172·172b 통로 빼고 새 길:
-      −y 문 → PVC −y → 꺾임(−y→+z) → PVC 세로 (55, −95) → 꺾임(+z→가운데 쪽) → PVC 가로 z 557 (갠트리·마커 위) → 꺾임(→+z) → PVC → 깔때기 173
+      −y 문 → PVC −y → 꺾임(−y→+z) → PVC 세로 (55, −135) → 꺾임(+z→가운데 쪽) → PVC 가로 z 557 (갠트리·마커 위) → 꺾임(→+z) → PVC → 깔때기 173
   방생 (176·G5): y 거울 (서보 +y 쪽 — 대기 컵 자리 비움). 목 174·굴뚝 175·G6 그대로 (축 377 ≈ 376.5)
   마커 (빔과 같이 x로 움직이는 것 + 컵 219): x +30. 고정(X 봉·X 리드·X 모터·X 원점)은 그대로. 컵 받침 220 새로 (방생 하우징 −y 면에 붙음)
 """
@@ -87,9 +87,9 @@ try:
         elif k.startswith("112s_gate_servo_screws"):
             split(o, lambda b: (M_REL, "rel") if b.Center.x > 50 else ((M_ISO, "iso") if b.Center.z > 365 else (M_ENTRY, "entry")))
         elif k.startswith(("196_gate_G4", "199b_gate_holder_G4")):
-            tr(o, mat(((1, 0, 0, 53.5), (0, 1, 0, -95), (0, 0, 1, -35))), "iso_duct")
+            tr(o, mat(((1, 0, 0, 53.5), (0, 1, 0, -135), (0, 0, 1, -35))), "iso_duct")
         elif k.startswith("199s_gate_screws"):
-            split(o, lambda b: (mat(((1, 0, 0, 53.5), (0, 1, 0, -95), (0, 0, 1, -35))), "iso_duct") if b.Center.z > 540 else (None, "fixed"))
+            split(o, lambda b: (mat(((1, 0, 0, 53.5), (0, 1, 0, -135), (0, 0, 1, -35))), "iso_duct") if b.Center.z > 540 else (None, "fixed"))
         elif k.startswith(("153b_", "153n_")):
             split(o, lambda b: (M_PARK, "marker") if b.Center.x < 125 else (None, "fixed"))
         elif k.startswith(MARKER):
@@ -138,7 +138,7 @@ try:
         p1 = c - t1 * R + t0 * 0                                 # 중심에서 끝 단면까지
         p1 = c + (p0 - c) * math.cos(math.radians(ang)) + t0 * R * math.sin(math.radians(ang))
         return body, p1
-    yB = -83.0
+    yB = -123.0                                                  # (11/14 움직임 검사) −83이면 세로관(y −95)이 X로 움직이는 Y 모터·커플링·브래킷(y −123~−74)에 닿음 → 세로관 y −135
     A, B = V(55, yf, z0), V(55, yB, z0)
     e1, C = elbow(B, V(0, -1, 0), V(0, 0, 1))
     Zt = 545.0
