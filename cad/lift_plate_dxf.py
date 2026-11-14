@@ -41,7 +41,40 @@ def dxf(path):
     return len(centers())
 
 
+def nest_dxf(path, W=100.0, H=90.0):
+    """(11/15) 아크릴몰은 50 mm 밑은 못 자름 → 판 한 장(100 × 90, 2T 투명) 안에 격자판 2 + 바닥 원판 2를 같이 그림 (바깥 틀도 자름)"""
+    import re
+    def body(fn, dx, dy):
+        tmp = path + ".tmp"
+        fn(tmp)
+        t = open(tmp, encoding="ascii").read()
+        os.remove(tmp)
+        ents = t.split("ENTITIES\n", 1)[1].rsplit("\n0\nENDSEC", 1)[0]
+        out = []
+        for e in ents.split("\n0\n"):
+            e = e if e.startswith("0\n") else "0\n" + e
+            ln = e.split("\n")
+            for i in range(0, len(ln) - 1, 2):
+                if ln[i] in ("10", "11"):
+                    ln[i + 1] = "%.4f" % (float(ln[i + 1]) + dx)
+                elif ln[i] in ("20", "21"):
+                    ln[i + 1] = "%.4f" % (float(ln[i + 1]) + dy)
+            out.append("\n".join(ln))
+        return out
+    e = []
+    for dx in (-25.0, 25.0):
+        e += body(dxf, dx, 21.0)
+        e += body(disc_dxf, dx, -24.0)
+    w, h = W / 2, H / 2
+    for a_, b_ in (((-w, -h), (w, -h)), ((w, -h), (w, h)), ((w, h), (-w, h)), ((-w, h), (-w, -h))):
+        e.append("0\nLINE\n8\nCUT\n10\n%.4f\n20\n%.4f\n11\n%.4f\n21\n%.4f" % (a_[0], a_[1], b_[0], b_[1]))
+    with open(path, "w", encoding="ascii") as f:
+        f.write("0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n" + "\n".join(e) + "\n0\nENDSEC\n0\nEOF\n")
+    return len(e)
+
+
 if __name__ == "__main__":
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "print", "lift", "300p_아크릴격자판.dxf")
     print(out, "구멍", dxf(out))
     disc_dxf(os.path.join(os.path.dirname(out), "300f_아크릴바닥원판.dxf"))
+    print("묶음", nest_dxf(os.path.join(os.path.dirname(out), "300pf_아크릴_묶음_100x90_2T.dxf")))
