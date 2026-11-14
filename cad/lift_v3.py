@@ -93,6 +93,14 @@ def make(doc=None):
     vb = L.box(face, face + 20, -10, 10, VBAR["top"] - VBAR["L"], VBAR["top"]).cut(
         L.box(face - 1, face + 6, -3.1, 3.1, VBAR["top"] - VBAR["L"] - 1, VBAR["top"] + 1)).cut(
         L.box(face + 10 - 3.1, face + 10 + 3.1, 4, 11, VBAR["top"] - VBAR["L"] - 1, VBAR["top"] + 1))      # +y 홈 (상자 혀)
+    # (11/15) 세운 막대 밑을 데크에 고정 — 빠져 있던 것. −y 면에 L 브래킷 DCB 2025 (20 × 25, 두께 4 [추측 — 판매처 치수 없음]):
+    #   세로 다리 → 막대 −y 홈 (M5 × 8 + 20시리즈 스프링너트), 가로 다리 → 데크 (M5 × 12 위에서 + 너트 데크 밑, 데크 구멍 Ø5.5)
+    zb = VBAR["top"] - VBAR["L"]
+    cx = face + 10
+    brk = L.box(face, face + 20, -14, -10, zb, zb + 25).fuse(L.box(face, face + 20, -30, -10, zb, zb + 4))
+    bs = [L.pan(V(cx, -14, zb + 16), V(0, 1, 0), 5.0, 8.0), L.box(cx - 5, cx + 5, -9.5, -5.0, zb + 13, zb + 19),
+          L.pan(V(cx, -22, zb + 4), V(0, 0, -1), 5.0, 12.0), L.box(cx - 4, cx + 4, -26, -18, zb - 5 - 4, zb - 5)]
+    INFO["deck_hole_world"] = (round(WORLD.x + cx, 2), round(WORLD.y - 22, 2), 5.5)
     tx, ty, tt, td = L.BOXD["tongue"]
     ts = []
     for z in L.BOXD["tongue_holes"]:
@@ -109,6 +117,8 @@ def make(doc=None):
             ("304s_stud_nut (M3 × 8 무두 볼트 + M3 너트 — 로드 끝, 구매)", hw, dark, 0),
             ("307v_bar_act (2020 %.1f mm 세움 — 데크 → 상자 밑, 액추에이터 경첩·상자 혀, 구매)" % VBAR["L"], vb, (0.8, 0.8, 0.82), 0),
             ("308s_tongue_screws (M5 × 10 둥근머리 렌치 2 + 20시리즈 M5 스프링너트 2 — 상자 혀 → 세운 막대, 구매)", Part.makeCompound(ts), dark, 0),
+            ("307b_bar_bracket (L 브래킷 DCB 2025 — 세운 막대 −y 면 → 데크, 디바이스마트 24022, 구매)", brk, gray, 0),
+            ("307s_bar_bracket_screws (M5 × 8 + 스프링너트 — 막대, M5 × 12 + M5 너트 — 데크 구멍 Ø5.5, 구매)", Part.makeCompound(bs), dark, 0),
             ("309s_hinge_screw (M3 × 20 냄비 + 틈 4 = M3 너트 1 + M3 DIN 125 와셔 3 (Ø6 × 4 스페이서 대신 — 해외품) + 2020 홈 안 M3 너트, 구매)",
              Part.makeCompound([scr, tn] + ws), dark, 0)]
     for i, (lab, shp, col, tr) in enumerate(rows):
@@ -123,7 +133,7 @@ def make(doc=None):
 
 MOVING = ("301r", "304")
 ALLOW = (("300s", "300_"), ("300s", "300p"), ("301r", "301_"), ("304s", "301r"), ("304s", "304_"),
-         ("308s", "307v"), ("308s", "300_"), ("309s", "301_"), ("309s", "307v"))
+         ("308s", "307v"), ("308s", "300_"), ("307s", "307b"), ("307s", "307v"), ("307b", "307v"), ("309s", "301_"), ("309s", "307v"))
 
 
 def check(doc):

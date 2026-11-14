@@ -32,7 +32,7 @@ try:
                 objs.append((f[:2] + " " + lab[:55], kind, o.Shape.copy()))
         App.closeDocument(d.Name)
     mov = [o for o in objs if o[1] != "fix"]
-    CHANGED = ("172_isolation_duct", "172b_", "220_", "300", "301", "304", "307v", "308s", "309s", "112_", "112s", "170_", "176_",
+    CHANGED = ("172_isolation_duct", "172b_", "220_", "300", "301", "304", "307v", "307b", "307s", "308s", "309s", "112_", "112s", "170_", "176_",
                "196_gate_G2", "196_gate_G3", "196_gate_G4", "196_gate_G5", "199b_", "199s", "110_", "110b", "219_")
     # (11/14) 마커 움직임 범위는 그대로 (X 37~75는 옛 범위 안) → 안 바뀐 프레임·급이부와의 관계는 원래 설계 그대로. 새로 놓였거나 옮긴 고정 부품만 봄
     fix = [o for o in objs if o[1] == "fix" and o[0].split(" ", 1)[1].startswith(CHANGED)]
