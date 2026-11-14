@@ -2,7 +2,8 @@
 """리프트 v3 — 소형 액추에이터 하나로 (서현 11/14 16:34~16:42 "액추에이터로 단순하게, 운동만, 힘 제한은 나중에(거리로)", CAP-AI-62)
 
 v2(MiniSlide + 거더 + 스페이서 + 스프링 + 홀)를 버리고 로드형 액추에이터를 바닥 가운데 밑에 세움.
-  300 마킹실 상자 (예외 프린트 1개) — 11/14 17:20부터 윗면 격자 한 몸 (망·인서트·나사 없음), 안 Ø33, 바깥 40
+  300 마킹실 상자 (예외 프린트 1개) 안 Ø33, 바깥 40 × 40, 윗면 z 8.0 + M3 인서트 4 (±15.5, ±15.5)
+  300p 투명 아크릴 격자판 40 × 40 × 2 (예외 주문 제작, 11/14 17:25 서현) 네모 구멍 3.0 간격 4.4 — 카메라가 막대 너머도 봄
   301 mightyZAP D7-6PT-3 (아이알로봇, 디바이스마트 101,000원) 행정 26, 6 N, 7.4 V, PWM 900~2100 µs로 위치 지정
       [확실 — 판매처 도면 d12d7_xxxx_3 rev03]: 몸통 57.5 × 29.5 × 15, 로드 끝 M3 암나사 + M3 너트, 뒤 경첩 구멍 Ø3.5 (몸통 뒤 7.6)
       판매처 STEP은 PC 받은도면에만 (공개 레포에 안 올림). 없으면 대표 모양
@@ -92,6 +93,8 @@ def make(doc=None):
     bars, rs, bs = L.frame()
     gray, dark, green = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37), (0.2, 0.7, 0.3)
     rows = [("300_marking_box (마킹실 상자 + 윗면 격자 Ø3 간격 4.4 — 예외 부품 1개, 프린트 파일 print/lift/300_마킹실상자)", L.marking_box(), green, 50),
+            ("300p_acrylic_plate (투명 아크릴 격자판 40 × 40 × 2, 네모 구멍 3.0 간격 4.4 — 주문 제작, DXF print/lift/300p_아크릴격자판.dxf)", L.acrylic_plate(), (0.55, 0.75, 0.95), 60),
+            ("300s_plate_screws (M3 × 8 냄비 4 + M3 DIN 125 4 + M3 열압입 인서트 4, 구매)", L.plate_screws(), dark, 0),
             ("301_mightyZAP_D7-6PT-3 (몸통 — 행정 26, 6 N, 7.4 V, PWM, 디바이스마트, 구매) [%s]" % src, body, gray, 0),
             ("301r_rod (로드 — 움직임) [%s]" % src, rod, gray, 0),
             ("304_floor (바닥 McMaster 90313A108 Ø31.75 + M4 DIN 9021 — 로드 끝에 얹힘, 구매)", fl, gray, 0),
@@ -112,7 +115,7 @@ def make(doc=None):
 
 
 MOVING = ("301r", "304")
-ALLOW = (("301r", "301_"), ("304s", "301r"), ("304s", "304_"),
+ALLOW = (("300s", "300_"), ("300s", "300p"), ("301r", "301_"), ("304s", "301r"), ("304s", "304_"),
          ("308s", "307_"), ("308s", "300_"), ("309s", "301_"), ("309s", "307v"))
 
 
@@ -139,17 +142,12 @@ def check(doc):
                     sweep.append((dz, key(a), key(b), round(v, 2)))
     static = [(key(a), key(b), round(v, 2)) for i, a in enumerate(fx) for b in fx[i + 1:]
               for v in [vol(a, a.Shape, b, b.Shape)] if v > 0.01]
-    fixed_pen = [o.Shape for o in obs if key(o) == "300_marking_box"]
+    fixed_pen = [o.Shape for o in obs if key(o) in ("300_marking_box", "300p_acrylic_plate", "300s_plate_screws")]
     n_ok = n_all = 0
-    n = int(L.MESH["d"] / 2 / L.MESH["p"]) + 1
-    for i in range(-n, n + 1):
-        for j in range(-n, n + 1):
-            x, y = i * L.MESH["p"], j * L.MESH["p"]
-            if math.hypot(x, y) > L.GRID_R + 1e-6:
-                continue
-            n_all += 1
-            if not any(L.pen(x, y, L.BOXD["z_mesh"]).common(f).Volume > 0.001 for f in fixed_pen):
-                n_ok += 1
+    for x, y in L.grid_centers():
+        n_all += 1
+        if not any(L.pen(x, y, L.BOXD["z_mesh"]).common(f).Volume > 0.001 for f in fixed_pen):
+            n_ok += 1
     fl = [o for o in obs if key(o) == "304_floor"][0].Shape.BoundBox
     body = [o for o in obs if key(o).startswith("301_")][0].Shape.BoundBox
     return dict(sweep=sweep, static=static, pen_holes=(n_ok, n_all), floor_top=(round(fl.ZMax, 2), round(fl.ZMax + STROKE, 2)),

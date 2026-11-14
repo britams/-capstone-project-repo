@@ -33,10 +33,46 @@ V = App.Vector
 STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파일"
 
 # 11/14 17:20 서현: 망은 상자 윗면 격자로 같이 프린트, 안 Ø31 → Ø33 (여왕벌 30 + 틈 2 ≥ 32). 바깥 40, 윗면 z 9.5
-BOXD = dict(half=20.0, z_bot=-10.0, z_top=9.5, bore=33.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
-            wing=(20.0, 32.0), wing_t=4.0, ins=(14.0, 14.0), ins_d=4.0, ins_L=6.0, r=1.0, grid=True)   # grid=False면 예전 망 + 인서트
-MESH = dict(d=33.0, t=1.5, hole=3.0, p=4.4)                # 격자 (상자와 한 몸): 구멍 Ø3, 간격 4.4, 두께 1.5 — 비전 자(D6 g_h·g_p·g_t)와 같음
-GRID_R = BOXD["bore"] / 2 - MESH["hole"] / 2               # 구멍 가운데가 이 안이면 뚫음 (구멍이 벽을 넘지 않음)
+# 11/14 17:25 서현: 격자는 투명 아크릴 주문 제작 (두 번째 예외) — 상자 윗면 z 8.0에 얹고 M3 × 8 + 와셔 4개로 인서트에 조임
+BOXD = dict(half=20.0, z_bot=-10.0, z_top=8.0, bore=33.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
+            wing=(20.0, 32.0), wing_t=4.0, ins=(15.5, 15.5), ins_d=4.0, ins_L=6.0, r=1.0, grid=False, plate=True)
+MESH = dict(d=40.0, t=2.0, hole=3.0, p=4.4, corner=1.0, screw_hole=3.4)   # 아크릴 2T, 네모 구멍 3.0 × 3.0 간격 4.4 (열린 면적 46 % — 비전 자 D6)
+GRID_R = BOXD["bore"] / 2 - MESH["hole"] / 2 * 2 ** 0.5   # 네모 구멍 모서리까지 안 Ø33 안
+
+
+def grid_centers():
+    n = int(GRID_R / MESH["p"]) + 1
+    return [(i * MESH["p"], j * MESH["p"]) for i in range(-n, n + 1) for j in range(-n, n + 1) if math.hypot(i, j) * MESH["p"] <= GRID_R + 1e-9]
+
+
+def acrylic_plate():
+    """300p 투명 아크릴 격자판 40 × 40 × 2 (주문 제작) — z_mesh 위에"""
+    m, z = MESH, BOXD["z_mesh"]
+    h = m["d"] / 2
+    s = box(-h, h, -h, h, z, z + m["t"])
+    try:
+        s = s.makeFillet(m["corner"], [e for e in s.Edges if e.Curve.TypeId == "Part::GeomLine" and abs(e.Length - m["t"]) < 1e-6])
+    except Exception:
+        pass
+    a = m["hole"] / 2
+    s = s.cut(Part.makeCompound([box(x - a, x + a, y - a, y + a, z - 1, z + m["t"] + 1) for x, y in grid_centers()]))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            s = s.cut(cyl(m["screw_hole"] / 2, m["t"] + 2, V(sx * BOXD["ins"][0], sy * BOXD["ins"][1], z - 1)))
+    return s
+
+
+def plate_screws():
+    """M3 × 8 냄비 4 + M3 DIN 125 와셔 4 (아크릴 깨짐 막음) + 인서트 4 (대표)"""
+    zt = BOXD["z_mesh"] + MESH["t"]
+    out = []
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            xy = (sx * BOXD["ins"][0], sy * BOXD["ins"][1])
+            out.append(washer(7.0, 3.2, 0.5, zt, xy))
+            out.append(pan(V(xy[0], xy[1], zt + 0.5), V(0, 0, -1), 3.0, 8.0))
+            out.append(washer(BOXD["ins_d"], 3.0, BOXD["ins_L"] - 0.7, BOXD["z_top"] - BOXD["ins_L"] + 0.7, xy))
+    return Part.makeCompound(out)
 PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.6)   # 승준 11/02 캘리퍼스
 H = dict(rest=-7.0, press=BOXD["z_mesh"] - 5.0)
 STROKE = H["press"] - H["rest"]                              # 10
@@ -101,7 +137,8 @@ def marking_box():
                                      for i in range(-n, n + 1) for j in range(-n, n + 1) if math.hypot(i, j) * MESH["p"] <= GRID_R]))
     else:
         s = s.cut(cyl(b["bore"] / 2, b["z_top"] - b["z_bot"] + 2, V(0, 0, b["z_bot"] - 1)))
-        s = s.cut(cyl(b["mesh_rec"] / 2, b["z_top"] - b["z_mesh"] + 1, V(0, 0, b["z_mesh"])))
+        if not b.get("plate"):
+            s = s.cut(cyl(b["mesh_rec"] / 2, b["z_top"] - b["z_mesh"] + 1, V(0, 0, b["z_mesh"])))
     zc = H["rest"] + b["hole"] / 2
     s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(-1, 0, 0)))
     s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(0, 1, 0)))
