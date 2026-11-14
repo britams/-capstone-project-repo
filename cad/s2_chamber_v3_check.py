@@ -17,6 +17,7 @@ try:
     V = App.Vector
     d = App.newDocument("S2v3_preview")
     L3.make(d)
+    rep["v3"] = L3.check(d)                       # 리프트 혼자 (움직임·펜·고정끼리)
     m = App.Matrix()
     m.move(L3.WORLD)
     new = []
@@ -45,7 +46,7 @@ try:
             for n in new:
                 if n.Shape.BoundBox.intersect(sh.BoundBox):
                     v = n.Shape.common(sh).Volume
-                    if v > 0.05:
+                    if v > 0.05 and not o.Label.startswith("REF_camera"):
                         hits.append((n.Label.split(" ")[1], f[:2], o.Label[:50], round(v, 1)))
         App.closeDocument(s.Name)
     rep["context"] = ctx
