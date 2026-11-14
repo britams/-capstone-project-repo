@@ -19,7 +19,7 @@
       (11/12 16:30 고침: 예전 '바닥 덩어리'는 기둥이 밑에서 밀어 올리니 힘을 못 막음 → 바닥 ↔ 기둥 사이 스프링)
       바닥이 말벌에 막히면 기둥만 더 올라가 스프링이 줄어듦 → 누르는 힘 = 0.193 N/mm × 줄어든 길이
       홀 칩이 자석 쪽으로 다가감 → 홀 모듈 DO가 바뀌면 멈춤. 2.5 mm에서 멈추면 0.48 N [문턱은 모듈 가변저항으로 실험해 맞춤 — 추측]
-  306 홀 모듈 KY-024 (SS49E + LM393, DO → UNO A1): 판을 눕혀 거더 구멍 위 M3 스페이서 40에 M3 × 6, 칩은 자석 바로 아래 [모듈 치수 추측]
+  306 홀 모듈 KY-024 (SS49E + LM393, DO → UNO A1): 판을 눕혀 거더 구멍 위 M3 스페이서 30에 M3 × 6, SS49E는 다리를 세워 자석 바로 아래 (가변저항이 높아 판은 낮게) [모듈 치수 추측]
   307 2020 100 mm 3개 (상자 · 레일 위 블록 · 레일 아래 블록), 레일은 M3 × 10 무두 볼트 + T너트
   행정 = 망 아래 z 8.0 − 눌린 말벌 5 − 바닥 −7 = 10 mm
 """
@@ -33,7 +33,7 @@ V = App.Vector
 STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파일"
 
 BOXD = dict(half=23.0, z_bot=-10.0, z_top=8.5, bore=31.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
-            wing=(23.0, 35.0), wing_t=4.0, ins=(13.0, 13.0), ins_d=4.0, ins_L=5.0)
+            wing=(23.0, 35.0), wing_t=4.0, ins=(14.0, 14.0), ins_d=4.0, ins_L=6.0, r=1.0)   # 인서트 M3 × 5.7용 구멍 Ø4.0 × 6 [가능성 높음 — 판매처 권장]
 MESH = dict(d=33.0, t=0.5, hole=2.6, p=3.2)                # 스테인리스 타공 원판 [상품 미정]. 펜 팁 2.2가 구멍 2.6을 지남
 PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.6)   # 승준 11/02 캘리퍼스
 H = dict(rest=-7.0, press=BOXD["z_mesh"] - 5.0)
@@ -45,12 +45,14 @@ SPR = dict(od=9.525, wire=0.635, L0=38.1, Ls=13.97, k=1.1 * 4.448 / 25.4)   # Mc
 MAG = dict(d=6.0, L=10.0, x=12.0)                            # 네오디뮴 막대 Ø6 × 10 [상품 미정]
 TRIP = 2.5                                                   # 멈추는 줄어듦 (mm) [추측 — 실험]
 SO = 20.0                                                    # M3 스페이서 20 (아래 암-암, 위 수-암)
-HSO = 40.0                                                   # 홀 판 스페이서 M3 암-암 40
+HSO = 30.0                                                   # 홀 판 스페이서 M3 암-암 30
 G = dict(L=38.1, w=12.7, t=1.0, hole=4.1, p=12.7, hole_from_out=6.6)
 YC = -G["hole_from_out"]
 ZR = -33.0                                                   # 레일 국부 x → 세계 z (레일 위 끝 −31.5 < 덩어리 아래 −29.5)
 CAR_RANGE = (-85.69, -9.0)
-HALLD = dict(L=32.0, W=14.0, t=1.6, x0=11.0, hole_x=25.4, chip=(1.6, 4.0, 3.0))
+HALLD = dict(L=32.0, W=14.0, t=1.6, x0=10.0, hole_x=25.4, gap=5.5,       # KY-024 판 [치수 추측 — 사서 잼]
+             ss49e=(3.0, 4.0, 1.52), lead=0.45, pot=(4.5, 9.5, 10.0), ic=(4.9, 3.9, 1.5), hdr=(2.5, 10.2, 2.5))
+BR = 1.2                                                     # N35 잔류 자속 밀도 (T) [추측]
 SCREW = {2.0: (4.0, 1.6), 2.5: (5.0, 2.0), 3.0: (5.6, 2.4), 4.0: (8.0, 3.1)}    # ISO 7045 머리 지름·높이 [확실 — 규격]
 RHO = dict(steel=7.85, ndfeb=7.5)
 
@@ -99,7 +101,14 @@ def marking_box():
         s = s.cut(cyl(2.25, b["wing_t"] + 2, V(sx * sum(b["wing"]) / 2, -h - 1, (b["z_bot"] + b["z_top"]) / 2), V(0, 1, 0)))
         for sy in (-1, 1):
             s = s.cut(cyl(b["ins_d"] / 2, b["ins_L"], V(sx * b["ins"][0], sy * b["ins"][1], b["z_top"] - b["ins_L"])))
-    return s.removeSplitter()
+    s = s.removeSplitter()
+    try:                                                   # 세로 모서리 R1 (날개 뿌리 안쪽 모서리 포함 → 날개가 덜 부러짐)
+        ed = [e for e in s.Edges if e.Curve.TypeId == "Part::GeomLine" and abs(e.Length - (b["z_top"] - b["z_bot"])) < 1e-3
+              and max(abs(e.Vertexes[0].X), abs(e.Vertexes[0].Y)) > h - 0.1]
+        s = s.makeFillet(b["r"], ed)
+    except Exception:
+        pass
+    return s
 
 
 def mesh_and_clamp():
@@ -177,15 +186,43 @@ def girder(z_g):
 
 
 def hall(z_g):
-    """홀 모듈 판 (눕힘) + 칩, 판 스페이서, 나사 2 (판 → 스페이서, 거더 아래 → 스페이서)"""
+    """KY-024: 판 (스페이서 HSO 위, M3 × 6) + LM393 + 가변저항 3296 + 핀 4 (직각) + SS49E (다리를 세워 자석 바로 아래, 얼굴 위)
+    가변저항 높이 10 때문에 판은 낮게 (올라가도 상자 밑 z −10 아래), 센서만 다리로 올림. 반환 (판·부품, 스페이서, 나사)"""
     d = HALLD
-    zt = z_g + HSO
-    board = box(d["x0"], d["x0"] + d["L"], -d["W"] / 2, d["W"] / 2, zt, zt + d["t"]).cut(cyl(1.6, 3, V(d["hole_x"], 0, zt - 1)))
-    cx, cy, cz = d["chip"]
-    chip = box(d["x0"] + 0.3, d["x0"] + 0.3 + cx, -cy / 2, cy / 2, zt + d["t"], zt + d["t"] + cz)
-    scr = Part.makeCompound([pan(V(d["hole_x"], 0, zt + d["t"]), V(0, 0, -1), 3.0, 6.0),
-                             pan(V(d["hole_x"], 0, z_g - G["t"]), V(0, 0, 1), 3.0, 6.0)])
-    return board.fuse(chip), hexso(d["hole_x"], 0, z_g, HSO), scr
+    zb = z_g + HSO
+    zt = zb + d["t"]
+    x0, x1 = d["x0"], d["x0"] + d["L"]
+    board = box(x0, x1, -d["W"] / 2, d["W"] / 2, zb, zt).cut(cyl(1.6, 3, V(d["hole_x"], 0, zb - 1)))
+    ix, iy, iz = d["ic"]
+    ic = box(17.0, 17.0 + ix, -iy / 2, iy / 2, zt, zt + iz)
+    px, py, pz = d["pot"]
+    pot = box(30.0, 30.0 + px, -py / 2, py / 2, zt, zt + pz).cut(cyl(1.0, 1.0, V(32.25, 2.5, zt + pz - 0.8)))
+    hx, hy, hz = d["hdr"]
+    hdr = box(x1 - 3.0, x1 - 3.0 + hx, -hy / 2, hy / 2, zt, zt + hz)
+    pins = [box(x1 - 1.75 - 0.32, x1 + 6.0, y - 0.32, y + 0.32, zt + hz / 2 - 0.32, zt + hz / 2 + 0.32) for y in (-3.81, -1.27, 1.27, 3.81)]
+    return Part.makeCompound([board, ic, pot, hdr] + pins), hexso(d["hole_x"], 0, z_g, HSO), \
+        Part.makeCompound([pan(V(d["hole_x"], 0, zt), V(0, 0, -1), 3.0, 6.0), pan(V(d["hole_x"], 0, z_g - G["t"]), V(0, 0, 1), 3.0, 6.0)])
+
+
+def ss49e(z_mag_bottom, zt):
+    """SS49E (TO-92S 4.0 × 3.0 × 1.52) 얼굴 위로 눕혀 자석 축 아래 + 다리 3 (옆으로 1 → 판으로 내려감)"""
+    d = HALLD
+    sx, sy, sz = d["ss49e"]
+    top = z_mag_bottom - d["gap"]
+    body = box(MAG["x"] - sx / 2, MAG["x"] + sx / 2, -sy / 2, sy / 2, top - sz, top)
+    xl = MAG["x"] + sx / 2 + 1.0
+    zm = top - sz / 2
+    legs = []
+    for y in (-1.27, 0.0, 1.27):
+        legs.append(cyl(d["lead"] / 2, xl - (MAG["x"] + sx / 2), V(MAG["x"] + sx / 2, y, zm), V(1, 0, 0)))
+        legs.append(cyl(d["lead"] / 2, zm - zt + d["lead"] / 2, V(xl, y, zt)))
+    return body, Part.makeCompound(legs)
+
+
+def b_mT(z):
+    """막대 자석 축 위 자속 밀도 (mT), 끝면에서 z mm"""
+    R, Lm = MAG["d"] / 2, MAG["L"]
+    return BR / 2 * ((Lm + z) / math.hypot(R, Lm + z) - z / math.hypot(R, z)) * 1000
 
 
 def slide(z_row):
@@ -241,6 +278,7 @@ def make(doc=None):
     rail, car, src = slide(z_row)
     gs = Part.makeCompound([pan(V(xh, YC + G["t"], z_row), V(0, -1, 0), 3.0, 6.0) for xh in (0.0, G["p"])])
     hb, hso, hscr = hall(z_g)
+    sb, sl = ss49e(mag.BoundBox.ZMin, z_g + HSO + HALLD["t"])
     mesh, clamp = mesh_and_clamp()
     bars, rs, bs = frame()
     gray, dark, green, blue = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37), (0.2, 0.7, 0.3), (0.2, 0.4, 0.8)
@@ -257,8 +295,10 @@ def make(doc=None):
             ("304_floor (바닥 M10 DIN 9021 + 스프링 받는 판 M5 DIN 9021 — 스프링 위에 얹힘, 구매)", flo, gray, 0),
             ("304m_magnet (네오디뮴 막대 Ø6 × 10 — 바닥 아래에 자석 힘으로 붙음, 구매) [상품 미정]", mag, (0.6, 0.6, 0.65), 0),
             ("305_spring (압축 스프링 McMaster 9657K33 — 0.193 N/mm, 구매)", spr, gray, 0),
-            ("306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 눕혀서 스페이서에, 구매) [판 치수 추측]", hb, blue, 0),
-            ("306o_standoff (M3 육각 스페이서 암-암 40 — 홀 판, 구매)", hso, gray, 0),
+            ("306_hall_module_KY024 (판 + LM393 + 가변저항 + 핀 4, DO → UNO A1 — 눕혀서 스페이서에, 구매) [판 치수 추측]", hb, blue, 0),
+            ("306h_SS49E (홀 소자 — 다리를 세워 얼굴이 자석을 봄, KY-024에 딸림)", sb, (0.15, 0.15, 0.15), 0),
+            ("306l_SS49E_legs (다리 3 — 판에 납땜된 그대로 구부림)", sl, (0.8, 0.7, 0.3), 0),
+            ("306o_standoff (M3 육각 스페이서 암-암 30 — 홀 판, 구매)", hso, gray, 0),
             ("306s_screws (M3 × 6 냄비 2 — 판 → 스페이서 → 거더, 구매)", hscr, dark, 0),
             ("307_bar_2020_100 (2020 알루미늄 프로파일 100 mm 3개 — 정해진 길이 제품, 구매)", bars, (0.8, 0.8, 0.82), 0),
             ("307s_rail_studs (M3 × 10 무두 볼트 4 + 2020 M3 T너트 4, 구매)", rs, dark, 0),
@@ -276,7 +316,7 @@ def make(doc=None):
 MOVING = ("301c", "302", "303", "304", "305", "306")
 LUMP = ("304",)
 ALLOW = (("300c", "300_"), ("300c", "300m"), ("301c", "301_"), ("302s", "301c"), ("302s", "302_"), ("303s", "303"),
-         ("303s", "302_"), ("306s", "306"), ("306s", "302_"), ("306o", "302_"), ("307s", "307_"), ("307s", "301_"),
+         ("303s", "302_"), ("306s", "306"), ("306l", "306"), ("306s", "302_"), ("306o", "302_"), ("307s", "307_"), ("307s", "301_"),
          ("308s", "307_"), ("308s", "300_"))
 
 
@@ -331,11 +371,11 @@ def check(doc):
             if not any(pn.common(f).Volume > 0.001 for f in fixed_pen):
                 n_ok += 1
     mb = [o for o in obs if key(o) == "304m_magnet"][0].Shape.BoundBox.ZMin
-    ct = [o for o in obs if key(o).startswith("306_")][0].Shape.BoundBox.ZMax
+    ct = [o for o in obs if key(o).startswith("306h")][0].Shape.BoundBox.ZMax
     return dict(stroke=STROKE, sweep=sweep, over=over, static=static, inner=inner,
                 carriage_local=(round(lo, 2), round(hi, 2)), carriage_in_rail=(lo >= CAR_RANGE[0] and hi <= CAR_RANGE[1]),
                 pen_holes=(n_ok, n_all), float_g=round(FLOAT_G, 1), spring_rest=round(L_REST, 2),
-                gap_rest=round(mb - ct, 2), gap_trip=round(mb - ct - TRIP, 2), N_trip=round(SPR["k"] * TRIP, 3),
+                gap_rest=round(mb - ct, 2), gap_trip=round(mb - ct - TRIP, 2), B_rest_mT=round(b_mT(mb - ct), 1), B_trip_mT=round(b_mT(mb - ct - TRIP), 1), N_trip=round(SPR["k"] * TRIP, 3),
                 N_lift=round(FLOAT_G * 9.81e-3, 3), standoff_gap=round(zb_gap(obs, key), 2))
 
 

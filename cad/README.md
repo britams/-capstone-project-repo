@@ -161,3 +161,4 @@
   - 서현 PC `CAD files\D5g\D5g_full_McMasterSTEP.FCStd`: 같은 색, 나사는 McMaster STEP 실제 모양 (레포에 안 올림)
 - 급이부 부품 파일 `cad/parts/feeder/`도 같은 색 규칙이다.
 - 예전 D5b~D5f FCStd는 기록용이다. 고치지 않는다.
+- 2026-11-14 (서현, CAP-AI-62) 리프트 v2 (`lift_v2.py`): 바닥 덩어리 → 스프링 McMaster 9657K33 + KY-024 홀 (2.5 mm 줄면 0.48 N). 홀 모듈을 판·LM393·가변저항·핀·SS49E(다리로 세움)로 그림. 마킹실 상자 프린트 파일 따로 `print/lift/300_마킹실상자.{stl,step,FCStd}` (`lift_v2_box_print.py`) — 인서트 Ø4 × 6 자리 (±14, ±14), 세로 모서리 R1. 검사: 겹침 0, 캐리지 레일 안, 펜 69/69
