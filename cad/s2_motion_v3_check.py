@@ -11,8 +11,8 @@ OUT = os.path.join(HERE, "split")
 XY = ("201_", "202_", "203_", "204_", "205", "206_", "221_", "223_", "224_")
 XO = ("207_", "208_", "209", "210_", "211_", "212_", "222_", "225_", "227y", "153b_", "153n_")
 PARK = (75.0, -40.0)
-XS = (37.0, 46.0, 55.0, 64.0, 75.0)
-YS = (-40.0, -28.0, -14.0, 0.0, 16.0)
+XS = (37.0, 55.0, 75.0)
+YS = (-40.0, -14.0, 16.0)                     # (11/14) 25자세는 27분 넘게 안 끝나서 9자세 + 움직임 범위 상자로 먼저 거름
 rep = dict(ok=False)
 try:
     import FreeCAD as App
@@ -35,12 +35,20 @@ try:
     fix = [o for o in objs if o[1] == "fix"]
     rep["n"] = dict(moving=len(mov), fixed=len(fix))
 
+    near = {}
+    for la, k, sa in mov:                                          # 움직임 전체를 덮는 상자 안에 드는 고정 부품만
+        bb = sa.BoundBox
+        sw = App.BoundBox(bb.XMin + min(XS) - PARK[0], bb.YMin + (min(YS) - PARK[1] if k == "xy" else 0), bb.ZMin,
+                          bb.XMax + max(XS) - PARK[0], bb.YMax + (max(YS) - PARK[1] if k == "xy" else 0), bb.ZMax)
+        near[la] = [(lb, sb) for lb, _, sb in fix if sw.intersect(sb.BoundBox)]
+    rep["near_pairs"] = sum(len(v) for v in near.values())
+
     def hits(dx, dy):
         out = {}
         for la, k, sa in mov:
             s = sa.copy()
             s.translate(V(dx, dy if k == "xy" else 0, 0))
-            for lb, _, sb in fix:
+            for lb, sb in near[la]:
                 if s.BoundBox.intersect(sb.BoundBox):
                     v = s.common(sb).Volume
                     if v > 0.05:
