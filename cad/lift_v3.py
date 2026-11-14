@@ -2,12 +2,12 @@
 """리프트 v3 — 소형 액추에이터 하나로 (서현 11/14 16:34~16:42 "액추에이터로 단순하게, 운동만, 힘 제한은 나중에(거리로)", CAP-AI-62)
 
 v2(MiniSlide + 거더 + 스페이서 + 스프링 + 홀)를 버리고 로드형 액추에이터를 바닥 가운데 밑에 세움.
-  300 마킹실 상자 (예외 프린트 1개) · 망 · 망 나사 — lift_v2 그대로
+  300 마킹실 상자 (예외 프린트 1개) — 11/14 17:20부터 윗면 격자 한 몸 (망·인서트·나사 없음), 안 Ø33, 바깥 40
   301 mightyZAP D7-6PT-3 (아이알로봇, 디바이스마트 101,000원) 행정 26, 6 N, 7.4 V, PWM 900~2100 µs로 위치 지정
       [확실 — 판매처 도면 d12d7_xxxx_3 rev03]: 몸통 57.5 × 29.5 × 15, 로드 끝 M3 암나사 + M3 너트, 뒤 경첩 구멍 Ø3.5 (몸통 뒤 7.6)
       판매처 STEP은 PC 받은도면에만 (공개 레포에 안 올림). 없으면 대표 모양
-  304 바닥: 로드 끝 M3 × 10 무두 볼트 + M3 너트(아래, 로드 잠금) + M4 DIN 9021 + M10 DIN 9021(밟는 면) + M3 너트(위, 바닥 구멍 안 — 윗면보다 낮음)
-      바닥 바깥 30이 상자 안 Ø31에 끼워져 로드를 똑바로 잡음
+  304 바닥: 로드 끝 M3 × 8 무두 볼트 + M3 너트(로드 잠금) + M4 DIN 9021 + McMaster 90313A108 (Ø31.75 × 1.3, 구멍 7.14 — 얹힘)
+      볼트 끝은 바닥 구멍 안 (윗면보다 낮음). 바닥 바깥 31.75가 상자 안 Ø33에 끼워져 옆을 잡음
   309 경첩 고정: M3 × 20 냄비 + M3 원형 스페이서 Ø6 × 4 (경첩 8.6 ↔ 몸통 15 차이 메움) + 2020 M3 T너트 → 세운 2020 막대 옆 홈
   307 2020 막대 2개: 상자용(가로, v2와 같음) + 액추에이터용(세움, 100 mm). 프레임과는 아직 안 맞춤
   행정: 바닥 z −7 (쉼, 로드 8 mm 나옴) → z +3 (누름, 18 mm) — 액추에이터 행정 26 안. 멈춤은 거리(PWM)로
@@ -27,8 +27,8 @@ DROP_IDS = (20, 30)                        # 판매처 끝 너트·볼 끝 (안 
 ACT = dict(front=42.0, rear=-15.5, rod_face=45.8, hinge_back=7.6, hinge_d=3.5, half_t=7.63)   # STEP 좌표 (축 z, 로드 +z)
 S_REST, STROKE = 8.0, L.STROKE              # 쉼 = 로드 8 mm 나옴, 누름까지 10
 FLOOR_TOP = L.H["rest"]                     # −7
-NUT_T, M4W, M10W = 2.4, (12.0, 4.3, 1.0), (30.0, 10.5, 2.5)
-STACK = NUT_T + M4W[2] + M10W[2]           # 로드 끝 → 바닥 윗면 5.9
+NUT_T, M4W, M10W = 2.4, (12.0, 4.3, 1.0), (31.75, 7.14, 1.27)   # 바닥 = McMaster 90313A108 (1-1/4" OD, 18-8) [확실 — 판매처]
+STACK = NUT_T + M4W[2] + M10W[2]           # 로드 끝 → 바닥 윗면 4.67
 Z0 = FLOOR_TOP - STACK - (ACT["rod_face"] + S_REST)
 SPACER = (6.0, 3.2, 4.0)                    # M3 원형 스페이서 (나사 없음) Ø6 × 4 [상품 미정]
 INFO = {}
@@ -64,13 +64,12 @@ def actuator():
 
 
 def floor_stack(f):
-    """로드 끝 면 f (세계 z)에서 위로: 무두 볼트, 아래 너트, M4 와셔, M10 와셔, 위 너트"""
-    stud = L.cyl(1.5, 10.0, V(0, 0, f - 4.5))
+    """로드 끝 면 f (세계 z)에서 위로: 무두 볼트 M3 × 8 (로드에 4.5), 잠금 너트, M4 DIN 9021, 바닥 와셔 (얹힘 — 볼트 끝은 바닥 구멍 안, 윗면 아래)"""
+    stud = L.cyl(1.5, 8.0, V(0, 0, f - 4.5))
     n1 = nut(f)
     w4 = L.washer(*M4W, f + NUT_T)
     w10 = L.washer(*M10W, f + NUT_T + M4W[2])
-    n2 = nut(f + NUT_T + M4W[2])
-    return Part.makeCompound([w4, w10]), Part.makeCompound([stud, n1, n2])
+    return Part.makeCompound([w4, w10]), Part.makeCompound([stud, n1])
 
 
 def make(doc=None):
@@ -90,16 +89,13 @@ def make(doc=None):
     tn = L.box(face + 1.5, face + 5.0, -3.0, 3.0, zh - 5, zh + 5)
     vb = L.box(face, face + 20, -10, 10, VBAR["top"] - VBAR["L"], VBAR["top"]).cut(
         L.box(face - 1, face + 6, -3.1, 3.1, VBAR["top"] - VBAR["L"] - 1, VBAR["top"] + 1))
-    mesh, clamp = L.mesh_and_clamp()
     bars, rs, bs = L.frame()
     gray, dark, green = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37), (0.2, 0.7, 0.3)
-    rows = [("300_marking_box (마킹실 상자 — 예외 부품 1개, 프린트 파일 print/lift/300_마킹실상자)", L.marking_box(), green, 50),
-            ("300m_mesh (스테인리스 타공 원판 Ø33 × 0.5, 구매) [상품 미정]", mesh, gray, 0),
-            ("300c_mesh_clamp (M3 × 6 냄비 4 + M3 DIN 9021 4 + M3 열압입 인서트 4, 구매)", clamp, dark, 0),
+    rows = [("300_marking_box (마킹실 상자 + 윗면 격자 Ø3 간격 4.4 — 예외 부품 1개, 프린트 파일 print/lift/300_마킹실상자)", L.marking_box(), green, 50),
             ("301_mightyZAP_D7-6PT-3 (몸통 — 행정 26, 6 N, 7.4 V, PWM, 디바이스마트, 구매) [%s]" % src, body, gray, 0),
             ("301r_rod (로드 — 움직임) [%s]" % src, rod, gray, 0),
-            ("304_floor (바닥 M10 DIN 9021 + M4 DIN 9021 — 로드 끝, 구매)", fl, gray, 0),
-            ("304s_stud_nuts (M3 × 10 무두 볼트 + M3 너트 2 — 로드 끝, 구매)", hw, dark, 0),
+            ("304_floor (바닥 McMaster 90313A108 Ø31.75 + M4 DIN 9021 — 로드 끝에 얹힘, 구매)", fl, gray, 0),
+            ("304s_stud_nut (M3 × 8 무두 볼트 + M3 너트 — 로드 끝, 구매)", hw, dark, 0),
             ("307_bar_box (2020 100 mm — 상자 날개, 구매)", Part.makeCompound([L.bar(L.Z_BAR[0], L.Y_BAR_FRONT[0])]), (0.8, 0.8, 0.82), 0),
             ("307v_bar_act (2020 100 mm 세움 — 액추에이터 경첩, 구매)", vb, (0.8, 0.8, 0.82), 0),
             ("308s_box_screws (M4 × 10 냄비 2 + 2020 M4 T너트 2, 구매)", bs, dark, 0),
@@ -116,7 +112,7 @@ def make(doc=None):
 
 
 MOVING = ("301r", "304")
-ALLOW = (("300c", "300_"), ("300c", "300m"), ("301r", "301_"), ("304s", "301r"), ("304s", "304_"),
+ALLOW = (("301r", "301_"), ("304s", "301r"), ("304s", "304_"),
          ("308s", "307_"), ("308s", "300_"), ("309s", "301_"), ("309s", "307v"))
 
 
@@ -143,13 +139,13 @@ def check(doc):
                     sweep.append((dz, key(a), key(b), round(v, 2)))
     static = [(key(a), key(b), round(v, 2)) for i, a in enumerate(fx) for b in fx[i + 1:]
               for v in [vol(a, a.Shape, b, b.Shape)] if v > 0.01]
-    fixed_pen = [o.Shape for o in obs if key(o) in ("300_marking_box", "300c_mesh_clamp")]
+    fixed_pen = [o.Shape for o in obs if key(o) == "300_marking_box"]
     n_ok = n_all = 0
     n = int(L.MESH["d"] / 2 / L.MESH["p"]) + 1
     for i in range(-n, n + 1):
         for j in range(-n, n + 1):
             x, y = i * L.MESH["p"], j * L.MESH["p"]
-            if math.hypot(x, y) >= L.BOXD["bore"] / 2 - 1.1:
+            if math.hypot(x, y) > L.GRID_R + 1e-6:
                 continue
             n_all += 1
             if not any(L.pen(x, y, L.BOXD["z_mesh"]).common(f).Volume > 0.001 for f in fixed_pen):

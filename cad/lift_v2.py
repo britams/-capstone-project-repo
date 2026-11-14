@@ -32,9 +32,11 @@ import Part
 V = App.Vector
 STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파일"
 
-BOXD = dict(half=19.0, z_bot=-10.0, z_top=8.5, bore=31.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
-            wing=(19.0, 31.0), wing_t=4.0, ins=(14.0, 14.0), ins_d=4.0, ins_L=6.0, r=1.0)   # 인서트 M3 × 5.7용 구멍 Ø4.0 × 6 [가능성 높음 — 판매처 권장]
-MESH = dict(d=33.0, t=0.5, hole=2.6, p=3.2)                # 스테인리스 타공 원판 [상품 미정]. 펜 팁 2.2가 구멍 2.6을 지남
+# 11/14 17:20 서현: 망은 상자 윗면 격자로 같이 프린트, 안 Ø31 → Ø33 (여왕벌 30 + 틈 2 ≥ 32). 바깥 40, 윗면 z 9.5
+BOXD = dict(half=20.0, z_bot=-10.0, z_top=9.5, bore=33.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
+            wing=(20.0, 32.0), wing_t=4.0, ins=(14.0, 14.0), ins_d=4.0, ins_L=6.0, r=1.0, grid=True)   # grid=False면 예전 망 + 인서트
+MESH = dict(d=33.0, t=1.5, hole=3.0, p=4.4)                # 격자 (상자와 한 몸): 구멍 Ø3, 간격 4.4, 두께 1.5 — 비전 자(D6 g_h·g_p·g_t)와 같음
+GRID_R = BOXD["bore"] / 2 - MESH["hole"] / 2               # 구멍 가운데가 이 안이면 뚫음 (구멍이 벽을 넘지 않음)
 PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.6)   # 승준 11/02 캘리퍼스
 H = dict(rest=-7.0, press=BOXD["z_mesh"] - 5.0)
 STROKE = H["press"] - H["rest"]                              # 10
@@ -92,15 +94,22 @@ def marking_box():
     w0, w1 = b["wing"]
     for sx in (-1, 1):
         s = s.fuse(box(min(sx * w0, sx * w1), max(sx * w0, sx * w1), -h, -h + b["wing_t"], b["z_bot"], b["z_top"]))
-    s = s.cut(cyl(b["bore"] / 2, b["z_top"] - b["z_bot"] + 2, V(0, 0, b["z_bot"] - 1)))
-    s = s.cut(cyl(b["mesh_rec"] / 2, b["z_top"] - b["z_mesh"] + 1, V(0, 0, b["z_mesh"])))
+    if b.get("grid"):
+        s = s.cut(cyl(b["bore"] / 2, b["z_mesh"] - b["z_bot"] + 1, V(0, 0, b["z_bot"] - 1)))
+        n = int(GRID_R / MESH["p"]) + 1
+        s = s.cut(Part.makeCompound([cyl(MESH["hole"] / 2, b["z_top"] - b["z_mesh"] + 2, V(i * MESH["p"], j * MESH["p"], b["z_mesh"] - 1))
+                                     for i in range(-n, n + 1) for j in range(-n, n + 1) if math.hypot(i, j) * MESH["p"] <= GRID_R]))
+    else:
+        s = s.cut(cyl(b["bore"] / 2, b["z_top"] - b["z_bot"] + 2, V(0, 0, b["z_bot"] - 1)))
+        s = s.cut(cyl(b["mesh_rec"] / 2, b["z_top"] - b["z_mesh"] + 1, V(0, 0, b["z_mesh"])))
     zc = H["rest"] + b["hole"] / 2
     s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(-1, 0, 0)))
     s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(0, 1, 0)))
     for sx in (-1, 1):
         s = s.cut(cyl(2.25, b["wing_t"] + 2, V(sx * sum(b["wing"]) / 2, -h - 1, (b["z_bot"] + b["z_top"]) / 2), V(0, 1, 0)))
         for sy in (-1, 1):
-            s = s.cut(cyl(b["ins_d"] / 2, b["ins_L"], V(sx * b["ins"][0], sy * b["ins"][1], b["z_top"] - b["ins_L"])))
+            if not b.get("grid"):
+                s = s.cut(cyl(b["ins_d"] / 2, b["ins_L"], V(sx * b["ins"][0], sy * b["ins"][1], b["z_top"] - b["ins_L"])))
     s = s.removeSplitter()
     try:                                                   # 세로 모서리 R1 (날개 뿌리 안쪽 모서리 포함 → 날개가 덜 부러짐)
         ed = [e for e in s.Edges if e.Curve.TypeId == "Part::GeomLine" and abs(e.Length - (b["z_top"] - b["z_bot"])) < 1e-3
