@@ -11,14 +11,15 @@
       뒤 날개 2개 (M4 구멍) → 상자 막대 T너트. 망은 M3 열압입 인서트 4 + M3 × 6 + M3 DIN 9021 와셔로 테두리를 누름
   301 Haydon Kerk MiniSlide MSA02S-C0039-805 (50 mm, 리드 1 mm, 20 mm 캔스택 7.5°, 5 V 350 mA) [확실 — 판매처 STEP, PC에만]
   302 메카노 앵글 거더 1½" (구멍 Ø4.1, 간격 12.7) — 캐리지 위 구멍 줄에 M3 × 6 두 개 [두께·구멍 자리 추측]
-  303 기둥: M3 육각 스페이서 암-암 20 + 받침 (M6 DIN 9021 + M4 DIN 9021, M3 × 8)
-  !! (11/12 16:30) 아래 304 '바닥 덩어리' 방식은 틀림 — 기둥이 덩어리를 밑에서 받쳐 밀면 덩어리가 멈출 수 없어 힘을 못 막음.
-     바닥 ↔ 기둥 사이 스프링으로 바꿀 것 (스프링 상품 고르는 중, McMaster 로그인 대기). 이 판은 실행·검사 안 함.
-  304 바닥 덩어리 (기둥 위에 얹혀 있을 뿐 — 누르는 힘 상한 = 이 무게):
-      M10 DIN 9021 (바깥 30 · 안 10.5 · 2.5) + M10 DIN 125 10장 (바깥 20 · 안 10.5 · 2) + 원판 자석 6 × 3 (와셔 테에 붙음)
-      → 계산 약 48.6 g = 0.48 N [가능성 높음 — 강철 7.85, 저울로 장수 맞춤]
-      바닥이 말벌을 이보다 세게 밀면 덩어리는 멈추고 기둥만 더 올라감 → 홀 센서가 자석과 어긋남을 보고 멈춤
-  306 홀 모듈 KY-024 (SS49E + LM393, DO → UNO A1): 판을 눕혀 거더 구멍 위 M3 스페이서 20에 M3 × 6, 칩은 자석 옆 0.5 [모듈 치수 추측]
+  303 기둥: M3 육각 스페이서 암-암 20 (거더 아래에서 M3 × 6) + 스프링 받침 M4 DIN 9021 + M3 스페이서 수-암 20 (스프링 안내)
+      — 위 스페이서 수나사가 받침 구멍을 지나 아래 스페이서에 물려 받침을 끼워 조임
+  304 바닥 (스프링 위에 얹힘): M10 DIN 9021 (밟는 면, 바깥 30 → 상자 안 Ø31이 옆을 잡음) + M5 DIN 9021 (스프링 받는 판)
+      + 막대 자석 Ø6 × 10 (바닥 아래 x 12에 붙음 — 자석 힘으로만 붙음, 나사 없음)
+  305 압축 스프링 McMaster 9657K33 (바깥 9.53 · 안 8.26 · 선 0.64 · 자유 38.1 · 1.1 lbf/in = 0.193 N/mm) [확실 — 판매처 표]
+      (11/12 16:30 고침: 예전 '바닥 덩어리'는 기둥이 밑에서 밀어 올리니 힘을 못 막음 → 바닥 ↔ 기둥 사이 스프링)
+      바닥이 말벌에 막히면 기둥만 더 올라가 스프링이 줄어듦 → 누르는 힘 = 0.193 N/mm × 줄어든 길이
+      홀 칩이 자석 쪽으로 다가감 → 홀 모듈 DO가 바뀌면 멈춤. 2.5 mm에서 멈추면 0.48 N [문턱은 모듈 가변저항으로 실험해 맞춤 — 추측]
+  306 홀 모듈 KY-024 (SS49E + LM393, DO → UNO A1): 판을 눕혀 거더 구멍 위 M3 스페이서 40에 M3 × 6, 칩은 자석 바로 아래 [모듈 치수 추측]
   307 2020 100 mm 3개 (상자 · 레일 위 블록 · 레일 아래 블록), 레일은 M3 × 10 무두 볼트 + T너트
   행정 = 망 아래 z 8.0 − 눌린 말벌 5 − 바닥 −7 = 10 mm
 """
@@ -38,15 +39,18 @@ PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.
 H = dict(rest=-7.0, press=BOXD["z_mesh"] - 5.0)
 STROKE = H["press"] - H["rest"]                              # 10
 FLOOR = dict(od=30.0, id=10.5, t=2.5)                        # M10 DIN 9021
-WGT = dict(od=20.0, id=10.5, t=2.0, n=10)                    # M10 DIN 125
-MAG = dict(d=6.0, t=3.0)
-PAD = ((12.0, 4.3, 1.0), (18.0, 6.4, 1.6))                   # M4 DIN 9021 (위), M6 DIN 9021 (아래)
-SO = 20.0                                                    # M3 스페이서 암-암 20
+BEAR = dict(od=15.0, id=5.3, t=1.2)                          # M5 DIN 9021
+SEAT = dict(od=12.0, id=4.3, t=1.0)                          # M4 DIN 9021 (구멍 4.3 — M3 수나사는 지나고 육각 5.5는 걸림)
+SPR = dict(od=9.525, wire=0.635, L0=38.1, Ls=13.97, k=1.1 * 4.448 / 25.4)   # McMaster 9657K33
+MAG = dict(d=6.0, L=10.0, x=12.0)                            # 네오디뮴 막대 Ø6 × 10 [상품 미정]
+TRIP = 2.5                                                   # 멈추는 줄어듦 (mm) [추측 — 실험]
+SO = 20.0                                                    # M3 스페이서 20 (아래 암-암, 위 수-암)
+HSO = 40.0                                                   # 홀 판 스페이서 M3 암-암 40
 G = dict(L=38.1, w=12.7, t=1.0, hole=4.1, p=12.7, hole_from_out=6.6)
 YC = -G["hole_from_out"]
 ZR = -33.0                                                   # 레일 국부 x → 세계 z (레일 위 끝 −31.5 < 덩어리 아래 −29.5)
 CAR_RANGE = (-85.69, -9.0)
-HALLD = dict(L=32.0, W=14.0, t=1.6, x0=13.2, hole_x=25.4, chip=(1.6, 4.0, 3.0))
+HALLD = dict(L=32.0, W=14.0, t=1.6, x0=11.0, hole_x=25.4, chip=(1.6, 4.0, 3.0))
 SCREW = {2.0: (4.0, 1.6), 2.5: (5.0, 2.0), 3.0: (5.6, 2.4), 4.0: (8.0, 3.1)}    # ISO 7045 머리 지름·높이 [확실 — 규격]
 RHO = dict(steel=7.85, ndfeb=7.5)
 
@@ -120,25 +124,47 @@ def mesh_and_clamp():
     return m, Part.makeCompound(cl)
 
 
-def floor_lump():
-    """바닥 덩어리 (받침 위에 얹힘): 바닥 와셔 + 무게 와셔 10 + 자석. 반환 (와셔들, 자석, 아랫면 z)"""
-    top = H["rest"]
-    parts = [washer(FLOOR["od"], FLOOR["id"], FLOOR["t"], top - FLOOR["t"])]
-    z = top - FLOOR["t"]
-    for k in range(WGT["n"]):
-        parts.append(washer(WGT["od"], WGT["id"], WGT["t"], z - WGT["t"]))
-        z -= WGT["t"]
-    mag = cyl(MAG["d"] / 2, MAG["t"], V(WGT["od"] / 2, 0, z + WGT["t"] / 2), V(1, 0, 0))
-    return Part.makeCompound(parts), mag, z
+def ring_g(od, idd, t, rho=RHO["steel"]):
+    return math.pi / 4 * (od ** 2 - idd ** 2) * t * rho / 1000
 
 
-def column(zb):
-    """받침 (M4 9021 위, M6 9021 아래) + M3 × 8 + 스페이서 20. 반환 (받침, 나사, 스페이서, 거더 윗면 z)"""
-    (od1, id1, t1), (od2, id2, t2) = PAD
-    pads = Part.makeCompound([washer(od1, id1, t1, zb - t1), washer(od2, id2, t2, zb - t1 - t2)])
-    scr = pan(V(0, 0, zb), V(0, 0, -1), 3.0, 8.0)
-    z_so = zb - t1 - t2
-    return pads, scr, hexso(0, 0, z_so - SO, SO), z_so - SO
+FLOAT_G = ring_g(FLOOR["od"], FLOOR["id"], FLOOR["t"]) + ring_g(BEAR["od"], BEAR["id"], BEAR["t"]) + \
+    ring_g(MAG["d"], 0, MAG["L"], RHO["ndfeb"])
+L_REST = SPR["L0"] - FLOAT_G * 9.81e-3 / SPR["k"]            # 바닥 무게로 눌린 길이
+
+
+def floor():
+    """바닥 (스프링 위): 와셔 2 + 자석. 반환 (와셔들, 자석, M5 와셔 아랫면 z)"""
+    z = H["rest"] - FLOOR["t"]
+    w = Part.makeCompound([washer(FLOOR["od"], FLOOR["id"], FLOOR["t"], z), washer(BEAR["od"], BEAR["id"], BEAR["t"], z - BEAR["t"])])
+    mag = cyl(MAG["d"] / 2, MAG["L"], V(MAG["x"], 0, z - MAG["L"]))
+    return w, mag, z - BEAR["t"]
+
+
+def spring(z0, L):
+    """압축 스프링 (선 가운데가 양 끝에서 선 반지름만큼 안) — 감김 수는 닫힌 길이 / 선 지름"""
+    r, w = (SPR["od"] - SPR["wire"]) / 2, SPR["wire"]
+    n = SPR["Ls"] / w
+    h = L - w
+    try:
+        hx = Part.makeHelix(h / n, h, r)
+        hx.translate(V(0, 0, z0 + w / 2))
+        p0 = hx.Edges[0].valueAt(hx.Edges[0].FirstParameter)
+        t0 = hx.Edges[0].tangentAt(hx.Edges[0].FirstParameter)
+        c = Part.Wire(Part.makeCircle(w / 2, p0, t0))
+        return Part.Wire(hx.Edges).makePipeShell([c], True, True)
+    except Exception:
+        return cyl(SPR["od"] / 2, L, V(0, 0, z0)).cut(cyl(SPR["od"] / 2 - w, L + 2, V(0, 0, z0 - 1)))
+
+
+def column(z_bear):
+    """스프링 받침 + 안내 스페이서 + 나사. 반환 (받침, 나사, 스페이서, 스프링, 거더 윗면 z)"""
+    z_seat = z_bear - L_REST
+    z_g = z_seat - SEAT["t"] - SO
+    seat = washer(SEAT["od"], SEAT["id"], SEAT["t"], z_g + SO)
+    scr = pan(V(0, 0, z_g - G["t"]), V(0, 0, 1), 3.0, 6.0)
+    so = Part.makeCompound([hexso(0, 0, z_g, SO), hexso(0, 0, z_seat, SO)])
+    return seat, scr, so, spring(z_seat, L_REST), z_g
 
 
 def girder(z_g):
@@ -153,13 +179,13 @@ def girder(z_g):
 def hall(z_g):
     """홀 모듈 판 (눕힘) + 칩, 판 스페이서, 나사 2 (판 → 스페이서, 거더 아래 → 스페이서)"""
     d = HALLD
-    zt = z_g + SO
+    zt = z_g + HSO
     board = box(d["x0"], d["x0"] + d["L"], -d["W"] / 2, d["W"] / 2, zt, zt + d["t"]).cut(cyl(1.6, 3, V(d["hole_x"], 0, zt - 1)))
     cx, cy, cz = d["chip"]
     chip = box(d["x0"] + 0.3, d["x0"] + 0.3 + cx, -cy / 2, cy / 2, zt + d["t"], zt + d["t"] + cz)
     scr = Part.makeCompound([pan(V(d["hole_x"], 0, zt + d["t"]), V(0, 0, -1), 3.0, 6.0),
                              pan(V(d["hole_x"], 0, z_g - G["t"]), V(0, 0, 1), 3.0, 6.0)])
-    return board.fuse(chip), hexso(d["hole_x"], 0, z_g, SO), scr
+    return board.fuse(chip), hexso(d["hole_x"], 0, z_g, HSO), scr
 
 
 def slide(z_row):
@@ -209,8 +235,8 @@ def frame():
 
 def make(doc=None):
     doc = doc or App.newDocument("Lift_v2")
-    lump, mag, zb = floor_lump()
-    pads, pscr, so, z_g = column(zb)
+    flo, mag, zb = floor()
+    seat, pscr, so, spr, z_g = column(zb)
     z_row = z_g - G["w"] / 2
     rail, car, src = slide(z_row)
     gs = Part.makeCompound([pan(V(xh, YC + G["t"], z_row), V(0, -1, 0), 3.0, 6.0) for xh in (0.0, G["p"])])
@@ -225,13 +251,14 @@ def make(doc=None):
             ("301c_minislide_carriage (MiniSlide 캐리지 — 움직임) [%s]" % src, car, gray, 0),
             ("302_meccano_angle_girder (메카노 앵글 거더 1½\" 구멍 3, 구매)", girder(z_g), gray, 0),
             ("302s_screws (M3 × 6 냄비 2 — 거더 → 캐리지 인서트, 구매)", gs, dark, 0),
-            ("303_standoff (M3 육각 스페이서 암-암 20, 구매)", so, gray, 0),
-            ("303p_pad (받침: M4 DIN 9021 + M6 DIN 9021, 구매)", pads, gray, 0),
-            ("303s_screw (M3 × 8 냄비 — 받침 → 스페이서, 구매)", pscr, dark, 0),
-            ("304_floor_lump (바닥 M10 DIN 9021 + 무게 M10 DIN 125 10장 — 받침 위에 얹힘, 구매)", lump, gray, 0),
-            ("304m_magnet (네오디뮴 원판 6 × 3 — 아래 와셔 테에 붙음, 구매) [상품 미정]", mag, (0.6, 0.6, 0.65), 0),
+            ("303_standoffs (M3 육각 스페이서 암-암 20 + 수-암 20 — 기둥·스프링 안내, 구매)", so, gray, 0),
+            ("303p_spring_seat (스프링 받침 M4 DIN 9021 — 스페이서 사이에 끼움, 구매)", seat, gray, 0),
+            ("303s_screw (M3 × 6 냄비 — 거더 아래 → 스페이서, 구매)", pscr, dark, 0),
+            ("304_floor (바닥 M10 DIN 9021 + 스프링 받는 판 M5 DIN 9021 — 스프링 위에 얹힘, 구매)", flo, gray, 0),
+            ("304m_magnet (네오디뮴 막대 Ø6 × 10 — 바닥 아래에 자석 힘으로 붙음, 구매) [상품 미정]", mag, (0.6, 0.6, 0.65), 0),
+            ("305_spring (압축 스프링 McMaster 9657K33 — 0.193 N/mm, 구매)", spr, gray, 0),
             ("306_hall_module_KY024 (SS49E + LM393, DO → UNO A1 — 눕혀서 스페이서에, 구매) [판 치수 추측]", hb, blue, 0),
-            ("306o_standoff (M3 육각 스페이서 암-암 20 — 홀 판, 구매)", hso, gray, 0),
+            ("306o_standoff (M3 육각 스페이서 암-암 40 — 홀 판, 구매)", hso, gray, 0),
             ("306s_screws (M3 × 6 냄비 2 — 판 → 스페이서 → 거더, 구매)", hscr, dark, 0),
             ("307_bar_2020_100 (2020 알루미늄 프로파일 100 mm 3개 — 정해진 길이 제품, 구매)", bars, (0.8, 0.8, 0.82), 0),
             ("307s_rail_studs (M3 × 10 무두 볼트 4 + 2020 M3 T너트 4, 구매)", rs, dark, 0),
@@ -246,7 +273,7 @@ def make(doc=None):
     return doc
 
 
-MOVING = ("301c", "302", "303", "304", "306")
+MOVING = ("301c", "302", "303", "304", "305", "306")
 LUMP = ("304",)
 ALLOW = (("300c", "300_"), ("300c", "300m"), ("301c", "301_"), ("302s", "301c"), ("302s", "302_"), ("303s", "303"),
          ("303s", "302_"), ("306s", "306"), ("306s", "302_"), ("306o", "302_"), ("307s", "307_"), ("307s", "301_"),
@@ -262,7 +289,7 @@ def pen(dx, dy, z_tip):
 
 def check(doc):
     """(1) 0 → 행정 3 mm씩 움직이는 것 ↔ 고정 (2) 덩어리가 멈춘 뒤 기둥 쪽만 1~3 mm 더 (3) 고정끼리 (4) 움직이는 것끼리
-    (5) 캐리지가 레일 안 (6) 펜이 닿는 망 구멍 수 (7) 덩어리 무게"""
+    (5) 캐리지가 레일 안 (6) 펜이 닿는 망 구멍 수 (7) 스프링 힘·자석 ↔ 칩 틈"""
     key = lambda o: o.Label.split(" ")[0]
     ok = lambda a, b: any(a.startswith(p) and b.startswith(q) or b.startswith(p) and a.startswith(q) for p, q in ALLOW)
     obs = [o for o in doc.Objects if hasattr(o, "Shape")]
@@ -282,8 +309,8 @@ def check(doc):
     sweep = [(dz, key(a), key(b), round(v, 2)) for dz in steps for a in mv for b in fx
              for v in [vol(a, moved(a, dz), b, b.Shape)] if v > 0.01]
     lump = [o for o in mv if key(o).startswith(LUMP)]
-    rest = [o for o in mv if o not in lump]
-    over = [(e, key(a), key(b), round(v, 2)) for e in (1.0, 2.0, 3.0) for a in rest for b in lump + fx
+    rest = [o for o in mv if o not in lump and not key(o).startswith("305")]
+    over = [(e, key(a), key(b), round(v, 2)) for e in (1.0, 2.0, TRIP + 1.0) for a in rest for b in lump + fx
             for v in [vol(a, moved(a, STROKE + e), b, moved(b, STROKE) if b in lump else b.Shape)] if v > 0.01]
     static = [(key(a), key(b), round(v, 2)) for i, a in enumerate(fx) for b in fx[i + 1:]
               for v in [vol(a, a.Shape, b, b.Shape)] if v > 0.01]
@@ -303,8 +330,17 @@ def check(doc):
             pn = pen(x, y, BOXD["z_mesh"])
             if not any(pn.common(f).Volume > 0.001 for f in fixed_pen):
                 n_ok += 1
-    g = sum(o.Shape.Volume for o in lump if key(o) == "304_floor_lump") * RHO["steel"] / 1000 + \
-        sum(o.Shape.Volume for o in lump if key(o) == "304m_magnet") * RHO["ndfeb"] / 1000
+    mb = [o for o in obs if key(o) == "304m_magnet"][0].Shape.BoundBox.ZMin
+    ct = [o for o in obs if key(o).startswith("306_")][0].Shape.BoundBox.ZMax
     return dict(stroke=STROKE, sweep=sweep, over=over, static=static, inner=inner,
                 carriage_local=(round(lo, 2), round(hi, 2)), carriage_in_rail=(lo >= CAR_RANGE[0] and hi <= CAR_RANGE[1]),
-                pen_holes=(n_ok, n_all), lump_g=round(g, 1), lump_N=round(g * 9.81 / 1000, 3))
+                pen_holes=(n_ok, n_all), float_g=round(FLOAT_G, 1), spring_rest=round(L_REST, 2),
+                gap_rest=round(mb - ct, 2), gap_trip=round(mb - ct - TRIP, 2), N_trip=round(SPR["k"] * TRIP, 3),
+                N_lift=round(FLOAT_G * 9.81e-3, 3), standoff_gap=round(zb_gap(obs, key), 2))
+
+
+def zb_gap(obs, key):
+    """안내 스페이서 윗면 ↔ M5 와셔 아랫면 (줄어들 수 있는 최대)"""
+    so = [o for o in obs if key(o) == "303_standoffs"][0].Shape.BoundBox.ZMax
+    fl = [o for o in obs if key(o) == "304_floor"][0].Shape.BoundBox.ZMin
+    return fl - so
