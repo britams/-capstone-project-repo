@@ -35,7 +35,8 @@ STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파�
 # 11/14 17:20 서현: 망은 상자 윗면 격자로 같이 프린트, 안 Ø31 → Ø33 (여왕벌 30 + 틈 2 ≥ 32). 바깥 40, 윗면 z 9.5
 # 11/14 17:25 서현: 격자는 투명 아크릴 주문 제작 (두 번째 예외) — 상자 윗면 z 8.0에 얹고 M3 × 8 + 와셔 4개로 인서트에 조임
 BOXD = dict(half=19.0, z_bot=-10.0, z_top=8.0, bore=33.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
-            wing=None, wing_t=4.0, ins=(15.0, 15.0), ins_d=4.0, ins_L=6.0, r=1.0, grid=False, plate=True,
+            wing=None, wing_t=4.0, ins=(15.0, 15.0), ins_d=2.5, ins_L=6.0,   # (11/15) ins_d 4.0 → 2.5: 열압입 인서트(인두 필요) 대신 M3 태핑 나사 밑구멍 — 서현 "나사로 조이기만"
+            r=1.0, grid=False, plate=True,
             doors4=True, feed_d=11.2, feed_tip=(0.0, 17.4, 1.0), feed_end=(0.0, 54.28, -8.15),   # 솜 축 (D5g_feeder_uln FD − (55, 0, 377))
             tongue=(18.3, 10.0, 3.0, 24.0), tongue_holes=(-21.0, -29.0))   # (11/14 17:55) 바깥 38 = 옛 벽 바깥, 세운 막대 위 끝 −16 (방생 문 하우징 아래)
 # (11/14 17:40 서현 "새 상자 넣고 문 3개 다시", "격리 −y") 전체 좌표 = 이 좌표 + (55, 0, 377): 격자 아래 385·바닥 쉼 370
@@ -68,7 +69,7 @@ def acrylic_plate():
 
 
 def plate_screws():
-    """M3 × 8 냄비 4 + M3 DIN 125 와셔 4 (아크릴 깨짐 막음) + 인서트 4 (대표)"""
+    """M3 × 8 냄비 태핑(셀프 탭) 4 + M3 DIN 125 와셔 4 (아크릴 깨짐 막음) — 상자 밑구멍 Ø2.5에 바로 (11/15, 인서트 없앰)"""
     zt = BOXD["z_mesh"] + MESH["t"]
     out = []
     for sx in (-1, 1):
@@ -76,7 +77,6 @@ def plate_screws():
             xy = (sx * BOXD["ins"][0], sy * BOXD["ins"][1])
             out.append(washer(7.0, 3.2, 0.5, zt, xy))
             out.append(pan(V(xy[0], xy[1], zt + 0.5), V(0, 0, -1), 3.0, 8.0))
-            out.append(washer(BOXD["ins_d"], 3.0, BOXD["ins_L"] - 0.7, BOXD["z_top"] - BOXD["ins_L"] + 0.7, xy))
     return Part.makeCompound(out)
 PEN = dict(tip_d=2.2, tip_L=8.0, nose_d=7.2, body_d=14.7, body_from=15.6, L=134.6)   # 승준 11/02 캘리퍼스
 H = dict(rest=-7.0, press=BOXD["z_mesh"] - 5.0)
