@@ -35,7 +35,11 @@ STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파�
 # 11/14 17:20 서현: 망은 상자 윗면 격자로 같이 프린트, 안 Ø31 → Ø33 (여왕벌 30 + 틈 2 ≥ 32). 바깥 40, 윗면 z 9.5
 # 11/14 17:25 서현: 격자는 투명 아크릴 주문 제작 (두 번째 예외) — 상자 윗면 z 8.0에 얹고 M3 × 8 + 와셔 4개로 인서트에 조임
 BOXD = dict(half=20.0, z_bot=-10.0, z_top=8.0, bore=33.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
-            wing=(20.0, 32.0), wing_t=4.0, ins=(15.5, 15.5), ins_d=4.0, ins_L=6.0, r=1.0, grid=False, plate=True)
+            wing=None, wing_t=4.0, ins=(15.5, 15.5), ins_d=4.0, ins_L=6.0, r=1.0, grid=False, plate=True,
+            doors4=True, feed_d=11.2, feed_z=-3.5, tongue=(18.3, 10.0, 3.0, 14.0), tongue_holes=(-14.5, -20.5))
+# (11/14 17:40 서현 "새 상자 넣고 문 3개 다시", "격리 −y") 전체 좌표 = 이 좌표 + (55, 0, 377): 격자 아래 385·바닥 쉼 370
+#   −x 입구 Ø13 · +x 방생 Ø13 · −y 격리 Ø13 (아래 끝 = 바닥 쉼) · +y 급이 Ø11.2 (솜 142n 가운데 z 373.5 → −3.5)
+#   날개 없앰 → 바닥 밑 혀(+y, x 13.3~23.3, 두께 3, 깊이 14)를 세운 2020 +y 홈에 M5 × 10 두 개 (lift_v3)
 MESH = dict(d=40.0, t=2.0, hole=3.0, p=4.4, corner=1.0, screw_hole=3.4)   # 아크릴 2T, 네모 구멍 3.0 × 3.0 간격 4.4 (열린 면적 46 % — 비전 자 D6)
 GRID_R = BOXD["bore"] / 2 - MESH["hole"] / 2 * 2 ** 0.5   # 네모 구멍 모서리까지 안 Ø33 안
 
@@ -91,7 +95,7 @@ CAR_RANGE = (-85.69, -9.0)
 HALLD = dict(L=32.0, W=14.0, t=1.6, x0=10.0, hole_x=25.4, gap=5.5,       # KY-024 판 [치수 추측 — 사서 잼]
              ss49e=(3.0, 4.0, 1.52), lead=0.45, pot=(4.5, 9.5, 10.0), ic=(4.9, 3.9, 1.5), hdr=(2.5, 10.2, 2.5))
 BR = 1.2                                                     # N35 잔류 자속 밀도 (T) [추측]
-SCREW = {2.0: (4.0, 1.6), 2.5: (5.0, 2.0), 3.0: (5.6, 2.4), 4.0: (8.0, 3.1)}    # ISO 7045 머리 지름·높이 [확실 — 규격]
+SCREW = {2.0: (4.0, 1.6), 2.5: (5.0, 2.0), 3.0: (5.6, 2.4), 4.0: (8.0, 3.1), 5.0: (9.5, 3.7)}    # ISO 7045 머리 지름·높이 [확실 — 규격]
 RHO = dict(steel=7.85, ndfeb=7.5)
 
 
@@ -127,9 +131,13 @@ def marking_box():
     b = BOXD
     h = b["half"]
     s = box(-h, h, -h, h, b["z_bot"], b["z_top"])
-    w0, w1 = b["wing"]
-    for sx in (-1, 1):
-        s = s.fuse(box(min(sx * w0, sx * w1), max(sx * w0, sx * w1), -h, -h + b["wing_t"], b["z_bot"], b["z_top"]))
+    if b.get("wing"):
+        w0, w1 = b["wing"]
+        for sx in (-1, 1):
+            s = s.fuse(box(min(sx * w0, sx * w1), max(sx * w0, sx * w1), -h, -h + b["wing_t"], b["z_bot"], b["z_top"]))
+    if b.get("tongue"):
+        tx, ty, tt, td = b["tongue"]
+        s = s.fuse(box(tx - 5, tx + 5, ty, ty + tt, b["z_bot"] - td, b["z_bot"] + 0.01))
     if b.get("grid"):
         s = s.cut(cyl(b["bore"] / 2, b["z_mesh"] - b["z_bot"] + 1, V(0, 0, b["z_bot"] - 1)))
         n = int(GRID_R / MESH["p"]) + 1
@@ -140,10 +148,19 @@ def marking_box():
         if not b.get("plate"):
             s = s.cut(cyl(b["mesh_rec"] / 2, b["z_top"] - b["z_mesh"] + 1, V(0, 0, b["z_mesh"])))
     zc = H["rest"] + b["hole"] / 2
-    s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(-1, 0, 0)))
-    s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(0, 1, 0)))
+    if b.get("doors4"):
+        for d in (V(-1, 0, 0), V(1, 0, 0), V(0, -1, 0)):
+            s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), d))
+        s = s.cut(cyl(b["feed_d"] / 2, h + 1, V(0, 0, b["feed_z"]), V(0, 1, 0)))
+        tx, ty, tt, td = b["tongue"]
+        for z in b["tongue_holes"]:
+            s = s.cut(cyl(2.75, tt + 2, V(tx, ty - 1, z), V(0, 1, 0)))
+    else:
+        s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(-1, 0, 0)))
+        s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(0, 1, 0)))
     for sx in (-1, 1):
-        s = s.cut(cyl(2.25, b["wing_t"] + 2, V(sx * sum(b["wing"]) / 2, -h - 1, (b["z_bot"] + b["z_top"]) / 2), V(0, 1, 0)))
+        if b.get("wing"):
+            s = s.cut(cyl(2.25, b["wing_t"] + 2, V(sx * sum(b["wing"]) / 2, -h - 1, (b["z_bot"] + b["z_top"]) / 2), V(0, 1, 0)))
         for sy in (-1, 1):
             if not b.get("grid"):
                 s = s.cut(cyl(b["ins_d"] / 2, b["ins_L"], V(sx * b["ins"][0], sy * b["ins"][1], b["z_top"] - b["ins_L"])))

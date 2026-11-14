@@ -33,7 +33,10 @@ STACK = NUT_T + M4W[2] + M10W[2]           # 로드 끝 → 바닥 윗면 4.67
 Z0 = FLOOR_TOP - STACK - (ACT["rod_face"] + S_REST)
 SPACER = (6.0, 3.2, 4.0)                    # M3 원형 스페이서 (나사 없음) Ø6 × 4 [상품 미정]
 INFO = {}
-VBAR = dict(L=100.0, top=L.BOXD["z_bot"] - 0.5)
+WORLD = V(55, 0, 377)                       # 전체 좌표로 옮길 때 (마킹실 가운데 (55, 0), 격자 아래 385)
+DECK_TOP = 205.0                             # 데크 윗면 (전체 좌표)
+VBAR = dict(top=L.BOXD["z_bot"] - 0.5)
+VBAR["L"] = VBAR["top"] - (DECK_TOP - WORLD.z)   # 161.5 — 데크까지 (2020 길이 주문 절단, 프레임 막대와 같은 방식) [가능성 높음]
 
 
 def nut(z0):
@@ -89,8 +92,14 @@ def make(doc=None):
     scr = L.pan(V(ex0, 0, zh), V(1, 0, 0), 3.0, 20.0)
     tn = L.box(face + 1.5, face + 5.0, -3.0, 3.0, zh - 5, zh + 5)
     vb = L.box(face, face + 20, -10, 10, VBAR["top"] - VBAR["L"], VBAR["top"]).cut(
-        L.box(face - 1, face + 6, -3.1, 3.1, VBAR["top"] - VBAR["L"] - 1, VBAR["top"] + 1))
-    bars, rs, bs = L.frame()
+        L.box(face - 1, face + 6, -3.1, 3.1, VBAR["top"] - VBAR["L"] - 1, VBAR["top"] + 1)).cut(
+        L.box(face + 10 - 3.1, face + 10 + 3.1, 4, 11, VBAR["top"] - VBAR["L"] - 1, VBAR["top"] + 1))      # +y 홈 (상자 혀)
+    tx, ty, tt, td = L.BOXD["tongue"]
+    ts = []
+    for z in L.BOXD["tongue_holes"]:
+        ts.append(L.pan(V(tx, ty + tt, z), V(0, -1, 0), 5.0, 10.0))
+        ts.append(L.box(tx - 5, tx + 5, 5.0, 9.0, z - 3, z + 3))                                       # 2020 M5 T너트
+
     gray, dark, green = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37), (0.2, 0.7, 0.3)
     rows = [("300_marking_box (마킹실 상자 + 윗면 격자 Ø3 간격 4.4 — 예외 부품 1개, 프린트 파일 print/lift/300_마킹실상자)", L.marking_box(), green, 50),
             ("300p_acrylic_plate (투명 아크릴 격자판 40 × 40 × 2, 네모 구멍 3.0 간격 4.4 — 주문 제작, DXF print/lift/300p_아크릴격자판.dxf)", L.acrylic_plate(), (0.55, 0.75, 0.95), 60),
@@ -99,9 +108,8 @@ def make(doc=None):
             ("301r_rod (로드 — 움직임) [%s]" % src, rod, gray, 0),
             ("304_floor (바닥 McMaster 90313A108 Ø31.75 + M4 DIN 9021 — 로드 끝에 얹힘, 구매)", fl, gray, 0),
             ("304s_stud_nut (M3 × 8 무두 볼트 + M3 너트 — 로드 끝, 구매)", hw, dark, 0),
-            ("307_bar_box (2020 100 mm — 상자 날개, 구매)", Part.makeCompound([L.bar(L.Z_BAR[0], L.Y_BAR_FRONT[0])]), (0.8, 0.8, 0.82), 0),
-            ("307v_bar_act (2020 100 mm 세움 — 액추에이터 경첩, 구매)", vb, (0.8, 0.8, 0.82), 0),
-            ("308s_box_screws (M4 × 10 냄비 2 + 2020 M4 T너트 2, 구매)", bs, dark, 0),
+            ("307v_bar_act (2020 %.1f mm 세움 — 데크 → 상자 밑, 액추에이터 경첩·상자 혀, 구매)" % VBAR["L"], vb, (0.8, 0.8, 0.82), 0),
+            ("308s_tongue_screws (M5 × 10 냄비 2 + 2020 M5 T너트 2 — 상자 혀 → 세운 막대, 구매)", Part.makeCompound(ts), dark, 0),
             ("309s_hinge_screw (M3 × 20 냄비 + M3 원형 스페이서 Ø6 × 4 + 2020 M3 T너트, 구매)",
              Part.makeCompound([scr, tn] + ws), dark, 0)]
     for i, (lab, shp, col, tr) in enumerate(rows):
@@ -116,7 +124,7 @@ def make(doc=None):
 
 MOVING = ("301r", "304")
 ALLOW = (("300s", "300_"), ("300s", "300p"), ("301r", "301_"), ("304s", "301r"), ("304s", "304_"),
-         ("308s", "307_"), ("308s", "300_"), ("309s", "301_"), ("309s", "307v"))
+         ("308s", "307v"), ("308s", "300_"), ("309s", "301_"), ("309s", "307v"))
 
 
 def check(doc):
