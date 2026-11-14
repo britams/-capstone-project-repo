@@ -53,7 +53,7 @@ QUEEN_MONTHS = (3, 4, 5, 9, 10, 11)
 @dataclass
 class Params:                   # 값 근거는 trap_sim PRM — [추측]은 시험으로 고칠 것
     press_g: float = 51.0       # F_p 0.5 N [확실 — D6]
-    F_feed: float = 31.0
+    F_feed: float = 2.0         # (11/14 mightyZAP) 바닥 윗면 z 372 — 급이 구멍(솜 끝 z 378) 아래 끝 바로 밑 [AI 판단, 미검증]
     F_retract: float = 10.0
     feed_s: float = 60.0        # [추측]
     feed_pump_ms: float = 100.0  # (CAP-AI-59) 한 번 먹일 때 펌프 시간 — 약 0.14 mL [추측 — 실측으로 맞춤]. 펌웨어 PUMP_MAX_MS 이하

@@ -28,5 +28,7 @@ struct Servo {
     ang = d;
     if (att) { g_servo_angle[pin] = d; g_servo_events.push_back({g_us, pin, 'W', d}); }
   }
+  void writeMicroseconds(int us) { write(us); }   // (11/14 mightyZAP) 기록 칸은 같음 — 값이 µs
+
 };
 #define SIM_DEFINE_SERVO int g_servo_angle[24]; int g_servo_attached[24]; std::vector<ServoEvent> g_servo_events;

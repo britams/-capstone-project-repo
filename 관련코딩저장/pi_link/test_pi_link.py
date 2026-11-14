@@ -80,7 +80,7 @@ def t_boot():
         check(t_close < t_home, '문 3개를 닫은 뒤 HOME 시작')
         st = parse_status(r.m.command('STATUS'))
         check(st.get('HOMED') == 'FXY' and st.get('PEN') == 'DOWN', 'UNO 1: HOMED=FXY, PEN=DOWN (캡 컵)')
-        check(abs(float(st['X']) - 10.0) < 0.01 and abs(float(st['Y']) + 40.0) < 0.01, '대기 자리 X 10, Y −40')
+        check(abs(float(st['X']) - 20.0) < 0.01 and abs(float(st['Y']) + 40.0) < 0.01, '대기 자리 X 20, Y −40')
         sd = parse_status(r.d.command('STATUS'))
         check(sd.get('IN') == sd.get('CAP') == sd.get('REL') == 'CLOSED', 'UNO 2: 문 3개 CLOSED')
         # 심장박동: 오래 쉬어도 WATCHDOG 이 안 터짐

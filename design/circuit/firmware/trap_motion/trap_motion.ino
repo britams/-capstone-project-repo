@@ -5,28 +5,31 @@
 // 사양: design/2026-11-06_펌웨어_변경요청_서현.md 1장, 핀 원본: design/circuit/circuit.py (검사 통과)
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
 //
-// 핀 (UNO 1, 18/18)
-//   F 바닥 승강 153 : D2  D3  D4  D5   (DRV8833 AIN1 AIN2 BIN1 BIN2 — 11/12 산 리니어 모듈 15BY25, 양극 2상)
+// (11/14, CAP-AI-62) 바닥 F = mightyZAP D7-6PT-3 리니어 서보 (PWM 900~2100 µs = 행정 0~26 mm, 스스로 위치 유지).
+//   스테핑·원점 스위치·누름 스위치 없음. F 좌표 = 쉼 자리(행정 8 mm, 바닥 윗면 z 370) 위 mm. 누름 = F 10 (행정 18, 격자 아랫면까지 5 mm).
+//   위치를 되읽지 못하므로 '도착'은 시간으로 셈 (F_UM_PER_MS — 미검증, 실측으로 맞춤). 힘 제한은 나중에 (지금은 거리로만).
+// 핀 (UNO 1, 14/18)
+//   F 바닥 승강 301 : D2 (mightyZAP PWM, 전원 7.4 V = MT3608)   D3 D4 D5 예비
 //   X 마커 X   215 : D6  D7  D8  D9
 //   Y 마커 Y   209 : D10 D11 D12 D13
 //   PEN 펜 서보 205 : A0  (SG90, 전원 +5V_B)
-//   누름 감지 PSW : A1 (INPUT_PULLUP) — (11/12 리프트 v2) 홀 모듈 KY-024 DO: 위 망 와셔 묶음의 링 자석이 센서 앞 = LOW,
-//                  망이 들림(누르는 힘 ≥ 와셔 무게 0.49 N)·선 끊김 = HIGH → 멈춤 쪽으로 안전. 문턱은 모듈 가변저항으로 맞춤   A2 예비
-//   원점 F / X / Y : A3 / A4 / A5  (INPUT_PULLUP, 눌리면 LOW, 100 nF)
+//   A1 A2 A3 예비 (11/14 누름 스위치·F 원점 스위치 없앰)
+//   원점 X / Y : A4 / A5  (INPUT_PULLUP, 눌리면 LOW, 100 nF)
 //
 // 시리얼 115200, 한 줄 = 명령 하나 (대문자로 바꿔 읽음)
 //   응답: OK ... (접수) / ERR <이유> / DONE ... (끝) / EVT ... (사건)
 //   PING                         → OK PONG
-//   STATUS                       → OK STATUS F=<mm> X=<mm> Y=<mm> MOVING=<FXY|-> HOMED=<FXY|-> PSW=<1|0> PEN=<UP|DOWN|MOVING|LIMP> SW=<FXY 눌림 1/0>
+//   STATUS                       → OK STATUS F=<mm> X=<mm> Y=<mm> MOVING=<FXY|-> HOMED=<FXY|-> PEN=<UP|DOWN|MOVING|LIMP> SW=<FXY 눌림 1/0, F는 늘 0>
 //   HOME <F|X|Y>                 → OK HOME <축>, 끝나면 DONE HOME <축> <찾을 때까지 반걸음> | ERR HOME <축> NOSWITCH | ERR HOME <축> STUCK
+//                                  (F: 서보를 붙이고 F 0으로 보냄, 행정 전체 시간 뒤 DONE HOME F 0)
 //   MOVE <F|X|Y> <mm>            → OK MOVE <축> <mm>, 끝나면 DONE MOVE <축> <mm>   (HOME/ZERO 전에는 ERR NOT_HOMED, 펜 DOWN이면 X·Y와 F 올리기는 ERR PEN_DOWN)
 //   STOP                         → OK STOP (HOME 중이면 HOME도 멈춤 → ERR HOME <축> STOPPED)
-//   ZERO <F|X|Y> <mm>            현재 위치를 <mm>로 (스위치 고장일 때 손으로) → OK ZERO, 그 축은 HOMED
-//   SPEED <F|X|Y> <us>           반걸음 간격 (기본 1000, 최소 800, 1080~1460은 스프링 서지 띠라 거부)
-//   LIMIT <F|X|Y> <min> <max>    소프트 한계 mm
-//   HOLD <F|X|Y> <0|1>           멈춘 뒤 코일 전류 (기본 모두 0 — F도 0, 변경요청 1장)
-//   PRESS <g> [<mm>]             → OK PRESS, DONE PRESS <mm> <g> | DONE PRESS LIMIT <mm> 0
-//                                  (g는 기록용 — 힘은 스위치 자리가 정함). 누르기 전부터 스위치가 HIGH면 ERR PRESS_SW (눌림·선 끊김)
+//   ZERO <X|Y> <mm>              현재 위치를 <mm>로 (스위치 고장일 때 손으로) → OK ZERO, 그 축은 HOMED (F는 ERR AXIS_F)
+//   SPEED <X|Y> <us>             반걸음 간격 (기본 1000, 최소 800, 1080~1460은 스프링 서지 띠라 거부) (F는 ERR AXIS_F)
+//   LIMIT <F|X|Y> <min> <max>    소프트 한계 mm (F는 0 ~ F_HARD_MAX 안에서만)
+//   HOLD <F|X|Y> <0|1>           멈춘 뒤 코일 전류 (기본 모두 0). F는 받기만 함 (서보가 스스로 유지)
+//   PRESS <g> [<mm>]             → OK PRESS, DONE PRESS <mm> <g>  — (11/14) 바닥을 F_PRESS_MM(또는 <mm>)까지 올림.
+//                                  g는 기록용 (힘 감지 없음, 거리로만). DONE PRESS LIMIT는 이제 안 나옴
 //   PEN <UP|DOWN>                → OK PEN, 끝나면 DONE PEN UP|DOWN. DOWN은 2단계(마지막 구간 ≤ 60 °/s). X·Y가 움직이면 ERR XY_MOVING
 //   SERVO PEN <deg>              각도 직접 (보정용) → OK SERVO
 //   SETDOOR PEN <위> <아래>       펜 각도 보정 (전원 끄면 사라짐) → OK SETDOOR
@@ -46,7 +49,16 @@
 
 // ---------------- 값 (미검증은 실물에서 맞춤) ----------------
 #define STEPS_PER_MM      (4075.7728f / 8.0f)  // X·Y: 28BYJ-48 반걸음 4075.77/회전 [가능성 높음] ÷ T8 리드 8 mm
-#define STEPS_PER_MM_F    (96.0f / 1.0f)       // F (11/12 15:39 리프트 v2): MiniSlide MSA02S-C0039 7.5°/걸음 → 반걸음 96/회전 ÷ 리드 1 mm [확실 — 판매처 표]
+#define STEPS_PER_MM_F    1000.0f   // F (11/14): '걸음' = µm (위치 셈 단위일 뿐, 스테핑 아님)
+#define F_PIN             2
+#define F_US_MIN          900       // mightyZAP PWM: 900 µs = 행정 0, 2100 µs = 26 mm [확실 — 판매처 사양]
+#define F_US_MAX          2100
+#define F_STROKE_MM       26.0f
+#define F_REST_STROKE_MM  8.0f      // F 0 = 행정 8 mm (쉼, 바닥 윗면 z 370) — cad/lift_v3.py S_REST
+#define F_PRESS_MM        10.0f     // 누름 = 행정 18 mm (바닥 윗면 z 380, 격자 아랫면 385) — 인터페이스 정의서 구동기 1
+#define F_HARD_MAX        12.0f     // LIMIT F 위 끝 최대: 바닥이 격자(F 15)에 3 mm 앞 (AI 판단, 서현 위임)
+#define F_UM_PER_MS       25        // 25 mm/s로 셈 — 판매처 무부하 36 mm/s보다 느리게 [추측 — 미검증, 실측으로 맞춤]
+#define F_SETTLE_MS       150       // 도착 뒤 더 기다림 [추측 — 미검증]
 #define HALF_US_DEFAULT   1000UL   // 반걸음 간격 µs (≈ 1.96 mm/s) — v0.1 값
 #define HALF_US_MIN       800UL
 #define SURGE_LO_US       1080UL   // 686~928 Hz 스프링 서지 띠 (역학계산 2차, b4_axis 주석) — 이 사이 SPEED 거부
@@ -69,8 +81,6 @@
 
 // 28BYJ-48 반걸음 순서
 const uint8_t HALF[8][4] = {{1,0,0,0},{1,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,1},{0,0,0,1},{1,0,0,1}};
-// F (11/12): 양극 반걸음 — DRV8833 AIN1 AIN2 (코일 A) · BIN1 BIN2 (코일 B), 0 0 = 그 코일 끔
-const uint8_t HALF_BI[8][4] = {{1,0,0,0},{1,0,1,0},{0,0,1,0},{0,1,1,0},{0,1,0,0},{0,1,0,1},{0,0,0,1},{1,0,0,1}};
 
 enum HomePhase { H_NONE = 0, H_SEEK, H_BACK, H_SLOW };
 
@@ -92,8 +102,8 @@ struct Axis {
 };
 
 Axis axes[3] = {
-  {'F', {2, 3, 4, 5},     A3, HOME_F_MM, 0, 0, 0, HALF_US_DEFAULT, 0, 0.0f,   36.5f, false, false, false, H_NONE, 0, 0, 0, false, 0},
-  {'X', {6, 7, 8, 9},     A4, HOME_X_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -18.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
+  {'F', {3, 4, 5, 3},     A3, HOME_F_MM, 0, 0, 0, HALF_US_DEFAULT, 0, 0.0f,   F_PRESS_MM, false, false, false, H_NONE, 0, 0, 0, false, 0},   // F: 코일·스위치 안 씀 (핀은 자리만)
+  {'X', {6, 7, 8, 9},     A4, HOME_X_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -18.0f, 20.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
   {'Y', {10, 11, 12, 13}, A5, HOME_Y_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -40.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
 };
 
@@ -111,10 +121,11 @@ int penCur = PEN_UP_DEG;          // 지금 쓴 각도
 unsigned long penT = 0;           // 다음 일 시각 (ms)
 uint8_t penStage = 0;             // 0 없음, 1 빠르게 가는 중, 2 천천히 내리는 중
 
-// ---------------- 누름 스위치 (스프링 + KW11, CAP-AI-60) ----------------
-const uint8_t PSW_PIN = A1;
-#define PSW_SAMPLES 2           // 연속 2걸음 HIGH면 눌림 (잡음 거름)
-uint8_t pswHigh = 0;
+// ---------------- 바닥 F = mightyZAP (11/14) ----------------
+Servo lift;
+long fFrom = 0;                   // 이동 시작 위치 (µm)
+unsigned long fT0 = 0, fDur = 0;  // 시작 시각·걸리는 시간 (ms, 도착 대기 포함)
+bool fHoming = false;
 
 // ---------------- 기타 ----------------
 char line[64];
@@ -128,15 +139,28 @@ Axis* findAxis(const char* t) {
 }
 
 void coils(Axis& a, bool on) {
-  const uint8_t (*seq)[4] = (a.name == 'F') ? HALF_BI : HALF;
-  for (int k = 0; k < 4; k++) digitalWrite(a.pins[k], on ? seq[a.phase][k] : 0);
+  if (a.name == 'F') return;                 // F는 서보
+  for (int k = 0; k < 4; k++) digitalWrite(a.pins[k], on ? HALF[a.phase][k] : 0);
 }
 float spm(const Axis& a) { return a.name == 'F' ? STEPS_PER_MM_F : STEPS_PER_MM; }
 float posMm(const Axis& a) { return a.pos / spm(a); }
 long mmToSteps(const Axis& a, float mm) { return lround(mm * spm(a)); }
-bool swPressed(const Axis& a) { return digitalRead(a.sw) == LOW; }
+bool swPressed(const Axis& a) { return a.name != 'F' && digitalRead(a.sw) == LOW; }
 
-bool pswPressed() { return digitalRead(PSW_PIN) == HIGH; }
+void reply(const char* s);
+int fUs(long um) { return F_US_MIN + (int)lround((um / 1000.0f + F_REST_STROKE_MM) * (F_US_MAX - F_US_MIN) / F_STROKE_MM); }
+void fStart(Axis& f, long um, unsigned long durMs) {
+  if (!lift.attached()) lift.attach(F_PIN);
+  f.target = um;
+  fFrom = f.pos; fT0 = millis(); fDur = durMs;
+  lift.writeMicroseconds(fUs(um));
+  f.moving = true;
+}
+void fStop(Axis& f) {                       // 지금 셈한 자리에서 멈춤
+  if (f.moving && lift.attached()) lift.writeMicroseconds(fUs(f.pos));
+  f.target = f.pos; f.moving = false;
+  if (fHoming) { fHoming = false; f.homed = false; reply("ERR HOME F STOPPED"); }
+}
 
 void reply(const char* s) { Serial.println(s); }
 void replyAxis(const char* head, const Axis& a, const char* tail) {
@@ -147,6 +171,12 @@ void doneMove(const Axis& a) {
 }
 
 void startMove(Axis& a, float mm) {
+  if (a.name == 'F') {
+    if (a.moving) fStop(a);                   // 가는 중 새 목표: 지금 셈한 자리부터
+    long um = mmToSteps(a, mm);
+    fStart(a, um, labs(um - a.pos) / F_UM_PER_MS + F_SETTLE_MS);
+    return;
+  }
   a.offPending = false;
   a.target = mmToSteps(a, mm);
   a.moving = (a.target != a.pos);
@@ -169,7 +199,8 @@ void homeFail(Axis& a, const char* why) {
 }
 
 void stopAll() {
-  for (int i = 0; i < 3; i++) {
+  fStop(axes[0]);
+  for (int i = 1; i < 3; i++) {
     if (axes[i].home != H_NONE) homeFail(axes[i], "STOPPED");
     else endAxis(axes[i]);
   }
@@ -224,6 +255,21 @@ const char* penName() {
     case PEN_MOVING: return "MOVING";
     default: return "LIMP";
   }
+}
+
+// 바닥 F: 시간으로 위치를 셈하고, 다 되면 보고
+void fPoll() {
+  Axis& f = axes[0];
+  if (!f.moving) return;
+  unsigned long el = millis() - fT0, travel = fDur - F_SETTLE_MS;
+  if (!fHoming) f.pos = (el >= travel) ? f.target : fFrom + (long)((f.target - fFrom) * (float)el / travel);
+  if (el < fDur) return;
+  f.pos = f.target; f.moving = false;
+  if (fHoming) { fHoming = false; f.homed = true; reply("DONE HOME F 0"); }
+  else if (pressActive) {
+    pressActive = false;
+    Serial.print(F("DONE PRESS ")); Serial.print(posMm(f), 3); Serial.print(' '); Serial.println(pressGrams, 1);
+  } else doneMove(f);
 }
 
 // ---------------- 원점 ----------------
@@ -301,7 +347,6 @@ void handle(char* cmd) {
     any = false;
     for (int i = 0; i < 3; i++) if (axes[i].homed) { Serial.print(axes[i].name); any = true; }
     if (!any) Serial.print('-');
-    Serial.print(F(" PSW=")); Serial.print(pswPressed() ? '1' : '0');
     Serial.print(F(" PEN=")); Serial.print(penName());
     Serial.print(F(" SW="));
     for (int i = 0; i < 3; i++) Serial.print(swPressed(axes[i]) ? '1' : '0');
@@ -314,7 +359,13 @@ void handle(char* cmd) {
     if (!a) { reply("ERR AXIS"); return; }
     if (a->moving) { reply("ERR BUSY"); return; }
     if (a->name != 'F' && penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }
-    if (a->name == 'F') pressActive = false;
+    if (a->name == 'F') {                 // (11/14) 스위치 없음: 어디 있든 F 0으로 — 행정 전체 시간 기다림
+      pressActive = false;
+      replyAxis("OK HOME ", *a, "");
+      a->pos = 0; a->homed = false; fHoming = true;
+      fStart(*a, 0, (unsigned long)(F_STROKE_MM * 1000) / F_UM_PER_MS + F_SETTLE_MS);
+      return;
+    }
     replyAxis("OK HOME ", *a, "");
     homeStart(*a);
     return;
@@ -323,7 +374,7 @@ void handle(char* cmd) {
   if (!strcmp(tok[0], "MOVE") && n == 3) {
     Axis* a = findAxis(tok[1]);
     if (!a) { reply("ERR AXIS"); return; }
-    if (a->home != H_NONE) { reply("ERR BUSY"); return; }
+    if (a->home != H_NONE || (a->name == 'F' && fHoming)) { reply("ERR BUSY"); return; }
     if (!a->homed) { reply("ERR NOT_HOMED"); return; }
     if (a->name != 'F' && penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }
     float mm = atof(tok[2]);
@@ -342,6 +393,7 @@ void handle(char* cmd) {
   if (!strcmp(tok[0], "ZERO") && n == 3) {
     Axis* a = findAxis(tok[1]);
     if (!a) { reply("ERR AXIS"); return; }
+    if (a->name == 'F') { reply("ERR AXIS_F"); return; }   // F는 PWM이 곧 위치
     if (a->moving) { reply("ERR BUSY"); return; }
     a->pos = a->target = mmToSteps(*a, atof(tok[2]));
     a->homed = true;
@@ -353,6 +405,7 @@ void handle(char* cmd) {
     Axis* a = findAxis(tok[1]);
     long us = atol(tok[2]);
     if (!a) { reply("ERR AXIS"); return; }
+    if (a->name == 'F') { reply("ERR AXIS_F"); return; }
     if (us < (long)HALF_US_MIN) { reply("ERR SPEED_MIN_800"); return; }
     if (us >= (long)SURGE_LO_US && us <= (long)SURGE_HI_US) { reply("ERR SPEED_SURGE_BAND"); return; }
     a->intervalUs = us;
@@ -365,6 +418,7 @@ void handle(char* cmd) {
     if (!a) { reply("ERR AXIS"); return; }
     float lo = atof(tok[2]), hi = atof(tok[3]);
     if (lo >= hi) { reply("ERR RANGE"); return; }
+    if (a->name == 'F' && (lo < 0 || hi > F_HARD_MAX)) { reply("ERR RANGE"); return; }   // 쉼 아래는 상자 바닥, F 15는 격자
     a->minMm = lo; a->maxMm = hi;
     reply("OK LIMIT");
     return;
@@ -381,19 +435,16 @@ void handle(char* cmd) {
 
   if (!strcmp(tok[0], "PRESS") && (n == 2 || n == 3)) {
     Axis& f = axes[0];
-    if (f.home != H_NONE || f.moving) { reply("ERR BUSY"); return; }
+    if (f.moving) { reply("ERR BUSY"); return; }
     if (!f.homed) { reply("ERR NOT_HOMED"); return; }
     if (penState != PEN_IS_UP) { reply("ERR PEN_DOWN"); return; }   // R1: 펜이 내려간 채 바닥을 올리면 말벌이 눌림
-    float maxMm = (n == 3) ? atof(tok[2]) : f.maxMm;
-    if (maxMm > f.maxMm) maxMm = f.maxMm;
+    float toMm = (n == 3) ? atof(tok[2]) : F_PRESS_MM;
+    if (toMm > f.maxMm) toMm = f.maxMm;
     pressGrams = atof(tok[1]);
     if (pressGrams <= 0) { reply("ERR GRAMS"); return; }
-    if (pswPressed()) { reply("ERR PRESS_SW"); return; }          // 누르기 전부터 HIGH = 눌린 채 걸림 또는 선 끊김 → 안 올림
-    pswHigh = 0;
     pressActive = true;
     reply("OK PRESS");
-    startMove(f, maxMm);
-    if (!f.moving) pressActive = false;
+    startMove(f, toMm);
     return;
   }
 
@@ -436,7 +487,7 @@ void handle(char* cmd) {
 
 void stepAxes() {
   unsigned long now = micros();
-  for (int i = 0; i < 3; i++) {
+  for (int i = 1; i < 3; i++) {             // F(0)는 fPoll
     Axis& a = axes[i];
     if (a.offPending && !a.moving && (long)(millis() - a.offAt) >= 0) { coils(a, false); a.offPending = false; }
     if (!a.moving) continue;
@@ -453,45 +504,28 @@ void stepAxes() {
       if (a.swLow >= SWITCH_SAMPLES && posMm(a) > a.homeMm + SWITCH_GUARD_MM) {
         float at = posMm(a);
         a.homed = false;
-        bool wasPress = (i == 0 && pressActive);
         endAxis(a);
-        if (wasPress) pressActive = false;
         Serial.print(F("EVT SWITCH ")); Serial.print(a.name); Serial.print(' '); Serial.println(at, 3);
         continue;
       }
     } else a.swLow = 0;
 
     stepOnce(a, dir);
-    if (i == 0 && pressActive && dir > 0) {
-      if (pswPressed()) { if (pswHigh < 255) pswHigh++; } else pswHigh = 0;
-      if (pswHigh >= PSW_SAMPLES) {
-        endAxis(a);
-        pressActive = false;
-        Serial.print(F("DONE PRESS ")); Serial.print(posMm(a), 3); Serial.print(' '); Serial.println(pressGrams, 1);
-        continue;
-      }
-    }
     if (a.pos == a.target) {
       endAxis(a);
-      if (i == 0 && pressActive) {
-        pressActive = false;
-        Serial.print(F("DONE PRESS LIMIT ")); Serial.print(posMm(a), 3); Serial.println(F(" 0"));
-      } else {
-        doneMove(a);
-      }
+      doneMove(a);
     }
   }
 }
 
 void setup() {
   Serial.begin(115200);
-  for (int i = 0; i < 3; i++) {
+  for (int i = 1; i < 3; i++) {
     for (int k = 0; k < 4; k++) pinMode(axes[i].pins[k], OUTPUT);
     coils(axes[i], false);                 // HOLD 기본 0 — 켤 때 코일 끔
     pinMode(axes[i].sw, INPUT_PULLUP);
   }
-  pinMode(PSW_PIN, INPUT_PULLUP);
-  // 펜 서보는 붙이지 않음 (LIMP) — Pi가 PEN UP을 먼저 보냄
+  // 펜 서보·바닥 서보는 붙이지 않음 (LIMP — mightyZAP은 펄스가 없으면 그 자리) — Pi가 PEN UP·HOME F를 보냄
   lastCmdMs = millis();
   reply("EVT READY trap_motion v0.2");
 }
@@ -513,6 +547,7 @@ void loop() {
     }
   }
   stepAxes();
+  fPoll();
   penPoll();
   if (watchdogMs && millis() - lastCmdMs > watchdogMs) {
     stopAll();

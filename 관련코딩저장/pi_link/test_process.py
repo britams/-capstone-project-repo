@@ -130,7 +130,7 @@ def t_mark():
         check('MOVE X 3.000' in cm and 'MOVE Y -5.000' in cm, '자세 사진의 흉부 좌표(3, −5)로 감 (C2)')
         i = cm.index('MOVE Y -5.000')
         check(cm[i + 1:i + 5] == ['PEN DOWN', 'PEN UP', 'PEN DOWN', 'PEN UP'], '2번 찍기 (DOWN·UP ×2)')
-        check('MOVE F 31.000' in cm, '급이 높이 F 31')
+        check('MOVE F 2.000' in cm, '급이 높이 F 2')
         check('PUMP 100' in cd and cd.index('PUMP 100') < cd.index('DOOR REL OPEN'), '급이 때 펌프 100 ms (방생 문 열기 전, CAP-AI-59)')
         check(cd[-2:] == ['DOOR REL CLOSE', 'LIGHT TOP 0'] or 'DOOR REL CLOSE' in cd, 'REL 닫음')
         check(cm[-1] == 'MOVE F 0.000', '마지막에 바닥 0')
@@ -155,12 +155,12 @@ def t_queen():
 
 
 def t_revisit():
-    r, proc, vis, res, cm, cd = run_scene('revisit 이미 표식 → 급이(펜 캡 컵에 꽂힌 채 F 31, R1′) → 방생',
+    r, proc, vis, res, cm, cd = run_scene('revisit 이미 표식 → 급이(펜 캡 컵에 꽂힌 채 F 2, R1′) → 방생',
                                           dict(species='velutina', mw_mm=4.0, marked=True, x=0, y=0))
     try:
         check(res == ('release', 'marked'), '결과 release (marked)')
         check(not any(s.startswith(('PRESS', 'PEN')) for s in cm), 'PRESS·펜 명령 없음')
-        check('MOVE F 31.000' in cm, '급이 F 31 — 펌웨어가 받아들임 (R1′, 펜은 Y −40 캡 컵)')
+        check('MOVE F 2.000' in cm, '급이 F 2 — 펌웨어가 받아들임 (R1′, 펜은 Y −40 캡 컵)')
         check(not any('ERR' in n.get('why', '') for n in proc.log), '오류 없음')
     finally:
         r.close()

@@ -10,7 +10,7 @@
 
 이 코드가 스스로 정한 것 (AI 판단, 서현 위임 — 웹 채팅 검토 대상)
   A1. EVT RAIL 0 을 받으면 UNO 1 에 STOP (UNO 1 은 레일을 못 봄 — 모터 전원이 끊겨 걸음을 잃음)
-  A2. 대기 자리 X = +10 mm (펌웨어 좌표) — trap_sim park X 65 (CAD 좌표, X 범위 37~73) 에서 55 를 뺌. 미검증
+  A2. 대기 자리 X = +20 mm (펌웨어 좌표) — (11/14 CAP-AI-62) CAD PARK (75, −40) 에서 55 를 뺌 (예전 65 → +10). 미검증
 """
 import time
 from dataclasses import dataclass, field
@@ -44,7 +44,7 @@ class Config:
     home_timeout_s: float = 60.0   # Y 행정 58 + 4 mm ≈ 32 s + 물러남·다시 닿기
     move_timeout_s: float = 60.0
     rail_wait_s: float = 30.0      # 켤 때 RAIL 0 이면 이만큼 기다림
-    park: dict = field(default_factory=lambda: {'X': 10.0, 'Y': -40.0})   # A2 — 미검증
+    park: dict = field(default_factory=lambda: {'X': 20.0, 'Y': -40.0})   # A2 (11/14 +10) — 미검증
     emit_off_at_night: bool = True
 
 
