@@ -199,6 +199,19 @@ try:
             seen.add(kk)
             uniq.append(h_)
     rep["hits"] = uniq
+    if App.GuiUp:                                                    # 색 규칙: 프린트 초록 · 사서 고침/주문 제작 파랑 · 그대로 산 것 회색
+        GREEN, BLUE, GRAY, DARK = (0.2, 0.7, 0.3), (0.55, 0.75, 0.95), (0.75, 0.75, 0.77), (0.35, 0.35, 0.37)
+        rule = (("300_", GREEN, 50), ("300p", BLUE, 60), ("300s", DARK, 0), ("304s", DARK, 0), ("308s", DARK, 0), ("309s", DARK, 0),
+                ("172b_", GREEN, 0), ("220_", GREEN, 0))
+        for o in d.Objects:
+            if not (o.Name.startswith(("V3_", "IsoDuct", "IsoBends", "CupBracket")) and o.ViewObject):
+                continue
+            c, t = GRAY, 0
+            for pre, cc, tt in rule:
+                if key(o).startswith(pre):
+                    c, t = cc, tt
+                    break
+            o.ViewObject.ShapeColor, o.ViewObject.Transparency = c, t
     d.saveAs(os.path.join(OUT, "S2_마킹부_v3.FCStd"))
     if App.GuiUp:
         import FreeCADGui as Gui
