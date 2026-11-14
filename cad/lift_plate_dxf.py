@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """300p 투명 아크릴 격자판 → 레이저 가공용 DXF (R12, mm, 원점 = 판 가운데). FreeCAD 없이: python cad/lift_plate_dxf.py
-치수는 lift_v2와 같은 값을 직접 씀 (lift_v2는 FreeCAD가 있어야 불러옴): 40 × 40, 모서리 R1, 네모 구멍 3.0 간격 4.4 (안 Ø33 안), 나사 구멍 Ø3.4 (±15.5, ±15.5)
+치수는 lift_v2와 같은 값을 직접 씀 (lift_v2는 FreeCAD가 있어야 불러옴): 38 × 38, 모서리 R1, 네모 구멍 3.0 간격 4.4 (안 Ø33 안), 나사 구멍 Ø3.4 (±15, ±15)
 """
 import math, os
 
-D, R, HOLE, P, BORE, SCREW, INS = 40.0, 1.0, 3.0, 4.4, 33.0, 3.4, 15.5
+D, R, HOLE, P, BORE, SCREW, INS = 38.0, 1.0, 3.0, 4.4, 33.0, 3.4, 15.0
 GRID_R = BORE / 2 - HOLE / 2 * 2 ** 0.5
 
 
