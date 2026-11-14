@@ -1031,3 +1031,5 @@
   - 상자 밑 혀 위 모서리 깎음 (방생 하우징 자리)
   - 검사 [확실 — CAD]: 바뀐 것 ↔ S1·S2·S3 겹침 0 (원래 S2에도 있던 4개: 110↔열수축관 30.4·안장 나사 6.2, G2↔110b 19.9, 172↔173h 30.4 빼고). 움직임(마커 이동) 검사는 아직 — 대기 자세만 봄
   - 펌웨어 영향 (승준 Issue 필요): 대기 X가 10 mm 더 +x (X 원점 xm 37 그대로 → 대기까지 걸음 수 +10 mm), F 스테핑 → mightyZAP PWM (전기계통 15장)
+- **전체 수정 3단계 끝 (11/14 21:15):** S2_마킹부 ← S2_마킹부_v3 (옛것은 PC 클론 `split/S2_마킹부_before_v3.FCStd`), full_merge → `cad/D5g_full.FCStd` (S1 24 · S2 102 · S3 92, 14.3 MB) + 바탕화면 `capstone design\D5g_full.FCStd` (옛것 `D5g_full_before_v3.FCStd`로 남김). PC 클론에서 커밋 0167162
+  - 남은 것: 마커가 움직일 때 새 격리 관·컵 받침과 부딪히는지 (움직임 검사), S2a 바닥구동 파일·lift_module/s2_lift(옛 리프트)는 안 씀 (지우지 않음), 펌웨어(대기 +10 mm, F → PWM) 승준 Issue, 서현 PC 사본(capstone design_이서현\repo) 맞추기
