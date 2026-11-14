@@ -7,7 +7,8 @@ v2(MiniSlide + 거더 + 스페이서 + 스프링 + 홀)를 버리고 로드형 �
   301 mightyZAP D7-6PT-3 (아이알로봇, 디바이스마트 101,000원) 행정 26, 6 N, 7.4 V, PWM 900~2100 µs로 위치 지정
       [확실 — 판매처 도면 d12d7_xxxx_3 rev03]: 몸통 57.5 × 29.5 × 15, 로드 끝 M3 암나사 + M3 너트, 뒤 경첩 구멍 Ø3.5 (몸통 뒤 7.6)
       판매처 STEP은 PC 받은도면에만 (공개 레포에 안 올림). 없으면 대표 모양
-  304 바닥: 로드 끝 M3 × 8 무두 볼트 + M3 너트(로드 잠금) + M4 DIN 9021 + McMaster 90313A108 (Ø31.75 × 1.3, 구멍 7.14 — 얹힘)
+  304 바닥: 로드 끝 M3 × 8 무두 볼트 + M3 너트(로드 잠금) + 아크릴 원판 Ø32 × 2T 구멍 Ø3.4 (격자판과 같이 주문 제작 — 너트 위에 얹힘, 볼트가 가운데를 잡음)
+      (11/14 23:40) McMaster 90313A108 + M4 DIN 9021은 해외구매라 정산 불가 → 바꿈 (CAP-AI-62)
       볼트 끝은 바닥 구멍 안 (윗면보다 낮음). 바닥 바깥 31.75가 상자 안 Ø33에 끼워져 옆을 잡음
   309 경첩 고정: M3 × 20 냄비 + M3 원형 스페이서 Ø6 × 4 (경첩 8.6 ↔ 몸통 15 차이 메움) + 2020 M3 T너트 → 세운 2020 막대 옆 홈
   307 2020 막대 2개: 상자용(가로, v2와 같음) + 액추에이터용(세움, 100 mm). 프레임과는 아직 안 맞춤
@@ -28,8 +29,8 @@ DROP_IDS = (20, 30)                        # 판매처 끝 너트·볼 끝 (안 
 ACT = dict(front=42.0, rear=-15.5, rod_face=45.8, hinge_back=7.6, hinge_d=3.5, half_t=7.63)   # STEP 좌표 (축 z, 로드 +z)
 S_REST, STROKE = 8.0, L.STROKE              # 쉼 = 로드 8 mm 나옴, 누름까지 10
 FLOOR_TOP = L.H["rest"]                     # −7
-NUT_T, M4W, M10W = 2.4, (12.0, 4.3, 1.0), (31.75, 7.14, 1.27)   # 바닥 = McMaster 90313A108 (1-1/4" OD, 18-8) [확실 — 판매처]
-STACK = NUT_T + M4W[2] + M10W[2]           # 로드 끝 → 바닥 윗면 4.67
+NUT_T, DISC = 2.4, (32.0, 3.4, 2.0)         # 바닥 = 아크릴 원판 (격자판과 같은 2T 판, DXF print/lift/300f_아크릴바닥원판.dxf)
+STACK = NUT_T + DISC[2]                     # 로드 끝 → 바닥 윗면 4.4 (11/14 전 4.67)
 Z0 = FLOOR_TOP - STACK - (ACT["rod_face"] + S_REST)
 SPACER = (6.0, 3.2, 4.0)                    # M3 원형 스페이서 (나사 없음) Ø6 × 4 [상품 미정]
 INFO = {}
@@ -68,12 +69,10 @@ def actuator():
 
 
 def floor_stack(f):
-    """로드 끝 면 f (세계 z)에서 위로: 무두 볼트 M3 × 8 (로드에 4.5), 잠금 너트, M4 DIN 9021, 바닥 와셔 (얹힘 — 볼트 끝은 바닥 구멍 안, 윗면 아래)"""
+    """로드 끝 면 f (세계 z)에서 위로: 무두 볼트 M3 × 8 (로드에 4.5), 잠금 너트, 아크릴 원판 (얹힘 — 볼트 끝 f + 3.5는 원판 구멍 안, 윗면 f + 4.4 아래)"""
     stud = L.cyl(1.5, 8.0, V(0, 0, f - 4.5))
     n1 = nut(f)
-    w4 = L.washer(*M4W, f + NUT_T)
-    w10 = L.washer(*M10W, f + NUT_T + M4W[2])
-    return Part.makeCompound([w4, w10]), Part.makeCompound([stud, n1])
+    return L.washer(*DISC, f + NUT_T), Part.makeCompound([stud, n1])
 
 
 def make(doc=None):
@@ -106,7 +105,7 @@ def make(doc=None):
             ("300s_plate_screws (M3 × 8 냄비 4 + M3 DIN 125 4 + M3 열압입 인서트 4, 구매)", L.plate_screws(), dark, 0),
             ("301_mightyZAP_D7-6PT-3 (몸통 — 행정 26, 6 N, 7.4 V, PWM, 디바이스마트, 구매) [%s]" % src, body, gray, 0),
             ("301r_rod (로드 — 움직임) [%s]" % src, rod, gray, 0),
-            ("304_floor (바닥 McMaster 90313A108 Ø31.75 + M4 DIN 9021 — 로드 끝에 얹힘, 구매)", fl, gray, 0),
+            ("304_floor (바닥 아크릴 원판 Ø32 × 2T 구멍 Ø3.4 — 격자판과 같이 주문 제작, 로드 끝 너트 위에 얹힘)", fl, (0.55, 0.75, 0.95), 0),
             ("304s_stud_nut (M3 × 8 무두 볼트 + M3 너트 — 로드 끝, 구매)", hw, dark, 0),
             ("307v_bar_act (2020 %.1f mm 세움 — 데크 → 상자 밑, 액추에이터 경첩·상자 혀, 구매)" % VBAR["L"], vb, (0.8, 0.8, 0.82), 0),
             ("308s_tongue_screws (M5 × 10 냄비 2 + 2020 M5 T너트 2 — 상자 혀 → 세운 막대, 구매)", Part.makeCompound(ts), dark, 0),

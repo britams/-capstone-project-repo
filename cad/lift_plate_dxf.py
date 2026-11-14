@@ -13,6 +13,13 @@ def centers():
     return [(i * P, j * P) for i in range(-n, n + 1) for j in range(-n, n + 1) if math.hypot(i, j) * P <= GRID_R + 1e-9]
 
 
+def disc_dxf(path, d=32.0, hole=3.4):
+    """(11/14) 304 바닥 원판 — 같은 2T 판에서 같이 자름 (McMaster 원판 대신)"""
+    e = ["0\nCIRCLE\n8\nCUT\n10\n0.0\n20\n0.0\n40\n%.4f" % (d / 2), "0\nCIRCLE\n8\nCUT\n10\n0.0\n20\n0.0\n40\n%.4f" % (hole / 2)]
+    with open(path, "w", encoding="ascii") as f:
+        f.write("0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n" + "\n".join(e) + "\n0\nENDSEC\n0\nEOF\n")
+
+
 def dxf(path):
     e = []
     line = lambda a, b: e.append("0\nLINE\n8\nCUT\n10\n%.4f\n20\n%.4f\n11\n%.4f\n21\n%.4f" % (a[0], a[1], b[0], b[1]))
@@ -37,3 +44,4 @@ def dxf(path):
 if __name__ == "__main__":
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "print", "lift", "300p_아크릴격자판.dxf")
     print(out, "구멍", dxf(out))
+    disc_dxf(os.path.join(os.path.dirname(out), "300f_아크릴바닥원판.dxf"))
