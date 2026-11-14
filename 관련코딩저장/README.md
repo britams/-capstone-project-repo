@@ -39,7 +39,7 @@ python test_pi_link.py              # 36개, 약 1분 (5배속)
 ## Pi 코드가 스스로 정한 것 (웹 채팅 검토 필요)
 - A1. `EVT RAIL 0`이면 UNO 1에 `STOP`. UNO 1은 레일을 못 보고, 모터 전원이 끊기면 걸음을 잃기 때문이다.
 - A2. 대기 자리 X = +20 mm (펌웨어 좌표, 11/14 CAP-AI-62). CAD PARK (75, −40)에서 55를 뺀 값이다 (예전 65 → +10). 펌웨어 X 위 한계도 +18 → +20. **미검증**
-- (11/14) 바닥 F = mightyZAP PWM: sim_motion 91/91 · sim_doors 89/89 · test_pi_link 36/36 · test_process 53/53 (Linux g++). **AVR 컴파일은 이번에 못 함 — PC에서 arduino-cli로 확인할 것**
+- (11/14) 바닥 F = mightyZAP PWM: sim_motion 91/91 · sim_doors 89/89 · test_pi_link 36/36 · test_process 53/53 (Linux g++). AVR 컴파일 (서현 PC arduino-cli, 11/14 23:32): trap_motion 12,664 B (39 %) / RAM 992 B (48 %) · trap_doors 11,684 B (36 %) / RAM 1,056 B (51 %), 경고 0
 
 ## 한계
 - PC의 `int`는 32비트이고 AVR은 16비트다 → 16비트 넘침은 못 잡는다. 시간은 100 µs 단위로 흐른다.
