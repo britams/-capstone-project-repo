@@ -100,8 +100,8 @@ try:
     # 방생 하우징 (+y로 뒤집음) 먼 모서리를 급이 노즐 니플·관(S1) 자리만큼 깎음
     for o in d.Objects:
         if group.get(o.Name) == "rel" and key(o).startswith("176_release_gate_housing"):
-            o.Shape = o.Shape.cut(K.box(73.9, 80.5, 40.0, 46.0, 355.0, 395.0))
-            o.Label = o.Label + " [11/14: +y로 뒤집음, 먼 모서리 x 74~80·y 40~ 깎음 — 급이 니플·관]"
+            o.Shape = o.Shape.cut(K.box(73.9, 90.0, 41.0, 46.0, 355.0, 395.0))
+            o.Label = o.Label + " [11/14: +y로 뒤집음, 먼 모서리 x 74~90·y 41~ 깎음 — 급이 니플·관]"
     # 새 마킹실 + 리프트 v3
     v = App.newDocument("_v3tmp")
     L3.make(v)
@@ -116,7 +116,7 @@ try:
     # 컵 받침 220: 컵 아래 → 방생 하우징 −y 면 (y −10)
     cx_cup, cy_cup = K.PARK[0] + DPARK, K.PARK[1]
     n = d.addObject("Part::Feature", "CupBracket")
-    n.Shape = K.box(cx_cup - 10, cx_cup + 7, cy_cup - 8, -10.2, 375.0, 380.0)
+    n.Shape = K.box(74.5, cx_cup + 7, cy_cup - 8, -10.2, 375.0, 380.0)            # 상자(x ~74) 밖만 — 컵 반쪽을 받침
     n.Label = "220_cup_bracket (11/14: 대기 (95, −40) 컵 받침 — 방생 문 하우징 −y 면에 M2 셀프 탭 2, 작은 3D 프린트)"
     group[n.Name] = "marker_fixed"
 
@@ -184,7 +184,9 @@ try:
             if ga in ("iso_duct",) and gb == "iso":
                 pass
             if a.Label.startswith("110_entry_duct") and lb.startswith(("111h_", "199s_")):
-                continue                                             # 원래 S2에도 같은 양 (30.4·6.2) — 열수축관·안장 나사
+                continue
+            if a.Label.startswith("196_gate_G2_ir_pair") and lb.startswith("110b") or a.Label.startswith("172_isolation_duct") and lb.startswith("173h"):
+                continue                                             # 원래 S2에도 같은 양 (19.9·30.4)                                             # 원래 S2에도 같은 양 (30.4·6.2) — 열수축관·안장 나사
             if not a.Shape.BoundBox.intersect(sb.BoundBox):
                 continue
             vv = a.Shape.common(sb).Volume
