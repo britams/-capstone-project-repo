@@ -172,7 +172,7 @@ class Processor:
     """ctl = controller.TrapController, vision.look(what) → [dict(species, mw_mm, marked, pose, p, x, y)]
     month() → 오늘 달, is_day() → 처리해도 되는 시간인가, battery_low() → INA226 부족인가"""
 
-    def __init__(self, ctl, vision, prm=None, month=lambda: time.localtime().tm_mon,
+    def __init__(self, ctl, vision, prm=None, month=lambda: time.localtime().tm_mon if time.localtime().tm_year >= 2026 else 4,   # (11/14) RTC 배터리 없음: 시계가 안 맞으면(2026년 전) 4월 = 여왕벌 철로 봄 → 격리 쪽 (안전)
                  is_day=lambda: True, battery_low=lambda: False):
         self.ctl, self.vision = ctl, vision
         self.prm = prm or Params()
