@@ -108,10 +108,10 @@ try:
     for o in sw:
         o.Placement.Base = o.Placement.Base + V(0, 0, -7.6)
     scr = [s.BoundBox.Center for o in ob(s2, "227xs") for s in o.Shape.Solids]
-    XC, YR, Z0 = 31.5, -70.0, 460.0
+    XC, YR, Z0 = 10.0, -70.0, 460.0             # SK8는 스위치(x 29.7~41.9) 옆 — 밑에 두면 스위치·볼트와 겹침
     sk = box(XC - 7, XC + 7, YR - 21, YR + 21, Z0, Z0 + 6).fuse(box(XC - 7, XC + 7, YR - 10.5, YR + 10.5, Z0, Z0 + 32.8))
     sk = sk.cut(cyl(4.0, 16, V(XC - 8, YR, Z0 + 20), ex)).cut(cyl(2.75, 8, V(XC, YR - 16, Z0 - 1))).cut(cyl(2.75, 8, V(XC, YR + 16, Z0 - 1))).removeSplitter()
-    ap = box(24.5, 42.5, -112.0, YR + 21, Z0 - 3, Z0)
+    ap = box(XC - 7, 42.5, -112.0, YR + 21, Z0 - 3, Z0)
     for yy in (YR - 16, YR + 16):
         ap = ap.cut(cyl(2.75, 5, V(XC, yy, Z0 - 4)))
     for c in scr:
