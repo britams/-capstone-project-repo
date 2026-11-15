@@ -42,7 +42,17 @@ try:
     b.Shape = Part.makeCompound(keep)
     b.Label = "202_holder_bolts (어깨 볼트 M3 · 어깨 Ø4 × 6 2 + 너트, P-8용 M3 × 10 접시머리 2 + 너트 — 구매, 홀더와 같이 움직임)"
     rep["bolt_solids"] = len(keep)
-    d.save()
+    import time
+    path = os.path.join(OUT, "S2_마킹부.FCStd")
+    try:
+        d.save()
+    except OSError:                                     # buy1과 같은 잠김 — FreeCAD가 다 쓴 임시 파일을 옮김
+        tmp = sorted(glob.glob(path + ".*-*"), key=os.path.getmtime)[-1]
+        for _ in range(60):
+            try:
+                os.replace(tmp, path); break
+            except OSError:
+                time.sleep(2)
     # DXF (HV)
     sl = hv.Shape.Solids[0]
     f = max([x for x in sl.Faces if x.Surface.TypeId == "Part::GeomPlane"], key=lambda x: x.Area); bb = sl.BoundBox
