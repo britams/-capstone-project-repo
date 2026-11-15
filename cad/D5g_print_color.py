@@ -19,12 +19,20 @@ OTHER = (0.80, 0.80, 0.82)
 CUT_WORDS = ("자름", "잘라", "자른", "뚫", "드릴", "재단")   # '구멍'은 '구멍 미검증' 같은 말에 걸려서 뺌
 
 
+KEEP_PRINT = ("300_marking_box", "112_entry_iso_gate_housing", "176_release_gate_housing")   # (11/15 서현 '출력 5개 미만') 남은 출력 3개
+LASER_WORDS = ("레이저", "맞춤 절단", "주문 제작")
+
+
 def color_of(label):
-    """반환 (색, 'print'|'modify'|'buy') — 부품표(D5g_parts_table) 종류·규격 글로 판정"""
+    """반환 (색, 'print'|'modify'|'buy') — (11/15) 남은 출력 3개 = 초록, 라벨에 레이저·맞춤 절단 = 파랑, 그 밖은 부품표(D5g_parts_table) 글로 판정 (부품표의 옛 '3D 프린트'는 회색)"""
+    if label.startswith(KEEP_PRINT):
+        return PRINT, "print"
+    if any(w in label for w in LASER_WORDS):
+        return MODIFY, "modify"
     import D5g_parts_table as PT
     head, ko, kind, spec = PT.name_of(label)
     if "3D 프린트" in spec:
-        return PRINT, "print"
+        return OTHER, "buy"
     if kind in ("판 재단", "설계") or any(w in spec for w in CUT_WORDS):
         return MODIFY, "modify"
     return OTHER, "buy"
