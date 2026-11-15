@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """마커 P 클립 → HellermannTyton P-8 (서현 11/15 22:03 "판홀더는 기구니까 건들고 싶으면", CAP-AI-62)
   규격 P 클립 15 mm는 M6 나사 (홀더 판 3 mm에 머리가 안 묻힘) → P-8: 묶음 Ø13.7~14.3 (마커 Ø14.7을 조금 늘려 잡음 [추측]), 폭 9.5, 벽 1.8, 구멍 3.2, 길이 28 [확실 — 제조사 페이지]
-  마커 축 = 판 면 − (7.35 + 1.8) = 75 그대로. 귀는 −y 쪽 (구멍 y −54) → 홀더 판 HV를 y −58까지 늘림, 옛 M4 구멍(y −29) 메움, M3 접시 (HV +x 면이 SP에 미끄러짐)
+  마커 축 = 판 면 − (7.35 + 1.8) = 75 그대로. 귀는 +y (구멍 = 고리 가운데 + 14.5 → y −25.5 [추측 — 길이 28에서 셈]), 클립 z 440.5 · 452.5
+  (−y 귀는 Y 원점 스위치·X 너트와, 아래쪽 클립은 어깨 볼트 머리·판 모서리와 겹쳐서 — 11/15 검사). 옛 M4 구멍 메움, M3 접시 (HV +x 면이 SP에 미끄러짐)
 한 번만 (다시는 split/S2_마킹부_before_p8.FCStd에서). freecad.exe cad/s2_clip_p8.py (cwd = cad) → split/S2, print/xy/HV_*.dxf, split/_clip_p8.json"""
 import json, os, sys, traceback, glob
 HERE = os.getcwd(); OUT = os.path.join(HERE, "split"); sys.path.insert(0, HERE)
@@ -13,11 +14,11 @@ try:
     box, cyl = L.box, L.cyl
     ex = V(1, 0, 0)
     XM, YM, HV0, HV1 = 75.0, -40.0, 84.15, 87.15
-    CZ, W, T, YH = (412.0, 445.0), 9.5, 1.8, -54.0
+    CZ, W, T, YH = (440.5, 452.5), 9.5, 1.8, -25.5
     d = App.openDocument(os.path.join(OUT, "S2_마킹부.FCStd"))
     ob = lambda p: [o for o in d.Objects if o.TypeId.startswith("Part::") and o.Label.startswith(p)]
     hv = ob("202_holder_plate_HV")[0]
-    s = hv.Shape.fuse(box(HV0, HV1, -58.0, -45.0, 405.0, 455.0))
+    s = hv.Shape
     for z in CZ:
         s = s.fuse(cyl(2.2, T + 3.2, V(HV0 - 0.1, -29.0, z), ex))      # 옛 M4 구멍 메움
     s = s.removeSplitter()
@@ -29,7 +30,7 @@ try:
     clips = []
     for z in CZ:
         ring = cyl(7.35 + T, W, V(XM, YM, z - W / 2)).cut(cyl(7.35, W + 2, V(XM, YM, z - W / 2 - 1)))
-        tab = box(HV0 - T, HV0, -58.0, YM - 7.35, z - W / 2, z + W / 2).cut(cyl(1.6, 5, V(HV0 - 3, YH, z), ex))
+        tab = box(HV0 - T, HV0, YM + 7.35, YM + 19.05, z - W / 2, z + W / 2).cut(cyl(1.6, 5, V(HV0 - 3, YH, z), ex))
         clips.append(ring.fuse(tab).removeSplitter())
     c = ob("203_marker_P_clips")[0]
     c.Shape = Part.makeCompound(clips)
