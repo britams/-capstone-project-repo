@@ -62,13 +62,21 @@ try:
     s, c = math.sin(a), math.cos(a)
     for o in ob(cur, "110b"):
         o.Shape = rotx(mv(o.Shape, V(0, OY, 0)), OY, ZD, -math.degrees(a))
-    F = V(0, 0, 247.4)
+    F = V(0, 0, 248.5)                                             # 깔때기 목 위 1.1 (기울어서 목 안쪽에 안 박히게 — 이음은 열수축관 111h)
     Lp = (ZD - 13.0 - 247.4) / c - 0.0
     T = V(0, OY - 13.0 * s, ZD - 13.0 * c)
     for o in ob(cur, "110_entry_duct"):
         o.Shape = K.tube(9.0, 6.5, (T - F).Length, F, (T - F).normalize())
         o.Label = "110_entry_duct (수도용 PVC 13A — 바깥 18·안 13, %d mm 자름, 4° 기울어 깔때기 목 → 꺾임 110b, 11/15)" % round((T - F).Length)
     rep["entry"] = dict(deg=round(math.degrees(a), 2), L=round((T - F).Length, 1))
+    # G1 빛 게이트 (관 둘레 안장 받침·센서·나사, z ~275)도 기운 관을 따라 y로
+    def y_at(z):
+        return F.y + (z - F.z) * math.tan(a)
+    for o in ob(cur, "196_gate_G1") + ob(cur, "199d_gate_holder_G1") + ob(cur, "199e_gate_holder_G1"):
+        o.Shape = mv(o.Shape, V(0, y_at(o.Shape.BoundBox.Center.z), 0))
+    for o in ob(cur, "199s_gate_screws"):
+        if "[iso" not in o.Label:
+            o.Shape = Part.makeCompound([mv(x, V(0, y_at(x.BoundBox.Center.z), 0)) if abs(x.BoundBox.Center.x) < 30 and abs(x.BoundBox.Center.y) < 30 and x.BoundBox.Center.z < 330 else x.copy() for x in o.Shape.Solids])
     # 3) 격리: 11/14 −y 묶음 빼고 옛 −x 묶음
     for p in ("170_isolation_gate", "196_gate_G3", "172_isolation_duct", "172b_isolation", "196_gate_G4", "199b_gate_holder_G4"):
         for o in ob(cur, p):
@@ -102,7 +110,7 @@ try:
             if ss:
                 add.append((lb + " [iso_duct]", mv(Part.makeCompound(ss), V(0, yG4, -0.5))))
     T2 = V(1.5, -OY + 13.0 * sb, ZD + 13.0 * cb)
-    G = V(1.5, 0, 585.0)
+    G = V(1.5, 0, 584.0)                                           # 깔때기 173 목 아래 1 (같은 이유, 열수축관 173h)
     add.append(("172_isolation_duct (수도용 PVC 13A — 바깥 18·안 13, %d mm 자름, 꺾임 172b → 깔때기 173 곧게 2.5°, 11/15 옛 길로)" % round((G - T2).Length),
                 K.tube(9.0, 6.5, (G - T2).Length, T2, (G - T2).normalize())))
     rep["iso"] = dict(deg=round(math.degrees(b), 2), L=round((G - T2).Length, 1), y_G4=round(yG4, 2))
@@ -130,7 +138,7 @@ try:
 
     def grp(l):
         t = l.split(" ", 1)[1]
-        if t.startswith(("112_", "196_gate_G2", "110")) or (t.startswith("112s") and "[entry]" in t):
+        if t.startswith(("112_", "196_gate_G2", "110", "196_gate_G1", "199d_gate_holder_G1", "199e_gate_holder_G1")) or (t.startswith("112s") and "[entry]" in t):
             return "entry"
         if t.startswith(("170_", "196_gate_G3", "172", "196_gate_G4", "199b_gate_holder_G4")) or "[iso" in t:
             return "iso"
@@ -139,7 +147,7 @@ try:
         if t.startswith("300_"):
             return "box"
         return None
-    ok = (("110_entry_duct", "111h_"), ("172_isolation_duct", "173h"), ("196_gate_G2_ir", "110b"), ("100h", "197"), ("100h", "100"), ("100i", "100"),
+    ok = (("110_entry_duct", "111h_"), ("199s", "199d"), ("199s", "199e"), ("199s", "196_gate_G1"), ("172_isolation_duct", "173h"), ("196_gate_G2_ir", "110b"), ("100h", "197"), ("100h", "100"), ("100i", "100"),
           ("300_", "300"), ("300_", "301"), ("300_", "304"), ("300_", "308"), ("300_", "307"), ("300_", "196_gate"), ("300_", "142"))
     probe = [(l, sh) for l, sh in every if grp(l) or l.split(" ", 1)[1].startswith(("100h", "100i"))]
     seen = set()
