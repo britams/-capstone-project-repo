@@ -84,7 +84,7 @@ try:
     for sy in (-1, 1):
         pl = pl.cut(cyl(M28["ear_hole"] / 2, 5, V(xp0 - 1, YA + sy * M28["ear_c"] / 2, zx - M28["off"]), V(1, 0, 0)))
     hw = []
-    for yb in (YA - 15, YA + 15):
+    for yb in (YA - 9, YA + 9):      # ±9: SK8 나사(y −81·−49)와 같은 y 피함
         pl = pl.cut(cyl(2.75, 5, V(xp0 - 1, yb, 450), V(1, 0, 0)))
         hw.append(L.pan(V(xp0, yb, 450), V(1, 0, 0), 5.0, 8.0))
         hw.append(box(160.5, 165.5, yb - 3, yb + 3, 445, 455))        # 20시리즈 스프링너트 (레일 −x 옆 홈)
