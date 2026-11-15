@@ -99,7 +99,7 @@
    "143l_feed_trough_lid",
    "143n_nipple_M5_barb",
    "143p_post_sq12",
-   "148c_spring_latch",
+   "148k_shaft_collar",
    "151_drive_side_L",
    "151_drive_side_R",
    "151k_column_brackets",
@@ -274,14 +274,17 @@
    "holder_on_rail_mm": 0.0
   },
   "press": {
-   "delta_mm": 4.83,
-   "lever_pressed_z": 253.67,
-   "latch_rest_bottom": 258.5,
-   "gap_rest": 4.83,
-   "spring_len_rest": 14.0,
-   "spring_solid": 3.9,
+   "delta_mm": 4.76,
+   "seat_z": 239.39,
+   "L_inst": 23.61,
+   "lever_pressed_z": 282.24,
+   "gap_rest": 4.76,
+   "switch_base_z": 270.04,
+   "collar_top_max": 328.5,
+   "spring_at_press": 18.85,
+   "spring_min": 12.45,
    "carriage_valid": true,
-   "carriage_vol": 17067,
+   "carriage_vol": 20171,
    "removed": [
     "159_floor_nut_T8",
     "152_motor_plate",
@@ -295,7 +298,7 @@
     [
      "158_carriage",
      "227ps_press_switch_screws",
-     18.85,
+     19.38,
      "허용"
     ]
    ],
@@ -401,11 +404,11 @@
      "solids": 1,
      "size": [
       36.0,
-      57.0,
-      34.5
+      52.0,
+      36.6
      ],
-     "volume_cm3": 17.1,
-     "mass_g": 21.7
+     "volume_cm3": 20.2,
+     "mass_g": 25.6
     },
     {
      "num": "112",
@@ -744,20 +747,6 @@
      "mass_g": 1.0
     },
     {
-     "num": "148c",
-     "name": "스프링 걸쇠 (축 147에 끼움, 누름 스위치를 누름)",
-     "label": "148c_spring_latch",
-     "spec": "3D 프린트 PETG (CAP-AI-60 — 로드셀 대신)",
-     "solids": 1,
-     "size": [
-      7.0,
-      21.5,
-      3.0
-     ],
-     "volume_cm3": 0.3,
-     "mass_g": 0.3
-    },
-    {
      "num": "193h",
      "name": "와고 받침 (5칸)",
      "label": "193h_wago_holder",
@@ -877,15 +866,15 @@
   "unknown": [],
   "volume_cm3": [
    310.7,
-   707.1,
+   710.1,
    6993.8
   ],
   "files": {
    "S1_급이부": 0.09,
-   "S2_마킹부": 0.79,
+   "S2_마킹부": 0.84,
    "S3_프레임회로": 12.21,
    "S0_전체조립": 0.0
   }
  },
- "seconds": 707
+ "seconds": 582
 }

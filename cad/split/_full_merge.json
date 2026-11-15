@@ -1,10 +1,10 @@
 {
  "ok": true,
  "merge": {
-  "S1_급이부": 24,
-  "S2_마킹부": 109,
-  "S3_프레임회로": 92,
-  "MB": 13.09
+  "S1_급이부": 6,
+  "S2_마킹부": 110,
+  "S3_프레임회로": 89,
+  "MB": 14.22
  },
  "pc_copy": "C:\\Users\\Seohyun_Lee\\Desktop\\capstone design\\D5g_full.FCStd"
 }

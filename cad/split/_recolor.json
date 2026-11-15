@@ -1,21 +1,19 @@
 {
  "S1_급이부": {
-  "buy": 17,
-  "modify": 7
+  "modify": 1,
+  "buy": 5
  },
  "S2_마킹부": {
-  "modify": 6,
-  "buy": 76,
-  "print": 33
+  "modify": 23,
+  "buy": 84,
+  "print": 3
  },
  "S3_프레임회로": {
-  "modify": 2,
-  "print": 7,
-  "buy": 83
+  "modify": 8,
+  "buy": 81
  },
  "S2a_바닥구동": {
-  "print": 7,
-  "buy": 18,
-  "modify": 1
+  "buy": 14,
+  "modify": 2
  }
 }
