@@ -37,7 +37,7 @@ STEP_DIR = r"C:\Users\Seohyun_Lee\Desktop\capstone design\받은도면 step파�
 BOXD = dict(half=19.0, z_bot=-10.0, z_top=8.0, bore=33.0, mesh_rec=33.4, z_mesh=8.0, hole=13.0,
             wing=None, wing_t=4.0, ins=(15.0, 15.0), ins_d=2.5, ins_L=6.0,   # (11/15) ins_d 4.0 → 2.5: 열압입 인서트(인두 필요) 대신 M3 태핑 나사 밑구멍 — 서현 "나사로 조이기만"
             r=1.0, grid=False, plate=True,
-            doors4=True, mx_y=(9.0, -9.0), feed_d=11.2, feed_tip=(0.0, 17.4, 1.0), feed_end=(0.0, 54.28, -8.15),   # 솜 축 (D5g_feeder_uln FD − (55, 0, 377))
+            doors4=True, mx_y=(9.0, -9.0), feed=False, feed_d=11.2, feed_tip=(0.0, 17.4, 1.0), feed_end=(0.0, 54.28, -8.15),   # 솜 축 (D5g_feeder_uln FD − (55, 0, 377))
             tongue=(18.3, 10.0, 3.0, 24.0), tongue_holes=(-21.0, -29.0))   # (11/14 17:55) 바깥 38 = 옛 벽 바깥, 세운 막대 위 끝 −16 (방생 문 하우징 아래)
 # (11/14 17:40 서현 "새 상자 넣고 문 3개 다시", "격리 −y") 전체 좌표 = 이 좌표 + (55, 0, 377): 격자 아래 385·바닥 쉼 370
 #   −x 입구 Ø13 · +x 방생 Ø13 · −y 격리 Ø13 (아래 끝 = 바닥 쉼) · +y 급이 Ø11.2 (솜 142n 축 따라 기울게, 끝 z 378)
@@ -154,9 +154,10 @@ def marking_box():
         s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(1, 0, 0)))          # +x 방생
         for yy in b["mx_y"]:                                                      # (11/15 서현 "일자로") −x 벽에 입구(+y)·격리(−y) 나란히, −y 격리 구멍 없앰
             s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, yy, zc), V(-1, 0, 0)))
-        t0, t1 = V(*b["feed_tip"]), V(*b["feed_end"])
-        u = (t1 - t0).normalize()
-        s = s.cut(cyl(b["feed_d"] / 2, 16.0, t0 - u * 6.0, u))                    # 솜 축 따라 Ø11.2 (옛 벽 120과 같은 방식)
+        if b.get("feed", True):                                                   # (11/15 서현) 급이는 방생 통로로 → +y 솜 구멍 없음
+            t0, t1 = V(*b["feed_tip"]), V(*b["feed_end"])
+            u = (t1 - t0).normalize()
+            s = s.cut(cyl(b["feed_d"] / 2, 16.0, t0 - u * 6.0, u))                # 솜 축 따라 Ø11.2 (옛 벽 120과 같은 방식)
         tx, ty, tt, td = b["tongue"]
         for z in b["tongue_holes"]:
             s = s.cut(cyl(2.75, tt + 2, V(tx, ty - 1, z), V(0, 1, 0)))
