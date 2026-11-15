@@ -10,6 +10,16 @@ import json, os, sys, traceback
 HERE = os.getcwd(); OUT = os.path.join(HERE, "split"); sys.path.insert(0, HERE)
 DZ = -12.0
 rep = dict(moved=[], hits=[])
+def _save(doc, path):          # 11/15: 바로 save()가 Permission denied (복사 직후 잠김) → 새 이름 저장 뒤 바꿔치기
+    import time
+    tmp = path[:-6] + "_tmp_buy1.FCStd"
+    doc.saveAs(tmp); App.closeDocument(doc.Name)
+    for _ in range(30):
+        try:
+            os.replace(tmp, path); return
+        except OSError:
+            time.sleep(2)
+    raise OSError("replace failed " + path)
 try:
     import FreeCAD as App, Part
     import lift_v2 as L
@@ -32,7 +42,7 @@ try:
             t = s.copy(); t.translate(V(0, 0, DZ)); moved.append(t)
         o.Shape = Part.makeCompound(keep + moved) if (keep or len(moved) > 1) else moved[0]
         rep["moved"].append([o.Label[:50], len(inside), len(sols)])
-    s3.save()
+    _save(s3, os.path.join(OUT, "S3_프레임회로.FCStd"))
     # --- S2: 218 → SK8, 217 → 판 + 브래킷, 213 다시
     s2 = App.openDocument(os.path.join(OUT, "S2_마킹부.FCStd"))
     ob = lambda p: [o for o in s2.Objects if o.Label.startswith(p)]
@@ -86,7 +96,7 @@ try:
         n.Shape, n.Label = shp, lab
         if App.GuiUp:
             n.ViewObject.ShapeColor = col
-    s2.save()
+    _save(s2, os.path.join(OUT, "S2_마킹부.FCStd"))
     # 고정 겹침 검사: 새것·내린 것 ↔ 전부
     every = []
     for f in ("S1_급이부", "S2_마킹부", "S3_프레임회로"):
