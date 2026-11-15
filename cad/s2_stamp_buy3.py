@@ -3,9 +3,9 @@
 프린트 Y 캐리지 206 · 마커 홀더 202 · 조임 띠 203 · 스프링 204 · 안내 핀 223 → 알루미늄 3 mm 레이저 판 + 사는 것:
   CP 캐리지 판 (법선 y, y −47~−44): LMK8UU ×2 플랜지 (−y 면) + T8 너트 224 플랜지 (+y 면, 구멍 0·90°로 돌림)
   SP 안내 판 (법선 x, x 87.15~90.15): 세로 홈 2 (폭 4.2) — 홀더가 어깨 볼트 M3 (어깨 Ø4 × 6) 2개로 미끄러짐
-  HV 홀더 판 (법선 x, x 84.15~87.15): P 클립 Ø15 ×2로 마커 잡음 (마커 축 x 75 = 옛 자리), 밑 모서리가 서보 혼에 얹힘 (옛 탭 높이 그대로)
+  HV 홀더 판 (법선 x, x 84.15~87.15): P 클립 Ø15 ×2로 마커 잡음 (M4 접시머리 — 카운터싱크는 레이저 업체) (마커 축 x 75 = 옛 자리), 밑 모서리가 서보 혼에 얹힘 (옛 탭 높이 그대로)
   SV 서보 판 (법선 x, x 100.15~103.15): SG90 몸통 구멍 + 귀 M2 2 — SP와 M3 × 10 기둥 3
-  CP ↔ SP: 작은 L 브래킷 2 (M3) — 위 z 486~496, 아래 z 395~405
+  CP ↔ SP: 작은 L 브래킷 2 (M3) — 위 z 488~498, 아래 z 399~409
   서보 205·혼·스플라인은 −x 2.35 (귀가 SV 면에 닿게)
 펜 내림 힘 = 홀더 + 마커 무게만 (스프링 204 뺌) [추측: 말벌 등에 앉기 충분 — 실물로 확인]
 P 클립 마커 축 거리 9.15 (반지름 7.35 + 고무·띠 1.8) [추측 — 판매처 치수로 확인]
@@ -38,7 +38,7 @@ try:
     box, cyl = L.box, L.cyl
     ex, ey, ez = V(1, 0, 0), V(0, 1, 0), V(0, 0, 1)
     XB, YM, XM = 101.4, -40.0, 75.0
-    YRZ, YSZ = (435.0, 471.0), 453.0
+    YRZ, YSZ = (433.5, 472.5), 453.0
     SZ, SY = 417.94, -18.9                    # 서보 축 높이·y (대기)
     DXS = -2.35
     T = 3.0
@@ -69,27 +69,27 @@ try:
     add = []
     # ---- CP (x 88.9~113.9, y −47~−44, z 395~496)
     CP0, CP1 = -47.0, -44.0
-    cp = box(88.9, 113.9, CP0, CP1, 395, 496)
+    cp = box(88.9, 113.9, CP0, CP1, 397, 496)
     for z in YRZ:
         cp = hy(cp, CP0, [(XB, z)], 15.2)
         cp = hy(cp, CP0, [(XB + 8.485 * sx, z + 8.485 * sz) for sx in (-1, 1) for sz in (-1, 1)], 3.5)
     cp = hy(cp, CP0, [(XB, YSZ)], 10.5)
     nut_h = [(XB + 8, YSZ), (XB - 8, YSZ), (XB, YSZ + 8), (XB, YSZ - 8)]
     cp = hy(cp, CP0, nut_h, 3.4)
-    BRK = [(398.0, 400.0), (493.0, 491.0)]    # (브래킷 가운데 z, 구멍 z)
+    BRK = [(404.0, 404.0), (493.0, 491.0)]    # (브래킷 가운데 z, 구멍 z)
     cp = hy(cp, CP0, [(98.0, zh) for _, zh in BRK], 3.4)
     # ---- SP (x 87.15~90.15, y −40~+1, z 388~496)
     SP0, SP1 = 87.15, 90.15
-    sp = box(SP0, SP1, -40, 1, 388, 496)
+    sp = box(SP0, SP1, -40, 1, 397, 496)            # 밑 397: 빛 게이트 G5b(z 390.5)·G6(395) 위로 지나감
     for y in (-32.0, -4.0):
         sp = slot_x(sp, SP0, y, 429.9, 446.2, 4.2)
     sp = sp.cut(box(SP0 - 1, SP1 + 1, -25.4, -12.4, 403.0, 425.0))           # 서보 보스·스플라인
-    SO = [(-8.0, 398.0), (-12.0, 440.0), (-30.0, 392.0)]      # (−12, 440): 펜 올렸을 때 y −4 어깨 볼트 너트 피함
+    SO = [(-8.0, 401.0), (-6.0, 426.0), (-30.0, 418.0)]      # 아래 Y 봉(z 429.5~) 밑, 서보(y −24.8~−13)·어깨 볼트 너트(z 429.25~) 피함
     sp = hx(sp, SP0, SO, 3.4)
     sp = hx(sp, SP0, [(-36.5, zh) for _, zh in BRK], 3.4)
     # ---- SV (x 100.15~103.15) — LMK 아래 몸통(y ≤ −28, z ≥ 427.5) 피해 L 모양
     SV0, SV1 = 100.15, 103.15
-    sv = box(SV0, SV1, -33, -5, 388, 426).fuse(box(SV0, SV1, -27, -5, 426, 444))
+    sv = box(SV0, SV1, -33, -5, 397, 425.5).fuse(box(SV0, SV1, -27, -5, 425.5, 428.5))   # 아래 Y 봉(z 429.5)·LMK 몸통(y ≤ −28, z ≥ 426) 밑
     sv = sv.cut(box(SV0 - 1, SV1 + 1, -25.1, -12.7, 401.34, 424.14))         # SG90 몸통
     sv = hx(sv, SV0, [(SY, SZ - 18.9), (SY, SZ + 8.5)], 2.2)                  # 귀 M2
     sv = hx(sv, SV0, SO, 3.4)
@@ -114,21 +114,22 @@ try:
     BOLT = [(-32.0, 432.0), (-4.0, 432.0)]
     hv = hx(hv, HV0, BOLT, 4.1)
     CLIP_Z = (412.0, 445.0)
-    hv = hx(hv, HV0, [(YM, z) for z in CLIP_Z], 4.3)                           # P 클립 M4
-    add.append(("202_holder_plate_HV (홀더 판 — 알루미늄 3 mm 레이저, 밑 모서리가 서보 혼에)", hv.removeSplitter(), (0.45, 0.6, 0.85)))
-    # P 클립 Ø15 ×2 (고리 + 귀) — 마커 축 x 75
+    CLIP_Y = YM + 12.0
+    hv = hx(hv, HV0, [(CLIP_Y, z) for z in CLIP_Z], 4.3)                       # P 클립 M4 (접시 — HV +x 면이 SP에 미끄러짐)
+    add.append(("202_holder_plate_HV (홀더 판 — 알루미늄 3 mm 레이저, 밑 모서리가 서보 혼에, M4 접시 2)", hv.removeSplitter(), (0.45, 0.6, 0.85)))
+    # P 클립 Ø15 ×2 (고리가 HV 면에 닿고, 귀는 +y 옆에 납작) — 마커 축 x 75
     clips = []
     for z in CLIP_Z:
         ring = cyl(9.15, 12, V(XM, YM, z - 6)).cut(cyl(7.35, 14, V(XM, YM, z - 7)))
-        ear = box(XM + 7.35, HV0, YM - 6, YM + 6, z - 6, z + 6).cut(cyl(7.35, 14, V(XM, YM, z - 7)))
+        ear = box(HV0 - 2, HV0, YM + 6, CLIP_Y + 6, z - 6, z + 6)
         clips.append(ring.fuse(ear).removeSplitter())
     add.append(("203_marker_P_clips (P 클립 Ø15 고무 ×2 + M4 × 10·너트 — 구매)", Part.makeCompound(clips), (0.3, 0.3, 0.3)))
     bolts = []
     for y, z in BOLT:                                                        # 어깨 볼트: 머리 −x, 어깨 Ø4 HV + SP
-        bolts.append(cyl(3.5, 2.5, V(HV0 - 2.5, y, z), ex).fuse(cyl(2.0, SP1 + 0.2 - HV0, V(HV0, y, z), ex)).fuse(cyl(1.5, 4, V(SP1 + 0.2, y, z), ex)))
+        bolts.append(cyl(3.5, 2.5, V(HV0 - 2.5, y, z), ex).fuse(cyl(2.0, SP1 + 0.2 - HV0, V(HV0, y, z), ex)).fuse(cyl(1.5, 2.4, V(SP1 + 0.2, y, z), ex)))
         bolts.append(box(SP1 + 0.2, SP1 + 2.6, y - 2.75, y + 2.75, z - 2.75, z + 2.75))     # 와셔 + 너트
     for z in CLIP_Z:
-        bolts.append(cyl(2.0, 10, V(HV0 - 3, YM, z), ex))
+        bolts.append(cyl(2.0, 10, V(HV1, CLIP_Y, z), V(-1, 0, 0)).fuse(box(HV0 - 5.2, HV0 - 2, CLIP_Y - 3.5, CLIP_Y + 3.5, z - 3.5, z + 3.5)))
     add.append(("202_holder_bolts (어깨 볼트 M3 · 어깨 Ø4 × 6 2 + 너트 — 구매, 홀더와 같이 움직임)", Part.makeCompound(bolts), (0.35, 0.35, 0.37)))
     for lab, shp, col in add:
         n = s2.addObject("Part::Feature", "B3_%d" % len(s2.Objects))
