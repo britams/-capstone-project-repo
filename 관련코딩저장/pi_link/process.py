@@ -11,7 +11,7 @@ trap_sim.py (PiFSM wait_entry·process·press_mark·feed·release·isolate·leav
     격리  : 2마리 이상 / 안 보임 / 2종 아님·불확실 / 유럽말벌 / 여왕벌 / 방제 모드
     재방문: 이미 표식 → 급이 → 방생
     마킹  : PRESS(51 g) → 자세 확인(등이 위, p ≥ 0.6) → 흉부 위 펜 2번 찍기 → 대기 자리 → 점 확인 → 급이 → 방생
-  급이: 펌프 feed_pump_ms로 방생 통로 T의 솜 적심 → feed_s 동안 마킹실에서 잉크 건조 (시험 전 [추측]) → 방생 때 나가며 먹음 (11/15)
+  급이: 펌프 feed_pump_ms로 방생 통로 T의 솜 적심 → feed_s(10 s — 서현 관찰 약 7 s + 여유) 동안 마킹실에서 잉크 건조 → 방생 때 나가며 먹음 (11/15)
   방생: (해 지면 격리로) REL 열기 → 장부·카메라로 빌 때까지 → 60 s 기록, 120 s 알림, 300 s CAP도 엶 → 닫기 → 바닥 0
   격리: 바닥 0 → CAP 열기 → 빌 때까지 → 닫기
   고장(TrapFault): 통과 모드 — CAP·IN 열고 조명 끔 (마킹실에 갇혀 죽지 않게), 알리고 멈춤
@@ -54,7 +54,7 @@ QUEEN_MONTHS = (3, 4, 5, 9, 10, 11)
 class Params:                   # 값 근거는 trap_sim PRM — [추측]은 시험으로 고칠 것
     press_g: float = 51.0       # F_p 0.5 N [확실 — D6]
     F_retract: float = 10.0
-    feed_s: float = 60.0        # [추측]
+    feed_s: float = 10.0        # (11/15 서현 "잉크 거의 7초면 마름") 7 s + 여유 3 s [AI 판단] — 말벌 몸(털) 위에서 다시 잼
     feed_pump_ms: float = 100.0  # (CAP-AI-59) 한 번 먹일 때 펌프 시간 — 약 0.14 mL [추측 — 실측으로 맞춤]. 펌웨어 PUMP_MAX_MS 이하
     dwell_s: float = 0.3        # 펜이 닿아 있는 시간 [추측]
     stamps: int = 2
