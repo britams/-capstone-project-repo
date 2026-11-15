@@ -19,8 +19,8 @@ try:
     ob = lambda p: [o for o in d.Objects if o.TypeId.startswith("Part::") and o.Label.startswith(p)]
     hv = ob("202_holder_plate_HV")[0]
     s = hv.Shape
-    for z in CZ:
-        s = s.fuse(cyl(2.2, T + 3.2, V(HV0 - 0.1, -29.0, z), ex))      # 옛 M4 구멍 메움
+    for z in (412.0, 445.0):
+        s = s.fuse(cyl(2.2, T + 3.2, V(HV0 - 0.1, -29.0, z), ex))      # 옛 M4 구멍 (y −29, z 412·445) 메움
     s = s.removeSplitter()
     s = s.common(box(HV0, HV1, -100, 100, 300, 500))
     for z in CZ:
