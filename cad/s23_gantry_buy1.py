@@ -12,14 +12,20 @@ DZ = -12.0
 rep = dict(moved=[], hits=[])
 def _save(doc, path):          # 11/15: 바로 save()가 Permission denied (복사 직후 잠김) → 새 이름 저장 뒤 바꿔치기
     import time
-    tmp = path[:-6] + "_tmp_buy1.FCStd"
-    doc.saveAs(tmp); App.closeDocument(doc.Name)
-    for _ in range(30):
+    import glob
+    try:
+        doc.save()                # FreeCAD는 path.<uuid>에 다 쓴 뒤 이름을 바꾸다 잠김에 걸림 → 그 파일을 직접 옮김
+        App.closeDocument(doc.Name); return
+    except OSError:
+        pass
+    App.closeDocument(doc.Name)
+    tmp = sorted(glob.glob(path + ".*-*"), key=os.path.getmtime)[-1]
+    for _ in range(60):
         try:
             os.replace(tmp, path); return
         except OSError:
             time.sleep(2)
-    raise OSError("replace failed " + path)
+    raise OSError("replace failed " + tmp)
 try:
     import FreeCAD as App, Part
     import lift_v2 as L
