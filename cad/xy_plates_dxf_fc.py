@@ -8,9 +8,11 @@ rep = {}
 try:
     import FreeCAD as App, Part
     d = App.openDocument(os.path.join(HERE, "split", "S2_마킹부.FCStd"), True)
-    want = [("212_beam_plates", ["YA_빔판A_알루미늄3T", "YB_빔판B_알루미늄3T", "XN_X너트판_알루미늄3T"]),
+    want = [("212_beam_plates", ["YA_빔판A_알루미늄3T_M4접시1", "YB_빔판B_알루미늄3T_M4접시1", "XN_X너트판_알루미늄3T"]),
             ("211_y_motor_plate", ["YM_Y모터판_알루미늄3T"]),
-            ("217_x_motor_plate", ["217_X모터판_알루미늄3T"])]
+            ("217_x_motor_plate", ["217_X모터판_알루미늄3T"]),
+            ("206_carriage_plates", ["CP_캐리지판_알루미늄3T", "SP_안내판_알루미늄3T", "SV_서보판_알루미늄3T"]),
+            ("202_holder_plate_HV", ["HV_홀더판_알루미늄3T_M4접시2"])]
     for pre, names in want:
         o = [x for x in d.Objects if x.Label.startswith(pre)][0]
         sols = o.Shape.Solids
@@ -21,6 +23,10 @@ try:
                 k = "XN" if b.XLength < 4 else ("YA" if b.Center.y < 0 else "YB")
                 byname[k] = s
             sols = [byname["YA"], byname["YB"], byname["XN"]]
+        if pre == "206_carriage_plates":   # CP (두께 y), SP (x ≈ 88.6), SV (x ≈ 101.6)
+            cp = [x for x in sols if x.BoundBox.YLength < 4][0]
+            px = sorted([x for x in sols if x.BoundBox.XLength < 4], key=lambda x: x.BoundBox.Center.x)
+            sols = [cp] + px
         for nm, s in zip(names, sols):
             f = max(s.Faces, key=lambda f: f.Area)
             nx = abs(f.normalAt(0, 0).x) > 0.9
