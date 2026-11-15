@@ -1,0 +1,58 @@
+# -*- coding: utf-8 -*-
+"""XY 알루미늄 판 → 레이저 DXF (R12, mm) — CAD 판 모양에서 바로 뽑음 (11/15, CAP-AI-62)
+freecad.exe cad/xy_plates_dxf_fc.py (cwd = cad) → print/xy/*.dxf + print/xy/_plates.json
+판마다 가장 큰 평면을 펴서: 법선 y 판은 (x, z), 법선 x 판은 (y, z). 원점 = 판 왼쪽 아래."""
+import json, os, traceback
+HERE = os.getcwd(); OUT = os.path.join(HERE, "print", "xy"); os.makedirs(OUT, exist_ok=True)
+rep = {}
+try:
+    import FreeCAD as App, Part
+    d = App.openDocument(os.path.join(HERE, "split", "S2_마킹부.FCStd"), True)
+    want = [("212_beam_plates", ["YA_빔판A_알루미늄3T", "YB_빔판B_알루미늄3T", "XN_X너트판_알루미늄3T"]),
+            ("211_y_motor_plate", ["YM_Y모터판_알루미늄3T"]),
+            ("217_x_motor_plate", ["217_X모터판_알루미늄3T"])]
+    for pre, names in want:
+        o = [x for x in d.Objects if x.Label.startswith(pre)][0]
+        sols = o.Shape.Solids
+        if pre == "212_beam_plates":       # YA (y −59), YB (y 49), XN (두께 x 3)
+            byname = {}
+            for s in o.Shape.Solids:
+                b = s.BoundBox
+                k = "XN" if b.XLength < 4 else ("YA" if b.Center.y < 0 else "YB")
+                byname[k] = s
+            sols = [byname["YA"], byname["YB"], byname["XN"]]
+        for nm, s in zip(names, sols):
+            f = max(s.Faces, key=lambda f: f.Area)
+            nx = abs(f.normalAt(0, 0).x) > 0.9
+            b = s.BoundBox
+            u0, v0 = (b.YMin if nx else b.XMin), b.ZMin
+            uv = lambda p: ((p.y if nx else p.x) - u0, p.z - v0)
+            ents = []
+            for e in f.Edges:
+                c = e.Curve
+                if isinstance(c, Part.Line) or e.Curve.TypeId == "Part::GeomLine":
+                    a, z = uv(e.Vertexes[0].Point), uv(e.Vertexes[-1].Point)
+                    ents.append("0\nLINE\n8\nCUT\n10\n%.4f\n20\n%.4f\n11\n%.4f\n21\n%.4f" % (a[0], a[1], z[0], z[1]))
+                elif "Circle" in c.TypeId:
+                    cc = uv(c.Center)
+                    if e.isClosed():
+                        ents.append("0\nCIRCLE\n8\nCUT\n10\n%.4f\n20\n%.4f\n40\n%.4f" % (cc[0], cc[1], c.Radius))
+                    else:
+                        import math
+                        a, z = uv(e.Vertexes[0].Point), uv(e.Vertexes[-1].Point)
+                        a0 = math.degrees(math.atan2(a[1] - cc[1], a[0] - cc[0])); a1 = math.degrees(math.atan2(z[1] - cc[1], z[0] - cc[0]))
+                        ents.append("0\nARC\n8\nCUT\n10\n%.4f\n20\n%.4f\n40\n%.4f\n50\n%.3f\n51\n%.3f" % (cc[0], cc[1], c.Radius, a0, a1))
+                else:
+                    raise RuntimeError("edge type " + c.TypeId)
+            w, h = (b.YLength if nx else b.XLength), b.ZLength
+            fn = "%s_%gx%g.dxf" % (nm, round(w, 1), round(h, 1))
+            with open(os.path.join(OUT, fn), "w", encoding="ascii") as fo:
+                fo.write("0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n" + "\n".join(ents) + "\n0\nENDSEC\n0\nEOF\n")
+            rep[fn] = dict(edges=len(ents), holes=sum(1 for x in ents if "CIRCLE" in x), w=round(w, 2), h=round(h, 2), t=round(min(b.XLength, b.YLength), 2))
+    rep["ok"] = True
+except Exception:
+    rep["error"] = traceback.format_exc()
+json.dump(rep, open(os.path.join(OUT, "_plates.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+import FreeCAD as App
+if App.GuiUp:
+    os._exit(0)
