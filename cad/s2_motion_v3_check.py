@@ -13,6 +13,11 @@ XO = ("207_", "208_", "209", "210_", "211_", "212_", "222_", "225_", "227y", "15
 PARK = (75.0, -40.0)
 XS = (37.0, 55.0, 75.0)
 YS = (-40.0, -14.0, 16.0)                     # (11/14) 25자세는 27분 넘게 안 끝나서 9자세 + 움직임 범위 상자로 먼저 거름
+# (11/15) 펜 올린 채 검사: PEN_LIFT=12.1 (펌웨어 PEN_UP_DEG 60 → 혼 14 sin 60°) → 홀더·마커·띠만 위로, 자세는 5 × 5, 결과 _motion_penup.json
+PEN_LIFT = float(os.environ.get("PEN_LIFT", "0"))
+if PEN_LIFT:
+    XS = (37.0, 46.5, 56.0, 65.5, 75.0)
+    YS = (-40.0, -26.0, -12.0, 2.0, 16.0)
 rep = dict(ok=False)
 try:
     import FreeCAD as App
@@ -29,7 +34,10 @@ try:
                     continue
                 lab = o.Label
                 kind = "xy" if lab.startswith(XY) else ("x" if lab.startswith(XO) and ("[marker]" in lab or not lab.startswith(("153b_", "153n_"))) else "fix")
-                objs.append((f[:2] + " " + lab[:55], kind, o.Shape.copy()))
+                sh = o.Shape.copy()
+                if PEN_LIFT and lab.startswith(("201_", "202_", "203_")):
+                    sh.translate(App.Vector(0, 0, PEN_LIFT))
+                objs.append((f[:2] + " " + lab[:55], kind, sh))
         App.closeDocument(d.Name)
     mov = [o for o in objs if o[1] != "fix"]
     CHANGED = ("213_", "218_", "172_isolation_duct", "172b_", "220_", "300", "301", "304", "307v", "307b", "307s", "308s", "309s", "112_", "112s", "170_", "176_",
@@ -71,7 +79,7 @@ try:
     rep["ok"] = True
 except Exception:
     rep["error"] = traceback.format_exc()
-with open(os.path.join(OUT, "_motion_v3.json"), "w", encoding="utf-8") as f:
+with open(os.path.join(OUT, "_motion_penup.json" if PEN_LIFT else "_motion_v3.json"), "w", encoding="utf-8") as f:
     json.dump(rep, f, ensure_ascii=False, indent=1, default=str)
 import FreeCAD as App
 if App.GuiUp:
