@@ -36,6 +36,8 @@ try:
                "196_gate_G2", "196_gate_G3", "196_gate_G4", "196_gate_G5", "199b_", "199s", "110_", "110b", "219_")
     # (11/14) 마커 움직임 범위는 그대로 (X 37~75는 옛 범위 안) → 안 바뀐 프레임·급이부와의 관계는 원래 설계 그대로. 새로 놓였거나 옮긴 고정 부품만 봄
     fix = [o for o in objs if o[1] == "fix" and o[0].split(" ", 1)[1].startswith(CHANGED)]
+    if os.environ.get("MOTION_ALL"):                               # (11/15) 움직이는 쪽을 바꿨을 때는 고정 전부와
+        fix = [o for o in objs if o[1] == "fix"]
     rep["n"] = dict(moving=len(mov), fixed=len(fix))
 
     near = {}
