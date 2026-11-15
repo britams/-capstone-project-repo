@@ -76,7 +76,7 @@ try:
     cp = hy(cp, CP0, [(XB, YSZ)], 10.5)
     nut_h = [(XB + 8, YSZ), (XB - 8, YSZ), (XB, YSZ + 8), (XB, YSZ - 8)]
     cp = hy(cp, CP0, nut_h, 3.4)
-    BRK = [(404.0, 404.0), (493.0, 491.0)]    # (브래킷 가운데 z, 구멍 z)
+    BRK = [(404.0, 400.0), (493.0, 491.0)]    # 아래 구멍 z 400: SP −x 면 나사 머리가 홀더 HV 밑(405) 아래    # (브래킷 가운데 z, 구멍 z)
     cp = hy(cp, CP0, [(98.0, zh) for _, zh in BRK], 3.4)
     # ---- SP (x 87.15~90.15, y −40~+1, z 388~496)
     SP0, SP1 = 87.15, 90.15
@@ -114,14 +114,14 @@ try:
     BOLT = [(-32.0, 432.0), (-4.0, 432.0)]
     hv = hx(hv, HV0, BOLT, 4.1)
     CLIP_Z = (412.0, 445.0)
-    CLIP_Y = YM + 12.0
+    CLIP_Y = YM + 11.0
     hv = hx(hv, HV0, [(CLIP_Y, z) for z in CLIP_Z], 4.3)                       # P 클립 M4 (접시 — HV +x 면이 SP에 미끄러짐)
     add.append(("202_holder_plate_HV (홀더 판 — 알루미늄 3 mm 레이저, 밑 모서리가 서보 혼에, M4 접시 2)", hv.removeSplitter(), (0.45, 0.6, 0.85)))
     # P 클립 Ø15 ×2 (고리가 HV 면에 닿고, 귀는 +y 옆에 납작) — 마커 축 x 75
     clips = []
     for z in CLIP_Z:
         ring = cyl(9.15, 12, V(XM, YM, z - 6)).cut(cyl(7.35, 14, V(XM, YM, z - 7)))
-        ear = box(HV0 - 2, HV0, YM + 6, CLIP_Y + 6, z - 6, z + 6)
+        ear = box(HV0 - 2, HV0, YM + 6, CLIP_Y + 6, z - 6, z + 6)          # 귀 y −34~−23 (서보 허브 y −22.4 앞)
         clips.append(ring.fuse(ear).removeSplitter())
     add.append(("203_marker_P_clips (P 클립 Ø15 고무 ×2 + M4 × 10·너트 — 구매)", Part.makeCompound(clips), (0.3, 0.3, 0.3)))
     bolts = []
