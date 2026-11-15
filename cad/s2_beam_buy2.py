@@ -5,7 +5,7 @@
   Y 판 YA·YB (알루미늄 3 mm 레이저, 안쪽 면 −56 · 48 = 옛 끝 블록 안쪽 면 → Y 이동 범위 그대로)
   → SC8UU 면이 판 바깥면에 오도록 X 봉을 5 mm 바깥으로: ya −65 → −70, yb 57 → 62 (SK8도 같이)
   Y 봉 Ø8 × 104 양 끝 M4 암나사 (미스미 맞춤 길이), 판 바깥에서 M4 접시머리로 → 봉 끝이 판 안쪽 면에 맞닿음
-  X 너트 판 XN (알루미늄 3 mm, x 84.4~87.4, 너트 225 −x 3) — T8 너트 225 자리 그대로, YA와 L 브래킷 DCB 2025로
+  X 너트 판 XN (알루미늄 3 mm, 옛 끝 블록 −x 면 자리, Y 원점 스위치도 이 판에) — T8 너트 225 자리 그대로, YA와 L 브래킷 DCB 2025로
   Y 모터판 YM (알루미늄 3 mm) — YA와 M3 × 40 기둥 3개 (그래서 Y 모터·커플링·Y T8 +2 mm)
   Y 베어링 221: LM6UU → LMK8UU (사각 플랜지 25, 길이 24, PCD 24, 구멍 3.5 [확실 — 판매처 표]) — 캐리지 206은 3단계에서
 순서: (s23_gantry_buy1·1b 뒤) → (이것, 한 번만 — 다시는 split/*_before_buy2.FCStd에서) → full_merge → s2_motion_v3_check
@@ -38,7 +38,8 @@ try:
     ex, ey = V(1, 0, 0), V(0, 1, 0)
     XB, YM0 = 101.4, -40.0                    # 대기 자세의 빔 x · 캐리지 y
     YA, YB = -70.0, 62.0                      # 새 X 봉 y
-    RZ, YRZ, YSZ = 480.0, (438.0, 468.0), 453.0
+    RZ, YRZ, YSZ = 480.0, (435.0, 471.0), 453.0   # Y 봉 간격 30 → 36: LMK8UU 플랜지(25) 사이로 Y T8(z 453) 지나감
+    XS = XB + 2.0                             # SC8UU 가운데 x (+2: YA −x 끝 90.4 안에 M4 구멍)
     A_IN, B_IN, T = -56.0, 48.0, 3.0
     DY_MOT = 2.0
 
@@ -67,6 +68,9 @@ try:
             for s in o.Shape.Solids:
                 t = s.copy(); t.translate(V(0, -5 if s.BoundBox.Center.y < 0 else 5, 0)); out.append(t)
             o.Shape = Part.makeCompound(out)
+    for p in ("226_", "227x"):                # X 원점 집게·스위치도 X 봉 따라 −y 5 (4단계에서 사는 것으로)
+        for o in ob(p):
+            o.Placement.Base = o.Placement.Base + V(0, -5, 0)
     # Y 모터 쪽 +2
     for p in ("209_", "209r_", "210_", "208_"):
         for o in ob(p):
@@ -80,45 +84,47 @@ try:
     # SC8UU ×2 (단순 모양: 몸통 + 봉 구멍 + LM8UU 테)
     def sc8(yr, face_y, sgn):                  # sgn: 면에서 몸통 쪽 (+1 = +y)
         y0, y1 = sorted((face_y, face_y + sgn * 22))
-        b = box(XB - 15, XB + 15, y0, y1, RZ - 17, RZ + 17).cut(cyl(4.05, 32, V(XB - 16, yr, RZ), ex))
+        b = box(XS - 15, XS + 15, y0, y1, RZ - 17, RZ + 17).cut(cyl(4.05, 32, V(XS - 16, yr, RZ), ex))
         return b
     add.append(("222_x_bearings_SC8UU (SC8UU ×2 — LM8UU 든 알루미늄 블록, 구매, M4 구멍 면이 Y 판에)",
                 Part.makeCompound([sc8(YA, A_IN - T, -1), sc8(YB, B_IN + T, 1)]), (0.6, 0.6, 0.65)))
     # Y 판 YA (x 90.4~116.4, z 388~497) · YB (x 87.4~116.4, z 425~497)
     rod_pts = [(XB, z) for z in YRZ]
-    sc_pts = [(XB + sx * 9, RZ + sz * 12) for sx in (-1, 1) for sz in (-1, 1)]
-    so_pts = [(114.0, 433.0), (114.0, 458.0), (92.5, 392.0)]                 # M3 기둥 (YA ↔ YM)
-    ya = box(87.4, 116.4, A_IN - T, A_IN, 388, 497)
+    sc_pts = [(XS + sx * 9, RZ + sz * 12) for sx in (-1, 1) for sz in (-1, 1)]
+    so_pts = [(115.5, 433.0), (115.5, 458.0), (100.0, 392.0)]                 # M3 기둥 (YA ↔ YM)
+    ya = box(90.4, 118.4, A_IN - T, A_IN, 400, 497).fuse(box(95, 105, A_IN - T, A_IN, 388, 400))   # 밑 혀: 기둥 3 (홀더 202는 x 91.4 밑으로 내려옴)
     ya = holes_y(ya, A_IN - T, rod_pts + sc_pts, 4.5)
     ya = holes_y(ya, A_IN - T, [(XB, YSZ)], 9.0)
     ya = holes_y(ya, A_IN - T, so_pts, 3.4)
     ya = holes_y(ya, A_IN - T, [(105.0, 408.0)], 5.5)                       # L 브래킷
-    yb = box(87.4, 116.4, B_IN, B_IN + T, 425, 497)
+    yb = box(90.4, 118.4, B_IN, B_IN + T, 425, 497)
     yb = holes_y(yb, B_IN, rod_pts + sc_pts, 4.5)
-    # X 너트 판 XN (법선 x, x 84.4~87.4 = YA −x 끝 바깥, y −84~−52, z 398~452) — 그래서 T8 너트 225는 −x 3 mm
-    for o in ob("225_"):
-        o.Placement.Base = o.Placement.Base + V(-3, 0, 0)
-    xn = box(84.4, 87.4, -84, -52, 398, 452).cut(cyl(5.25, 5, V(83, -65, 425), ex))
+    # X 너트 판 XN (법선 x, x 87.4~90.4 = 옛 끝 블록 −x 면, y −84~−56, z 398~466) — T8 너트 225·Y 원점 스위치 227y 자리 그대로, 스위치 M2 나사는 판 관통 + 너트
+    xn = box(87.4, 90.4, -84, -56, 398, 466).cut(cyl(5.25, 5, V(86, -65, 425), ex))
+    for o in ob("227ys_"):
+        for sol in o.Shape.Solids:
+            c = sol.BoundBox.Center
+            xn = xn.cut(cyl(1.2, 5, V(86, c.y, c.z), ex))
     import math
-    xn = holes_x(xn, 84.4, [(-65 + 8 * math.cos(math.radians(45 + 90 * k)), 425 + 8 * math.sin(math.radians(45 + 90 * k))) for k in range(4)], 3.4)
-    xn = holes_x(xn, 84.4, [(-76.0, 408.0)], 5.5)
+    xn = holes_x(xn, 87.4, [(-65 + 8 * math.cos(math.radians(45 + 90 * k)), 425 + 8 * math.sin(math.radians(45 + 90 * k))) for k in range(4)], 3.4)
+    xn = holes_x(xn, 87.4, [(-76.0, 408.0)], 5.5)
     add.append(("212_beam_plates (Y 판 YA·YB + X 너트 판 XN — 알루미늄 3 mm 레이저 주문)", Part.makeCompound([ya.removeSplitter(), yb.removeSplitter(), xn.removeSplitter()]), (0.45, 0.6, 0.85)))
     # L 브래킷 DCB 2025 (XN +x 면 ↔ YA 바깥면), z 398~418. M5: XN은 −x에서 냄비 + 너트, YA는 안쪽에서 접시머리(판 면과 같은 높이) + 바깥 너트
-    brk = box(87.4, 91.4, -84, -59, 398, 418).fuse(box(87.4, 112.4, -63, -59, 398, 418))
-    hw = [cyl(2.5, 12, V(82.4, -76, 408), ex), box(91.4, 95.4, -80, -72, 404, 412),
+    brk = box(90.4, 94.4, -84, -59, 398, 418).fuse(box(90.4, 110.4, -63, -59, 398, 418))
+    hw = [cyl(2.5, 12, V(85.4, -76, 408), ex), box(94.4, 98.4, -80, -72, 404, 412),
           cyl(2.5, 12, V(105, -56, 408), V(0, -1, 0)), box(101, 109, -67, -63, 404, 412)]
     # Y 봉 끝 M4 접시머리 4 (판 바깥 → 봉 끝), SC8UU M4 접시머리 8 (판 안쪽 → SC8UU)
     for x, z in rod_pts:
         hw += [cyl(2, 10, V(x, A_IN - T, z), ey), cyl(2, 10, V(x, B_IN + T, z), V(0, -1, 0))]
     for x, z in sc_pts:
         hw += [cyl(2, 10, V(x, A_IN, z), V(0, -1, 0)), cyl(2, 10, V(x, B_IN, z), ey)]
-    add.append(("212_beam_hardware (DCB 2025 1 + M5 × 10·너트 2 + M4 × 10 접시머리 12, 구매)", Part.makeCompound([brk] + hw), (0.35, 0.35, 0.37)))
+    add.append(("212_beam_hardware (DCB 2025 1 + M5 × 10·너트 2 + M4 × 10 냄비 10 + 접시머리 2 (위 Y 봉 끝 — SC8UU 밑), 구매)", Part.makeCompound([brk] + hw), (0.35, 0.35, 0.37)))
     # Y 봉 Ø8 × 104
     add.append(("207_y_rods (Ø8 × 104 양 끝 M4 암나사 — 미스미 맞춤 길이, 판 안쪽 면 사이)",
                 cyl(4, B_IN - A_IN, V(XB, A_IN, YRZ[0]), ey).fuse(cyl(4, B_IN - A_IN, V(XB, A_IN, YRZ[1]), ey)), (0.75, 0.75, 0.78)))
     # Y 모터판 YM (옛 211 판 자리 +2 → y −101.9~−98.9), 기둥 쪽으로 아래 늘림
     ym1 = -100.9 + DY_MOT
-    ymp = box(XB - 21.5, XB + 21.5, ym1 - T, ym1, YSZ - 12, YSZ + 20).fuse(box(88.0, 116.4, ym1 - T, ym1, 388, YSZ - 12))
+    ymp = box(XB - 21.5, XB + 21.5, ym1 - T, ym1, YSZ - 12, YSZ + 20).fuse(box(95.0, 118.4, ym1 - T, ym1, 388, YSZ - 12))
     ymp = holes_y(ymp, ym1 - T, [(XB, YSZ)], 10.0)
     ymp = holes_y(ymp, ym1 - T, [(XB + sx * 17.5, YSZ + 8) for sx in (-1, 1)], 4.2)
     ymp = holes_y(ymp, ym1 - T, so_pts, 3.4)
@@ -145,7 +151,7 @@ try:
     CH = ("207", "208", "209", "210", "211", "212", "213", "218", "221", "222", "153b", "153n")
     probe = [(l, s) for l, s in every if l.split(" ", 1)[1].startswith(CH)]
     ok_pairs = (("213", "218_rod"), ("213", "222"), ("218s", "218_rod"), ("218s", "100"), ("217s", "218s"),
-                ("207", "212"), ("207", "221"), ("221", "206"), ("207", "206"), ("222", "212"), ("212_beam_h", "212"), ("212_beam_h", "222"),
+                ("207", "212"), ("207", "221"), ("221", "206"), ("221", "202"), ("227ys", "212"), ("207", "206"), ("222", "212"), ("212_beam_h", "212"), ("212_beam_h", "222"),
                 ("211_y_motor_s", "211"), ("211_y_motor_s", "212"), ("209", "211"), ("153", "211"), ("153", "209"), ("210", "209"), ("208", "210"),
                 ("208", "212"), ("208", "206"), ("208", "224"), ("225", "212"), ("214", "225"), ("214", "212"))
     seen = set()
