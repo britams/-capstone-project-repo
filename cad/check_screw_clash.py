@@ -2,7 +2,7 @@
 """나사끼리 겹침 검사 (서현 11/17 01:23 "가까이 있는 나사들이 이런 식으로 겹쳐 있지는 않은지 전부 확인", CAP-AI-62)
   D5g_full(급이 있음)에서 체결 부품(나사·볼트·너트·와셔·기둥·스페이서) 물체를 낱개 solid로 나눠, 서로 다른 두 solid가
   ① 부피로 겹치면 (> 0.01 mm³) '겹침', ② 안 겹쳐도 0.5 mm보다 가까우면 '너무 가까움' (드라이버·렌치가 안 들어감)
-  나사와 그 나사가 지나가는 너트·와셔·기둥은 같은 축에 있으면 짝으로 보고 뺌 (축 거리 < 0.3)
+  나사와 그 나사가 지나가는 너트·와셔·기둥은 한쪽 가운데가 다른 쪽 축 위(0.5 안)에 있으면 짝으로 보고 뺌 (그림에서 너트에 구멍이 없는 것도 이걸로 걸러짐)
 freecad.exe cad/check_screw_clash.py (cwd = cad) → split/_screw_clash.json"""
 import json, os, re, traceback
 HERE = os.getcwd(); OUT = os.path.join(HERE, "split")
@@ -29,15 +29,15 @@ try:
         f = max(cy, key=lambda f: f.Area)
         return f.Surface.Center, f.Surface.Axis
 
+    def on_axis(a, b):                              # b의 가운데가 a 축 위에 있으면 같은 나사 묶음 (나사 ↔ 자기 너트·와셔·기둥)
+        A = axis(a)
+        if not A:
+            return False
+        dv = b.BoundBox.Center - A[0]
+        return (dv - A[1] * dv.dot(A[1])).Length < 0.5
+
     def coaxial(a, b):
-        A, B = axis(a), axis(b)
-        if not A or not B:
-            return False
-        if abs(abs(A[1].dot(B[1])) - 1) > 1e-3:
-            return False
-        dv = B[0] - A[0]
-        perp = dv - A[1] * dv.dot(A[1])
-        return perp.Length < 0.3
+        return on_axis(a, b) or on_axis(b, a)
 
     for i in range(len(parts)):
         la, ia, sa = parts[i]
