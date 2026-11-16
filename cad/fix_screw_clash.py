@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """나사 겹침 고치기 (서현 11/17 01:23 "나사끼리 겹치는 것 … 전부 확인", CAP-AI-62) — check_screw_clash.py 결과로
   A. S3 갠트리 높이(레일 z 440~460) 모서리 L 브래킷 8개가 12 mm 높게 그려져 레일 살과 겹치고, 그 볼트(M5 × 8)가 레일 속에 박혀 있음
-     → 브래킷·볼트·T너트를 z −12 (데크·위 레일 모서리와 같은 꼴: 브래킷이 레일 밑, 볼트 레일 밑면 −1.2)
+     → 브래킷·볼트·기둥 홈 T너트를 z −12 (레일 밑 홈 T너트 z 440.5~445는 처음부터 맞음) (데크·위 레일 모서리와 같은 꼴: 브래킷이 레일 밑, 볼트 레일 밑면 −1.2)
   B. S2 상자 혀 나사 308s: M5 머리(Ø9.5) 두 개가 8 mm 간격이라 겹침 → 혀 깊이 24 → 28, 구멍 −21·−29 → −21·−32 (11 mm, lift_v2 BOXD)
   C. S2 X 원점 팔 226p: M5 × 8 + 스프링너트 2가 x 29·37 (8 mm) — 같은 홈의 스프링너트(길이 10)끼리 겹침
      → 구멍 x 27·39 (12 mm), 팔 밑동을 x 21~45 (y −178~−160)로 넓힘, 226s를 머리 있는 나사로 다시 그림, DXF 226p 다시
@@ -50,6 +50,8 @@ try:
         for s in o.Shape.Solids:
             c = s.BoundBox.Center
             near = any(bb.XMin - 6 <= c.x <= bb.XMax + 6 and bb.YMin - 6 <= c.y <= bb.YMax + 6 and 430 <= c.z <= 458 for bb in moved_bb)
+            if p.startswith("100g") and abs(s.BoundBox.ZMin - 440.5) < 0.2:   # 레일 밑 홈 T너트는 처음부터 맞는 자리 (데크 모서리와 같음)
+                near = False
             if near:
                 t = s.copy(); t.translate(V(0, 0, -12)); out.append(t); n_hw += 1
             else:
