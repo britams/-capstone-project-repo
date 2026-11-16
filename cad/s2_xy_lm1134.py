@@ -2,7 +2,7 @@
 """XY 구동을 '나사 일체형 모터' 모터뱅크 LM-NK1134 (28각, 외부 스크류형, 스크류 150) 2개로 (서현 11/16 18:02 "물품구매 정리 설계 다 완료", CAP-AI-62)
   NK1140 + 커플링 5→8 + T8 리드 나사·황동 너트는 커플링·T8을 파는 국내 판매처를 못 찾음 (디바이스마트·아이씨뱅큐·모터뱅크·11번가 11/16) →
   모터 축이 곧 나사인 LM-NK1134 하나로 (모터뱅크, 국내) — 커플링·T8 4개가 빠지고 축 맞춤도 없어짐.
-  치수 [가능성 높음 — 모터뱅크 LM-NK1134 도면 그림]: 몸 28각 × 34, 턱 Ø22 × 2, 스크류 Tr5 × 2 (지름 5, 리드 2, 한 스텝 0.01 mm), 길이 150 옵션,
+  치수 [가능성 높음 — 모터뱅크 LM-NK1134 도면 그림]: 몸 28각 × 34, 턱 Ø22 × 2, 스크류 Tr5 × 2 (지름 5, 리드 2, 한 스텝 0.01 mm), 길이 132 옵션 (150은 Y 끝이 빔 판 YB에 닿음 — 11/16 검사),
     POM 너트: 플랜지 Ø19.05 × 3.18, 몸 Ø7.94, 전체 9.53, 구멍 3 × Ø3.175 PCD 12.7. 앞 나사 구멍은 NK1140과 같은 23 × 23 M2.6 [추측 — 같은 28각 계열].
   모터판 217·211은 그대로 (턱 Ø22.5·M2.6 구멍 같음). 너트 판 XN·캐리지 판 CP: 옛 T8 너트 구멍 메우고 Ø8.5 + M3 Ø3.4 3 (PCD 12.7).
 한 번만 (다시는 split/S2_마킹부_before_lm.FCStd에서). freecad.exe cad/s2_xy_lm1134.py (cwd = cad) → split/S2, print/xy/{XN,CP}_*.dxf, split/_xy_lm1134.json"""
@@ -16,7 +16,7 @@ try:
     box, cyl = L.box, L.cyl
     d = App.openDocument(os.path.join(OUT, "S2_마킹부.FCStd"))
     ob = lambda p: [o for o in d.Objects if o.TypeId.startswith("Part::") and o.Label.startswith(p)]
-    BODY, PIL, PT, SCR, SD = 34.0, 22.0, 2.0, 150.0, 5.0
+    BODY, PIL, PT, SCR, SD = 34.0, 22.0, 2.0, 132.0, 5.0
 
     def along(c, n, a, b, r):          # 축 c, 방향 n 위 [a, b] 구간 원기둥 (a, b = 축 방향 좌표)
         p = c + n * (a - c.dot(n))
@@ -86,10 +86,10 @@ try:
     plates.Shape = Part.makeCompound([newx if s.isSame(xn) else s for s in plates.Shape.Solids])
     newc = replate(cp, CY, V(0, 1, 0), uy, wy)
     cplates.Shape = Part.makeCompound([newc if s.isSame(cp) else s for s in cplates.Shape.Solids])
-    add = [("215_x_stepper_LM-NK1134 (모터뱅크 LM-NK1134 28각 외부 스크류형 2상 1.8° 0.75 A — 몸 28 × 28 × 34, 스크류 Tr5 × 2 150 일체, 구매)", mx),
-           ("214_x_lead_screw_Tr5 (LM-NK1134 축 = 나사 Ø5 리드 2 × 150 — 모터와 한 몸)", sx),
-           ("209_y_stepper_LM-NK1134 (모터뱅크 LM-NK1134 28각 외부 스크류형 2상 1.8° 0.75 A — 몸 28 × 28 × 34, 스크류 150 일체, 구매, X와 같이 움직임)", my),
-           ("208_y_lead_screw_Tr5 (LM-NK1134 축 = 나사 Ø5 리드 2 × 150 — 모터와 한 몸)", sy)]
+    add = [("215_x_stepper_LM-NK1134 (모터뱅크 LM-NK1134 28각 외부 스크류형 2상 1.8° 0.75 A — 몸 28 × 28 × 34, 스크류 Tr5 × 2 132 일체, 구매)", mx),
+           ("214_x_lead_screw_Tr5 (LM-NK1134 축 = 나사 Ø5 리드 2 × 132 — 모터와 한 몸)", sx),
+           ("209_y_stepper_LM-NK1134 (모터뱅크 LM-NK1134 28각 외부 스크류형 2상 1.8° 0.75 A — 몸 28 × 28 × 34, 스크류 132 일체, 구매, X와 같이 움직임)", my),
+           ("208_y_lead_screw_Tr5 (LM-NK1134 축 = 나사 Ø5 리드 2 × 132 — 모터와 한 몸)", sy)]
     for lab, shp in add:
         n = d.addObject("Part::Feature", "LM_%d" % len(d.Objects)); n.Shape, n.Label = shp, lab
     for o in ob("153b_stepper_bolts_M2.6"):
