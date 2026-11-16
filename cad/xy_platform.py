@@ -114,16 +114,23 @@ try:
         for o in s2.Objects:
             if o.TypeId.startswith("Part::") and o.Label.startswith(PRE):
                 by.setdefault(key(o.Label), []).append(o)
-        done, miss = 0, []
+        done, miss, added, removed = 0, [], [], []
+        labels_new = lambda L: L
         for p in part.Objects:
             if not p.TypeId.startswith("Part::") or p.Label.startswith("REF_"):
                 continue
             tg = [o for o in by.get(key(p.Label), []) if o.Label == p.Label] or by.get(key(p.Label), [])
+            if len(tg) == 0:                       # 부품 파일에서 새로 생긴 것 → S2에 더함
+                n = s2.addObject("Part::Feature", "XYn%d" % len(s2.Objects)); n.Shape = p.Shape.copy(); n.Label = p.Label; added.append(p.Label[:50]); continue
             if len(tg) != 1:
                 miss.append([p.Label[:50], len(tg)]); continue
             tg[0].Shape = p.Shape.copy(); tg[0].Label = p.Label; done += 1
+        labs = set(p.Label for p in part.Objects if p.TypeId.startswith("Part::") and not p.Label.startswith("REF_"))
+        for o in list(s2.Objects):                  # 부품 파일에서 지운 것 → S2에서도 지움
+            if o.TypeId.startswith("Part::") and o.Label.startswith(PRE) and o.Label not in labels_new(labs):
+                removed.append(o.Label[:50]); s2.removeObject(o.Name)
         s2.save()
-        rep["attached"] = done; rep["miss"] = miss
+        rep["attached"] = done; rep["miss"] = miss; rep["added"] = added; rep["removed"] = removed
         App.closeDocument(part.Name); App.closeDocument(s2.Name)
     rep["ok"] = True
 except Exception:
