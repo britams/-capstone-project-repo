@@ -186,3 +186,4 @@
 - 2026-11-16 22:17 (서현, CAP-AI-62) 급이부 없는 판 `D5g_full_no.FCStd` (D5g_full에서 펌프 144·T 175·관 끝 144hf 뺌, 관 174 끝이 출구). 있는 판은 그대로 `D5g_full.FCStd`. 움직임 검사 새 접촉 0 [확실 — CAD]
 - 2026-11-16 22:45 (서현, CAP-AI-62) 빛 게이트 5쌍 (G2b·G3·G4 뺌, 112 구멍 메움 — `split/S2_마킹부_before_g5`), `_make_no.py` = D5g_full → D5g_full_no (급이 부품 뺌). 주 설계 = `D5g_full_no`
 - 2026-11-17 02:00 (서현, CAP-AI-62) 나사 겹침 검사 `check_screw_clash.py` + 고침 `fix_screw_clash.py` (갠트리 모서리 브래킷 −12, 상자 혀 나사 11 간격, X 원점 팔 나사 12 간격)
+- 2026-11-17 04:15 (서현, CAP-AI-62) `xy_detail.py` (XY·펜 그립 실제 모양 + 구멍마다 나사), `xy_ytravel.py` (YB 쪽 +10, Y 봉 114 → Y 최대 +19), `check_xy_travel.py` (캐리지 ↔ 빔 Y 행정 검사), 판 DXF 탭·접시, 조립 그림 7장
