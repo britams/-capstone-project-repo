@@ -38,7 +38,8 @@ BOXD = dict(half=19.0, z_bot=-10.0, z_top=8.0, bore=33.0, mesh_rec=33.4, z_mesh=
             wing=None, wing_t=4.0, ins=(15.0, 15.0), ins_d=2.5, ins_L=6.0,   # (11/15) ins_d 4.0 → 2.5: 열압입 인서트(인두 필요) 대신 M3 태핑 나사 밑구멍 — 서현 "나사로 조이기만"
             r=1.0, grid=False, plate=True,
             doors4=True, mx_y=(9.0, -9.0), feed=False, feed_d=11.2, feed_tip=(0.0, 17.4, 1.0), feed_end=(0.0, 54.28, -8.15),   # 솜 축 (D5g_feeder_uln FD − (55, 0, 377))
-            tongue=(18.3, 10.0, 3.0, 24.0), tongue_holes=(-21.0, -29.0))   # (11/14 17:55) 바깥 38 = 옛 벽 바깥, 세운 막대 위 끝 −16 (방생 문 하우징 아래)
+            tongue=(18.3, 10.0, 3.0, 24.0), tongue_holes=(-21.0, -29.0),
+            half_y=24.0, ear_holes=((-16.0, 24.0), (-16.0, -24.0), (16.0, 24.0), (16.0, -24.0)))   # (11/17) 귀 나사 M3 × 8 태핑 4 (300s와 같은 나사)   # (11/14 17:55) 바깥 38 = 옛 벽 바깥, 세운 막대 위 끝 −16 (방생 문 하우징 아래)
 # (11/14 17:40 서현 "새 상자 넣고 문 3개 다시", "격리 −y") 전체 좌표 = 이 좌표 + (55, 0, 377): 격자 아래 385·바닥 쉼 370
 #   −x 입구 Ø13 · +x 방생 Ø13 · −y 격리 Ø13 (아래 끝 = 바닥 쉼) · +y 급이 Ø11.2 (솜 142n 축 따라 기울게, 끝 z 378)
 #   날개 없앰 → 바닥 밑 혀(+y, x 13.3~23.3, 두께 3, 깊이 14)를 세운 2020 +y 홈에 M5 × 10 두 개 (lift_v3)
@@ -132,6 +133,9 @@ def marking_box():
     b = BOXD
     h = b["half"]
     s = box(-h, h, -h, h, b["z_bot"], b["z_top"])
+    hy = b.get("half_y", h)                     # (11/17 서현 "너가 제안하는 데로") y만 ±19 → ±24: 112·176 귀를 M3 태핑으로 거는 살
+    if hy > h:
+        s = s.fuse(box(-h, h, -hy, hy, b["z_bot"], b["z_top"]))
     if b.get("wing"):
         w0, w1 = b["wing"]
         for sx in (-1, 1):
@@ -164,6 +168,9 @@ def marking_box():
     else:
         s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(-1, 0, 0)))
         s = s.cut(cyl(b["hole"] / 2, h + 1, V(0, 0, zc), V(0, 1, 0)))
+    for x, y in b.get("ear_holes", ()):           # 귀 나사 밑구멍 Ø2.5 깊이 6 (±y 면에서 안으로, 통로 높이)
+        sy = 1 if y > 0 else -1
+        s = s.cut(cyl(1.25, 7.0, V(x, sy * (hy + 1.0), zc), V(0, -sy, 0)))
     for sx in (-1, 1):
         if b.get("wing"):
             s = s.cut(cyl(2.25, b["wing_t"] + 2, V(sx * sum(b["wing"]) / 2, -h - 1, (b["z_bot"] + b["z_top"]) / 2), V(0, 1, 0)))
