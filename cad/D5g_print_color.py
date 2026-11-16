@@ -19,7 +19,7 @@ OTHER = (0.80, 0.80, 0.82)
 CUT_WORDS = ("자름", "잘라", "자른", "뚫", "드릴", "재단")   # '구멍'은 '구멍 미검증' 같은 말에 걸려서 뺌
 
 
-KEEP_PRINT = ("300_marking_box", "112_entry_iso_gate_housing", "176_release_gate_housing")   # (11/15 서현 '출력 5개 미만') 남은 출력 3개
+KEEP_PRINT = ("300_marking_box", "112_entry_iso_gate_housing", "176_release_gate_housing", "175_release_feed_tee")   # (11/15 서현 '출력 5개 미만') 남은 출력 4개 — 11/16 방생 T 더함 (국내 13A 티 없음)
 LASER_WORDS = ("레이저", "맞춤 절단", "주문 제작")
 
 
