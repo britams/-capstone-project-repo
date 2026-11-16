@@ -29,7 +29,8 @@ try:
             sols = [cp] + px
         for nm, s in zip(names, sols):
             amax = max(f.Area for f in s.Faces)        # (11/17) 접시 자리가 없는 쪽 면 (원 반지름 합이 작은 면) = 뚫는 구멍 지름
-            cand = [f for f in s.Faces if f.Area > 0.97 * amax and "Plane" in f.Surface.TypeId]
+            f0 = max(s.Faces, key=lambda f: f.Area); n0 = f0.normalAt(0, 0)
+            cand = [f for f in s.Faces if "Plane" in f.Surface.TypeId and f.Area > 0.6 * amax and abs(abs(f.normalAt(0, 0).dot(n0)) - 1) < 1e-6]
             f = min(cand, key=lambda f: sum(e.Curve.Radius for e in f.Edges if "Circle" in e.Curve.TypeId))
             nx = abs(f.normalAt(0, 0).x) > 0.9
             b = s.BoundBox
