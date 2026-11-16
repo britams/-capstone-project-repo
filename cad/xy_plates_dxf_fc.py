@@ -36,8 +36,18 @@ try:
             u0, v0 = (b.YMin if nx else b.XMin), b.ZMin
             uv = lambda p: ((p.y if nx else p.x) - u0, p.z - v0)
             ents = []
+            hole = {}                                   # (11/17) 양쪽 면 원 중 같은 자리는 작은 것 (접시 자리가 양쪽에 나뉘어 있어도 뚫는 지름)
+            for ff in cand:
+                for e in ff.Edges:
+                    if "Circle" in e.Curve.TypeId and e.isClosed():
+                        cc = uv(e.Curve.Center); k = (round(cc[0], 2), round(cc[1], 2))
+                        hole[k] = min(hole.get(k, 99.0), e.Curve.Radius)
+            for k, r in hole.items():
+                ents.append("0\nCIRCLE\n8\nCUT\n10\n%.4f\n20\n%.4f\n40\n%.4f" % (k[0], k[1], r))
             for e in f.Edges:
                 c = e.Curve
+                if "Circle" in c.TypeId and e.isClosed():
+                    continue
                 if isinstance(c, Part.Line) or e.Curve.TypeId == "Part::GeomLine":
                     a, z = uv(e.Vertexes[0].Point), uv(e.Vertexes[-1].Point)
                     ents.append("0\nLINE\n8\nCUT\n10\n%.4f\n20\n%.4f\n11\n%.4f\n21\n%.4f" % (a[0], a[1], z[0], z[1]))
