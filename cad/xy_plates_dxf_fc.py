@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """XY 알루미늄 판 → 레이저 DXF (R12, mm) — CAD 판 모양에서 바로 뽑음 (11/15, CAP-AI-62)
 freecad.exe cad/xy_plates_dxf_fc.py (cwd = cad) → print/xy/*.dxf + print/xy/_plates.json
-판마다 가장 큰 평면을 펴서: 법선 y 판은 (x, z), 법선 x 판은 (y, z). 원점 = 판 왼쪽 아래."""
+판마다 가장 큰 평면(접시 자리가 없는 쪽)을 펴서. 탭 구멍은 밑구멍(M2 Ø1.6, M3 Ø2.5)으로 — 파일 이름의 "탭"·"접시"는 업체(meviy)에 같이 맡길 가공: 법선 y 판은 (x, z), 법선 x 판은 (y, z). 원점 = 판 왼쪽 아래."""
 import json, os, traceback
 HERE = os.getcwd(); OUT = os.path.join(HERE, "print", "xy"); os.makedirs(OUT, exist_ok=True)
 rep = {}
 try:
     import FreeCAD as App, Part
     d = App.openDocument(os.path.join(HERE, "split", "S2_마킹부.FCStd"), True)
-    want = [("212_beam_plates", ["YA_빔판A_알루미늄3T_M4접시1", "YB_빔판B_알루미늄3T_M4접시1", "XN_X너트판_알루미늄3T"]),
-            ("211_y_motor_plate", ["YM_Y모터판_알루미늄3T"]),
+    want = [("212_beam_plates", ["YA_빔판A_알루미늄3T_M4접시6", "YB_빔판B_알루미늄3T_M4접시6", "XN_X너트판_알루미늄3T_M2탭2"]),
+            ("211_y_motor_plate", ["YM_Y모터판_알루미늄3T_M3접시3"]),
             ("217_x_motor_plate", ["217_X모터판_알루미늄3T"]),
-            ("206_carriage_plates", ["CP_캐리지판_알루미늄3T", "SP_안내판_알루미늄3T", "SV_서보판_알루미늄3T"]),
-            ("202_holder_plate_HV", ["HV_홀더판_알루미늄3T_M4접시2"])]
+            ("206_carriage_plates", ["CP_캐리지판_알루미늄3T", "SP_안내판_알루미늄3T_M3탭3", "SV_서보판_알루미늄3T"]),
+            ("202_holder_plate_HV", ["HV_홀더판_알루미늄3T_M3접시2"])]
     for pre, names in want:
         o = [x for x in d.Objects if x.Label.startswith(pre)][0]
         sols = o.Shape.Solids
@@ -28,7 +28,9 @@ try:
             px = sorted([x for x in sols if x.BoundBox.XLength < 4], key=lambda x: x.BoundBox.Center.x)
             sols = [cp] + px
         for nm, s in zip(names, sols):
-            f = max(s.Faces, key=lambda f: f.Area)
+            amax = max(f.Area for f in s.Faces)        # (11/17) 접시 자리가 없는 쪽 면 (원 반지름 합이 작은 면) = 뚫는 구멍 지름
+            cand = [f for f in s.Faces if f.Area > 0.97 * amax and "Plane" in f.Surface.TypeId]
+            f = min(cand, key=lambda f: sum(e.Curve.Radius for e in f.Edges if "Circle" in e.Curve.TypeId))
             nx = abs(f.normalAt(0, 0).x) > 0.9
             b = s.BoundBox
             u0, v0 = (b.YMin if nx else b.XMin), b.ZMin
