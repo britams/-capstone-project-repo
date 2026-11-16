@@ -6,11 +6,25 @@
   C. S2 X 원점 팔 226p: M5 × 8 + 스프링너트 2가 x 29·37 (8 mm) — 같은 홈의 스프링너트(길이 10)끼리 겹침
      → 구멍 x 27·39 (12 mm), 팔 밑동을 x 21~45 (y −178~−160)로 넓힘, 226s를 머리 있는 나사로 다시 그림, DXF 226p 다시
 한 번만 — 다시는 split/S2·S3 *_before_scr.FCStd에서. GUI FreeCAD에서 exec 가능 (os._exit 없음) → split/_fix_screw.json"""
-import json, os, sys, shutil, traceback, importlib
+import json, os, sys, shutil, traceback, importlib, glob, time
 import FreeCAD as App, Part
 HERE = r"C:\capstone\-capstone-project-repo\cad"; OUT = os.path.join(HERE, "split"); sys.path.insert(0, HERE)
 rep = dict()
 V = App.Vector
+
+
+def _save(doc, path):                               # 저장 잠김이면 임시 파일을 바꿔 넣음
+    try:
+        doc.save(); return
+    except OSError:
+        pass
+    tmp = sorted(glob.glob(path + ".*-*"), key=os.path.getmtime)[-1]
+    for _ in range(60):
+        try:
+            os.replace(tmp, path); return
+        except OSError:
+            time.sleep(2)
+    raise OSError("replace failed " + tmp)
 try:
     import lift_v2 as L, lift_v3 as L3
     importlib.reload(L); importlib.reload(L3)
@@ -42,7 +56,7 @@ try:
                 out.append(s)
         o.Shape = Part.makeCompound(out)
     rep["A"] = dict(brackets=n_br, hardware=n_hw)
-    d3.recompute(); d3.save(); App.closeDocument(d3.Name)
+    d3.recompute(); _save(d3, os.path.join(OUT, "S3_프레임회로.FCStd")); App.closeDocument(d3.Name)
     # ---------- B · C ----------
     d2 = App.openDocument(os.path.join(OUT, "S2_마킹부.FCStd"), True)
     ob2 = lambda p: [o for o in d2.Objects if o.TypeId.startswith("Part::") and o.Label.startswith(p)]
@@ -65,7 +79,7 @@ try:
     ob2("226s_x_home_bolts")[0].Shape = Part.makeCompound(hw)
     ob2("226s_x_home_bolts")[0].Label = "226s_x_home_bolts (20시리즈 M5 × 8 + 스프링너트 2, 구매 — 11/17 간격 8 → 12, 스프링너트끼리 겹침 없앰)"
     ob2("308s_tongue_screws")[0].Label = "308s_tongue_screws (M5 × 10 둥근머리 렌치 2 + 20시리즈 M5 스프링너트 2 — 상자 혀 → 세운 막대, 구매 — 11/17 간격 8 → 11, 머리 겹침 없앰)"
-    d2.recompute(); d2.save(); App.closeDocument(d2.Name)
+    d2.recompute(); _save(d2, os.path.join(OUT, "S2_마킹부.FCStd")); App.closeDocument(d2.Name)
     # DXF 226p
     f = max([x for x in a.Faces if x.Surface.TypeId == "Part::GeomPlane"], key=lambda x: x.Area); bb = a.BoundBox
     uv = lambda p: (p.x - bb.XMin, p.y - bb.YMin)
