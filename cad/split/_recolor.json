@@ -4,13 +4,13 @@
   "buy": 5
  },
  "S2_마킹부": {
-  "modify": 23,
-  "buy": 79,
-  "print": 4
+  "print": 5,
+  "modify": 16,
+  "buy": 65
  },
  "S3_프레임회로": {
   "modify": 7,
-  "buy": 79
+  "buy": 74
  },
  "S2a_바닥구동": {
   "buy": 14,
