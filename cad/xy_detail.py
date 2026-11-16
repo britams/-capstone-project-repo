@@ -6,7 +6,7 @@
   C. DCB 2025 (212 안): 민 상자 → L (두께 4 [추측]) + 다리마다 Ø5.5 / M5 × 12 냄비 2 + 6각 너트 2 (옛 M5 × 10은 판 3 + 다리 4 + 너트 4에 짧음)
   D. M4 12개 (212 안): 머리 없는 원기둥 → M4 × 10 접시머리 (ISO 10642) 12, YA·YB에 접시 자리 12 (봉 끝 4 · SC8UU 8 — 캐리지 쪽 면이 평평해야 LMK 나사 머리와 안 닿음)
   E. 211 기둥 3: 원기둥 → M3 × 40 암-암 6각 기둥 + M3 × 6 냄비 6 (양 끝)
-  F. 206: SP–SV 기둥 3 → Ø6 × 10 스페이서 + M3 × 16 냄비 (SV 쪽에서, SP는 M3 탭 — 홀더 판 HV가 SP 바깥 면을 미끄러지므로 거기 머리·너트를 두면 안 됨)
+  F. 206: SP–SV 기둥 3 → M3 × 10 암-암 6각 기둥 + SV 쪽 M3 × 6 냄비 + SP 쪽 M3 × 6 무두 (SP는 M3 탭 — 홀더 판 HV가 SP 바깥 면을 미끄러지므로 거기 머리·너트를 두면 안 됨)
          ETTINGER 브래킷 2: 나사 구멍 Ø3.2, M3 × 8 냄비 4 + 너트 4
   G. SG90 귀: M2 × 8 냄비 2 + M2 너트 2 (SV 쪽에서) → 새 물체 205_z_servo_screws
   H. 202: 네모 너트 4 → 6각, P-8 나사 2 → M3 × 10 접시머리 (HV +x 면이 SP에 닿아 미끄러짐 → 접시), HV 접시 자리 2
@@ -193,8 +193,9 @@ try:
     for s in sols[0:3]:                                      # SP–SV 기둥 → 스페이서 + M3 × 16 (SV 쪽), SP M3 탭
         b = s.BoundBox
         y, z = b.Center.y, b.Center.z
-        hw.append(tube(V(90.15, y, z), EX, 3.0, 1.6, 10.0))
-        hw.append(pan(V(103.15, y, z), -EX, 3.0, 16.0))
+        hw.append(hexprism(V(90.15, y, z), EX, 5.5, 10.0, 3.0))           # M3 × 10 암-암 기둥 (키트 C)
+        hw.append(pan(V(103.15, y, z), -EX, 3.0, 6.0))                    # SV 쪽 M3 × 6
+        hw.append(cyl(V(87.15, y, z), EX, 1.5, 6.0).cut(cyl(V(87.14, y, z), EX, 0.75, 1.5)))   # SP 탭 ↔ 기둥: M3 × 6 무두 (SP 바깥 면과 같은 높이)
         sp = sp.fuse(cyl(V(87.15, y, z), EX, 1.72, 3.0)).cut(cyl(V(86.0, y, z), EX, 1.25, 5.0))
     cps[iSP] = sp.removeSplitter()
     cp.Shape = Part.makeCompound(cps)
@@ -205,7 +206,7 @@ try:
         hw += [br, pan(V(98.0, -47.0, zb), EY, 3.0, 8.0), nut(V(98.0, -43.0, zb), EY, 3.0),
                pan(V(87.15, -36.5, zb), EX, 3.0, 8.0), nut(V(91.15, -36.5, zb), EX, 3.0)]
     o.Shape = Part.makeCompound(hw)
-    o.Label = ("206_carriage_hardware (SP–SV: Ø6 × 10 스페이서 3 + M3 × 16 냄비 3 (SV 쪽에서 → SP 탭) · ETTINGER 014.86.153 직각 브래킷 2 "
+    o.Label = ("206_carriage_hardware (SP–SV: M3 × 10 암-암 기둥 3 + M3 × 6 냄비 3 (SV 쪽) + M3 × 6 무두 3 (SP 탭 쪽, 면과 같은 높이) · ETTINGER 014.86.153 직각 브래킷 2 "
                "(15 × 15 × 10, 두께 1 [가능성 높음], 구멍 Ø3.2) + M3 × 8 냄비 4 + 너트 4 — 구매)")
     # ---------- G. SG90 귀 ----------
     sg = []
