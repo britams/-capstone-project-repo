@@ -259,7 +259,7 @@ try:
     objs = [(o.Label, o.Shape) for o in d.Objects if o.TypeId.startswith("Part::") and not o.Shape.isNull()]
     CH = ("222_", "221_", "212_beam_hardware", "212_beam_plates", "211_y_motor_standoffs", "206_", "205_z_servo_screws", "202_", "225_x_nut_screws", "224_y_nut_screws")
     ok = (("212_beam_hardware", "222_"), ("212_beam_hardware", "207_"), ("206_carriage_hardware", "206_carriage_plates"),
-          ("212_beam_hardware", "212_beam_hardware"), ("206_carriage_hardware", "206_carriage_hardware"), ("202_holder_bolts", "202_holder_bolts"),
+          ("212_beam_hardware", "212_beam_hardware"), ("225_x_nut_screws", "212_beam_plates"), ("206_carriage_hardware", "206_carriage_hardware"), ("202_holder_bolts", "202_holder_bolts"),
           ("221_y_bearing_screws", "221_y_bearing_screws"), ("211_y_motor_standoffs", "211_y_motor_standoffs"))
     seen = set()
     for la, sa in objs:
