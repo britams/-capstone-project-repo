@@ -3,7 +3,7 @@
 (서현 11/16 19:39 "1. 추정 치수로 바로 바꾸기", CAP-AI-62) — 부품 파일 split/P2xy_XY플랫폼.FCStd에서 고치고 xy_platform.py attach로 S2에 붙임
   모듈 치수 [추측 — 판매 페이지에 없음, 사서 잼]: 기판 14 × 32 × 1.6 (스위치 끝에 레버, 반대 끝에 M3 구멍 1 + 3핀 헤더), 기판 밑 납땜 다리 → M3 스페이서 3
   X (227x): 팔 226p 위 — 스페이서 3 + 기판 → 스위치 +4.6 위로. 구멍 (x 34, y −75.5), 팔을 y −70까지 늘림, 옛 M2 구멍 메움. M3 × 10 + 너트
-  Y (227y): X 너트 판 XN −x 면 — 스페이서 3 + 기판 → 스위치 −x 4.6, 아래로 10 (구멍이 POM 너트·SC8UU를 피하게). 구멍 (y −63, z 458), XN 옛 M2 구멍 메움. M3 × 12 + 너트
+  Y (227y): X 너트 판 XN −x 면 — 스페이서 3 + 기판 (z 435~466, X 나사·POM 너트 위) → 스위치 −x 4.6, 아래로 10 (구멍이 POM 너트·SC8UU를 피하게, 레버 쪽은 기판 밑으로 나옴 [추측]). 구멍 (y −63, z 458), XN 옛 M2 구멍 메움. M3 × 12 + 너트
 freecad.exe cad/xy_home_modules.py (cwd = cad) → split/P2xy, print/laser/226p_*.dxf, print/xy/XN_*.dxf, split/_xy_home.json"""
 import json, os, sys, traceback, glob
 HERE = os.getcwd(); OUT = os.path.join(HERE, "split"); sys.path.insert(0, HERE)
@@ -59,7 +59,7 @@ try:
     nx = nx.cut(cyl(1.7, 6, V(85.0, -63.0, 458.0), V(1, 0, 0))).removeSplitter()
     bp.Shape = Part.makeCompound([nx if q.isSame(xn) else q for q in bp.Shape.Solids])
     x0 = xn.BoundBox.XMin                       # 87.4
-    pcb = box(x0 - 3.0 - 1.6, x0 - 3.0, -67.0, -53.0, 424.0, 462.0 + 4.0).cut(cyl(1.6, 4, V(x0 - 6, -63.0, 458.0), V(1, 0, 0)))
+    pcb = box(x0 - 3.0 - 1.6, x0 - 3.0, -67.0, -53.0, 435.0, 466.0).cut(cyl(1.6, 4, V(x0 - 6, -63.0, 458.0), V(1, 0, 0)))
     hdr = [box(x0 - 6.2, x0 - 4.6 - 0.0, y - 0.32, y + 0.32, 466.0, 472.0) for y in (-62.54, -60.0, -57.46)]
     n = d.addObject("Part::Feature", "HMy"); n.Shape = Part.makeCompound([pcb] + hdr)
     n.Label = "227ym_home_module_board_Y (%s, 빔과 같이 움직임)" % MOD
