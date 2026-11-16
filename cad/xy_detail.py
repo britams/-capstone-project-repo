@@ -10,7 +10,10 @@
          ETTINGER 브래킷 2: 나사 구멍 Ø3.2, M3 × 8 냄비 4 + 너트 4
   G. SG90 귀: M2 × 8 냄비 2 + M2 너트 2 (SV 쪽에서) → 새 물체 205_z_servo_screws
   H. 202: 네모 너트 4 → 6각, P-8 나사 2 → M3 × 10 접시머리 (HV +x 면이 SP에 닿아 미끄러짐 → 접시), HV 접시 자리 2
-  I. POM 너트 224·225: M2 × 8 냄비 + M2 너트 2개씩 (M3 너트는 너트 몸통 Ø7.9와 닿음). 225 위 구멍은 Y 원점 스위치, 224 아래 구멍은 LMK8UU 플랜지에 가려 비움
+  I. POM 너트 224: M2 × 8 냄비 + M2 너트 2 (M3 너트는 너트 몸통 Ø7.9와 닿음), 아래 구멍은 LMK8UU 플랜지에 가려 비움
+     225: XN +x 쪽에 너트 자리가 없어 XN M2 탭 2 + M2 × 6 (위 구멍은 Y 원점 스위치에 가려 비움). XN 윗모서리가 SC8UU와 겹치던 것 깎음
+  E′. 211 기둥 나사 중 Y 모터판 쪽은 모터 앞면과 닿아 M3 × 8 접시머리 + 접시 자리
+  G′. SV 아래 귀 구멍이 SG90 귀 구멍과 0.56 어긋나 있던 것 맞춤
 GUI FreeCAD에서 exec 가능 (os._exit 없음) → split/_xy_detail.json"""
 import json, os, sys, shutil, traceback, importlib, math
 import FreeCAD as App, Part
@@ -163,15 +166,22 @@ try:
     rep["csk"] = {k: len(v) for k, v in seats.items()}
     # ---------- E. 211 기둥 ----------
     o = ob("211_y_motor_standoffs")
-    so = []
+    so, m211 = [], []
     for s in o.Shape.Solids:
         b = s.BoundBox
         x, z = b.Center.x, b.Center.z
         so.append(hexprism(V(x, b.YMin, z), EY, 5.5, b.YLength, 3.0))
-        so.append(pan(V(x, b.YMin - 3.0, z), EY, 3.0, 6.0))      # Y 모터판 바깥 면
+        so.append(csk(V(x, b.YMin - 3.0, z), EY, 3.0, 8.0))      # Y 모터판 바깥 면 — 모터 앞면이 판에 붙으므로 접시 (머리가 모터와 닿음)
+        m211.append(csk_seat(V(x, b.YMin - 3.0, z), EY, 3.0, 1.7))
         so.append(pan(V(x, b.YMax + 3.0, z), -EY, 3.0, 6.0))     # YA +y 면
     o.Shape = Part.makeCompound(so)
-    o.Label = "211_y_motor_standoffs (M3 × 40 암-암 6각 기둥 3 + M3 × 6 냄비 6, 구매)"
+    o.Label = "211_y_motor_standoffs (M3 × 40 암-암 6각 기둥 3 + M3 × 8 접시머리 3 (Y 모터판 쪽) + M3 × 6 냄비 3 (YA 쪽), 구매)"
+    ym = ob("211_y_motor_plate")
+    t = ym.Shape
+    for c in m211:
+        t = t.cut(c)
+    ym.Shape = t.removeSplitter()
+    ym.Label = "211_y_motor_plate (알루미늄 3 mm 레이저 — 모터 턱 Ø22.5 · M2.5 Ø2.9 4 · 기둥 Ø3.4 3 + M3 접시 자리 3 (바깥 면, meviy 접시 가공))"
     # ---------- F. 206 ----------
     o = ob("206_carriage_hardware")
     sols = o.Shape.Solids
@@ -185,7 +195,7 @@ try:
         y, z = b.Center.y, b.Center.z
         hw.append(tube(V(90.15, y, z), EX, 3.0, 1.6, 10.0))
         hw.append(pan(V(103.15, y, z), -EX, 3.0, 16.0))
-        sp = sp.fuse(cyl(V(87.14, y, z), EX, 1.72, 3.02)).cut(cyl(V(86.0, y, z), EX, 1.25, 5.0))
+        sp = sp.fuse(cyl(V(87.15, y, z), EX, 1.72, 3.0)).cut(cyl(V(86.0, y, z), EX, 1.25, 5.0))
     cps[iSP] = sp.removeSplitter()
     cp.Shape = Part.makeCompound(cps)
     cp.Label = "206_carriage_plates (CP 캐리지 판 · SP 안내 판 · SV 서보 판 — 알루미늄 3 mm 레이저, SP M3 탭 3 (meviy 탭 가공))"
@@ -199,9 +209,15 @@ try:
                "(15 × 15 × 10, 두께 1 [가능성 높음], 구멍 Ø3.2) + M3 × 8 냄비 4 + 너트 4 — 구매)")
     # ---------- G. SG90 귀 ----------
     sg = []
-    for z in (399.6, 426.4):
+    cps = list(cp.Shape.Solids)
+    iSV = [i for i, s in enumerate(cps) if s.BoundBox.XLength < 4 and s.BoundBox.Center.x > 95][0]
+    sv = cps[iSV]
+    for zo, z in ((399.6, 399.04), (426.4, 426.44)):                       # SV 아래 구멍이 SG90 귀 구멍(간격 27.4)과 0.56 어긋나 있었음 → 귀 구멍에 맞춤
+        sv = sv.fuse(cyl(V(100.15, -18.9, zo), EX, 1.12, 3.0)).cut(cyl(V(99.0, -18.9, z), EX, 1.1, 5.0))
         sg.append(pan(V(103.15, -18.9, z), -EX, 2.0, 8.0))
         sg.append(nut(V(97.65, -18.9, z), -EX, 2.0))
+    cps[iSV] = sv.removeSplitter()
+    cp.Shape = Part.makeCompound(cps)
     add("205_z_servo_screws (M2 × 8 냄비 2 + M2 6각 너트 2 — SV 판 +x 면에서 SG90 귀로, 구매)", sg)
     # ---------- H. 202 ----------
     o = ob("202_holder_bolts")
@@ -224,9 +240,16 @@ try:
     hv.Label = "202_holder_plate_HV (홀더 판 — 알루미늄 3 mm 레이저, 밑 모서리가 서보 혼에, P-8 M3 접시 자리 2 (+x 면, meviy 접시 가공))"
     # ---------- I. POM 너트 ----------
     pm = []
-    for y in (-59.5, -70.5):
-        pm.append(pan(V(84.22, y, 421.8), EX, 2.0, 8.0)); pm.append(nut(V(90.4, y, 421.8), EX, 2.0))
-    add("225_x_nut_screws (M2 × 8 냄비 2 + M2 6각 너트 2 — POM 플랜지(−x) → XN, 위 구멍은 Y 원점 스위치와 닿아 비움, 구매)", pm)
+    plates = list(bp.Shape.Solids)
+    iXN = [i for i, s in enumerate(plates) if s.BoundBox.XLength < 4][0]
+    xn = plates[iXN]
+    for y in (-59.5, -70.5):                                 # XN +x 쪽은 YA 모서리·DCB라 너트 자리가 없음 → XN에 M2 탭, 플랜지 쪽에서 M2 × 6 (끝이 XN 면과 같음)
+        pm.append(pan(V(84.22, y, 421.8), EX, 2.0, 6.0))
+        xn = xn.fuse(cyl(V(87.4, y, 421.8), EX, 1.72, 3.0)).cut(cyl(V(86.0, y, 421.8), EX, 0.8, 5.0))
+    xn = xn.cut(Part.makeBox(4.0, 23.0, 5.0, V(86.9, -81.5, 462.5)))     # SC8UU 밑 모서리와 겹치던 XN 윗부분 (z 463~466) 깎음
+    plates[iXN] = xn.removeSplitter()
+    bp.Shape = Part.makeCompound(plates)
+    add("225_x_nut_screws (M2 × 6 냄비 2 — POM 플랜지(−x) → XN M2 탭 (meviy 탭 가공), 위 구멍은 Y 원점 스위치와 닿아 비움, 구매)", pm)
     pm = []
     for x in (95.9, 106.9):
         pm.append(pan(V(x, -40.82, 456.2), -EY, 2.0, 8.0)); pm.append(nut(V(x, -47.0, 456.2), -EY, 2.0))
