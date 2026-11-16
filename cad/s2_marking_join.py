@@ -2,7 +2,7 @@
 """마킹실 프린트 3개 잇기 (서현 11/17 00:32 "너가 제안하는 데로 … 나사 사이즈 통일", CAP-AI-62)
   상자 300: y만 ±19 → ±24 (lift_v2 BOXD half_y), ±y 면 귀 나사 밑구멍 Ø2.5 깊이 6 4개 (x 39·71, z 376.5)
   112·176: 상자 ±y 면에 겹치는 귀 (두께 3, 13 높이) — 문판 도는 자리(문판 면 x 30·80, 경첩 둘레 반지름 27.5)를 피해 x 방향 나사 대신 y 방향
-           176 −y 귀는 몸통(y −10)까지 다리로 이음
+           176 −y 귀는 몸통(y −10)까지 다리로 이음 (다리는 컵 받침 220 밑, z 366~374.8)
   나사: M3 × 8 냄비 태핑 4 (격자판 300s와 같은 나사)
 한 번만 — 다시는 split/S2_마킹부_before_join.FCStd에서. GUI FreeCAD에서 exec 가능 (os._exit 없음) → split/_marking_join.json"""
 import json, os, sys, shutil, traceback
@@ -16,7 +16,8 @@ try:
     V = App.Vector
     box, cyl = L.box, L.cyl
     P = os.path.join(OUT, "S2_마킹부.FCStd")
-    shutil.copy(P, os.path.join(OUT, "S2_마킹부_before_join.FCStd"))
+    B = os.path.join(OUT, "S2_마킹부_before_join.FCStd")
+    shutil.copy(B if os.path.exists(B) else P, P) if os.path.exists(B) else shutil.copy(P, B)
     d = App.openDocument(P, True)
     ob = lambda p: [o for o in d.Objects if o.TypeId.startswith("Part::") and o.Label.startswith(p)]
     mw = App.Matrix(); mw.move(L3.WORLD)
@@ -34,7 +35,7 @@ try:
         else:                                       # 176: 귀가 176 면(x 74)까지, −y는 몸통 y −10까지 다리
             e = e.fuse(box(gx - 3.5, 74.5, min(sy * HY, sy * (HY + 3)), max(sy * HY, sy * (HY + 3)), Z0, Z1))
             if sy < 0:
-                e = e.fuse(box(74.0, 77.0, -(HY + 3), -9.5, Z0, Z1))
+                e = e.fuse(box(74.0, 79.0, -(HY + 3), -9.5, 366.0, 374.8))   # 다리는 컵 받침 220 (z 375~380) 밑으로
             k = "176"
         e = e.cut(cyl(1.7, 6, V(gx, sy * (HY + 4), ZC), V(0, -sy, 0)))
         ears[k].append(e)
