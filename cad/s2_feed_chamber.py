@@ -7,7 +7,7 @@
   177d 접시 서랍 = 3D 프린트: 접시 Ø12 × 3 (약 0.34 mL), 윗면이 방 바닥, −y 손잡이로 빼서 씻음
   144hf 실리콘 관 끝 (안 3 · 바깥 5): +y 벽으로 들어와 접시 위 14 mm에서 떨어뜨림. 위(z 397~)는 XY 캐리지가 지나가서 관을 위로 안 뺌
   옛 아크릴 관 174는 S2에 그대로 둠 (급이부 없는 판 D5g_full_no용) — D5g_full에서는 _add_feed.py가 174를 뺌
-한 번만 — 다시는 split/S2_마킹부_before_feed.FCStd에서. GUI FreeCAD에서 exec 가능 (os._exit 없음) → split/_feed_chamber.json"""
+한 번만 — 다시는 split/S2_마킹부_before_feedch.FCStd에서. GUI FreeCAD에서 exec 가능 (os._exit 없음) → split/_feed_chamber.json"""
 import json, os, shutil, traceback, glob, time
 import FreeCAD as App, Part
 HERE = r"C:\capstone\-capstone-project-repo\cad"; OUT = os.path.join(HERE, "split")
@@ -36,7 +36,7 @@ def box(x0, x1, y0, y1, z0, z1):
 
 
 try:
-    P, B = os.path.join(OUT, "S2_마킹부.FCStd"), os.path.join(OUT, "S2_마킹부_before_feed.FCStd")
+    P, B = os.path.join(OUT, "S2_마킹부.FCStd"), os.path.join(OUT, "S2_마킹부_before_feedch.FCStd")   # _before_feed는 11/15 옛 백업이 있어 다른 이름
     shutil.copy(B, P) if os.path.exists(B) else shutil.copy(P, B)
     d = App.openDocument(P, True)
     ob = lambda p: [o for o in d.Objects if o.TypeId.startswith("Part::") and o.Label.startswith(p)]
