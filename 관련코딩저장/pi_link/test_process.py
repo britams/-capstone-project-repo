@@ -2,7 +2,7 @@
 """test_process.py — 처리 순서를 실제 펌웨어 로직(sim --serve, 5배속) + 가짜 카메라·가짜 말벌로 시험 (서현 CAP-AI-48)
 
 실행:  python 관련코딩저장/pi_link/test_process.py           (decide 표 + 장면 6개, 약 1~2분)
-말벌은 '#BLOCK 게이트 1/0' 줄로 빔을 차례로 끊어 흉내 낸다 (G1 → G2 → G2b → 마킹실, 나갈 때 G5 → G5b → G6 또는 G3 → G3b → G4).
+말벌은 '#BLOCK 게이트 1/0' 줄로 빔을 끊어 흉내 낸다 (11/17 문마다 빔 1개: 들어올 때 G2, 나갈 때 G5 또는 G3b).
 """
 import os
 import sys
@@ -51,9 +51,7 @@ def cross(port, gates):
 def enter(rig, vis, delay=0.5):
     def go():
         time.sleep(delay)
-        cross(rig.pd, ['G1'])
-        time.sleep(0.2)
-        cross(rig.pd, ['G2', 'G2b'])
+        cross(rig.pd, ['G2'])
         vis.present += 1
     threading.Thread(target=go, daemon=True).start()
 
@@ -64,11 +62,8 @@ def leave_when_open(rig, vis, proc):
             return
         def go():
             time.sleep(0.3)
-            beams, out = (['G5', 'G5b'], 'G6') if d == 'REL' else (['G3', 'G3b'], 'G4')
-            cross(rig.pd, beams)
+            cross(rig.pd, ['G5' if d == 'REL' else 'G3b'])
             vis.present -= 1
-            time.sleep(0.2)
-            cross(rig.pd, [out])
         threading.Thread(target=go, daemon=True).start()
     proc.on_door_opened = on_open
 
@@ -130,11 +125,12 @@ def t_mark():
         check('MOVE X 3.000' in cm and 'MOVE Y -5.000' in cm, '자세 사진의 흉부 좌표(3, −5)로 감 (C2)')
         i = cm.index('MOVE Y -5.000')
         check(cm[i + 1:i + 5] == ['PEN DOWN', 'PEN UP', 'PEN DOWN', 'PEN UP'], '2번 찍기 (DOWN·UP ×2)')
-        check('MOVE F 2.000' not in cm, '급이 때 바닥 안 올림 (11/15 솜은 방생 통로)')
+        check('MOVE F 2.000' not in cm, '급이 때 바닥 안 올림 (11/17 접시는 급이실 177)')
         check('PUMP 100' in cd and cd.index('PUMP 100') < cd.index('DOOR REL OPEN'), '급이 때 펌프 100 ms (방생 문 열기 전, CAP-AI-59)')
         check(cd[-2:] == ['DOOR REL CLOSE', 'LIGHT TOP 0'] or 'DOOR REL CLOSE' in cd, 'REL 닫음')
         check(cm[-1] == 'MOVE F 0.000', '마지막에 바닥 0')
-        check(proc.ledger.n['released'] == 1 and proc.ledger.n['chamber'] == 0, '장부: 방생 1, 마킹실 0')
+        rt = [n for n in proc.log if n['kind'] == 'release_time']
+        check(len(rt) == 1 and 'DOOR REL CLOSE' in cd[cd.index('DOOR REL OPEN'):], '로그 release_time 1번 (REL 닫을 때, 방생 시각 %s)' % (rt[0]['at'] if rt else '-'))
         check(vis.calls[:3] == ['entry', 'after_close', 'identify'] or vis.calls[0] in ('entry', 'idle_check'), '카메라 순서 entry → after_close → identify')
         check('verify' in vis.calls and vis.h['marked'], '점 확인')
     finally:
@@ -148,7 +144,7 @@ def t_queen():
         check(res == ('isolate', 'queen'), '결과 isolate (queen)')
         check(not any(s.startswith('PRESS') for s in cm), 'PRESS 안 함')
         check('DOOR CAP OPEN' in cd and cd.index('DOOR CAP OPEN') < len(cd) - 1 and 'DOOR CAP CLOSE' in cd[cd.index('DOOR CAP OPEN'):], 'CAP 열고 나간 뒤 닫음')
-        check(proc.ledger.n['captured'] == 1, '장부: 포획 1')
+        check(sum(1 for n in proc.log if n['kind'] == 'capture_time') == 1, '로그 capture_time 1번')
         check('DOOR REL OPEN' not in cd, '방생 문은 안 엶')
     finally:
         r.close()
@@ -160,7 +156,7 @@ def t_revisit():
     try:
         check(res == ('release', 'marked'), '결과 release (marked)')
         check(not any(s.startswith(('PRESS', 'PEN')) for s in cm), 'PRESS·펜 명령 없음')
-        check('MOVE F 2.000' not in cm, '급이 때 바닥 안 올림 (11/15 솜은 방생 통로)')
+        check('MOVE F 2.000' not in cm, '급이 때 바닥 안 올림 (11/17 접시는 급이실 177)')
         check(not any('ERR' in n.get('why', '') for n in proc.log), '오류 없음')
     finally:
         r.close()

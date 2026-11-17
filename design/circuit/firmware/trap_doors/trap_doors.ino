@@ -1,28 +1,28 @@
-// trap_doors.ino — UNO 2 (문·빛 게이트·조명): 문 서보 3, 빛 게이트 9쌍, 조명 2, 송신 켜기, 레일 감지 — v0.2
+// trap_doors.ino — UNO 2 (문·빛 게이트·조명): 문 서보 3, 빛 게이트 3쌍, 조명 2, 송신 켜기, 레일 감지 — v0.3
 // 작성: 서현 (Claude, CAP-AI-41, 2026-11-08). 바탕: trap_controller.ino v0.1 명령 형식 + bringup/b2_gate·b3_door
-// 사양: design/2026-11-06_펌웨어_변경요청_서현.md 2장, 핀 원본: design/circuit/circuit.py (GATE_PIN, 검사 통과)
+// v0.3 (서현 Claude, CAP-AI-62, 2026-11-17): 빛 게이트 9 → 3쌍 (문마다 1개, 모두 Adafruit 2167 디지털), G1·G4·G6·G2b·G3·G5b 없앰, 펌프 Kamoer, PUMP_MAX_MS 2000 → 200
+// 사양: design/2026-11-06_펌웨어_변경요청_서현.md 2장, 핀 원본: design/2026-11-17_전원_12V하나_센서쉴드_서현.md 3장 (circuit.py GATE_PIN은 아직 9쌍)
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
 //
-// 핀 (UNO 2, 17/18 — D13 예비)
+// 핀 (UNO 2 — D7 D8 D12 D13 A1 A2 A5 비움)
 //   D2  레일 감지 (+5V_B → 10 kΩ → D2, 레일 있으면 HIGH) — INPUT (내부 풀업 쓰면 레일이 꺼져도 HIGH라 안 됨)
 //   D3  위 링 조명 Q1 (PWM)      D5  아래 조명 Q2 (PWM)
-//   D4  송신 켜기 Q4 (EMIT_EN, HIGH = 9개 송신 켬)
-//   D6  급이 펌프 Q3 (Adafruit 3910 5 V 0.5 A, HIGH = 돎) — 11/10 밤 CAP-AI-59 (예비였던 핀)
-//   D7 / D8 / D12  통로 게이트 G1 / G4 / G6 (Adafruit 2167, 외부 10 kΩ 풀업, 끊기면 LOW)
+//   D4  송신 켜기 Q4 (EMIT_EN, HIGH = 3개 송신 켬)
+//   D6  급이 펌프 Q3 (Kamoer NKP 12 V, HIGH = 돎) — 11/10 밤 CAP-AI-59 (예비였던 핀)
 //   D9 / D10 / D11 문 서보 IN 112 / CAP 170 / REL 176 (MG90S)
-//   A0..A5 문 빔 G2 G2b G3 G3b G5 G5b (포토TR 이미터 팔로어, 빛 받으면 높음 → analogRead)
+//   A0 / A3 / A4  문 빔 G2 (IN) / G3b (CAP) / G5 (REL) — Adafruit 2167 수신, 디지털 INPUT_PULLUP, 끊기면 LOW. G2 = 진입 신호도 겸함
 //
 // 시리얼 115200, 한 줄 = 명령 하나
 //   PING                        → OK PONG
-//   STATUS                      → OK STATUS IN=<문> CAP=<문> REL=<문> RAIL=<1|0> EMIT=<1|0> GATES=<G1 G2 G2b G3 G3b G4 G5 G5b G6 순 1/0/?>
+//   STATUS                      → OK STATUS IN=<문> CAP=<문> REL=<문> RAIL=<1|0> EMIT=<1|0> PUMP=<1|0> GATES=<G2 G3b G5 순 1/0/?>
 //                                  <문> = UNKNOWN OPEN CLOSED OPENING WAIT CLOSING REOPEN BLOCKED
-//   SELFTEST                    → OK SELFTEST G1=OK G2=OK ... G2b=FAIL(87)   (켤 때 자동 1번 → EVT SELFTEST ...)
-//                                  문 빔 FAIL(<켬−끔>), 통로 FAIL(H) = 송신 꺼도 HIGH / FAIL(L) = 송신 켜도 LOW
-//   GATES                       → OK GATES G1=1 G2=1 ... (1 이어짐, 0 끊김, ? 자가 시험 FAIL)
-//   (사건) EVT GATE <이름> BLOCK|CLEAR   같은 값 20 ms 뒤에만. G1 BLOCK = 진입 신호
+//   SELFTEST                    → OK SELFTEST G2=OK G3b=OK G5=FAIL(L)   (켤 때 자동 1번 → EVT SELFTEST ...)
+//                                  FAIL(H) = 송신 꺼도 HIGH (수신 선 빠짐) / FAIL(L) = 송신 켜도 LOW (송신 고장·어긋남·막힘)
+//   GATES                       → OK GATES G2=1 G3b=1 G5=1 (1 이어짐, 0 끊김, ? 자가 시험 FAIL)
+//   (사건) EVT GATE <이름> BLOCK|CLEAR   같은 값 20 ms 뒤에만. G2 BLOCK = 진입 신호 (방향은 모름 → Pi가 카메라로 셈)
 //   DOOR <IN|CAP|REL> OPEN      → OK DOOR, 끝나면 DONE DOOR <이름> OPEN
 //   DOOR <IN|CAP|REL> CLOSE     → OK DOOR, 그다음 하나:
-//                                  DONE DOOR <이름> CLOSED / ERR DOOR <이름> WAIT (2 s 안에 빔 0.2 s 비지 않음, 문은 열린 채)
+//                                  DONE DOOR <이름> CLOSED / ERR DOOR <이름> WAIT (2 s 안에 그 문 빔이 0.2 s 비지 않음, 문은 열린 채)
 //                                  / EVT DOOR <이름> REOPEN <n> (닫다가 빔 끊김 → 바로 엶, 1 s 뒤 다시) / EVT DOOR <이름> BLOCKED (3번 실패, 열어 둠)
 //                                  거부: ERR RAIL · ERR DOOR <이름> BEAMFAIL · ERR DOOR <이름> EMIT_OFF · ERR BUSY
 //   SERVO <IN|CAP|REL> <deg>    각도 직접 (보정용, 빔 규칙 없음 — 사람이 볼 때만) → OK SERVO, 그 문은 UNKNOWN
@@ -40,7 +40,7 @@
 //   - 문 서보는 한 번에 하나만 붙인다 (다른 문은 떼고), 붙이는 사이는 0.3 s 이상 (켤 때 3.27 A > 퓨즈 3 A, 변경요청 0장).
 //   - 움직임이 끝나고 0.5 s 뒤 뗀다 (MG90S 기어 마찰로 자리 유지 — trap_sim, b3_door).
 //   - 문 하나가 움직이는(열기·기다림·닫기·다시 열기) 동안 다른 문 명령은 ERR BUSY. Pi가 순서를 정한다.
-//   - (CAP-AI-59) 펌프 한 번 최대 PUMP_MAX_MS: 고장 나도 물길이 넘치지 않는 양 (cad/feeder_check.py 1번이 이 값을 읽어 검사). 펌프와 문은 같이 안 움직임.
+//   - (CAP-AI-59, 11/17) 펌프 한 번 최대 PUMP_MAX_MS: Pi가 잘못 보내도 급이실 접시 177d (약 0.34 mL)가 안 넘치는 양. 펌프와 문은 같이 안 움직임.
 
 #include <Servo.h>
 
@@ -59,37 +59,28 @@
 #define BLOCK_SAMPLES       2     // 닫는 중 연속 2번 끊김이면 끊김 (잡음 거르기) — 미검증
 #define GATE_DEBOUNCE_MS    20    // 사양: 같은 값 20 ms
 #define RAIL_DEBOUNCE_MS    20
-#define BEAM_MIN_DIFF       200   // 사양: 켬−끔 < 200 이면 FAIL (약 1 V)
 #define SETTLE_MS           20    // 송신 켜고 끈 뒤 기다림 (b2·b3)
 
 const uint8_t PIN_RAIL = 2, PIN_TOP = 3, PIN_EMIT = 4, PIN_BOT = 5, PIN_PUMP = 6;
-const unsigned int PUMP_MAX_MS = 2000;   // 100 mL/min × 2 s = 3.3 mL ≤ 물길 넘침까지 (feeder_check 1)
+const unsigned int PUMP_MAX_MS = 200;    // 접시 0.34 mL ÷ 유량 — 100 mL/min이면 0.33 mL [추측 — Kamoer 유량 실측 뒤 다시 셈]
 unsigned long pumpOffAt = 0, pumpMs = 0;  // 0 = 멈춤
 
 // ---------------- 빛 게이트 ----------------
 struct Gate {
   const char* name;
   uint8_t pin;
-  bool analog;
-  int thr;               // 문 빔 문턱값 (SELFTEST)
   bool ok;               // 자가 시험 통과
-  int diff;              // 켬 − 끔 (문 빔)
-  char failWhy;          // 통로: 'H' / 'L'
+  char failWhy;          // 'H' / 'L'
   bool raw;              // 지금 읽은 값 (true = 이어짐)
   bool stable;           // 20 ms 같은 값으로 인정한 것
   unsigned long tChange; // raw가 바뀐 시각
 };
 // 순서: STATUS GATES 문자열 순서와 같음
-Gate gates[9] = {
-  {"G1",  7,  false, 0,   false, 0, 0, true, true, 0},
-  {"G2",  A0, true,  512, false, 0, 0, true, true, 0},
-  {"G2b", A1, true,  512, false, 0, 0, true, true, 0},
-  {"G3",  A2, true,  512, false, 0, 0, true, true, 0},
-  {"G3b", A3, true,  512, false, 0, 0, true, true, 0},
-  {"G4",  8,  false, 0,   false, 0, 0, true, true, 0},
-  {"G5",  A4, true,  512, false, 0, 0, true, true, 0},
-  {"G5b", A5, true,  512, false, 0, 0, true, true, 0},
-  {"G6",  12, false, 0,   false, 0, 0, true, true, 0},
+const int NG = 3;
+Gate gates[NG] = {
+  {"G2",  A0, false, 0, true, true, 0},
+  {"G3b", A3, false, 0, true, true, 0},
+  {"G5",  A4, false, 0, true, true, 0},
 };
 bool emitOn = true;
 bool selftestDone = false;
@@ -102,7 +93,7 @@ const char* const DOOR_STATE_NAME[] = {"UNKNOWN", "OPEN", "CLOSED", "OPENING", "
 struct Door {
   const char* name;
   uint8_t pin;
-  uint8_t beamA, beamB;  // gates[] 번호
+  uint8_t beam;          // gates[] 번호
   int openDeg, closeDeg;
   Servo s;
   uint8_t state;
@@ -117,9 +108,9 @@ struct Door {
   unsigned long detachAt;  // 0 = 없음
 };
 Door doors[3] = {
-  {"IN",  9,  1, 2, DOOR_OPEN_DEG, DOOR_CLOSED_DEG, Servo(), D_UNKNOWN, D_UNKNOWN, DOOR_OPEN_DEG, 0, false, 0, 0, 0, 0, 0},
-  {"CAP", 10, 3, 4, DOOR_OPEN_DEG, DOOR_CLOSED_DEG, Servo(), D_UNKNOWN, D_UNKNOWN, DOOR_OPEN_DEG, 0, false, 0, 0, 0, 0, 0},
-  {"REL", 11, 6, 7, DOOR_OPEN_DEG, DOOR_CLOSED_DEG, Servo(), D_UNKNOWN, D_UNKNOWN, DOOR_OPEN_DEG, 0, false, 0, 0, 0, 0, 0},
+  {"IN",  9,  0, DOOR_OPEN_DEG, DOOR_CLOSED_DEG, Servo(), D_UNKNOWN, D_UNKNOWN, DOOR_OPEN_DEG, 0, false, 0, 0, 0, 0, 0},
+  {"CAP", 10, 1, DOOR_OPEN_DEG, DOOR_CLOSED_DEG, Servo(), D_UNKNOWN, D_UNKNOWN, DOOR_OPEN_DEG, 0, false, 0, 0, 0, 0, 0},
+  {"REL", 11, 2, DOOR_OPEN_DEG, DOOR_CLOSED_DEG, Servo(), D_UNKNOWN, D_UNKNOWN, DOOR_OPEN_DEG, 0, false, 0, 0, 0, 0, 0},
 };
 unsigned long lastAttachMs = 0;
 bool everAttached = false;
@@ -133,10 +124,7 @@ char line[64];
 uint8_t lineLen = 0;
 unsigned long watchdogMs = 0, lastCmdMs = 0;
 
-bool readClear(const Gate& g) {
-  if (g.analog) return analogRead(g.pin) > g.thr;
-  return digitalRead(g.pin) == HIGH;
-}
+bool readClear(const Gate& g) { return digitalRead(g.pin) == HIGH; }
 
 void reply(const char* s) { Serial.println(s); }
 void doorMsg(const char* head, const Door& d, const char* tail) {
@@ -150,7 +138,7 @@ Door* findDoor(const char* t) {
 }
 bool doorBusy(const Door& d) { return d.state == D_OPENING || d.state == D_WAIT || d.state == D_CLOSING || d.state == D_REOPEN; }
 Door* busyDoor() { for (int i = 0; i < 3; i++) if (doorBusy(doors[i])) return &doors[i]; return nullptr; }
-bool beamsOk(const Door& d) { return gates[d.beamA].ok && gates[d.beamB].ok; }
+bool beamsOk(const Door& d) { return gates[d.beam].ok; }
 
 // 한 번에 하나만 붙임 + 붙이는 사이 0.3 s. 붙였으면 true, 아직 기다려야 하면 false
 bool servoAttach(Door& d) {
@@ -197,7 +185,7 @@ void doorPoll(Door& d) {
       return;
 
     case D_WAIT: {
-      bool clr = gates[d.beamA].raw && gates[d.beamB].raw;
+      bool clr = gates[d.beam].raw;
       if (clr) {
         if (!d.clearSince) d.clearSince = now ? now : 1;
         if (now - d.clearSince >= CLEAR_BEFORE_MS) {
@@ -217,7 +205,7 @@ void doorPoll(Door& d) {
     }
 
     case D_CLOSING: {
-      bool clr = gates[d.beamA].raw && gates[d.beamB].raw;
+      bool clr = gates[d.beam].raw;
       if (!clr) { if (d.blockN < 255) d.blockN++; } else d.blockN = 0;
       if (d.blockN >= BLOCK_SAMPLES) {     // 닫는 중 끊김 → 바로 엶
         d.cur = d.openDeg; d.s.write(d.cur);
@@ -259,42 +247,32 @@ void doorPoll(Door& d) {
 
 // ---------------- 자가 시험 ----------------
 void selftest(bool asEvent) {
-  int offV[9], onV[9];
+  int offV[NG], onV[NG];
   digitalWrite(PIN_EMIT, LOW); delay(SETTLE_MS);
-  for (int i = 0; i < 9; i++) offV[i] = gates[i].analog ? analogRead(gates[i].pin) : digitalRead(gates[i].pin);
+  for (int i = 0; i < NG; i++) offV[i] = digitalRead(gates[i].pin);
   digitalWrite(PIN_EMIT, HIGH); delay(SETTLE_MS);
-  for (int i = 0; i < 9; i++) onV[i] = gates[i].analog ? analogRead(gates[i].pin) : digitalRead(gates[i].pin);
+  for (int i = 0; i < NG; i++) onV[i] = digitalRead(gates[i].pin);
   if (!emitOn) digitalWrite(PIN_EMIT, LOW);
 
   Serial.print(asEvent ? F("EVT SELFTEST") : F("OK SELFTEST"));
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < NG; i++) {
     Gate& g = gates[i];
-    if (g.analog) {
-      g.diff = onV[i] - offV[i];
-      g.ok = g.diff >= BEAM_MIN_DIFF;
-      if (g.ok) g.thr = (onV[i] + offV[i]) / 2;
-    } else {
-      g.failWhy = (offV[i] != LOW) ? 'H' : ((onV[i] != HIGH) ? 'L' : 0);
-      g.ok = (g.failWhy == 0);
-    }
+    g.failWhy = (offV[i] != LOW) ? 'H' : ((onV[i] != HIGH) ? 'L' : 0);
+    g.ok = (g.failWhy == 0);
     Serial.print(' '); Serial.print(g.name); Serial.print('=');
     if (g.ok) Serial.print(F("OK"));
-    else {
-      Serial.print(F("FAIL("));
-      if (g.analog) Serial.print(g.diff); else Serial.print(g.failWhy);
-      Serial.print(')');
-    }
+    else { Serial.print(F("FAIL(")); Serial.print(g.failWhy); Serial.print(')'); }
   }
   Serial.println();
   // 사건 기준을 지금 값으로 다시 잡음 (송신 끈 동안의 끊김을 사건으로 보내지 않음)
   unsigned long now = millis();
-  for (int i = 0; i < 9; i++) { gates[i].raw = gates[i].stable = readClear(gates[i]); gates[i].tChange = now; }
+  for (int i = 0; i < NG; i++) { gates[i].raw = gates[i].stable = readClear(gates[i]); gates[i].tChange = now; }
   selftestDone = true;
 }
 
 void gatesPoll() {
   unsigned long now = millis();
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < NG; i++) {
     Gate& g = gates[i];
     bool r = readClear(g);
     if (r != g.raw) { g.raw = r; g.tChange = now; }
@@ -335,7 +313,7 @@ void railPoll() {
 }
 
 void printGateBits(bool withNames) {
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < NG; i++) {
     if (withNames) { Serial.print(' '); Serial.print(gates[i].name); Serial.print('='); }
     Serial.print(!gates[i].ok ? '?' : (gates[i].stable ? '1' : '0'));
   }
@@ -442,7 +420,7 @@ void handle(char* cmd) {
     if (on) {                              // 다시 켜면 사건 기준을 다시 잡음
       delay(SETTLE_MS);
       unsigned long now = millis();
-      for (int i = 0; i < 9; i++) { gates[i].raw = gates[i].stable = readClear(gates[i]); gates[i].tChange = now; }
+      for (int i = 0; i < NG; i++) { gates[i].raw = gates[i].stable = readClear(gates[i]); gates[i].tChange = now; }
     }
     reply("OK EMIT");
     return;
@@ -472,11 +450,11 @@ void setup() {
   pinMode(PIN_BOT, OUTPUT); analogWrite(PIN_BOT, 0);
   pinMode(PIN_EMIT, OUTPUT); digitalWrite(PIN_EMIT, HIGH);
   pinMode(PIN_PUMP, OUTPUT); digitalWrite(PIN_PUMP, LOW);
-  for (int i = 0; i < 9; i++) if (!gates[i].analog) pinMode(gates[i].pin, INPUT);   // 풀업은 허브 10 kΩ
+  for (int i = 0; i < NG; i++) pinMode(gates[i].pin, INPUT_PULLUP);   // 11/17 허브 없앰 → 내부 풀업 (2167 오픈 컬렉터)
   // 문 서보는 붙이지 않음 (UNKNOWN) — 위 '안전 규칙'
   railRaw = railStable = digitalRead(PIN_RAIL) == HIGH;
   lastCmdMs = millis();
-  reply("EVT READY trap_doors v0.2");
+  reply("EVT READY trap_doors v0.3");
   delay(SETTLE_MS);
   selftest(true);
   if (!railStable) reply("EVT RAIL 0");

@@ -91,28 +91,29 @@ def t_boot():
         r.close()
 
 
-def t_g1_fail():
-    print('[g1] P1: G1 이 자가 시험 FAIL → 시작 안 함, 문·축 명령 안 보냄')
-    r = Rig(doors_args=('--dead', 'G1'))
+def t_g2_fail():
+    print('[g2] P1 (11/17): 진입 신호 G2 가 다시 시험해도 FAIL → 시작 안 함, 문·축 명령 안 보냄')
+    r = Rig(doors_args=('--dead', 'G2'))
     try:
         try:
             r.ctl.boot()
             check(False, 'TrapFault 가 나야 함')
         except TrapFault as e:
-            check(e.code == 'G1_SELFTEST_FAIL', 'TrapFault G1_SELFTEST_FAIL')
+            check(e.code == 'G2_SELFTEST_FAIL', 'TrapFault G2_SELFTEST_FAIL')
+        check(sum(1 for s in r.sent_d() if s == 'SELFTEST') == 2, 'SELFTEST 2번 (말벌이 막았을 수 있어 한 번 더)')
         check(not any(s.startswith('DOOR') for s in r.sent_d()), '문 명령 없음')
         check(not any(s.startswith(('HOME', 'MOVE', 'PEN')) for s in r.sent_m()), '축·펜 명령 없음')
-        check(any(n['kind'] == 'g1_fail' for n in r.ctl.notes), '알림 g1_fail')
+        check(any(n['kind'] == 'g2_fail' for n in r.ctl.notes), '알림 g2_fail')
     finally:
         r.close()
 
 
 def t_beam_retest_ok():
-    print('[retest] P2: 켤 때 G2b 가 막혀 FAIL → 10 s(펌웨어 시간) 뒤 다시 시험 → 풀려서 OK, 정상 켜기')
-    r = Rig(doors_args=('--block', 'G2b'))
+    print('[retest] P2: 켤 때 G2 가 막혀 FAIL → 10 s(펌웨어 시간) 뒤 다시 시험 → 풀려서 OK, 정상 켜기')
+    r = Rig(doors_args=('--block', 'G2'))
     try:
         import threading
-        threading.Timer(0.8, lambda: r.pd.control('#BLOCK G2b 0')).start()   # 4 s(펌웨어 시간) 뒤 말벌이 빠짐
+        threading.Timer(0.8, lambda: r.pd.control('#BLOCK G2 0')).start()   # 4 s(펌웨어 시간) 뒤 말벌이 빠짐
         rep = r.ctl.boot()
         check(sum(1 for s in r.sent_d() if s == 'SELFTEST') == 2, 'SELFTEST 2번')
         check(rep['unusable'] == [], '두 번째에 OK → 쓰지 못하는 문 없음')
@@ -122,18 +123,18 @@ def t_beam_retest_ok():
 
 
 def t_beam_dead():
-    print('[dead] P2: G2b 고장 → 다시 시험해도 FAIL → IN 은 쓰지 않음, 나머지는 켬, IN 닫기는 거부')
-    r = Rig(doors_args=('--dead', 'G2b'))
+    print('[dead] P2: G3b 고장 → 다시 시험해도 FAIL → CAP 은 쓰지 않음, 나머지는 켬, CAP 닫기는 거부')
+    r = Rig(doors_args=('--dead', 'G3b'))
     try:
         rep = r.ctl.boot()
-        check(rep['unusable'] == ['IN'], '쓰지 못하는 문 = IN')
-        check('DOOR IN CLOSE' not in r.sent_d(), 'IN 에는 닫기 명령을 보내지 않음')
-        check('DOOR CAP CLOSE' in r.sent_d() and 'DOOR REL CLOSE' in r.sent_d(), 'CAP·REL 은 닫음')
+        check(rep['unusable'] == ['CAP'], '쓰지 못하는 문 = CAP')
+        check('DOOR CAP CLOSE' not in r.sent_d(), 'CAP 에는 닫기 명령을 보내지 않음')
+        check('DOOR IN CLOSE' in r.sent_d() and 'DOOR REL CLOSE' in r.sent_d(), 'IN·REL 은 닫음')
         try:
-            r.ctl.close_door('IN')
+            r.ctl.close_door('CAP')
             check(False, 'TrapFault 가 나야 함')
         except TrapFault as e:
-            check(e.code == 'DOOR_IN_UNUSABLE', 'close_door(IN) → DOOR_IN_UNUSABLE')
+            check(e.code == 'DOOR_CAP_UNUSABLE', 'close_door(CAP) → DOOR_CAP_UNUSABLE')
     finally:
         r.close()
 
@@ -145,7 +146,7 @@ def t_door_retry():
         r.ctl.boot()
         r.ctl.open_door('IN')
         r.ctl.idle(0.3)
-        r.pd.control('#CLOSEBLOCK IN G2b 3')      # 닫는 중 3번 끊김 → 펌웨어 한 번 시도 = BLOCKED
+        r.pd.control('#CLOSEBLOCK IN G2 3')      # 닫는 중 3번 끊김 → 펌웨어 한 번 시도 = BLOCKED
         k = r.ctl.close_door('IN')
         check(k == 2, 'Pi 두 번째 시도에서 닫힘 (첫 번째는 BLOCKED)')
         ev = [n for n in r.ctl.notes if n['kind'] == 'door_not_closed']
@@ -163,7 +164,7 @@ def t_door_stuck():
         r.ctl.boot()
         r.ctl.open_door('IN')
         r.ctl.idle(0.3)
-        r.pd.control('#CLOSEBLOCK IN G2b 99')
+        r.pd.control('#CLOSEBLOCK IN G2 99')
         try:
             r.ctl.close_door('IN')
             check(False, 'TrapFault 가 나야 함')
@@ -240,7 +241,7 @@ def t_status_fallback():
         pd.close()
 
 
-TESTS = dict(boot=t_boot, g1=t_g1_fail, retest=t_beam_retest_ok, dead=t_beam_dead, retry=t_door_retry,
+TESTS = dict(boot=t_boot, g2=t_g2_fail, retest=t_beam_retest_ok, dead=t_beam_dead, retry=t_door_retry,
              stuck=t_door_stuck, night=t_night_day, rail=t_rail, fallback=t_status_fallback)
 
 if __name__ == '__main__':

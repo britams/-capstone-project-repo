@@ -6,14 +6,16 @@ trap_sim.py (PiFSM wait_entry·process·press_mark·feed·release·isolate·leav
 
 순서 (한 마리)
   대기: 조명 위 0·아래 255, CAP·REL 닫힘, IN 열림
-  진입: 장부(빛 게이트 순서)로 마킹실 1마리 이상 → 카메라로 확인 → IN 닫기 → 다시 셈
+  진입: (11/17) G2가 끊겼다 이어지면(또는 5 s 조용하면) 카메라로 셈 → 1마리 이상이면 IN 닫기 → 다시 셈
+        빔이 문마다 1개라 방향을 모름 → 수는 카메라가 셈 (예전 장부의 빔 2개 순서 셈은 없앰)
   판별: 위 조명 → 카메라 → decide()
     격리  : 2마리 이상 / 안 보임 / 2종 아님·불확실 / 유럽말벌 / 여왕벌 / 방제 모드
     재방문: 이미 표식 → 급이 → 방생
     마킹  : PRESS(51 g) → 자세 확인(등이 위, p ≥ 0.6) → 흉부 위 펜 2번 찍기 → 대기 자리 → 점 확인 → 급이 → 방생
-  급이: 펌프 feed_pump_ms로 방생 통로 T의 솜 적심 → feed_s(10 s — 서현 관찰 약 7 s + 여유) 동안 마킹실에서 잉크 건조 → 방생 때 나가며 먹음 (11/15)
-  방생: (해 지면 격리로) REL 열기 → 장부·카메라로 빌 때까지 → 60 s 기록, 120 s 알림, 300 s CAP도 엶 → 닫기 → 바닥 0
-  격리: 바닥 0 → CAP 열기 → 빌 때까지 → 닫기
+  급이: (11/17) 펌프 feed_pump_ms로 급이실 177 접시에 설탕물 → feed_s(10 s — 서현 관찰 약 7 s + 여유) 동안 마킹실에서 잉크 건조
+  방생: (해 지면 격리로) REL(안쪽 문 176) 열기 → 카메라에 안 보이고 G5가 비면 REL 닫기 + 로그 release_time (방생 시각) → 바닥 0
+        60 s 기록, 120 s 알림, 300 s CAP도 엶. 급이실은 밖 문이 없어 말벌이 먹고 스스로 나감
+  격리: 바닥 0 → CAP 열기 → 카메라에 안 보이고 G3b가 비면 닫기 + 로그 capture_time
   고장(TrapFault): 통과 모드 — CAP·IN 열고 조명 끔 (마킹실에 갇혀 죽지 않게), 알리고 멈춤
 
 이 파일이 정한 규칙 (AI 판단, 서현 위임 — CAP-AI-48)
@@ -32,7 +34,7 @@ import sys
 import time
 from dataclasses import dataclass
 
-from controller import TrapFault
+from controller import TrapFault, DOOR_BEAM, ENTRY
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'vision', 'scripts'))
 
@@ -45,8 +47,6 @@ def plan_stamps(h, start):
     r = mark_planner.plan(h['thorax'], h['unc'], start=start)
     return [tuple(p) for p in r['route']]
 
-GAP = {'IN': ('G2', 'G2b'), 'CAP': ('G3', 'G3b'), 'REL': ('G5', 'G5b')}
-PAIR = {g: (d, i) for d, pr in GAP.items() for i, g in enumerate(pr)}
 QUEEN_MONTHS = (3, 4, 5, 9, 10, 11)
 
 
@@ -55,7 +55,7 @@ class Params:                   # 값 근거는 trap_sim PRM — [추측]은 시
     press_g: float = 51.0       # F_p 0.5 N [확실 — D6]
     F_retract: float = 10.0
     feed_s: float = 10.0        # (11/15 서현 "잉크 거의 7초면 마름") 7 s + 여유 3 s [AI 판단] — 말벌 몸(털) 위에서 다시 잼
-    feed_pump_ms: float = 100.0  # (CAP-AI-59) 한 번 먹일 때 펌프 시간 — 약 0.14 mL [추측 — 실측으로 맞춤]. 펌웨어 PUMP_MAX_MS 이하
+    feed_pump_ms: float = 100.0  # (CAP-AI-59) 한 번 먹일 때 펌프 시간 — 약 0.14 mL [추측 — 실측으로 맞춤]. 펌웨어 PUMP_MAX_MS(200) 이하, 접시 0.34 mL
     dwell_s: float = 0.3        # 펜이 닿아 있는 시간 [추측]
     stamps: int = 2
     pose_retry_max: int = 3
@@ -101,70 +101,21 @@ def decide(obs_list, month, prm=Params()):
 
 
 class Ledger:
-    """통로마다 들어감 − 나감 (trap_sim Ledger를 펌웨어 'EVT GATE G2b BLOCK' 형식으로).
-    문은 빔 2개 순서로 방향을 안다: 앞 → 뒤 = 정방향, 뒤 → 앞 = 역방향, 같은 빔으로 빠지면 되돌아감."""
+    """(11/17) 빛 게이트 사건 기록 — 문마다 빔 1개라 방향을 모름. on = 지금 끊긴 빔, crossed[g] = 끊겼다 이어진 수."""
 
     def __init__(self):
-        self.n = dict(tube_in=0, chamber=0, tube_cap=0, tube_rel=0, captured=0, released=0)
         self.on = set()
-        self.pair = {d: dict(on=set(), first=None) for d in GAP}
-        self.out_pending = 0
-        self.changed = 0
+        self.crossed = {}
 
     def on_event(self, line):
         t = line.split()                      # EVT GATE <이름> BLOCK|CLEAR
-        if len(t) >= 4 and self.gate(t[2], t[3] == 'BLOCK'):
-            self.changed += 1
-
-    def gate(self, g, blocked):
-        if g in PAIR:
-            d, i = PAIR[g]
-            st = self.pair[d]
-            if blocked:
-                if not st['on']:
-                    st['first'] = i
-                st['on'].add(i)
-                return False
-            st['on'].discard(i)
-            if st['on'] or st['first'] is None:
-                return False
-            first, st['first'] = st['first'], None
-            if first == i:
-                return False
-            return self.door_pass(d, forward=(first == 0))
-        if blocked:
-            self.on.add(g)
-            return False
-        if g not in self.on:
-            return False
-        self.on.discard(g)
-        n = self.n
-        if g == 'G1':
-            if self.out_pending > 0 and n['tube_in'] > 0:
-                n['tube_in'] -= 1
-                self.out_pending -= 1
-            else:
-                n['tube_in'] += 1
-        elif g == 'G4' and n['tube_cap'] > 0:
-            n['tube_cap'] -= 1
-            n['captured'] += 1
-        elif g == 'G6' and n['tube_rel'] > 0:
-            n['tube_rel'] -= 1
-            n['released'] += 1
-        else:
-            return False
-        return True
-
-    def door_pass(self, d, forward):
-        n = self.n
-        src, dst = {'IN': ('tube_in', 'chamber'), 'CAP': ('chamber', 'tube_cap'), 'REL': ('chamber', 'tube_rel')}[d]
-        if not forward:
-            src, dst = dst, src
-        n[src] = max(0, n[src] - 1)
-        n[dst] += 1
-        if d == 'IN' and not forward:
-            self.out_pending += 1
-        return True
+        if len(t) < 4:
+            return
+        if t[3] == 'BLOCK':
+            self.on.add(t[2])
+        elif t[2] in self.on:
+            self.on.discard(t[2])
+            self.crossed[t[2]] = self.crossed.get(t[2], 0) + 1
 
 
 class Processor:
@@ -202,42 +153,39 @@ class Processor:
         self._open('IN')
 
     def wait_entry(self, timeout_s=None):
-        """마킹실에 들어온 수 (0 = 없었음/잘못 셈). timeout_s 없으면 들어올 때까지."""
+        """마킹실에 들어온 수 (0 = 없었음). timeout_s 없으면 들어올 때까지.
+        (11/17) G2가 끊겼다 이어지면 카메라로 셈 (빔 1개라 들어왔는지 되돌아갔는지 모름), 5 s 조용하면 한 번 봄."""
         p, L = self.prm, self.ledger
         t0 = time.monotonic()
-        while L.n['chamber'] <= 0:
-            c0 = L.changed
+        while True:
+            c0 = L.crossed.get(ENTRY, 0)
             end = time.monotonic() + p.idle_look_s
-            while time.monotonic() < end and L.changed == c0 and L.n['chamber'] <= 0:
+            while time.monotonic() < end and L.crossed.get(ENTRY, 0) == c0:
                 self.ctl.idle(0.05)
-            if L.n['chamber'] > 0:
-                break
-            if L.changed == c0:                # 5 s 조용함 → 카메라로 한 번 (장부가 놓쳤을 수 있음)
+            obs = []
+            if L.crossed.get(ENTRY, 0) != c0:
+                for _ in range(p.entry_looks):    # 구석에 있으면 못 볼 수 있음
+                    obs = self.look('entry')
+                    if obs:
+                        break
+                    self.ctl.idle(1.0)
+                if not obs:
+                    self.note('mismatch', what='G2 지나감, camera 0 → 문 열어 둠')
+            else:                                  # 5 s 조용함 → 카메라로 한 번 (G2가 놓쳤을 수 있음)
                 obs = self.look('idle_check')
                 if obs:
-                    self.note('mismatch', what='camera %d, ledger 0' % len(obs))
-                    L.n['chamber'] = len(obs)
-                    break
+                    self.note('mismatch', what='camera %d, G2 사건 없음' % len(obs))
+            if obs:
+                break
             if timeout_s is not None and time.monotonic() - t0 > timeout_s:
                 return 0
             if not self.is_day():              # C5: 기다리다 해 짐 → 다음 step이 밤으로
                 return 0
-        obs = []
-        for _ in range(p.entry_looks):        # 구석에 있으면 못 볼 수 있음
-            obs = self.look('entry')
-            if obs:
-                break
-            self.ctl.idle(1.0)
-        if not obs:
-            self.note('mismatch', what='ledger %d, camera 0 → 문 열어 둠' % L.n['chamber'])
-            L.n['chamber'] = 0
-            return 0
         self.ctl.close_door('IN')
-        obs = self.look('after_close')
-        if len(obs) != L.n['chamber']:
-            self.note('mismatch', what='ledger %d, camera %d' % (L.n['chamber'], len(obs)))
-            L.n['chamber'] = len(obs)
-        return len(obs)
+        n = len(self.look('after_close'))
+        if n != len(obs):
+            self.note('mismatch', what='entry %d, after_close %d' % (len(obs), n))
+        return n
 
     # ---------------- 처리 ----------------
     def process(self, n):
@@ -313,9 +261,9 @@ class Processor:
 
     def feed(self):
         self.ctl.lights(0, 255)
-        if not self.ctl.pump(self.prm.feed_pump_ms):    # (CAP-AI-59) 먹일 때만 솜을 적심 — 평소 솜은 마름 (다른 벌레가 덜 먹음)
+        if not self.ctl.pump(self.prm.feed_pump_ms):    # (CAP-AI-59) 먹일 때만 접시에 떨어뜨림 — 평소 접시는 마름 (다른 벌레가 덜 먹음)
             self.note('pump_stop')
-        # (11/15 서현) 솜은 방생 통로 T에 있음 → 바닥은 그대로, feed_s = 마킹실에서 잉크 마를 때까지 기다림. 먹는 것은 문이 열린 뒤 나가면서
+        # (11/17 서현) 접시는 REL 뒤 급이실 177 → 바닥은 그대로, feed_s = 마킹실에서 잉크 마를 때까지 기다림. 먹는 것은 REL이 열린 뒤
         self.ctl.idle(self.prm.feed_s)
 
     def floor_down(self):
@@ -338,20 +286,15 @@ class Processor:
         self.leave('CAP')
 
     def leave(self, d):
-        """문을 열고 마킹실이 빌 때까지 (장부 + 카메라) 기다린 뒤 닫음."""
+        """문을 열고 그 문 빔이 비고 카메라에 안 보일 때까지 기다린 뒤 닫음 + 닫은 시각 기록 (11/17 서현: REL = '방생 시각')."""
         p, L = self.prm, self.ledger
         self._open(d)
         t0 = time.monotonic()
         nudged = alerted = fallback = False
         while True:
             self.ctl.idle(0.2)
-            n = L.n
-            if n['chamber'] == 0 and n['tube_cap'] == 0 and n['tube_rel'] == 0:
-                obs = self.look('empty_check')
-                if not obs:
-                    break
-                self.note('mismatch', what='ledger 0, camera %d' % len(obs))
-                n['chamber'] = len(obs)
+            if DOOR_BEAM[d] not in L.on and not self.look('empty_check'):
+                break
             el = time.monotonic() - t0
             if el > p.T_light_s and not nudged:
                 nudged = True
@@ -364,6 +307,7 @@ class Processor:
                 self.note('fallback', what='REL 300 s → CAP도 엶')
                 self._open('CAP')
         self.ctl.close_door(d)
+        self.note('release_time' if d == 'REL' else 'capture_time', at=time.strftime('%Y-%m-%d %H:%M:%S'))   # RTC 배터리 없음 — Pi 시계가 맞을 때만 맞음
         if fallback:
             self.ctl.close_door('CAP')
 

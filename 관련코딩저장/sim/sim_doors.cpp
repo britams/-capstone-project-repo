@@ -1,6 +1,6 @@
 ﻿// sim_doors.cpp — trap_doors.ino (UNO 2) PC 시험 (서현 CAP-AI-44)
 // 빌드:  zig c++ -std=c++17 -Wall -I. sim_doors.cpp -o sim_doors.exe   (run_all.ps1 이 해 줌)
-// 실제 .ino 를 그대로 #include 한다. 세계 = 빛 게이트 9개 + 레일 + 문 서보 기록.
+// 실제 .ino 를 그대로 #include 한다. 세계 = 빛 게이트 3개 (11/17 v0.3, 모두 2167 디지털) + 레일 + 문 서보 기록.
 #include "Arduino.h"
 #include "Servo.h"
 SIM_DEFINE_GLOBALS
@@ -10,13 +10,12 @@ SIM_DEFINE_SERVO
 #include <map>
 
 // ---- 세계 ----
-static const char* GN[9] = {"G1", "G2", "G2b", "G3", "G3b", "G4", "G5", "G5b", "G6"};   // 스케치 gates[] 순서
-static int gi(const char* n) { for (int i = 0; i < 9; i++) if (!strcmp(GN[i], n)) return i; return -1; }
-static bool w_blocked[9], w_dead[9];     // dead = 송신부/수신부 고장 (빛이 안 옴, 수신부 선 빠짐 포함)
+static const char* GN[3] = {"G2", "G3b", "G5"};   // 스케치 gates[] 순서
+static int gi(const char* n) { for (int i = 0; i < 3; i++) if (!strcmp(GN[i], n)) return i; return -1; }
+static bool w_blocked[3], w_dead[3];     // dead = 수신부 선 빠짐 (풀업 때문에 늘 HIGH). 송신 고장은 blocked로 흉내
 static bool w_rail = true;
 static std::function<void()> w_script;   // 시험이 넣는 장면 (시간·서보 각도에 따라 빔을 막음)
-static const int ANALOG_PIN_GATE[6] = {1, 2, 3, 4, 6, 7};        // A0..A5 → gates[] 번호
-static int digital_gate(int pin) { return pin == 7 ? 0 : pin == 8 ? 5 : pin == 12 ? 8 : -1; }
+static int digital_gate(int pin) { return pin == A0 ? 0 : pin == A3 ? 1 : pin == A4 ? 2 : -1; }
 static bool lit(int g) { return g_pins[4] && !w_blocked[g] && !w_dead[g]; }   // 송신(D4) 켬 + 안 막힘 + 안 고장
 
 static void world_setup() {
@@ -28,15 +27,9 @@ static void world_setup() {
                   return lit(g) ? 1 : 0; }
     return g_pins[p];
   };
-  g_aread = [](int p) -> int {
-    int k = p - 14; if (k < 0 || k > 5) return 0;
-    int g = ANALOG_PIN_GATE[k];
-    if (w_dead[g]) return 120;                           // 빛이 없을 때의 값
-    return lit(g) ? 820 : 130;                           // 빛 받음 / 못 받음 — 값은 흉내 (실물 미검증)
-  };
 }
 static void world_reset() {
-  for (int i = 0; i < 9; i++) w_blocked[i] = w_dead[i] = false;
+  for (int i = 0; i < 3; i++) w_blocked[i] = w_dead[i] = false;
   w_rail = true; w_script = nullptr;
   g_us = 0; g_lines.clear(); g_servo_events.clear(); Serial.in.clear(); Serial.cur.clear();
   for (int i = 0; i < 24; i++) { g_servo_angle[i] = -1; g_servo_attached[i] = 0; g_pins[i] = 0; }
@@ -55,7 +48,7 @@ static double min_attach_gap_s() {                // 서로 다른 서보를 붙
 }
 static int last_write(int pin) { return g_servo_angle[pin]; }
 
-// 스크립트: 문 IN(서보 D9)이 닫히는 중(각도 ≥ 100)에 빔 G2b 를 ms 동안 막음. times 번 반복
+// 스크립트: 문 IN(서보 D9)이 닫히는 중(각도 ≥ 100)에 빔 G2 를 ms 동안 막음. times 번 반복
 struct BlockWhileClosing {
   int pin, gate, minAngle, times, done = 0; unsigned long hold_ms; bool active = false; unsigned long until = 0;
   void operator()() {
@@ -66,7 +59,7 @@ struct BlockWhileClosing {
   }
 };
 
-// 서버 모드:  sim_doors.exe --serve [--speed N] [--block G2b] [--dead G2b]
+// 서버 모드:  sim_doors.exe --serve [--speed N] [--block G2] [--dead G3b]
 //   제어 줄: #BLOCK <게이트> 0|1, #DEAD <게이트> 0|1 (고장), #RAIL 0|1, #CLOSEBLOCK <문 IN|CAP|REL> <게이트> <횟수>
 //   (#CLOSEBLOCK: 그 문이 닫히는 중 각도 ≥ 100 이 될 때마다 게이트를 600 ms 막음, 횟수만큼)
 static BlockWhileClosing g_cb{9, 0, 100, 0, 0, 600};
@@ -99,12 +92,13 @@ int main(int argc, char** argv) {
   // ===== 0. 켜기 =====
   printf("[0] 켜기: READY 이름, 서보를 붙이지 않음 (V1), 자가 시험\n");
   setup();
-  CHECK(t_has(0, "EVT READY trap_doors v0.2"), "READY 이름 trap_doors");
-  CHECK(t_has(0, "EVT SELFTEST G1=OK G2=OK G2b=OK G3=OK G3b=OK G4=OK G5=OK G5b=OK G6=OK"), "켤 때 자가 시험 9쌍 OK");
+  CHECK(t_has(0, "EVT READY trap_doors v0.3"), "READY 이름 trap_doors");
+  CHECK(t_has(0, "EVT SELFTEST G2=OK G3b=OK G5=OK"), "켤 때 자가 시험 3쌍 OK");
+  CHECK(g_pinmode[A0] == INPUT_PULLUP && g_pinmode[A3] == INPUT_PULLUP && g_pinmode[A4] == INPUT_PULLUP, "게이트 핀 A0·A3·A4 내부 풀업 (허브 없음)");
   CHECK(g_servo_events.empty(), "켤 때 문 서보를 붙이지 않음 (V1)");
   t_run(100);
   size_t m = t_cmd("STATUS");
-  CHECK(t_has(m, "OK STATUS IN=UNKNOWN CAP=UNKNOWN REL=UNKNOWN RAIL=1 EMIT=1 PUMP=0 GATES=111111111"), "STATUS: 문 UNKNOWN, 게이트 9개 1");
+  CHECK(t_has(m, "OK STATUS IN=UNKNOWN CAP=UNKNOWN REL=UNKNOWN RAIL=1 EMIT=1 PUMP=0 GATES=111"), "STATUS: 문 UNKNOWN, 게이트 3개 1");
   m = t_cmd("PING"); CHECK(t_has(m, "OK PONG"), "PING");
   m = t_cmd("foo"); CHECK(t_has(m, "ERR UNKNOWN"), "모르는 명령 → ERR UNKNOWN");
 
@@ -140,7 +134,7 @@ int main(int argc, char** argv) {
 
   // ===== 3. 닫는 중 빔 끊김 → REOPEN → 다시 닫힘 =====
   printf("[3] 시험 ②: 닫는 중 빔 끊김 → REOPEN, 한 번만 끊기면 다음에 닫힘\n");
-  static BlockWhileClosing S1{9, gi("G2b"), 100, 1, 0, 600};   // 1번만 600 ms 막음
+  static BlockWhileClosing S1{9, gi("G2"), 100, 1, 0, 600};   // 1번만 600 ms 막음
   w_script = [&]() { S1(); };
   m = t_cmd("DOOR IN CLOSE", 20);
   CHECK(t_wait(m, "EVT DOOR IN REOPEN 1", 3000), "닫는 중 끊김 → EVT DOOR IN REOPEN 1");
@@ -150,12 +144,12 @@ int main(int argc, char** argv) {
   int ci = t_find(m, "DONE DOOR IN CLOSED");
   printf("      REOPEN → CLOSED 사이 %.2f s\n", (ci >= 0 && ri >= 0) ? t_time(ci) - t_time(ri) : -1.0);
   CHECK(!t_has(m, "BLOCKED"), "한 번만 끊겼으니 BLOCKED 아님");
-  w_script = nullptr; w_blocked[gi("G2b")] = false;
+  w_script = nullptr; w_blocked[gi("G2")] = false;
   t_cmd("DOOR IN OPEN"); t_wait(0, "DONE DOOR IN OPEN", 100); t_run(1000);
 
   // ===== 4. 3번 끊김 → BLOCKED, 열어 둠 =====
   printf("[4] 시험 ②: 3번 모두 끊김 → EVT DOOR IN BLOCKED, 문은 열린 채\n");
-  static BlockWhileClosing S3{9, gi("G2b"), 100, 99, 0, 600};
+  static BlockWhileClosing S3{9, gi("G2"), 100, 99, 0, 600};
   w_script = [&]() { S3(); };
   m = t_cmd("DOOR IN CLOSE", 20);
   CHECK(t_wait(m, "EVT DOOR IN BLOCKED", 12000), "3번 실패 → EVT DOOR IN BLOCKED");
@@ -164,7 +158,7 @@ int main(int argc, char** argv) {
   t_run(1500);
   CHECK(last_write(9) == DOOR_OPEN_DEG, "마지막 각도 = 열림 (열어 둔 채)");
   m = t_cmd("STATUS"); CHECK(t_has(m, "IN=BLOCKED"), "STATUS IN=BLOCKED");
-  w_script = nullptr; w_blocked[gi("G2b")] = false;
+  w_script = nullptr; w_blocked[gi("G2")] = false;
   m = t_cmd("DOOR IN OPEN"); CHECK(t_wait(m, "DONE DOOR IN OPEN", 1500), "BLOCKED 뒤 DOOR IN OPEN 으로 풀림");
   t_run(1000);
 
@@ -222,44 +216,44 @@ int main(int argc, char** argv) {
   t_run(1000);
 
   // ===== 10. 빔 고장 = SELFTEST FAIL → 닫기 거부 =====
-  printf("[10] 시험 ③: SELFTEST FAIL → 그 문의 닫기 거부 (G2b LED 고장)\n");
-  w_dead[gi("G2b")] = true;
+  printf("[10] 시험 ③: SELFTEST FAIL → 그 문의 닫기 거부 (G2 수신 선 빠짐)\n");
+  w_dead[gi("G2")] = true;
   m = t_cmd("SELFTEST", 100);
-  CHECK(t_has(m, "OK SELFTEST") && t_has(m, "G2b=FAIL(0)"), "SELFTEST: G2b=FAIL(켬−끔 차이 0)");
-  CHECK(t_has(m, "G2=OK") && t_has(m, "G3=OK"), "나머지 빔은 OK");
+  CHECK(t_has(m, "OK SELFTEST") && t_has(m, "G2=FAIL(H)"), "SELFTEST: G2=FAIL(H) (송신을 꺼도 HIGH)");
+  CHECK(t_has(m, "G3b=OK") && t_has(m, "G5=OK"), "나머지 빔은 OK");
   m = t_cmd("DOOR IN CLOSE"); CHECK(t_has(m, "ERR DOOR IN BEAMFAIL") && !t_has(m, "OK DOOR"), "DOOR IN CLOSE → ERR DOOR IN BEAMFAIL");
   CHECK(last_write(9) == DOOR_OPEN_DEG, "서보 움직이지 않음");
   m = t_cmd("DOOR CAP CLOSE"); CHECK(t_wait(m, "DONE DOOR CAP CLOSED", 3000), "다른 문(CAP)은 정상으로 닫힘");
   t_cmd("DOOR CAP OPEN"); t_wait(0, "DONE DOOR CAP OPEN", 100); t_run(1000);
-  m = t_cmd("GATES"); CHECK(t_has(m, "OK GATES G1=1 G2=1 G2b=? G3=1"), "GATES: 고장 빔은 ?");
+  m = t_cmd("GATES"); CHECK(t_has(m, "OK GATES G2=? G3b=1 G5=1"), "GATES: 고장 빔은 ?");
   m = t_cmd("DOOR IN OPEN"); CHECK(t_has(m, "OK DOOR"), "고장 빔이 있어도 열기는 됨");
   t_run(800);
   // 고장난 빔은 사건도 안 보냄
-  size_t mm = t_mark(); w_blocked[gi("G2b")] = true; t_run(100); w_blocked[gi("G2b")] = false; t_run(100);
-  CHECK(!t_has(mm, "EVT GATE G2b"), "고장 빔은 EVT GATE 를 안 보냄");
-  w_dead[gi("G2b")] = false; m = t_cmd("SELFTEST", 100);
-  CHECK(t_has(m, "G2b=OK"), "고친 뒤 SELFTEST → OK");
+  size_t mm = t_mark(); w_blocked[gi("G2")] = true; t_run(100); w_blocked[gi("G2")] = false; t_run(100);
+  CHECK(!t_has(mm, "EVT GATE G2"), "고장 빔은 EVT GATE 를 안 보냄");
+  w_dead[gi("G2")] = false; m = t_cmd("SELFTEST", 100);
+  CHECK(t_has(m, "G2=OK"), "고친 뒤 SELFTEST → OK");
   m = t_cmd("DOOR IN CLOSE"); CHECK(t_wait(m, "DONE DOOR IN CLOSED", 3000), "그 문 다시 닫힘");
   t_cmd("DOOR IN OPEN"); t_wait(0, "DONE DOOR IN OPEN", 100); t_run(1000);
 
-  // ===== 11. 통로 게이트 고장 (수신 선 빠짐) =====
-  printf("[11] 통로 게이트 G1 수신 선 빠짐 → 자가 시험 FAIL(H)\n");
-  w_dead[gi("G1")] = true;
+  // ===== 11. 송신 고장 (빛이 안 옴) =====
+  printf("[11] G5 송신 고장·어긋남 (늘 끊김) → 자가 시험 FAIL(L)\n");
+  w_blocked[gi("G5")] = true;
   m = t_cmd("SELFTEST", 100);
-  CHECK(t_has(m, "G1=FAIL(H)"), "G1=FAIL(H) (송신을 꺼도 HIGH)");
-  m = t_cmd("GATES"); CHECK(t_has(m, "G1=?"), "G1 = ?");
-  w_dead[gi("G1")] = false; t_cmd("SELFTEST", 100);
+  CHECK(t_has(m, "G5=FAIL(L)"), "G5=FAIL(L) (송신을 켜도 LOW)");
+  m = t_cmd("GATES"); CHECK(t_has(m, "G5=?"), "G5 = ?");
+  w_blocked[gi("G5")] = false; t_cmd("SELFTEST", 100);
 
   // ===== 12. EVT GATE 20 ms 거름 =====
   printf("[12] EVT GATE: 20 ms 미만 잡음은 안 보내고, 진짜 막힘은 BLOCK·CLEAR\n");
-  mm = t_mark(); w_blocked[gi("G1")] = true; t_run(10); w_blocked[gi("G1")] = false; t_run(100);
-  CHECK(!t_has(mm, "EVT GATE G1"), "10 ms 끊김 → 사건 없음");
-  mm = t_mark(); w_blocked[gi("G1")] = true; t_run(100);
-  CHECK(t_has(mm, "EVT GATE G1 BLOCK"), "100 ms 끊김 → EVT GATE G1 BLOCK (진입 신호)");
-  w_blocked[gi("G1")] = false; t_run(100);
-  CHECK(t_has(mm, "EVT GATE G1 CLEAR"), "풀리면 EVT GATE G1 CLEAR");
+  mm = t_mark(); w_blocked[gi("G2")] = true; t_run(10); w_blocked[gi("G2")] = false; t_run(100);
+  CHECK(!t_has(mm, "EVT GATE G2"), "10 ms 끊김 → 사건 없음");
+  mm = t_mark(); w_blocked[gi("G2")] = true; t_run(100);
+  CHECK(t_has(mm, "EVT GATE G2 BLOCK"), "100 ms 끊김 → EVT GATE G2 BLOCK (진입 신호)");
+  w_blocked[gi("G2")] = false; t_run(100);
+  CHECK(t_has(mm, "EVT GATE G2 CLEAR"), "풀리면 EVT GATE G2 CLEAR");
   mm = t_mark(); w_blocked[gi("G3b")] = true; t_run(100); w_blocked[gi("G3b")] = false; t_run(100);
-  CHECK(t_has(mm, "EVT GATE G3b BLOCK") && t_has(mm, "EVT GATE G3b CLEAR"), "문 빔(아날로그)도 BLOCK·CLEAR");
+  CHECK(t_has(mm, "EVT GATE G3b BLOCK") && t_has(mm, "EVT GATE G3b CLEAR"), "다른 문 빔(G3b)도 BLOCK·CLEAR");
 
   // ===== 13. EMIT 0 =====
   printf("[13] EMIT 0 (밤): 닫기 거부(EMIT_OFF), 게이트 사건 멈춤, EMIT 1 로 되돌려도 가짜 사건 없음\n");
@@ -292,17 +286,17 @@ int main(int argc, char** argv) {
   // ===== 16. PUMP (11/10 밤, CAP-AI-59 급이 펌프 D6) =====
   printf("[16] PUMP: 시간만큼 돌고 멈춤, 최대 시간, 문과 같이 안 움직임, 레일 끊기면 멈춤\n");
   t_run(1500);
-  m = t_cmd("PUMP 300", 50); CHECK(t_has(m, "OK PUMP") && g_pins[6] == 1, "PUMP 300 → OK PUMP, D6 HIGH");
-  CHECK(t_wait(m, "DONE PUMP 300", 600), "300 ms 뒤 DONE PUMP 300");
+  m = t_cmd("PUMP 150", 50); CHECK(t_has(m, "OK PUMP") && g_pins[6] == 1, "PUMP 150 → OK PUMP, D6 HIGH");
+  CHECK(t_wait(m, "DONE PUMP 150", 600), "150 ms 뒤 DONE PUMP 150");
   CHECK(g_pins[6] == 0, "끝나면 D6 LOW");
-  m = t_cmd("PUMP 2001"); CHECK(t_has(m, "ERR PUMP MAX") && g_pins[6] == 0, "PUMP 2001 → ERR PUMP MAX (안 돎)");
-  m = t_cmd("PUMP 500", 20); CHECK(g_pins[6] == 1, "PUMP 500 돎");
+  m = t_cmd("PUMP 201"); CHECK(t_has(m, "ERR PUMP MAX") && g_pins[6] == 0, "PUMP 201 → ERR PUMP MAX (안 돎, 접시 넘침 막음)");
+  m = t_cmd("PUMP 200", 20); CHECK(g_pins[6] == 1, "PUMP 200 돎");
   m = t_cmd("DOOR CAP OPEN"); CHECK(t_has(m, "ERR BUSY"), "펌프 도는 중 DOOR → ERR BUSY");
   m = t_cmd("PUMP 0"); CHECK(t_has(m, "OK PUMP 0") && g_pins[6] == 0, "PUMP 0 → 바로 멈춤");
   m = t_cmd("STATUS"); CHECK(t_has(m, "PUMP=0"), "STATUS PUMP=0");
   m = t_cmd("DOOR IN CLOSE", 20); m = t_cmd("PUMP 100"); CHECK(t_has(m, "ERR BUSY") && g_pins[6] == 0, "문 움직이는 중 PUMP → ERR BUSY");
   t_run(3000);
-  m = t_cmd("PUMP 1500", 50); CHECK(g_pins[6] == 1, "다시 돎");
+  m = t_cmd("PUMP 200", 50); CHECK(g_pins[6] == 1, "다시 돎");
   mm = t_mark(); w_rail = false; t_run(100);
   CHECK(t_has(mm, "EVT PUMP STOP") && g_pins[6] == 0, "레일 끊기면 EVT PUMP STOP, D6 LOW");
   m = t_cmd("PUMP 100"); CHECK(t_has(m, "ERR RAIL"), "레일 없으면 PUMP → ERR RAIL");

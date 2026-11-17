@@ -18,7 +18,8 @@ from dataclasses import dataclass, field
 from uno_link import LinkError, CommandError
 
 DOORS = ('IN', 'CAP', 'REL')
-DOOR_BEAMS = {'IN': ('G2', 'G2b'), 'CAP': ('G3', 'G3b'), 'REL': ('G5', 'G5b')}
+DOOR_BEAM = {'IN': 'G2', 'CAP': 'G3b', 'REL': 'G5'}   # (11/17 펌웨어 v0.3) 문마다 빔 1개
+ENTRY = 'G2'                                          # 진입 신호 = IN 문 빔 (G1 없앰)
 
 
 class TrapFault(RuntimeError):
@@ -49,7 +50,7 @@ class Config:
 
 
 def parse_selftest(line):
-    """'OK SELFTEST G1=OK G2b=FAIL(87) …' → {'G1': 'OK', 'G2b': 'FAIL(87)', …}"""
+    """'OK SELFTEST G2=OK G5=FAIL(L) …' → {'G2': 'OK', 'G5': 'FAIL(L)', …}"""
     out = {}
     for tok in line.split()[2:]:
         if '=' in tok:
@@ -202,7 +203,7 @@ class TrapController:
         return parse_selftest(self.d.command('SELFTEST', timeout=3.0))
 
     def _bad_doors(self, rep):
-        return [d for d, beams in DOOR_BEAMS.items() if any(rep.get(b) != 'OK' for b in beams)]
+        return [d for d, b in DOOR_BEAM.items() if rep.get(b) != 'OK']
 
     def open_door(self, d):
         self.d.command('DOOR %s OPEN' % d)
@@ -238,16 +239,14 @@ class TrapController:
         for lk in (self.m, self.d):
             lk.command('WATCHDOG %g' % c.watchdog_s)            # P5
         rep = self.selftest()
-        if rep.get('G1') != 'OK':                               # P1: 진입 신호가 고장이면 시작 안 함
-            self.notify('g1_fail', value=rep.get('G1'))
-            raise TrapFault('G1_SELFTEST_FAIL', rep.get('G1', '?'))
         bad = self._bad_doors(rep)
         if bad:                                                 # P2: 빔 사이에 말벌이 있었을 수 있음 → 한 번 더
             self.notify('beam_fail_retest', doors=bad, report=rep)
             self.idle(c.retest_wait_s)
             rep = self.selftest()
-            if rep.get('G1') != 'OK':
-                raise TrapFault('G1_SELFTEST_FAIL', rep.get('G1', '?'))
+            if rep.get(ENTRY) != 'OK':                          # P1 (11/17): 진입 신호 G2가 두 번 다 고장이면 시작 안 함
+                self.notify('g2_fail', value=rep.get(ENTRY))
+                raise TrapFault('G2_SELFTEST_FAIL', rep.get(ENTRY, '?'))
             for d in self._bad_doors(rep):
                 self.unusable.add(d)
                 self.notify('door_unusable', door=d, report=rep)
