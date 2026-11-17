@@ -39,7 +39,7 @@ def mv(o, v):
 
 def rehole(sh, z0, z1, holes):                      # holes: [(r, 옛 (x, y), 새 (x, y))] — 옛 구멍 메우고 새로 뚫음
     for r, a, b in holes:
-        sh = sh.fuse(cyl(r + 0.01, z1 - z0, V(a[0], a[1], z0)))
+        sh = sh.fuse(cyl(r + 1.0, z1 - z0, V(a[0], a[1], z0)))      # r + 0.01이면 옛 구멍 벽 0.01 띠가 남아 DXF에 작은 호가 생김
     for r, a, b in holes:
         sh = sh.cut(cyl(r, z1 - z0 + 2, V(b[0], b[1], z0 - 1)))
     return sh.removeSplitter()
