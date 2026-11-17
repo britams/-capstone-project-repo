@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """문판 3장 (112f·170f·176f) — 서보 날개(혼)에 나사로 붙일 긴 구멍 + 날개 가운데 나사 자리 홈 (서현 11/18 01:30 'A', CAP-AI-62)
   옛 모델: 문판이 날개와 겹쳐만 있고 구멍 0 (al_plates_step_meviy.py 구멍 표에서 찾음).
-  날개 줄 (가운데 축 → 날개 끝 구멍, 모델은 30° 아래)을 따라 축에서 5.5~16 mm 긴 구멍 폭 2.2 → 날개 구멍이 어디 있든 날개 봉지의 작은 나사 2개가 들어감
+  날개 줄 (가운데 축 → 날개 끝 구멍, 모델은 30° 아래)을 따라 축에서 5.5~11.5 mm 긴 구멍 폭 2.2 → 그 사이 날개 구멍에 날개 봉지의 작은 나사 2개
+  (1차는 16까지 — 문판 아래 안쪽 모서리 (y 17.2, z 369)를 뚫고 나가 판 모양이 깨짐 → 11.5. 끝단 검사는 판 바깥선으로)
   (MG90S 날개 구멍 간격은 모름 [추측]). 축 자리 (날개를 서보에 고정하는 나사 머리)는 판 끝에 Ø6 홈 — 문판이 그 머리에 뜨지 않게.
-  긴 구멍·홈은 통로 구멍 (Ø12)에서 4 mm 넘게 떨어짐 (닫혔을 때 말벌이 못 지나감). 220 컵받침은 이름표만 (폼 양면테이프, AI 판단).
+  긴 구멍·홈은 통로 구멍 (Ø12) 밖 (닫혔을 때 말벌이 못 지나감) — 거리는 split/_flapslot.json. 220 컵받침은 이름표만 (폼 양면테이프, AI 판단).
 한 번만 — 다시는 split/S2_마킹부_before_flapslot.FCStd에서. freecad.exe 따로 (cwd = cad) → split/_flapslot.json + print/laser/1xxf DXF"""
 import json, os, shutil, traceback, math
 HERE = os.getcwd(); OUT = os.path.join(HERE, "split")
 DESK = r"C:\Users\Seohyun_Lee\Desktop\capstone design\주문제작 파일\레이저_판"
-R0, R1, W, NR = 5.5, 16.0, 2.2, 3.0
+R0, R1, W, NR = 5.5, 11.5, 2.2, 3.0
 rep = {}
 try:
     import FreeCAD as App, Part
@@ -46,14 +47,15 @@ try:
         slot = Part.Face(wire).extrude(V(T, 0, 0))
         notch = Part.makeCylinder(NR, T, V(x0, H.y, H.z), V(1, 0, 0))
         s2 = Part.Solid(s.cut(slot).cut(notch).removeSplitter().Solids[0])
+        g = max(s2.Faces, key=lambda f: f.Area); inner = [w for w in g.Wires if not w.isSame(g.OuterWire)]
         by, bz = bore
         dmin = min((math.hypot(q.y - by, q.z - bz) for q in (p1, p2)))
         rep[key[:4]] = dict(valid=s2.isValid(), vol_before=round(s.Volume, 1), vol_after=round(s2.Volume, 1),
                             slot_from=[round(p1.y, 2), round(p1.z, 2)], slot_to=[round(p2.y, 2), round(p2.z, 2)],
                             slot_to_bore_edge=round(dmin - r - 6.0, 2), notch_to_bore_edge=round(math.hypot(H.y - by, H.z - bz) - NR - 6.0, 2),
-                            slot_to_plate_edge=round(min(q.z for q in (p1, p2)) - r - b.ZMin, 2))
+                            slot_closed=len(inner) == 1, slot_to_outline=round(min(w.distToShape(g.OuterWire)[0] for w in inner), 2) if inner else None)
         fo.Shape = s2
-        fo.Label = fo.Label.split(" (")[0] + " (문판 — 알루미늄 1.5 mm 레이저, 서보 날개 줄 따라 긴 구멍 폭 2.2 (축에서 5.5~16) + 날개 나사 자리 홈 Ø6 — 날개 봉지의 작은 나사 2 (11/18))"
+        fo.Label = fo.Label.split(" (")[0] + " (문판 — 알루미늄 1.5 mm 레이저, 서보 날개 줄 따라 긴 구멍 폭 2.2 (축에서 %g~%g) + 날개 나사 자리 홈 Ø6 — 날개 봉지의 작은 나사 2 (11/18))" % (R0, R1)
         rep[key[:4]]["dxf_entities"] = dxf_yz(s2, os.path.join(HERE, "print", "laser", fn))
         if os.path.isdir(DESK):
             shutil.copy(os.path.join(HERE, "print", "laser", fn), DESK)
