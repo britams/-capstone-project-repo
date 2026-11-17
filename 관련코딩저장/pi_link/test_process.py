@@ -246,10 +246,24 @@ def t_night_wait():
         r.close()
 
 
+def t_clock():
+    r, proc, vis, res, cm, cd = run_scene('clock (11/17) 시연 스위치 always_day: 해가 져도 처리 + 시계 안 맞으면 알림',
+                                          dict(species='velutina', mw_mm=4.0, marked=True, x=0, y=0),
+                                          is_day=lambda: False, prm=fast_prm(always_day=True))
+    try:
+        check(res != 'night' and 'DOOR REL OPEN' in cd, 'always_day: is_day가 False여도 밤 모드 안 감, 방생 (%s)' % (res,))
+        p1 = Processor(r.ctl, FakeVision(None), fast_prm(), clock_ok=lambda: False)
+        p2 = Processor(r.ctl, FakeVision(None), fast_prm(), clock_ok=lambda: True)
+        check(any(n['kind'] == 'clock_unsynced' for n in p1.log) and not any(n['kind'] == 'clock_unsynced' for n in p2.log),
+              '시계 안 맞으면 알림 clock_unsynced, 맞으면 없음')
+    finally:
+        r.close()
+
+
 if __name__ == '__main__':
     t0 = time.time()
     tests = dict(decide=t_decide, format=t_format, mark=t_mark, queen=t_queen, revisit=t_revisit, season=t_season,
-                 dusk=t_dusk, pose=t_pose_retry, planner=t_planner, nightwait=t_night_wait)
+                 dusk=t_dusk, pose=t_pose_retry, planner=t_planner, nightwait=t_night_wait, clock=t_clock)
     for n in (sys.argv[1:] or list(tests)):
         tests[n]()
     print('\n== test_process: PASS %d, FAIL %d (%.0f s)' % (PASS[0], FAIL[0], time.time() - t0))

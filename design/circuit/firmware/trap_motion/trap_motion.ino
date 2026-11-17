@@ -1,33 +1,35 @@
-﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F·마커 X·Y 스테핑, 펜 서보, 누름 스위치, 원점 스위치 3 — v0.2
+﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F mightyZAP, 마커 X·Y 스텝 (DRV8825), 펜 서보, 원점 스위치 2 — v0.3
+// v0.3 (서현 Claude, CAP-AI-62, 2026-11-17): X·Y를 28BYJ-48 코일 4선 → LM-NK1134 + DRV8825 STEP·DIR·EN (서현 11/17 13시 핀),
+//   1/4 스텝 400 걸음/mm (design/2026-11-16_XY_튜닝_체크리스트.md 3장), 스프링 146 서지 띠 거부 없앰 (11/14 mightyZAP으로 스프링 없음)
 // (11/10 밤, CAP-AI-60) 교수님 피드백 '로드셀은 과함' → HX711·로드셀 없앰. 스프링 146(k 103.6 N/m)이 4.8 mm 눌리면(0.5 N)
 //   축 147의 걸쇠가 누름 스위치(KW11, NC 접점)를 누름 → 멈춤. 힘은 스위치 자리로 정함 (저울로 한 번 맞춤)
 // 작성: 서현 (Claude, CAP-AI-40, 2026-11-08). 바탕: control/firmware/trap_controller/trap_controller.ino v0.1 (승준 SJ-19)
-// 사양: design/2026-11-06_펌웨어_변경요청_서현.md 1장, 핀 원본: design/circuit/circuit.py (검사 통과)
+// 사양: design/2026-11-06_펌웨어_변경요청_서현.md 1장, 핀 원본: design/circuit/circuit.py 11/17 판 (검사 통과)
 // ※ 승준 control/ 은 고치지 않음. 승준이 동의하면 control/firmware/ 로 옮긴다.
 //
 // (11/14, CAP-AI-62) 바닥 F = mightyZAP D7-6PT-3 리니어 서보 (PWM 900~2100 µs = 행정 0~26 mm, 스스로 위치 유지).
 //   스테핑·원점 스위치·누름 스위치 없음. F 좌표 = 쉼 자리(행정 8 mm, 바닥 윗면 z 370) 위 mm. 누름 = F 10 (행정 18, 격자 아랫면까지 5 mm).
 //   위치를 되읽지 못하므로 '도착'은 시간으로 셈 (F_UM_PER_MS — 미검증, 실측으로 맞춤). 힘 제한은 나중에 (지금은 거리로만).
-// 핀 (UNO 1, 14/18)
-//   F 바닥 승강 301 : D2 (mightyZAP PWM, 전원 7.4 V = MT3608)   D3 D4 D5 예비
-//   X 마커 X   215 : D6  D7  D8  D9
-//   Y 마커 Y   209 : D10 D11 D12 D13
+// 핀 (UNO 1 + 센서 쉴드 1, 10/18)
+//   F 바닥 승강 301 : D2 (mightyZAP PWM, 전원 7.4 V = XL4015 ②)   D3 D4 D5 예비
+//   X 마커 X   215 : D6 STEP · D7 DIR · D8 EN   → ARD200928 X (DRV8825, EN LOW = 켬)
+//   Y 마커 Y   209 : D9 STEP · D10 DIR · D11 EN → ARD200928 Y        D12 D13 예비
 //   PEN 펜 서보 205 : A0  (SG90, 전원 +5V_B)
 //   A1 A2 A3 예비 (11/14 누름 스위치·F 원점 스위치 없앰)
-//   원점 X / Y : A4 / A5  (INPUT_PULLUP, 눌리면 LOW, 100 nF)
+//   원점 X / Y : A4 / A5  (VLT-SM006, INPUT_PULLUP, 눌리면 LOW [받고 확인])
 //
 // 시리얼 115200, 한 줄 = 명령 하나 (대문자로 바꿔 읽음)
 //   응답: OK ... (접수) / ERR <이유> / DONE ... (끝) / EVT ... (사건)
 //   PING                         → OK PONG
 //   STATUS                       → OK STATUS F=<mm> X=<mm> Y=<mm> MOVING=<FXY|-> HOMED=<FXY|-> PEN=<UP|DOWN|MOVING|LIMP> SW=<FXY 눌림 1/0, F는 늘 0>
-//   HOME <F|X|Y>                 → OK HOME <축>, 끝나면 DONE HOME <축> <찾을 때까지 반걸음> | ERR HOME <축> NOSWITCH | ERR HOME <축> STUCK
+//   HOME <F|X|Y>                 → OK HOME <축>, 끝나면 DONE HOME <축> <찾을 때까지 걸음> | ERR HOME <축> NOSWITCH | ERR HOME <축> STUCK
 //                                  (F: 서보를 붙이고 F 0으로 보냄, 행정 전체 시간 뒤 DONE HOME F 0)
 //   MOVE <F|X|Y> <mm>            → OK MOVE <축> <mm>, 끝나면 DONE MOVE <축> <mm>   (HOME/ZERO 전에는 ERR NOT_HOMED, 펜 DOWN이면 X·Y와 F 올리기는 ERR PEN_DOWN)
 //   STOP                         → OK STOP (HOME 중이면 HOME도 멈춤 → ERR HOME <축> STOPPED)
 //   ZERO <X|Y> <mm>              현재 위치를 <mm>로 (스위치 고장일 때 손으로) → OK ZERO, 그 축은 HOMED (F는 ERR AXIS_F)
-//   SPEED <X|Y> <us>             반걸음 간격 (기본 1000, 최소 800, 1080~1460은 스프링 서지 띠라 거부) (F는 ERR AXIS_F)
+//   SPEED <X|Y> <us>             걸음 간격 (기본 1250 = 2 mm/s, 최소 100 = 25 mm/s → ERR SPEED_MIN) (F는 ERR AXIS_F)
 //   LIMIT <F|X|Y> <min> <max>    소프트 한계 mm (F는 0 ~ F_HARD_MAX 안에서만)
-//   HOLD <F|X|Y> <0|1>           멈춘 뒤 코일 전류 (기본 모두 0). F는 받기만 함 (서보가 스스로 유지)
+//   HOLD <F|X|Y> <0|1>           멈춘 뒤 코일 전류 = DRV8825 EN (기본 모두 0 = 끔). F는 받기만 함 (서보가 스스로 유지)
 //   PRESS <g> [<mm>]             → OK PRESS, DONE PRESS <mm> <g>  — (11/14) 바닥을 F_PRESS_MM(또는 <mm>)까지 올림.
 //                                  g는 기록용 (힘 감지 없음, 거리로만). DONE PRESS LIMIT는 이제 안 나옴
 //   PEN <UP|DOWN>                → OK PEN, 끝나면 DONE PEN UP|DOWN. DOWN은 2단계(마지막 구간 ≤ 60 °/s). X·Y가 움직이면 ERR XY_MOVING
@@ -41,14 +43,14 @@
 //   - R1 (검토 CAP-AI-42) → R1′ (CAP-AI-48): 펜이 DOWN이고 마킹실 위(Y > -20.5)면 F를 올리는 MOVE 거부 (ERR PEN_DOWN).
 //     펜이 대기 자리 캡 컵에 꽂혀 있으면 F 올리기 허용 (재방문 말벌 급이 높이로). PRESS는 언제나 펜 UP일 때만. F 내리기·HOME F는 언제나.
 //   - 스위치 쪽으로 MOVE 하다가 원점보다 0.5 mm 넘게 위에서 스위치가 눌리면 걸음을 잃은 것 → 그 축 정지, HOMED 지움, EVT SWITCH <축> <mm>
-//   - 마지막 반걸음 뒤 코일은 COIL_OFF_DWELL_MS(20 ms) 뒤에 끈다 (CAP-AI-44, 시뮬레이터가 찾음): 이전 코드는 도착한 loop에서 걸음 코일을 켜자마자 꺼서
+//   - 마지막 걸음 뒤 코일(EN)은 COIL_OFF_DWELL_MS(20 ms) 뒤에 끈다 (CAP-AI-44, 시뮬레이터가 찾음): 이전 코드는 도착한 loop에서 걸음 코일을 켜자마자 꺼서
 //     모터가 마지막 반걸음(약 2 µm)을 돌 시간이 없고, 이동마다 쌓여 위치가 틀어질 수 있음. v0.1(승준)에도 같은 구조. 실물 효과는 미검증.
 //   - 원점 위치는 LIMIT와 따로 상수(HOME_*_MM)로 둔다 (LIMIT를 바꿔도 스위치 자리는 그대로)
 
 #include <Servo.h>
 
 // ---------------- 값 (미검증은 실물에서 맞춤) ----------------
-#define STEPS_PER_MM      (4075.7728f / 8.0f)  // X·Y: 28BYJ-48 반걸음 4075.77/회전 [가능성 높음] ÷ T8 리드 8 mm
+#define STEPS_PER_MM      400.0f    // X·Y: 200 걸음/회전 × 1/4 스텝 (M0 L·M1 H·M2 L) ÷ 리드 2 mm — 튜닝표 3장에서 실측
 #define STEPS_PER_MM_F    1000.0f   // F (11/14): '걸음' = µm (위치 셈 단위일 뿐, 스테핑 아님)
 #define F_PIN             2
 #define F_US_MIN          900       // mightyZAP PWM: 900 µs = 행정 0, 2100 µs = 26 mm [확실 — 판매처 사양]
@@ -59,11 +61,10 @@
 #define F_HARD_MAX        12.0f     // LIMIT F 위 끝 최대: 바닥이 격자(F 15)에 3 mm 앞 (AI 판단, 서현 위임)
 #define F_UM_PER_MS       25        // 25 mm/s로 셈 — 판매처 무부하 36 mm/s보다 느리게 [추측 — 미검증, 실측으로 맞춤]
 #define F_SETTLE_MS       150       // 도착 뒤 더 기다림 [추측 — 미검증]
-#define HALF_US_DEFAULT   1000UL   // 반걸음 간격 µs (≈ 1.96 mm/s) — v0.1 값
-#define HALF_US_MIN       800UL
-#define SURGE_LO_US       1080UL   // 686~928 Hz 스프링 서지 띠 (역학계산 2차, b4_axis 주석) — 이 사이 SPEED 거부
-#define SURGE_HI_US       1460UL
-#define HOME_SLOW_US      2000UL   // 원점 다시 닿을 때 반걸음 간격 — 미검증 (서지 띠 밖으로 고름)
+#define HALF_US_DEFAULT   1250UL   // 걸음 간격 µs = 2 mm/s (튜닝표 6장 시작값)
+#define HALF_US_MIN       100UL    // 25 mm/s — UNO 펄스 한계 근처 [추측 — 튜닝표 6장]
+#define HOME_SLOW_US      2500UL   // 원점 다시 닿을 때 1 mm/s (튜닝표 5장)
+#define STEP_PULSE_US     2        // DRV8825 STEP HIGH 최소 1.9 µs
 #define HOME_BACKOFF_MM   1.0f     // 사양: 1 mm 물러났다 다시
 #define HOME_MARGIN_MM    4.0f     // 찾는 최대 거리 = 행정 + 이 값 — (AI 판단) 아래 HOME_MAX 주석
 #define HOME_F_MM         0.0f     // 스위치 자리 = 소프트 한계 아래 끝 (사양)
@@ -72,25 +73,23 @@
 #define SWITCH_SAMPLES    3        // 걸음마다 읽어 3번 연속 LOW면 눌림 (튐 막기) — 미검증
 #define SWITCH_GUARD_MM   0.5f     // 원점보다 이만큼 넘게 위에서 눌리면 걸음 잃음
 #define PEN_CHAMBER_Y_MM  (-20.5f)  // Y가 이보다 크면 펜이 마킹실 위 (trap_sim: Y > -20.5) — [가능성 높음] D5e 모델 값, R1′
-#define COIL_OFF_DWELL_MS 20       // 마지막 반걸음 뒤 코일을 이만큼 더 켜 둔 다음 끔 (HOLD 0일 때) — 미검증, 아래 안전 규칙
+#define COIL_OFF_DWELL_MS 20       // 마지막 걸음 뒤 코일을 이만큼 더 켜 둔 다음 끔 (HOLD 0일 때) — 미검증, 아래 안전 규칙
 #define PEN_UP_DEG        60       // v0.1 값 — 미검증 (SETDOOR PEN으로 맞춤)
 #define PEN_DOWN_DEG      0        // v0.1 값 — 미검증
 #define PEN_SLOW_DEG      12       // 여기부터 천천히 (팁 위 약 2 mm ≈ 60° × 2/10 mm) — [추측] 미검증
 #define PEN_SLOW_MS_DEG   17       // 1°당 17 ms ≈ 59 °/s (인터페이스 정의서 구동기 4: 마지막 2 mm ≤ 60 °/s)
 #define PEN_FAST_MS       150      // SG90 0.1 s/60° + 여유 (trap_sim pen_up_s)
 
-// 28BYJ-48 반걸음 순서
-const uint8_t HALF[8][4] = {{1,0,0,0},{1,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,1},{0,0,0,1},{1,0,0,1}};
+const bool DIR_INV[3] = {false, false, false};   // +명령이 −로 가면 그 축을 true (튜닝표 4장 — 선은 안 바꿈)
 
 enum HomePhase { H_NONE = 0, H_SEEK, H_BACK, H_SLOW };
 
 struct Axis {
   char name;
-  uint8_t pins[4];
+  uint8_t pins[3];     // STEP, DIR, EN
   uint8_t sw;          // 원점 스위치 핀
   float homeMm;        // 스위치 자리
-  long pos, target;    // 반걸음
-  uint8_t phase;       // 0..7
+  long pos, target;    // 걸음
   unsigned long intervalUs, lastUs;
   float minMm, maxMm;
   bool hold, moving, homed;
@@ -102,9 +101,9 @@ struct Axis {
 };
 
 Axis axes[3] = {
-  {'F', {3, 4, 5, 3},     A3, HOME_F_MM, 0, 0, 0, HALF_US_DEFAULT, 0, 0.0f,   F_PRESS_MM, false, false, false, H_NONE, 0, 0, 0, false, 0},   // F: 코일·스위치 안 씀 (핀은 자리만)
-  {'X', {6, 7, 8, 9},     A4, HOME_X_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -18.0f, 20.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
-  {'Y', {10, 11, 12, 13}, A5, HOME_Y_MM, 0, 0, 0, HALF_US_DEFAULT, 0, -40.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
+  {'F', {0, 0, 0},    A3, HOME_F_MM, 0, 0, HALF_US_DEFAULT, 0, 0.0f,   F_PRESS_MM, false, false, false, H_NONE, 0, 0, 0, false, 0},   // F: 스텝·스위치 안 씀
+  {'X', {6, 7, 8},    A4, HOME_X_MM, 0, 0, HALF_US_DEFAULT, 0, -18.0f, 20.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
+  {'Y', {9, 10, 11},  A5, HOME_Y_MM, 0, 0, HALF_US_DEFAULT, 0, -40.0f, 18.0f, false, false, false, H_NONE, 0, 0, 0, false, 0},
 };
 
 bool pressActive = false;
@@ -140,7 +139,7 @@ Axis* findAxis(const char* t) {
 
 void coils(Axis& a, bool on) {
   if (a.name == 'F') return;                 // F는 서보
-  for (int k = 0; k < 4; k++) digitalWrite(a.pins[k], on ? HALF[a.phase][k] : 0);
+  digitalWrite(a.pins[2], on ? LOW : HIGH);  // DRV8825 EN: LOW = 켬
 }
 float spm(const Axis& a) { return a.name == 'F' ? STEPS_PER_MM_F : STEPS_PER_MM; }
 float posMm(const Axis& a) { return a.pos / spm(a); }
@@ -189,7 +188,7 @@ void endAxis(Axis& a) {
   a.moving = false;
   a.home = H_NONE;
   a.swLow = 0;
-  // 마지막 반걸음 코일을 바로 끄면 모터가 그 걸음을 돌 시간이 없다 (같은 loop 안에서 켜자마자 끔) → 잠깐 두었다 끔
+  // 마지막 걸음 뒤 코일을 바로 끄면 모터가 그 걸음을 돌 시간이 없다 → 잠깐 두었다 끔
   if (!a.hold) { a.offPending = true; a.offAt = millis() + COIL_OFF_DWELL_MS; }
 }
 
@@ -274,8 +273,7 @@ void fPoll() {
 
 // ---------------- 원점 ----------------
 long homeMaxSteps(const Axis& a) { return mmToSteps(a, a.maxMm - a.homeMm + HOME_MARGIN_MM); }
-// HOME_MAX: 사양은 '반걸음 20480번'(b4의 40 mm = F 행정 기준). Y는 행정 58 mm라 +18에서 켜지면 20480으로는
-//   스위치에 못 닿아 거짓 NOSWITCH가 남 → 축마다 (행정 + 4 mm): F 20,634 · X 20,379 · Y 31,587 반걸음 (AI 판단, CAP-AI-40)
+// HOME_MAX: 축마다 (행정 + 4 mm) — X 16,800 · Y 24,800 걸음 (AI 판단, CAP-AI-40; v0.3 400 걸음/mm)
 
 void homeStart(Axis& a) {
   a.offPending = false;
@@ -289,9 +287,10 @@ void homeStart(Axis& a) {
 
 // 한 걸음 (dir = +1/-1)
 void stepOnce(Axis& a, int dir) {
-  a.phase = (a.phase + dir + 8) % 8;
-  a.pos += dir;
   coils(a, true);
+  digitalWrite(a.pins[1], ((dir > 0) != DIR_INV[a.name == 'X' ? 1 : 2]) ? HIGH : LOW);
+  digitalWrite(a.pins[0], HIGH); delayMicroseconds(STEP_PULSE_US); digitalWrite(a.pins[0], LOW);
+  a.pos += dir;
 }
 
 void homeStep(Axis& a) {
@@ -406,8 +405,7 @@ void handle(char* cmd) {
     long us = atol(tok[2]);
     if (!a) { reply("ERR AXIS"); return; }
     if (a->name == 'F') { reply("ERR AXIS_F"); return; }
-    if (us < (long)HALF_US_MIN) { reply("ERR SPEED_MIN_800"); return; }
-    if (us >= (long)SURGE_LO_US && us <= (long)SURGE_HI_US) { reply("ERR SPEED_SURGE_BAND"); return; }
+    if (us < (long)HALF_US_MIN) { reply("ERR SPEED_MIN"); return; }
     a->intervalUs = us;
     reply("OK SPEED");
     return;
@@ -521,13 +519,13 @@ void stepAxes() {
 void setup() {
   Serial.begin(115200);
   for (int i = 1; i < 3; i++) {
-    for (int k = 0; k < 4; k++) pinMode(axes[i].pins[k], OUTPUT);
+    for (int k = 0; k < 3; k++) pinMode(axes[i].pins[k], OUTPUT);
     coils(axes[i], false);                 // HOLD 기본 0 — 켤 때 코일 끔
     pinMode(axes[i].sw, INPUT_PULLUP);
   }
   // 펜 서보·바닥 서보는 붙이지 않음 (LIMP — mightyZAP은 펄스가 없으면 그 자리) — Pi가 PEN UP·HOME F를 보냄
   lastCmdMs = millis();
-  reply("EVT READY trap_motion v0.2");
+  reply("EVT READY trap_motion v0.3");
 }
 
 void loop() {

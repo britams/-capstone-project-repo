@@ -1,6 +1,6 @@
 ﻿// sim_motion.cpp — trap_motion.ino (UNO 1) PC 시험 (서현 CAP-AI-44)
 // 빌드:  zig c++ -std=c++17 -Wall -I. sim_motion.cpp -o sim_motion.exe   (run_all.ps1 이 해 줌)
-// 세계 = 스테핑 X·Y(코일 패턴을 읽어 기계 위치를 셈) + 원점 스위치 2 + 펜 서보 기록 + 바닥 F = mightyZAP PWM(D2, 11/14 CAP-AI-62).
+// 세계 = X·Y DRV8825 (STEP 올라갈 때 DIR 보고 기계 위치를 셈, 11/17 v0.3) + 원점 스위치 2 + 펜 서보 기록 + 바닥 F = mightyZAP PWM(D2, 11/14 CAP-AI-62).
 #include "Arduino.h"
 #include "Servo.h"
 SIM_DEFINE_GLOBALS
@@ -11,40 +11,33 @@ SIM_DEFINE_SERVO
 
 // ---- 세계: 축 ----
 struct AxisW {
-  int pin0;            // 코일 핀 시작 (4개 연속)
+  int stepPin, dirPin, enPin;   // DRV8825 (F는 -1)
   int swPin;           // 원점 스위치 핀
-  long mech = 0;       // 기계 위치 (반걸음). 스위치가 눌리는 자리 = swPos
+  long mech = 0;       // 기계 위치 (걸음). 스위치가 눌리는 자리 = swPos
   long swPos = 0;
   bool swConnected = true;
-  int lastIdx = 0;     // 스케치 phase 시작값 0
   long minMech = 0, maxMech = 0;
-  long lost = 0;       // 순서 어긋난 걸음
+  long lost = 0;       // EN 꺼진 채 낸 STEP (드라이버가 버림 = 걸음 잃음)
   long steps = 0;      // 움직인 걸음 총수
 };
-static AxisW W[3] = {{2, A3}, {6, A4}, {10, A5}};
-static const int HALF_T[8][4] = {{1,0,0,0},{1,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,1},{0,0,0,1},{1,0,0,1}};
+static AxisW W[3] = {{-1, -1, -1, A3}, {6, 7, 8, A4}, {9, 10, 11, A5}};
 static std::function<void()> w_script;
 
-static void sample_axes() {
-  for (int a = 1; a < 3; a++) {               // F(0)는 서보
+static void on_write(int p, int v) {          // STEP 올라갈 때 한 걸음 (EN LOW일 때만)
+  if (!v) return;
+  for (int a = 1; a < 3; a++) {
     AxisW& w = W[a];
-    int v[4]; bool all0 = true;
-    for (int k = 0; k < 4; k++) { v[k] = g_pins[w.pin0 + k]; if (v[k]) all0 = false; }
-    if (all0) continue;                                    // 코일 꺼짐 (위치 유지)
-    int idx = -1;
-    const int (*T)[4] = HALF_T;
-    for (int i = 0; i < 8; i++) if (v[0]==T[i][0] && v[1]==T[i][1] && v[2]==T[i][2] && v[3]==T[i][3]) { idx = i; break; }
-    if (idx < 0 || idx == w.lastIdx) continue;
-    int d = (idx - w.lastIdx + 8) % 8;
-    if (d == 1) w.mech++; else if (d == 7) w.mech--; else w.lost++;
+    if (p != w.stepPin) continue;
+    if (g_pins[w.enPin]) { w.lost++; continue; }
+    w.mech += g_pins[w.dirPin] ? 1 : -1;
     w.steps++;
-    w.lastIdx = idx;
     w.minMech = std::min(w.minMech, w.mech); w.maxMech = std::max(w.maxMech, w.mech);
   }
 }
 
 static void world_setup() {
-  g_world = []() { sample_axes(); if (w_script) w_script(); };
+  g_dwrite_hook = on_write;
+  g_world = []() { if (w_script) w_script(); };
   g_dread = [](int p) -> int {
     for (int a = 0; a < 3; a++) if (p == W[a].swPin) return (W[a].swConnected && W[a].mech <= W[a].swPos) ? 0 : 1;   // 눌리면 LOW (풀업)
     return g_pins[p];
@@ -52,18 +45,17 @@ static void world_setup() {
 }
 
 static void axes_reset() {
-  for (int a = 0; a < 3; a++) { W[a].mech = 0; W[a].swPos = 0; W[a].swConnected = true; W[a].lastIdx = 0; W[a].minMech = W[a].maxMech = 0; W[a].lost = 0; W[a].steps = 0; }
+  for (int a = 0; a < 3; a++) { W[a].mech = 0; W[a].swPos = 0; W[a].swConnected = true; W[a].minMech = W[a].maxMech = 0; W[a].lost = 0; W[a].steps = 0; }
 }
 static double SPM(int a) { return a == 0 ? STEPS_PER_MM_F : STEPS_PER_MM; }
 // 바닥 F: D2 에 나간 펄스 µs → F mm (쉼 = 행정 8 mm 가 0)
 static double f_cmd_mm() { return (g_servo_angle[F_PIN] - F_US_MIN) * F_STROKE_MM / (F_US_MAX - F_US_MIN) - F_REST_STROKE_MM; }
 static double mm_of(int a) { return (W[a].mech - W[a].swPos) / SPM(a); }   // 스위치 자리 기준 mm
 static int last_write(int pin) { return g_servo_angle[pin]; }
-// 마지막 걸음 뒤 대기 시간(COIL_OFF_DWELL_MS)이 지난 다음 코일을 본다
+// 마지막 걸음 뒤 대기 시간(COIL_OFF_DWELL_MS)이 지난 다음 EN을 본다 (HIGH = 코일 꺼짐)
 static bool coils_off() {
   t_run(COIL_OFF_DWELL_MS + 20);
-  for (int p = 2; p <= 13; p++) if (g_pins[p]) return false;
-  return true;
+  return g_pins[W[1].enPin] == 1 && g_pins[W[2].enPin] == 1;
 }
 static bool wait_home(const char* ax, unsigned long max_ms, size_t m) {
   char ok[32], bad[32]; snprintf(ok, sizeof ok, "DONE HOME %s", ax); snprintf(bad, sizeof bad, "ERR HOME %s", ax);
@@ -98,10 +90,11 @@ int main(int argc, char** argv) {
   world_setup();
   axes_reset();
 
-  printf("[0] 켜기: READY 이름, 코일 꺼짐(HOLD F 0), 펜 서보 안 붙임, 스위치 풀업\n");
+  printf("[0] 켜기: READY 이름, 코일 꺼짐(EN HIGH), 펜 서보 안 붙임, 스위치 풀업\n");
   setup();
-  CHECK(t_has(0, "EVT READY trap_motion v0.2"), "READY 이름 trap_motion");
-  CHECK(coils_off(), "켠 직후 코일 전부 꺼짐 (F도)");
+  CHECK(t_has(0, "EVT READY trap_motion v0.3"), "READY 이름 trap_motion");
+  CHECK(coils_off(), "켠 직후 X·Y EN HIGH (코일 꺼짐)");
+  CHECK(g_pinmode[6] == OUTPUT && g_pinmode[7] == OUTPUT && g_pinmode[8] == OUTPUT && g_pinmode[9] == OUTPUT && g_pinmode[10] == OUTPUT && g_pinmode[11] == OUTPUT, "D6~D11 출력 (X·Y STEP·DIR·EN)");
   CHECK(g_servo_events.empty(), "켤 때 펜·바닥 서보를 붙이지 않음 (LIMP)");
   CHECK(g_pinmode[A4] == INPUT_PULLUP && g_pinmode[A5] == INPUT_PULLUP, "원점 스위치 A4·A5 INPUT_PULLUP");
   size_t m = t_cmd("STATUS"); CHECK(t_has(m, "HOMED=- ") && t_has(m, "PEN=LIMP"), "STATUS: 아무 축도 HOMED 아님, PEN=LIMP");
@@ -129,14 +122,14 @@ int main(int argc, char** argv) {
   m = t_cmd("MOVE X 0"); CHECK(t_has(m, "ERR NOT_HOMED"), "실패한 축은 MOVE 거부");
   W[1].swConnected = true; W[1].mech = 3000;
 
-  printf("[3] HOME Y: 행정 58 mm 끝(+18)에서 켜도 스위치에 닿음 (V6 — 20480 반걸음이면 거짓 NOSWITCH)\n");
+  printf("[3] HOME Y: 행정 58 mm 끝(+18)에서 켜도 스위치에 닿음 (V6 — 옛 20480 한도면 거짓 NOSWITCH)\n");
   W[2].mech = (long)(58 * STEPS_PER_MM);            // 스위치 위 58 mm
   m = t_cmd("HOME Y", 10);
   CHECK(wait_home("Y", 120000, m), "끝남");
   CHECK(t_has(m, "DONE HOME Y"), "DONE HOME Y");
   printf("      %s", t_dump(m).c_str());
   CHECK(std::labs(W[2].mech - W[2].swPos) <= 3, "스위치 자리에서 멈춤");
-  CHECK((long)(58 * STEPS_PER_MM) > 20480, "58 mm = 29,5xx 반걸음 > 20480 (옛 한도로는 못 닿았음)");
+  CHECK((long)(58 * STEPS_PER_MM) > 20480, "58 mm = 23,200 걸음 > 20480 (옛 한도로는 못 닿았음)");
 
   printf("[4] HOME X 정상 + 이미 눌려 있으면 먼저 물러남\n");
   W[1].mech = 0;                                     // 스위치 위에 앉아 있음 (눌림)
@@ -215,14 +208,15 @@ int main(int argc, char** argv) {
   CHECK(coils_off(), "이동 뒤 코일 꺼짐 (HOLD 0 기본)");
   m = t_cmd("HOLD X 1"); CHECK(t_has(m, "OK HOLD") && !coils_off(), "HOLD X 1 → 코일 켜짐");
   m = t_cmd("HOLD X 0"); CHECK(coils_off(), "HOLD X 0 → 코일 꺼짐");
-  m = t_cmd("HOLD F 0"); CHECK(t_has(m, "OK HOLD") && coils_off(), "HOLD F 0 → OK (Pi 켜기 순서 그대로), D2~D5 코일 출력 없음");
+  m = t_cmd("HOLD F 0"); CHECK(t_has(m, "OK HOLD") && coils_off(), "HOLD F 0 → OK (Pi 켜기 순서 그대로), X·Y EN 그대로 꺼짐");
 
   printf("[11] SPEED / LIMIT / ZERO\n");
-  m = t_cmd("SPEED X 700"); CHECK(t_has(m, "ERR SPEED_MIN_800"), "700 µs → 거부 (최소 800)");
-  m = t_cmd("SPEED X 1200"); CHECK(t_has(m, "ERR SPEED_SURGE_BAND"), "1200 µs → 거부 (스프링 서지 띠 1080~1460)");
-  m = t_cmd("SPEED X 1000"); CHECK(t_has(m, "OK SPEED"), "1000 µs → OK");
-  m = t_cmd("SPEED X 1600"); CHECK(t_has(m, "OK SPEED"), "1600 µs → OK (띠 밖)");
-  t_cmd("SPEED X 1000");
+  m = t_cmd("SPEED X 50"); CHECK(t_has(m, "ERR SPEED_MIN"), "50 µs → 거부 (최소 100 = 25 mm/s)");
+  m = t_cmd("SPEED X 1200"); CHECK(t_has(m, "OK SPEED"), "1200 µs → OK (11/17 스프링 146 없어 서지 띠 거부 없앰)");
+  m = t_cmd("SPEED X 250"); CHECK(t_has(m, "OK SPEED"), "250 µs (10 mm/s) → OK");
+  { long x0 = W[1].mech; m = t_cmd("MOVE X 2", 10); t_wait(m, "DONE MOVE X", 5000);
+    CHECK(t_near((W[1].mech - x0) / STEPS_PER_MM, 1.0, 0.01), "10 mm/s로 X 1 → 2 mm (기계 1 mm 이동)"); }
+  t_cmd("SPEED X 1250");
   m = t_cmd("MOVE F 99"); CHECK(t_has(m, "ERR LIMIT"), "행정 밖 → ERR LIMIT");
   m = t_cmd("LIMIT F 5 1"); CHECK(t_has(m, "ERR RANGE"), "LIMIT 거꾸로 → ERR RANGE");
   m = t_cmd("LIMIT F 0 14"); CHECK(t_has(m, "ERR RANGE"), "LIMIT F 위 끝 > 12 (격자 15 앞 3 mm) → ERR RANGE");
@@ -273,8 +267,8 @@ int main(int argc, char** argv) {
   pen_up(); CHECK(last_write(A0) == 70, "보정한 위 각도 70");
   m = t_cmd("DOOR IN OPEN"); CHECK(t_has(m, "ERR UNKNOWN"), "DOOR 명령 없음 → ERR UNKNOWN");
 
-  printf("\n순서 어긋난 걸음: F %ld, X %ld, Y %ld (0 이어야 함)\n", W[0].lost, W[1].lost, W[2].lost);
-  CHECK(W[0].lost == 0 && W[1].lost == 0 && W[2].lost == 0, "코일 순서 어긋남 없음 (걸음 건너뜀 없음)");
+  printf("\nEN 꺼진 채 낸 STEP: X %ld, Y %ld (0 이어야 함)\n", W[1].lost, W[2].lost);
+  CHECK(W[1].lost == 0 && W[2].lost == 0, "STEP은 늘 EN 켠 뒤 (걸음 버림 없음)");
   return t_summary("sim_motion");
 }
 

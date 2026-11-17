@@ -30,6 +30,7 @@ trap_sim.py (PiFSM wait_entry·process·press_mark·feed·release·isolate·leav
       wait_entry가 0으로 돌아와 다음 step이 night_mode로 간다
 """
 import os
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -52,6 +53,7 @@ QUEEN_MONTHS = (3, 4, 5, 9, 10, 11)
 
 @dataclass
 class Params:                   # 값 근거는 trap_sim PRM — [추측]은 시험으로 고칠 것
+    always_day: bool = False    # (11/17 서현) 시연용 스위치 — 시계·해 뜸·짐을 안 보고 늘 처리
     press_g: float = 51.0       # F_p 0.5 N [확실 — D6]
     F_retract: float = 10.0
     feed_s: float = 10.0        # (11/15 서현 "잉크 거의 7초면 마름") 7 s + 여유 3 s [AI 판단] — 말벌 몸(털) 위에서 다시 잼
@@ -100,6 +102,16 @@ def decide(obs_list, month, prm=Params()):
     return 'mark', 'worker'
 
 
+def clock_synced():
+    """(11/17 서현) Pi 시계가 인터넷 시간으로 맞춰졌는가. RTC 배터리가 없어 전원을 끄면 시계가 틀어지고,
+    그러면 낮·밤 판단·여왕벌 철·방생 시각이 다 틀림 → 켤 때 폰 핫스팟으로 맞춤. timedatectl을 물을 수 없으면 False."""
+    try:
+        r = subprocess.run(['timedatectl', 'show', '-p', 'NTPSynchronized', '--value'], capture_output=True, text=True, timeout=3)
+        return r.stdout.strip() == 'yes'
+    except Exception:
+        return False
+
+
 class Ledger:
     """(11/17) 빛 게이트 사건 기록 — 문마다 빔 1개라 방향을 모름. on = 지금 끊긴 빔, crossed[g] = 끊겼다 이어진 수."""
 
@@ -123,7 +135,7 @@ class Processor:
     month() → 오늘 달, is_day() → 처리해도 되는 시간인가, battery_low() → INA226 부족인가"""
 
     def __init__(self, ctl, vision, prm=None, month=lambda: time.localtime().tm_mon if time.localtime().tm_year >= 2026 else 4,   # (11/14) RTC 배터리 없음: 시계가 안 맞으면(2026년 전) 4월 = 여왕벌 철로 봄 → 격리 쪽 (안전)
-                 is_day=lambda: True, battery_low=lambda: False):
+                 is_day=lambda: True, battery_low=lambda: False, clock_ok=clock_synced):
         self.ctl, self.vision = ctl, vision
         self.prm = prm or Params()
         self.month, self.is_day, self.battery_low = month, is_day, battery_low
@@ -132,6 +144,11 @@ class Processor:
         self.on_door_opened = None            # 시험용 갈고리 (문 이름)
         self.night = False
         self.log = []                         # (무엇, 내용) — 결과 기록
+        self.clock_ok = clock_ok()
+        if not self.clock_ok:                 # (11/17) 알림: 폰 핫스팟에 이어 인터넷 시간을 받을 것
+            self.note('clock_unsynced')
+        if self.prm.always_day:
+            self.is_day = lambda: True
 
     def note(self, kind, **kw):
         self.log.append(dict(kind=kind, **kw))
@@ -307,7 +324,7 @@ class Processor:
                 self.note('fallback', what='REL 300 s → CAP도 엶')
                 self._open('CAP')
         self.ctl.close_door(d)
-        self.note('release_time' if d == 'REL' else 'capture_time', at=time.strftime('%Y-%m-%d %H:%M:%S'))   # RTC 배터리 없음 — Pi 시계가 맞을 때만 맞음
+        self.note('release_time' if d == 'REL' else 'capture_time', at=time.strftime('%Y-%m-%d %H:%M:%S'), clock_ok=self.clock_ok)   # clock_ok False면 시각을 믿지 말 것
         if fallback:
             self.ctl.close_door('CAP')
 
