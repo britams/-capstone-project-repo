@@ -41,8 +41,9 @@ def dxf(path):
     return len(centers())
 
 
-def nest_dxf(path, W=100.0, H=90.0):
-    """(11/15) 아크릴몰은 50 mm 밑은 못 자름 → 판 한 장(100 × 90, 2T 투명) 안에 격자판 2 + 바닥 원판 2를 같이 그림 (바깥 틀도 자름)"""
+def nest_dxf(path, W=100.0, H=90.0, parts=None):
+    """(11/15) 아크릴몰은 50 mm 밑은 못 자름 → 판 한 장 안에 여러 개를 같이 그림 (바깥 틀도 자름).
+    (11/17 서현) 바닥 원판은 흰색 불투명으로 → 격자판 2 (투명 100 × 50)와 바닥 원판 2 (백색 90 × 50)를 따로. parts = [(그리는 함수, dx, dy)]"""
     import re
     def body(fn, dx, dy):
         tmp = path + ".tmp"
@@ -62,9 +63,8 @@ def nest_dxf(path, W=100.0, H=90.0):
             out.append("\n".join(ln))
         return out
     e = []
-    for dx in (-25.0, 25.0):
-        e += body(dxf, dx, 21.0)
-        e += body(disc_dxf, dx, -24.0)
+    for fn, dx, dy in parts:
+        e += body(fn, dx, dy)
     w, h = W / 2, H / 2
     for a_, b_ in (((-w, -h), (w, -h)), ((w, -h), (w, h)), ((w, h), (-w, h)), ((-w, h), (-w, -h))):
         e.append("0\nLINE\n8\nCUT\n10\n%.4f\n20\n%.4f\n11\n%.4f\n21\n%.4f" % (a_[0], a_[1], b_[0], b_[1]))
@@ -77,4 +77,6 @@ if __name__ == "__main__":
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "print", "lift", "300p_아크릴격자판.dxf")
     print(out, "구멍", dxf(out))
     disc_dxf(os.path.join(os.path.dirname(out), "300f_아크릴바닥원판.dxf"))
-    print("묶음", nest_dxf(os.path.join(os.path.dirname(out), "300pf_아크릴_묶음_100x90_2T.dxf")))
+    d = os.path.dirname(out)
+    print("격자판 묶음", nest_dxf(os.path.join(d, "300p2_격자판_묶음_100x50_투명2T.dxf"), 100.0, 50.0, [(dxf, -25.0, 0.0), (dxf, 25.0, 0.0)]))
+    print("바닥 원판 묶음", nest_dxf(os.path.join(d, "300f2_바닥원판_묶음_90x50_백색2T.dxf"), 90.0, 50.0, [(disc_dxf, -22.0, 0.0), (disc_dxf, 22.0, 0.0)]))
