@@ -1,7 +1,7 @@
 ﻿넷,끝,AWG (0 = 산 케이블·플러그),비고
-+12V,SW_E.NC2,20,비상 정지 뒤 = 구동 12 V (와고 12 V)
-+12V,WG12.1,20,비상 정지 뒤 = 구동 12 V (와고 12 V)
-+12V,DRV.VMOT,20,ARD200928 전원 단자 — DRV8825 2개. 드라이버 옆 VMOT–GND 100 µF (보드에 없으면) [받고 확인]
++12V,SW_E.NC2,22,비상 정지 뒤 = 구동 12 V (와고 12 V)
++12V,WG12.1,22,비상 정지 뒤 = 구동 12 V (와고 12 V)
++12V,DRV.VMOT,22,ARD200928 전원 단자 — DRV8825 2개. 드라이버 옆 VMOT–GND 100 µF (보드에 없으면) [받고 확인]
 +12V,MOS.V+,22,SZH-AT021 전원 단자 (Q1 LED · Q3 펌프)
 +12V,MOS.Q1+,24,LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]
 +12V,L1.+,24,LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]
@@ -9,10 +9,10 @@
 +12V,MOS.Q3+,22,Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)
 +12V,PUMP.+,22,Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)
 +12V,D_P.K,22,Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)
-+12V,XL1.IN+,20,강압 ① 입력
++12V,XL1.IN+,22,강압 ① 입력
 +12V,XL2.IN+,22,강압 ② 입력
-+5V_B,XL1.OUT+,20,XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V
-+5V_B,WG5.1,20,XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V
++5V_B,XL1.OUT+,22,XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V
++5V_B,WG5.1,22,XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V
 +5V_B,SH1.VCC,22,"센서 쉴드 1·2 나사 단자 V — SEL 점퍼 뺌 (쉴드 V 핀 = +5V_B, UNO 5V와 안 이음)"
 +5V_B,SH2.VCC,22,"센서 쉴드 1·2 나사 단자 V — SEL 점퍼 뺌 (쉴드 V 핀 = +5V_B, UNO 5V와 안 이음)"
 +5V_B,SG90.V+,,빨강 → 쉴드 V (= +5V_B)
@@ -36,8 +36,8 @@ EMIT_LO,TX_G2.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
 EMIT_LO,TX_G3b.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
 EMIT_LO,TX_G5.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
 EMIT_LO,MOS.Q4-,24,
-GND,JDC.-,20,와고 GND 2개 (다리 1개로 이음) — 한 점
-GND,WGG.1,20,와고 GND 2개 (다리 1개로 이음) — 한 점
+GND,JDC.-,22,와고 GND 2개 (다리 1개로 이음) — 한 점
+GND,WGG.1,22,와고 GND 2개 (다리 1개로 이음) — 한 점
 GND,DRV.GND,22,
 GND,MOS.GND,22,
 GND,XL1.IN-,22,
@@ -126,8 +126,8 @@ USB_U1,PI.USB1,,"USB A-B, UNO 1 전원 + 115200"
 USB_U1,U1.USB,,"USB A-B, UNO 1 전원 + 115200"
 USB_U2,PI.USB2,,"USB A-B, UNO 2"
 USB_U2,U2.USB,,"USB A-B, UNO 2"
-V12_F,F1.2,20,퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)
-V12_F,SW_E.NC1,20,퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)
+V12_F,F1.2,22,퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)
+V12_F,SW_E.NC1,22,퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)
 V12_RAW,ADP.PLUG+,,어댑터 5.5 × 2.1 플러그를 잭 변환 SZH-LC002에 꽂음
 V12_RAW,JDC.+,,어댑터 5.5 × 2.1 플러그를 잭 변환 SZH-LC002에 꽂음
-V12_RAW,F1.1,20,잭 변환 + 나사 → FHAM1 (블레이드 퓨즈 5 A)
+V12_RAW,F1.1,22,잭 변환 + 나사 → FHAM1 (블레이드 퓨즈 5 A)

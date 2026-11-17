@@ -47,19 +47,19 @@ def con(net, *nodes, awg=26, note=""):
 
 # ---- 전원 (12 V 하나) ----
 con("V12_RAW", "ADP.PLUG+", "JDC.+", awg=0, note="어댑터 5.5 × 2.1 플러그를 잭 변환 SZH-LC002에 꽂음")
-con("V12_RAW", "F1.1", awg=20, note="잭 변환 + 나사 → FHAM1 (블레이드 퓨즈 5 A)")
-con("V12_F", "F1.2", "SW_E.NC1", awg=20, note="퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)")
-con("+12V", "SW_E.NC2", "WG12.1", awg=20, note="비상 정지 뒤 = 구동 12 V (와고 12 V)")
-con("+12V", "DRV.VMOT", awg=20, note="ARD200928 전원 단자 — DRV8825 2개. 드라이버 옆 VMOT–GND 100 µF (보드에 없으면) [받고 확인]")
+con("V12_RAW", "F1.1", awg=22, note="잭 변환 + 나사 → FHAM1 (블레이드 퓨즈 5 A)")
+con("V12_F", "F1.2", "SW_E.NC1", awg=22, note="퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)")
+con("+12V", "SW_E.NC2", "WG12.1", awg=22, note="비상 정지 뒤 = 구동 12 V (와고 12 V)")
+con("+12V", "DRV.VMOT", awg=22, note="ARD200928 전원 단자 — DRV8825 2개. 드라이버 옆 VMOT–GND 100 µF (보드에 없으면) [받고 확인]")
 con("+12V", "MOS.V+", awg=22, note="SZH-AT021 전원 단자 (Q1 LED · Q3 펌프)")
 con("+12V", "MOS.Q1+", "L1.+", "L2.+", awg=24, note="LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]")
 con("+12V", "MOS.Q3+", "PUMP.+", "D_P.K", awg=22, note="Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)")
-con("+12V", "XL1.IN+", awg=20, note="강압 ① 입력")
+con("+12V", "XL1.IN+", awg=22, note="강압 ① 입력")
 con("+12V", "XL2.IN+", awg=22, note="강압 ② 입력")
-con("+5V_B", "XL1.OUT+", "WG5.1", awg=20, note="XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V")
+con("+5V_B", "XL1.OUT+", "WG5.1", awg=22, note="XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V")
 con("+5V_B", "SH1.VCC", "SH2.VCC", awg=22, note="센서 쉴드 1·2 나사 단자 V — SEL 점퍼 뺌 (쉴드 V 핀 = +5V_B, UNO 5V와 안 이음)")
 con("+7V4", "XL2.OUT+", "MZ.V", awg=22, note="XL4015 ② 7.4 V → mightyZAP 빨강 (IR-EW06)")
-con("GND", "JDC.-", "WGG.1", awg=20, note="와고 GND 2개 (다리 1개로 이음) — 한 점")
+con("GND", "JDC.-", "WGG.1", awg=22, note="와고 GND 2개 (다리 1개로 이음) — 한 점")
 con("GND", "DRV.GND", "MOS.GND", "XL1.IN-", "XL1.OUT-", "XL2.IN-", "XL2.OUT-", awg=22)
 con("GND", "SH1.GND", "SH2.GND", awg=22, note="쉴드 나사 단자 G = UNO GND (USB GND와 같은 점)")
 con("GND", "MZ.GND", awg=22, note="mightyZAP 검정")
@@ -133,9 +133,9 @@ BOM = [
     ("LED 3구 모듈 백색 12 V", 2, "위 조명 (카메라 양옆)", "엑셀 (4 = 2 + 예비 2)"),
     ("연동 펌프 Kamoer NKP 12 V", 1, "급이 (Q3)", "엑셀"),
     ("저항 10 kΩ", 1, "레일 감지 R_RS (쉴드 2 D2 줄)", "보유 키트"),
-    ("쇼트키 다이오드 1N5819", 1, "펌프 역기전력 D_P — MOSFET Q3 나사 단자에 같이 조임", "**엑셀에 없음**"),
-    ("전해 커패시터 100 µF 25 V", 1, "DRV 보드 VMOT–GND (보드에 있으면 안 삼)", "**엑셀에 없음 — 보드 받고**"),
-    ("연선 20·22 AWG (빨강·검정)", 1, "12 V·5 V·GND 와고 줄 — 길이는 harness.py", "**엑셀에 없음**"),
+    ("쇼트키 다이오드 1N5819", 1, "펌프 역기전력 D_P — MOSFET Q3 나사 단자에 같이 조임", "엑셀 (11/17 15시, 최소 40)"),
+    ("전해 커패시터 100 µF 25 V", 1, "DRV 보드 VMOT–GND (보드에 있으면 안 씀)", "엑셀 (11/17 15시, 최소 40)"),
+    ("전선 UL1007 AWG22 빨강·검정 10 m", 2, "12 V·5 V·7.4 V·GND 와고·단자 줄 — 길이는 harness.py (11/17 15시 20 → 22 AWG: 20은 30 m 롤뿐)", "엑셀"),
     ("듀폰 점퍼선 (암-암·암-수)", 1, "쉴드 ↔ DRV 보드·스위치·MOSFET TRIG, 짧은 선 연장", "보유"),
 ]
 
