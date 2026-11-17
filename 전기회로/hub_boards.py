@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 """hub_boards.py — 서보 허브·게이트 허브 만능기판 배치 + 넷 검사 + SVG 그림 (서현 CAP-AI-50, 2026-11-08)
+※ 11/17 기록용: 허브 기판 2장을 센서 쉴드로 바꿔 없앰 — circuit.py 11/17 판과 넷이 달라 이제 안 돌림.
 
 판 크기·자리는 CAD(cad/D5g_real_parts.py HUBS)를 그대로: 서보 허브 60 × 40, 게이트 허브 70 × 30, 네 귀 M2 기둥(가장자리 3 mm).
 연결은 design/circuit/circuit.py 의 NETS 가 원본 — 이 스크립트는 판 위 연결이 그 넷과 '똑같은지' 검사한다.

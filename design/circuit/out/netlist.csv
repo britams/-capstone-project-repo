@@ -1,214 +1,133 @@
-﻿넷,끝,AWG,비고
-+5V_B,SW_E.2,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,TB.+5V,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,C1.+,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,C2.1,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,R_RS.1,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,D_RP.K,20,비상 정지 NC 뒤 = 구동 레일
-+5V_B,ULN_X.VCC,22,
-+5V_B,ULN_Y.VCC,22,
-+5V_B,DRV_F.VM,22,모듈 정격 9 V — 5 V면 힘이 줄지만 바닥 0.5 N에는 넉넉 [가능성 높음]
-+5V_B,SG90.V+,26,빨강 — 레일에서 (UNO 5V 아님)
-+5V_B,MG_IN.V+,26,
-+5V_B,MG_CAP.V+,26,
-+5V_B,MG_REL.V+,26,
-+5V_B,R_G1.2,28,
-+5V_B,RX_G1.V+,28,
-+5V_B,TX_G1.V+,28,
-+5V_B,R_G4.2,28,
-+5V_B,RX_G4.V+,28,
-+5V_B,TX_G4.V+,28,
-+5V_B,R_G6.2,28,
-+5V_B,RX_G6.V+,28,
-+5V_B,TX_G6.V+,28,
-+5V_B,RLED_G2.1,28,
-+5V_B,PT_G2.C,28,포토TR 컬렉터
-+5V_B,RLED_G2b.1,28,
-+5V_B,PT_G2b.C,28,포토TR 컬렉터
-+5V_B,RLED_G3.1,28,
-+5V_B,PT_G3.C,28,포토TR 컬렉터
-+5V_B,RLED_G3b.1,28,
-+5V_B,PT_G3b.C,28,포토TR 컬렉터
-+5V_B,RLED_G5.1,28,
-+5V_B,PT_G5.C,28,포토TR 컬렉터
-+5V_B,RLED_G5b.1,28,
-+5V_B,PT_G5b.C,28,포토TR 컬렉터
-+5V_B,L_TOP.V+,24,
-+5V_B,L_BOT.V+,24,
-+5V_B,PUMP.V+,22,
-+5V_B,D_P.K,22,
-CSI,PI.CAM0,,"Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로"
-CSI,CAM.CSI,,"Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로"
-EMIT_LO,TX_G1.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G4.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,TX_G6.GND,28,송신 검정 → MOSFET Q4 (낮은 쪽 스위치)
-EMIT_LO,LED_G2.K,28,LED 짧은 다리(K) → Q4
-EMIT_LO,LED_G2b.K,28,LED 짧은 다리(K) → Q4
-EMIT_LO,LED_G3.K,28,LED 짧은 다리(K) → Q4
-EMIT_LO,LED_G3b.K,28,LED 짧은 다리(K) → Q4
-EMIT_LO,LED_G5.K,28,LED 짧은 다리(K) → Q4
-EMIT_LO,LED_G5b.K,28,LED 짧은 다리(K) → Q4
-EMIT_LO,Q4.OUT-,24,
-GND,J_B.-,20,GND 한 점 (와고 GND 묶음)
-GND,TB.GND,20,GND 한 점 (와고 GND 묶음)
-GND,C1.-,20,GND 한 점 (와고 GND 묶음)
-GND,C2.2,20,GND 한 점 (와고 GND 묶음)
-GND,D_RP.A,20,GND 한 점 (와고 GND 묶음)
-GND,U1.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
-GND,U2.GND,22,UNO GND를 단자대로 (USB GND와 같은 점)
-GND,ULN_X.GND,22,
-GND,ULN_Y.GND,22,
-GND,DRV_F.GND,22,
-GND,SG90.GND,26,갈색
-GND,PSW.NC_B,28,
-GND,SW_HF.COM,28,
-GND,C_HF.2,28,
-GND,SW_HX.COM,28,
-GND,C_HX.2,28,
-GND,SW_HY.COM,28,
-GND,C_HY.2,28,
-GND,MG_IN.GND,26,
-GND,MG_CAP.GND,26,
-GND,MG_REL.GND,26,
-GND,RX_G1.GND,28,
-GND,RX_G4.GND,28,
-GND,RX_G6.GND,28,
-GND,RL_G2.2,28,
-GND,RL_G2b.2,28,
-GND,RL_G3.2,28,
-GND,RL_G3b.2,28,
-GND,RL_G5.2,28,
-GND,RL_G5b.2,28,
-GND,Q4.GND,24,
-GND,Q1.GND,24,
-GND,Q2.GND,24,
-GND,Q3.GND,22,
-I2C_SCL,PI.GPIO3,28,
-I2C_SCL,J_I2C.SCL,28,
-I2C_SDA,PI.GPIO2,28,INA226 (배터리 상자)
-I2C_SDA,J_I2C.SDA,28,INA226 (배터리 상자)
-LEDA_G2,RLED_G2.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G2,LED_G2.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G2b,RLED_G2b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G2b,LED_G2b.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G3,RLED_G3.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G3,LED_G3.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G3b,RLED_G3b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G3b,LED_G3b.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G5,RLED_G5.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G5,LED_G5.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G5b,RLED_G5b.2,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-LEDA_G5b,LED_G5b.A,28,220 Ω → 약 17 mA ((5 − 1.2) / 220)
-L_BOT_LO,L_BOT.V-,24,
-L_BOT_LO,Q2.OUT-,24,
-L_TOP_LO,L_TOP.V-,24,
-L_TOP_LO,Q1.OUT-,24,
-M_F_A,DRV_F.AOUT1,28,빨강 A · 흰 A− (Keshuo 치수도)
-M_F_A,M_F.A,28,빨강 A · 흰 A− (Keshuo 치수도)
-M_F_An,DRV_F.AOUT2,28,
-M_F_An,M_F.An,28,
-M_F_B,DRV_F.BOUT1,28,갈색 B · 검정 B−
-M_F_B,M_F.B,28,갈색 B · 검정 B−
-M_F_Bn,DRV_F.BOUT2,28,
-M_F_Bn,M_F.Bn,28,
-M_X,ULN_X.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
-M_X,M_X.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
-M_Y,ULN_Y.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
-M_Y,M_Y.XH5,26,28BYJ-48 기본 선 (JST-XH 5핀)
-PI_3V3,PI.3V3,28,
-PI_3V3,J_I2C.VCC,28,
-PI_GND,PI.GND,28,
-PI_GND,J_I2C.GND,28,
-PUMP_LO,PUMP.V-,22,
-PUMP_LO,D_P.A,22,
-PUMP_LO,Q3.OUT-,22,
-U1_F_IN1,U1.D2,26,
-U1_F_IN1,DRV_F.AIN1,26,
-U1_F_IN2,U1.D3,26,
-U1_F_IN2,DRV_F.AIN2,26,
-U1_F_IN3,U1.D4,26,
-U1_F_IN3,DRV_F.BIN1,26,
-U1_F_IN4,U1.D5,26,
-U1_F_IN4,DRV_F.BIN2,26,
-U1_HOME_F,U1.A3,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_F,SW_HF.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_F,C_HF.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_X,U1.A4,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_X,SW_HX.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_X,C_HX.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_Y,U1.A5,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_Y,SW_HY.NO,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_HOME_Y,C_HY.1,28,"내부 풀업, 눌리면 LOW, 100 nF"
-U1_PEN,U1.A0,26,주황
-U1_PEN,SG90.SIG,26,주황
-U1_PSW,U1.A1,28,"캐리지와 같이 움직임 — 실리콘 선, 100 nF 함께"
-U1_PSW,PSW.NC_A,28,"캐리지와 같이 움직임 — 실리콘 선, 100 nF 함께"
-U1_X_IN1,U1.D6,26,
-U1_X_IN1,ULN_X.IN1,26,
-U1_X_IN2,U1.D7,26,
-U1_X_IN2,ULN_X.IN2,26,
-U1_X_IN3,U1.D8,26,
-U1_X_IN3,ULN_X.IN3,26,
-U1_X_IN4,U1.D9,26,
-U1_X_IN4,ULN_X.IN4,26,
-U1_Y_IN1,U1.D10,26,
-U1_Y_IN1,ULN_Y.IN1,26,
-U1_Y_IN2,U1.D11,26,
-U1_Y_IN2,ULN_Y.IN2,26,
-U1_Y_IN3,U1.D12,26,
-U1_Y_IN3,ULN_Y.IN3,26,
-U1_Y_IN4,U1.D13,26,
-U1_Y_IN4,ULN_Y.IN4,26,
-U2_DOOR_CAP,U2.D10,26,주황
-U2_DOOR_CAP,MG_CAP.SIG,26,주황
-U2_DOOR_IN,U2.D9,26,주황
-U2_DOOR_IN,MG_IN.SIG,26,주황
-U2_DOOR_REL,U2.D11,26,주황
-U2_DOOR_REL,MG_REL.SIG,26,주황
+﻿넷,끝,AWG (0 = 산 케이블·플러그),비고
++12V,SW_E.NC2,20,비상 정지 뒤 = 구동 12 V (와고 12 V)
++12V,WG12.1,20,비상 정지 뒤 = 구동 12 V (와고 12 V)
++12V,DRV.VMOT,20,ARD200928 전원 단자 — DRV8825 2개. 드라이버 옆 VMOT–GND 100 µF (보드에 없으면) [받고 확인]
++12V,MOS.V+,22,SZH-AT021 전원 단자 (Q1 LED · Q3 펌프)
++12V,MOS.Q1+,24,LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]
++12V,L1.+,24,LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]
++12V,L2.+,24,LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]
++12V,MOS.Q3+,22,Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)
++12V,PUMP.+,22,Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)
++12V,D_P.K,22,Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)
++12V,XL1.IN+,20,강압 ① 입력
++12V,XL2.IN+,22,강압 ② 입력
++5V_B,XL1.OUT+,20,XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V
++5V_B,WG5.1,20,XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V
++5V_B,SH1.VCC,22,"센서 쉴드 1·2 나사 단자 V — SEL 점퍼 뺌 (쉴드 V 핀 = +5V_B, UNO 5V와 안 이음)"
++5V_B,SH2.VCC,22,"센서 쉴드 1·2 나사 단자 V — SEL 점퍼 뺌 (쉴드 V 핀 = +5V_B, UNO 5V와 안 이음)"
++5V_B,SG90.V+,,빨강 → 쉴드 V (= +5V_B)
++5V_B,SWX.V,26,
++5V_B,SWY.V,26,
++5V_B,R_RS.1,,쉴드 2 D2 줄 V 핀에 저항 다리를 듀폰 암에 꽂음
++5V_B,MG_IN.V+,,
++5V_B,MG_CAP.V+,,
++5V_B,MG_REL.V+,,
++5V_B,RX_G2.V+,28,수신 빨강 → 같은 줄 V
++5V_B,TX_G2.V+,28,"송신 빨강 → 쉴드 A1 줄 V (빈 줄, 신호 핀은 안 씀)"
++5V_B,RX_G3b.V+,28,수신 빨강 → 같은 줄 V
++5V_B,TX_G3b.V+,28,"송신 빨강 → 쉴드 A2 줄 V (빈 줄, 신호 핀은 안 씀)"
++5V_B,RX_G5.V+,28,수신 빨강 → 같은 줄 V
++5V_B,TX_G5.V+,28,"송신 빨강 → 쉴드 A5 줄 V (빈 줄, 신호 핀은 안 씀)"
++7V4,XL2.OUT+,22,XL4015 ② 7.4 V → mightyZAP 빨강 (IR-EW06)
++7V4,MZ.V,22,XL4015 ② 7.4 V → mightyZAP 빨강 (IR-EW06)
+CSI,PI.CAM0,,FPC 22P(0.5) ↔ 15P(1.0) 300 mm — 카메라 모듈 3
+CSI,CAM.CSI,,FPC 22P(0.5) ↔ 15P(1.0) 300 mm — 카메라 모듈 3
+EMIT_LO,TX_G2.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
+EMIT_LO,TX_G3b.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
+EMIT_LO,TX_G5.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
+EMIT_LO,MOS.Q4-,24,
+GND,JDC.-,20,와고 GND 2개 (다리 1개로 이음) — 한 점
+GND,WGG.1,20,와고 GND 2개 (다리 1개로 이음) — 한 점
+GND,DRV.GND,22,
+GND,MOS.GND,22,
+GND,XL1.IN-,22,
+GND,XL1.OUT-,22,
+GND,XL2.IN-,22,
+GND,XL2.OUT-,22,
+GND,SH1.GND,22,쉴드 나사 단자 G = UNO GND (USB GND와 같은 점)
+GND,SH2.GND,22,쉴드 나사 단자 G = UNO GND (USB GND와 같은 점)
+GND,MZ.GND,22,mightyZAP 검정
+GND,DRV.LGND,26,보드 신호 GND ↔ 쉴드 1 G 핀 (같은 점)
+GND,SG90.GND,,갈색 → 쉴드 G
+GND,SWX.G,26,
+GND,SWY.G,26,
+GND,MG_IN.GND,,
+GND,MG_CAP.GND,,
+GND,MG_REL.GND,,
+GND,RX_G2.GND,28,수신 검정 → 같은 줄 G
+GND,RX_G3b.GND,28,수신 검정 → 같은 줄 G
+GND,RX_G5.GND,28,수신 검정 → 같은 줄 G
+GND,MOS.SGND,26,MOSFET 신호 쪽 GND ↔ 쉴드 2 G 핀 (TRIG 기준)
+L_TOP_LO,MOS.Q1-,24,LED 모듈 검정
+L_TOP_LO,L1.-,24,LED 모듈 검정
+L_TOP_LO,L2.-,24,LED 모듈 검정
+M_X_A1,DRV.X_A1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_A1,M_X.A1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_A2,DRV.X_A2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_A2,M_X.A2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_B1,DRV.X_B1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_B1,M_X.B1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_B2,DRV.X_B2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_X_B2,M_X.B2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_A1,DRV.Y_A1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_A1,M_Y.A1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_A2,DRV.Y_A2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_A2,M_Y.A2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_B1,DRV.Y_B1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_B1,M_Y.B1,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_B2,DRV.Y_B2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+M_Y_B2,M_Y.B2,,LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자
+PUMP_LO,MOS.Q3-,22,펌프 − · 1N5819 A
+PUMP_LO,PUMP.-,22,펌프 − · 1N5819 A
+PUMP_LO,D_P.A,22,펌프 − · 1N5819 A
+U1_HOME_X,U1.A4,26,"VLT-SM006 3핀 → 쉴드 A4 줄 (암-암 점퍼), INPUT_PULLUP, 눌리면 LOW [받고 확인]"
+U1_HOME_X,SWX.S,26,"VLT-SM006 3핀 → 쉴드 A4 줄 (암-암 점퍼), INPUT_PULLUP, 눌리면 LOW [받고 확인]"
+U1_HOME_Y,U1.A5,26,"VLT-SM006 3핀 → 쉴드 A5 줄 (암-암 점퍼), INPUT_PULLUP, 눌리면 LOW [받고 확인]"
+U1_HOME_Y,SWY.S,26,"VLT-SM006 3핀 → 쉴드 A5 줄 (암-암 점퍼), INPUT_PULLUP, 눌리면 LOW [받고 확인]"
+U1_MZ,U1.D2,26,"쉴드 D2 줄 S — mightyZAP 흰(신호)만, V·G는 XL4015 ② (PWM 900~2100 µs)"
+U1_MZ,MZ.PWM,26,"쉴드 D2 줄 S — mightyZAP 흰(신호)만, V·G는 XL4015 ② (PWM 900~2100 µs)"
+U1_PEN,U1.A0,,쉴드 A0 줄에 서보 3핀 그대로 (주황 S)
+U1_PEN,SG90.SIG,,쉴드 A0 줄에 서보 3핀 그대로 (주황 S)
+U1_X_DIR,U1.D7,26,
+U1_X_DIR,DRV.X_DIR,26,
+U1_X_EN,U1.D8,26,"LOW = 켬 (DRV8825), HIGH = 코일 끔 (HOLD 0)"
+U1_X_EN,DRV.X_EN,26,"LOW = 켬 (DRV8825), HIGH = 코일 끔 (HOLD 0)"
+U1_X_STEP,U1.D6,26,쉴드 S 핀 → 보드 헤더 (암-암 점퍼)
+U1_X_STEP,DRV.X_STEP,26,쉴드 S 핀 → 보드 헤더 (암-암 점퍼)
+U1_Y_DIR,U1.D10,26,
+U1_Y_DIR,DRV.Y_DIR,26,
+U1_Y_EN,U1.D11,26,"LOW = 켬 (DRV8825), HIGH = 코일 끔 (HOLD 0)"
+U1_Y_EN,DRV.Y_EN,26,"LOW = 켬 (DRV8825), HIGH = 코일 끔 (HOLD 0)"
+U1_Y_STEP,U1.D9,26,쉴드 S 핀 → 보드 헤더 (암-암 점퍼)
+U1_Y_STEP,DRV.Y_STEP,26,쉴드 S 핀 → 보드 헤더 (암-암 점퍼)
+U2_DOOR_CAP,U2.D10,,쉴드 D10 줄에 서보 3핀 그대로
+U2_DOOR_CAP,MG_CAP.SIG,,쉴드 D10 줄에 서보 3핀 그대로
+U2_DOOR_IN,U2.D9,,쉴드 D9 줄에 서보 3핀 그대로
+U2_DOOR_IN,MG_IN.SIG,,쉴드 D9 줄에 서보 3핀 그대로
+U2_DOOR_REL,U2.D11,,쉴드 D11 줄에 서보 3핀 그대로
+U2_DOOR_REL,MG_REL.SIG,,쉴드 D11 줄에 서보 3핀 그대로
 U2_EMIT,U2.D4,26,HIGH = 송신 켬 (자가 시험 때 끔)
-U2_EMIT,Q4.TRIG,26,HIGH = 송신 켬 (자가 시험 때 끔)
-U2_G1,U2.D7,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G1,RX_G1.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G1,R_G1.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G2,U2.A0,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G2,PT_G2.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G2,RL_G2.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G2b,U2.A1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G2b,PT_G2b.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G2b,RL_G2b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G3,U2.A2,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G3,PT_G3.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G3,RL_G3.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G3b,U2.A3,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G3b,PT_G3b.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G3b,RL_G3b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G4,U2.D8,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G4,RX_G4.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G4,R_G4.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G5,U2.A4,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G5,PT_G5.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G5,RL_G5.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G5b,U2.A5,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G5b,PT_G5b.E,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G5b,RL_G5b.1,28,"아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2"
-U2_G6,U2.D12,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G6,RX_G6.OUT,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_G6,R_G6.1,28,"흰 선, 10 kΩ 풀업, 끊기면 LOW"
-U2_PUMP,U2.D6,26,"HIGH = 펌프 돎 (펌웨어 PUMP <ms>, 최대 2 s)"
-U2_PUMP,Q3.TRIG,26,"HIGH = 펌프 돎 (펌웨어 PUMP <ms>, 최대 2 s)"
-U2_Q1,U2.D3,26,PWM 되는 핀
-U2_Q1,Q1.TRIG,26,PWM 되는 핀
-U2_Q2,U2.D5,26,PWM 되는 핀
-U2_Q2,Q2.TRIG,26,PWM 되는 핀
-U2_RAIL,U2.D2,28,"10 kΩ 직렬, 레일 있으면 HIGH (INT0)"
-U2_RAIL,R_RS.2,28,"10 kΩ 직렬, 레일 있으면 HIGH (INT0)"
-USB_PI,PSU_A.USBC,,27 W USB-C (또는 배터리 상자 5.1 V 5 A)
-USB_PI,PI.USBC,,27 W USB-C (또는 배터리 상자 5.1 V 5 A)
-USB_U1,PI.USB1,,"USB A-B 0.5 m, UNO 1 전원 + 115200"
-USB_U1,U1.USB,,"USB A-B 0.5 m, UNO 1 전원 + 115200"
-USB_U2,PI.USB2,,USB A-B 0.5 m
-USB_U2,U2.USB,,USB A-B 0.5 m
-VF_B,F1.2,20,퓨즈 T2.5A 지연형
-VF_B,SW_E.1,20,퓨즈 T2.5A 지연형
-VIN_B,J_B.+,20,배럴 5.5×2.1 (+ 가운데)
-VIN_B,F1.1,20,배럴 5.5×2.1 (+ 가운데)
+U2_EMIT,MOS.Q4_TRIG,26,HIGH = 송신 켬 (자가 시험 때 끔)
+U2_G2,U2.A0,28,"2167 수신 흰 → 쉴드 A0 S, 내부 풀업, 끊기면 LOW"
+U2_G2,RX_G2.OUT,28,"2167 수신 흰 → 쉴드 A0 S, 내부 풀업, 끊기면 LOW"
+U2_G3b,U2.A3,28,"2167 수신 흰 → 쉴드 A3 S, 내부 풀업, 끊기면 LOW"
+U2_G3b,RX_G3b.OUT,28,"2167 수신 흰 → 쉴드 A3 S, 내부 풀업, 끊기면 LOW"
+U2_G5,U2.A4,28,"2167 수신 흰 → 쉴드 A4 S, 내부 풀업, 끊기면 LOW"
+U2_G5,RX_G5.OUT,28,"2167 수신 흰 → 쉴드 A4 S, 내부 풀업, 끊기면 LOW"
+U2_LIGHT,U2.D3,26,PWM — LED 모듈 2개 같이
+U2_LIGHT,MOS.Q1_TRIG,26,PWM — LED 모듈 2개 같이
+U2_PUMP,U2.D6,26,"HIGH = 펌프 돎 (trap_doors PUMP <ms>, 최대 200)"
+U2_PUMP,MOS.Q3_TRIG,26,"HIGH = 펌프 돎 (trap_doors PUMP <ms>, 최대 200)"
+U2_RAIL,U2.D2,,10 kΩ 직렬 → D2 S: 비상 정지가 눌리면 +5V_B가 꺼져 LOW (INPUT)
+U2_RAIL,R_RS.2,,10 kΩ 직렬 → D2 S: 비상 정지가 눌리면 +5V_B가 꺼져 LOW (INPUT)
+USB_PI,PSU_A.USBC,,27 W 공식 USB-C (보유)
+USB_PI,PI.USBC,,27 W 공식 USB-C (보유)
+USB_U1,PI.USB1,,"USB A-B, UNO 1 전원 + 115200"
+USB_U1,U1.USB,,"USB A-B, UNO 1 전원 + 115200"
+USB_U2,PI.USB2,,"USB A-B, UNO 2"
+USB_U2,U2.USB,,"USB A-B, UNO 2"
+V12_F,F1.2,20,퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)
+V12_F,SW_E.NC1,20,퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)
+V12_RAW,ADP.PLUG+,,어댑터 5.5 × 2.1 플러그를 잭 변환 SZH-LC002에 꽂음
+V12_RAW,JDC.+,,어댑터 5.5 × 2.1 플러그를 잭 변환 SZH-LC002에 꽂음
+V12_RAW,F1.1,20,잭 변환 + 나사 → FHAM1 (블레이드 퓨즈 5 A)

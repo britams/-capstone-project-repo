@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
-"""회로 설계 (서현, 2026-11-06, CAP-AI-23) — D5e + 11/02 결정 (빛 게이트 9쌍, 콘센트 + 배터리 상자)
+"""회로 설계 — 11/17 판 (서현, Claude CAP-AI-62). 처음: 2026-11-06 CAP-AI-23 (빛 게이트 9쌍, 5 V 어댑터, 만능기판 허브)
+
+11/17에 바뀐 것 (design/2026-11-17_전원_12V하나_센서쉴드_서현.md, 인터페이스 정의서 11/14~17 이력)
+  - 전원: 12 V 5 A 어댑터 하나 → 잭 변환 SZH-LC002 → 퓨즈 FHAM1 5 A → 비상 정지 NC → 와고 12 V
+          → DRV8825 보드 · MOSFET(LED·펌프) · XL4015 ① 5.0 V (+5V_B → 센서 쉴드 2장) · XL4015 ② 7.4 V (mightyZAP)
+  - 허브 만능기판 2장 → 센서 쉴드 V5 2장 (3핀 G·V·S, 납땜 없음). 쉴드 SEL 점퍼 뺌 = 쉴드 V는 나사 단자(+5V_B), UNO 5V와 안 이음
+  - XY: 28BYJ-48 + ULN2003 → LM-NK1134 + DRV8825 (듀얼 보드 ARD200928). UNO 1 X STEP D6·DIR D7·EN D8, Y D9·D10·D11 (서현 11/17 13시)
+  - 바닥: mightyZAP D7-6PT-3 PWM (UNO 1 D2) — 원점·누름 스위치 없음
+  - 빛 게이트 3쌍 (Adafruit 2167): G2 A0 · G3b A3 · G5 A4, 내부 풀업 (trap_doors v0.3)
+  - 조명: 12 V LED 3구 모듈 2개를 MOSFET Q1 하나로 (Q2·D5 비움), 펌프 Kamoer NKP 12 V (Q3)
 
 한 곳(NETS)에 모든 연결을 적고, 여기서
-  1) 넷리스트 표 out/netlist.csv (+ 선 굵기·색·커넥터)
-  2) 구매 목록 out/bom.csv
-  3) 검사: UNO 핀 중복 없음, 모든 넷에 끝이 2개 이상, 정해진 핀만 씀, 전원 넷에 GND 공통
-  4) 회로도 3장 design/img/circuit/ (전원, UNO 1, UNO 2) — schemdraw
-를 만든다.  실행: python design/circuit/circuit.py
-근거: design/2026-11-02_전기계통_제어순서_서현.md (핀 4장, 전원 3·8장), Adafruit 2167 열린 컬렉터(끊기면 LOW)
+  1) 넷리스트 표 out/netlist.csv   2) 전기 부품 목록 out/bom.csv
+  3) 검사: UNO 핀 중복 없음, 넷마다 끝 2개 이상, 정해진 핀만 씀, 부하마다 맞는 전압 줄, 모든 구동 줄이 비상 정지 뒤, UNO 5V ↔ +5V_B 안 이음
+  4) 회로도 3장 design/img/circuit/회로도_{1,2,3}_*_1117.png (11/06 그림은 그 회차 문서용으로 둠) — schemdraw
+실행: python design/circuit/circuit.py
+[가능성 높음 — 받으면 확인] 쉴드 SEL 점퍼 뜻, MOSFET 모듈 OUT+ = V+, DRV 보드 헤더 이름 (EN·STEP·DIR·GND), VLT-SM006 출력 (눌리면 LOW)
 """
 import csv
 import re
@@ -21,17 +29,13 @@ IMG = os.path.join(HERE, "..", "img", "circuit")
 os.makedirs(OUT, exist_ok=True)
 os.makedirs(IMG, exist_ok=True)
 
-GATES = ["G1", "G2", "G2b", "G3", "G3b", "G4", "G5", "G5b", "G6"]
-# 11/06 21시 (CAP-AI-34): 문 빔 6쌍은 3 mm 적외선 LED + 3 mm 포토트랜지스터 낱개 (승준 SJ-47: 문 하우징 틈 5 mm에 Adafruit 2167 몸통이 안 들어감)
-#   → 아날로그로 읽어야 해서(문턱값을 자가 시험 때 정함) A0~A5로, 통로 게이트 3쌍(Adafruit 2167, 디지털)은 D7·D8·D12로 옮김
-DOOR_GATES = ["G2", "G2b", "G3", "G3b", "G5", "G5b"]
-PASS_GATES = ["G1", "G4", "G6"]
-GATE_PIN = {"G2": "A0", "G2b": "A1", "G3": "A2", "G3b": "A3", "G5": "A4", "G5b": "A5", "G1": "D7", "G4": "D8", "G6": "D12"}
-GATE_WHERE = {"G1": "입구 세로관", "G2": "입구 문 바깥", "G2b": "입구 문 안", "G3": "격리 문 안", "G3b": "격리 문 바깥",
-              "G4": "격리 통로 끝", "G5": "방생 문 안", "G5b": "방생 문 바깥", "G6": "방생 출구"}
+GATES = ["G2", "G3b", "G5"]
+GATE_PIN = {"G2": "A0", "G3b": "A3", "G5": "A4"}
+GATE_WHERE = {"G2": "입구 문 앞 (트랩 쪽) — 진입 신호 겸함", "G3b": "격리 문 뒤 (관 쪽)", "G5": "방생 문 뒤 (급이실 쪽)"}
+EMIT_V_PIN = {"G2": "A1", "G3b": "A2", "G5": "A5"}   # 송신 빨강을 꽂는 쉴드 2 빈 줄의 V 핀 (+5V_B) — 신호 핀은 비움 (AI 판단)
 
 # ---------------------------------------------------------------------------
-# 넷: 이름 → [(부품.핀, 선 굵기 AWG, 비고)]
+# 넷: 이름 → [(부품.핀, 선 굵기 AWG, 비고)]   AWG 0 = 사서 쓰는 케이블·플러그
 # ---------------------------------------------------------------------------
 NETS = defaultdict(list)
 
@@ -41,132 +45,106 @@ def con(net, *nodes, awg=26, note=""):
         NETS[net].append((n, awg, note))
 
 
-# 전원 ② → 구동 레일
-con("VIN_B", "J_B.+", "F1.1", awg=20, note="배럴 5.5×2.1 (+ 가운데)")
-con("VF_B", "F1.2", "SW_E.1", awg=20, note="퓨즈 T2.5A 지연형")
-con("+5V_B", "SW_E.2", "TB.+5V", "C1.+", "C2.1", "R_RS.1", "D_RP.K", awg=20, note="비상 정지 NC 뒤 = 구동 레일")
-con("GND", "J_B.-", "TB.GND", "C1.-", "C2.2", "D_RP.A", awg=20, note="GND 한 점 (와고 GND 묶음)")
-# 역극성 보호 (11/08 CAP-AI-50, AI 판단): 레일에 거꾸로 걸친 쇼트키 다이오드 — 평소 전압 손실 0, 극성이 반대인 어댑터를 꽂으면
-#   다이오드로 큰 전류 → 퓨즈 3 A가 끊김, 부품에는 약 −0.5 V만 걸림. 직렬 다이오드는 0.3~0.5 V 떨어져 MG90S(4.8 V~)가 사양 밑이라 안 씀
-# 전원 ① → Pi
-con("USB_PI", "PSU_A.USBC", "PI.USBC", awg=0, note="27 W USB-C (또는 배터리 상자 5.1 V 5 A)")
-con("USB_U1", "PI.USB1", "U1.USB", awg=0, note="USB A-B 0.5 m, UNO 1 전원 + 115200")
-con("USB_U2", "PI.USB2", "U2.USB", awg=0, note="USB A-B 0.5 m")
-con("CSI", "PI.CAM0", "CAM.CSI", awg=0, note="Pi 5 22핀(0.5 mm) ↔ 카메라 15핀(1 mm) FFC 500 mm — 필요 약 320 mm > 동봉 300 mm (CAP-AI-38, 구매 E18). 카메라 전원도 이 리본으로")
-con("GND", "U1.GND", "U2.GND", awg=22, note="UNO GND를 단자대로 (USB GND와 같은 점)")
-# 배터리 상자 I2C (배터리일 때만)
-con("I2C_SDA", "PI.GPIO2", "J_I2C.SDA", awg=28, note="INA226 (배터리 상자)")
-con("I2C_SCL", "PI.GPIO3", "J_I2C.SCL", awg=28)
-con("PI_3V3", "PI.3V3", "J_I2C.VCC", awg=28)
-con("PI_GND", "PI.GND", "J_I2C.GND", awg=28)
+# ---- 전원 (12 V 하나) ----
+con("V12_RAW", "ADP.PLUG+", "JDC.+", awg=0, note="어댑터 5.5 × 2.1 플러그를 잭 변환 SZH-LC002에 꽂음")
+con("V12_RAW", "F1.1", awg=20, note="잭 변환 + 나사 → FHAM1 (블레이드 퓨즈 5 A)")
+con("V12_F", "F1.2", "SW_E.NC1", awg=20, note="퓨즈 → 비상 정지 KGE-J4R1R NC (나사 단자)")
+con("+12V", "SW_E.NC2", "WG12.1", awg=20, note="비상 정지 뒤 = 구동 12 V (와고 12 V)")
+con("+12V", "DRV.VMOT", awg=20, note="ARD200928 전원 단자 — DRV8825 2개. 드라이버 옆 VMOT–GND 100 µF (보드에 없으면) [받고 확인]")
+con("+12V", "MOS.V+", awg=22, note="SZH-AT021 전원 단자 (Q1 LED · Q3 펌프)")
+con("+12V", "MOS.Q1+", "L1.+", "L2.+", awg=24, note="LED 3구 모듈 12 V 2개 빨강 — 보드 OUT+ = V+ [가능성 높음]")
+con("+12V", "MOS.Q3+", "PUMP.+", "D_P.K", awg=22, note="Kamoer NKP + · 1N5819 줄(K)을 같은 나사 단자에 (납땜 없음)")
+con("+12V", "XL1.IN+", awg=20, note="강압 ① 입력")
+con("+12V", "XL2.IN+", awg=22, note="강압 ② 입력")
+con("+5V_B", "XL1.OUT+", "WG5.1", awg=20, note="XL4015 ① 5.0 V (표시 보며 손잡이 나사로) → 와고 5 V")
+con("+5V_B", "SH1.VCC", "SH2.VCC", awg=22, note="센서 쉴드 1·2 나사 단자 V — SEL 점퍼 뺌 (쉴드 V 핀 = +5V_B, UNO 5V와 안 이음)")
+con("+7V4", "XL2.OUT+", "MZ.V", awg=22, note="XL4015 ② 7.4 V → mightyZAP 빨강 (IR-EW06)")
+con("GND", "JDC.-", "WGG.1", awg=20, note="와고 GND 2개 (다리 1개로 이음) — 한 점")
+con("GND", "DRV.GND", "MOS.GND", "XL1.IN-", "XL1.OUT-", "XL2.IN-", "XL2.OUT-", awg=22)
+con("GND", "SH1.GND", "SH2.GND", awg=22, note="쉴드 나사 단자 G = UNO GND (USB GND와 같은 점)")
+con("GND", "MZ.GND", awg=22, note="mightyZAP 검정")
+# ---- Pi 레일 (따로) ----
+con("USB_PI", "PSU_A.USBC", "PI.USBC", awg=0, note="27 W 공식 USB-C (보유)")
+con("USB_U1", "PI.USB1", "U1.USB", awg=0, note="USB A-B, UNO 1 전원 + 115200")
+con("USB_U2", "PI.USB2", "U2.USB", awg=0, note="USB A-B, UNO 2")
+con("CSI", "PI.CAM0", "CAM.CSI", awg=0, note="FPC 22P(0.5) ↔ 15P(1.0) 300 mm — 카메라 모듈 3")
 
-# UNO 1 — 스테핑 3개
-for ax, pins in (("X", "D6 D7 D8 D9"), ("Y", "D10 D11 D12 D13")):
-    for k, p in enumerate(pins.split(), 1):
-        con("U1_%s_IN%d" % (ax, k), "U1.%s" % p, "ULN_%s.IN%d" % (ax, k), awg=26)
-    con("+5V_B", "ULN_%s.VCC" % ax, awg=22)
-    con("GND", "ULN_%s.GND" % ax, awg=22)
-    con("M_%s" % ax, "ULN_%s.XH5" % ax, "M_%s.XH5" % ax, awg=26, note="28BYJ-48 기본 선 (JST-XH 5핀)")
-# (11/12 서현 '리프팅 살 수 있으면 사') 바닥 F = 산 리니어 모듈 15BY25 (양극 2상 4선) → DRV8833, 같은 핀 D2~D5
-for k, (p, i) in enumerate((("D2", "AIN1"), ("D3", "AIN2"), ("D4", "BIN1"), ("D5", "BIN2")), 1):
-    con("U1_F_IN%d" % k, "U1.%s" % p, "DRV_F.%s" % i, awg=26)
-con("+5V_B", "DRV_F.VM", awg=22, note="모듈 정격 9 V — 5 V면 힘이 줄지만 바닥 0.5 N에는 넉넉 [가능성 높음]")
-con("GND", "DRV_F.GND", awg=22)
-con("M_F_A", "DRV_F.AOUT1", "M_F.A", awg=28, note="빨강 A · 흰 A− (Keshuo 치수도)")
-con("M_F_An", "DRV_F.AOUT2", "M_F.An", awg=28)
-con("M_F_B", "DRV_F.BOUT1", "M_F.B", awg=28, note="갈색 B · 검정 B−")
-con("M_F_Bn", "DRV_F.BOUT2", "M_F.Bn", awg=28)
-# 펜 서보
-con("U1_PEN", "U1.A0", "SG90.SIG", awg=26, note="주황")
-con("+5V_B", "SG90.V+", awg=26, note="빨강 — 레일에서 (UNO 5V 아님)")
-con("GND", "SG90.GND", awg=26, note="갈색")
-# (11/10 밤, CAP-AI-60) HX711·로드셀 없앰 (교수님 '로드셀은 과함') → 누름 스위치 PSW (KW11-3Z, NC 접점): 스프링 146이 0.5 N만큼 눌리면 열림
-#   NC → GND, A1 내부 풀업: 평소 LOW, 눌림·선 끊김 = HIGH → 펌웨어가 바닥을 멈춤 (선이 끊겨도 누르지 않는 쪽). A2 예비
-con("U1_PSW", "U1.A1", "PSW.NC_A", awg=28, note="캐리지와 같이 움직임 — 실리콘 선, 100 nF 함께")
-con("GND", "PSW.NC_B", awg=28)
-# 원점 스위치
-for ax, p in (("F", "A3"), ("X", "A4"), ("Y", "A5")):
-    con("U1_HOME_%s" % ax, "U1.%s" % p, "SW_H%s.NO" % ax, "C_H%s.1" % ax, awg=28, note="내부 풀업, 눌리면 LOW, 100 nF")
-    con("GND", "SW_H%s.COM" % ax, "C_H%s.2" % ax, awg=28)
+# ---- UNO 1 (쉴드 1): 움직임 ----
+con("U1_MZ", "U1.D2", "MZ.PWM", awg=26, note="쉴드 D2 줄 S — mightyZAP 흰(신호)만, V·G는 XL4015 ② (PWM 900~2100 µs)")
+for ax, (st, dr, en) in (("X", ("D6", "D7", "D8")), ("Y", ("D9", "D10", "D11"))):
+    con("U1_%s_STEP" % ax, "U1.%s" % st, "DRV.%s_STEP" % ax, awg=26, note="쉴드 S 핀 → 보드 헤더 (암-암 점퍼)")
+    con("U1_%s_DIR" % ax, "U1.%s" % dr, "DRV.%s_DIR" % ax, awg=26)
+    con("U1_%s_EN" % ax, "U1.%s" % en, "DRV.%s_EN" % ax, awg=26, note="LOW = 켬 (DRV8825), HIGH = 코일 끔 (HOLD 0)")
+    for c in ("A1", "A2", "B1", "B2"):
+        con("M_%s_%s" % (ax, c), "DRV.%s_%s" % (ax, c), "M_%s.%s" % (ax, c), awg=0, note="LM-NK1134 4선 (모터에 달린 선) → 보드 모터 단자")
+con("GND", "DRV.LGND", awg=26, note="보드 신호 GND ↔ 쉴드 1 G 핀 (같은 점)")
+con("U1_PEN", "U1.A0", "SG90.SIG", awg=0, note="쉴드 A0 줄에 서보 3핀 그대로 (주황 S)")
+con("+5V_B", "SG90.V+", awg=0, note="빨강 → 쉴드 V (= +5V_B)")
+con("GND", "SG90.GND", awg=0, note="갈색 → 쉴드 G")
+for ax, p in (("X", "A4"), ("Y", "A5")):
+    con("U1_HOME_%s" % ax, "U1.%s" % p, "SW%s.S" % ax, awg=26, note="VLT-SM006 3핀 → 쉴드 %s 줄 (암-암 점퍼), INPUT_PULLUP, 눌리면 LOW [받고 확인]" % p)
+    con("+5V_B", "SW%s.V" % ax, awg=26)
+    con("GND", "SW%s.G" % ax, awg=26)
 
-# UNO 2 — 문 서보
+# ---- UNO 2 (쉴드 2): 문·게이트·조명·펌프 ----
+con("+5V_B", "R_RS.1", awg=0, note="쉴드 2 D2 줄 V 핀에 저항 다리를 듀폰 암에 꽂음")
+con("U2_RAIL", "U2.D2", "R_RS.2", awg=0, note="10 kΩ 직렬 → D2 S: 비상 정지가 눌리면 +5V_B가 꺼져 LOW (INPUT)")
 for d, p in (("IN", "D9"), ("CAP", "D10"), ("REL", "D11")):
-    con("U2_DOOR_%s" % d, "U2.%s" % p, "MG_%s.SIG" % d, awg=26, note="주황")
-    con("+5V_B", "MG_%s.V+" % d, awg=26)
-    con("GND", "MG_%s.GND" % d, awg=26)
-# 통로 빛 게이트 3쌍 (Adafruit 2167, 열린 컬렉터)
-for g in PASS_GATES:
-    con("U2_%s" % g, "U2.%s" % GATE_PIN[g], "RX_%s.OUT" % g, "R_%s.1" % g, awg=28, note="흰 선, 10 kΩ 풀업, 끊기면 LOW")
-    con("+5V_B", "R_%s.2" % g, "RX_%s.V+" % g, "TX_%s.V+" % g, awg=28)
-    con("GND", "RX_%s.GND" % g, awg=28)
-    con("EMIT_LO", "TX_%s.GND" % g, awg=28, note="송신 검정 → MOSFET Q4 (낮은 쪽 스위치)")
-# 문 빛 게이트 6쌍 (낱개): +5V_B → 220 Ω → IR LED → EMIT_LO (Q4)  /  +5V_B → 포토TR C, E → U2 아날로그 + 10 kΩ → GND (이미터 팔로어: 빛 받으면 HIGH, 끊기면 LOW)
-for g in DOOR_GATES:
-    con("+5V_B", "RLED_%s.1" % g, awg=28)
-    con("LEDA_%s" % g, "RLED_%s.2" % g, "LED_%s.A" % g, awg=28, note="220 Ω → 약 17 mA ((5 − 1.2) / 220)")
-    con("EMIT_LO", "LED_%s.K" % g, awg=28, note="LED 짧은 다리(K) → Q4")
-    con("+5V_B", "PT_%s.C" % g, awg=28, note="포토TR 컬렉터")
-    con("U2_%s" % g, "U2.%s" % GATE_PIN[g], "PT_%s.E" % g, "RL_%s.1" % g, awg=28, note="아날로그, 10 kΩ → GND, 문턱값은 자가 시험 때 (켬 값 + 끔 값) / 2")
-    con("GND", "RL_%s.2" % g, awg=28)
-con("EMIT_LO", "Q4.OUT-", awg=24)
-con("GND", "Q4.GND", awg=24)
-con("U2_EMIT", "U2.D4", "Q4.TRIG", awg=26, note="HIGH = 송신 켬 (자가 시험 때 끔)")
-# 조명 MOSFET
-# 출구 조명 L_EXIT·Q3 없앰 (승준 SJ-45 11/06: 방생 굴뚝 위 하늘빛, 밤 LED는 다른 벌레를 부름) → UNO 2 D6 예비
-for q, p, lamp in (("Q1", "D3", "L_TOP"), ("Q2", "D5", "L_BOT")):
-    con("U2_%s" % q, "U2.%s" % p, "%s.TRIG" % q, awg=26, note="PWM 되는 핀")
-    con("+5V_B", "%s.V+" % lamp, awg=24)
-    con("%s_LO" % lamp, "%s.V-" % lamp, "%s.OUT-" % q, awg=24)
-    con("GND", "%s.GND" % q, awg=24)
-# (11/10 밤, CAP-AI-59) 급이 펌프: UNO 2 D6 → Q3 (MOSFET 모듈) → 펌프 Adafruit 3910 (5 V 0.5 A), 펌프 양 끝에 역기전력 다이오드 D_P
-con("U2_PUMP", "U2.D6", "Q3.TRIG", awg=26, note="HIGH = 펌프 돎 (펌웨어 PUMP <ms>, 최대 2 s)")
-con("+5V_B", "PUMP.V+", "D_P.K", awg=22)
-con("PUMP_LO", "PUMP.V-", "D_P.A", "Q3.OUT-", awg=22)
-con("GND", "Q3.GND", awg=22)
-# 레일 감지
-con("U2_RAIL", "U2.D2", "R_RS.2", awg=28, note="10 kΩ 직렬, 레일 있으면 HIGH (INT0)")
+    con("U2_DOOR_%s" % d, "U2.%s" % p, "MG_%s.SIG" % d, awg=0, note="쉴드 %s 줄에 서보 3핀 그대로" % p)
+    con("+5V_B", "MG_%s.V+" % d, awg=0)
+    con("GND", "MG_%s.GND" % d, awg=0)
+for g in GATES:
+    con("U2_%s" % g, "U2.%s" % GATE_PIN[g], "RX_%s.OUT" % g, awg=28, note="2167 수신 흰 → 쉴드 %s S, 내부 풀업, 끊기면 LOW" % GATE_PIN[g])
+    con("+5V_B", "RX_%s.V+" % g, awg=28, note="수신 빨강 → 같은 줄 V")
+    con("GND", "RX_%s.GND" % g, awg=28, note="수신 검정 → 같은 줄 G")
+    con("+5V_B", "TX_%s.V+" % g, awg=28, note="송신 빨강 → 쉴드 %s 줄 V (빈 줄, 신호 핀은 안 씀)" % EMIT_V_PIN[g])
+    con("EMIT_LO", "TX_%s.GND" % g, awg=28, note="송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)")
+con("EMIT_LO", "MOS.Q4-", awg=24)
+con("U2_EMIT", "U2.D4", "MOS.Q4_TRIG", awg=26, note="HIGH = 송신 켬 (자가 시험 때 끔)")
+con("U2_LIGHT", "U2.D3", "MOS.Q1_TRIG", awg=26, note="PWM — LED 모듈 2개 같이")
+con("L_TOP_LO", "MOS.Q1-", "L1.-", "L2.-", awg=24, note="LED 모듈 검정")
+con("U2_PUMP", "U2.D6", "MOS.Q3_TRIG", awg=26, note="HIGH = 펌프 돎 (trap_doors PUMP <ms>, 최대 200)")
+con("PUMP_LO", "MOS.Q3-", "PUMP.-", "D_P.A", awg=22, note="펌프 − · 1N5819 A")
+con("GND", "MOS.SGND", awg=26, note="MOSFET 신호 쪽 GND ↔ 쉴드 2 G 핀 (TRIG 기준)")
 
 # ---------------------------------------------------------------------------
-# 구매 목록 (수량은 이 설계 기준, 보유분은 승준 구매장부와 대조)
+# 전기 부품 목록 (이 회로 기준 수량) — 값·판매처는 purchase/부품정리_2026-11-17.xlsx (엑셀이 원본)
 # ---------------------------------------------------------------------------
 BOM = [
-    ("Arduino UNO R3", 2, "UNO 1 움직임, UNO 2 문·게이트·조명", "보유 4 (정품 1 + 호환)"),
-    ("Raspberry Pi 5 + AI HAT+ + AI 카메라", 1, "판단", "보유"),
-    ("Pi 5 카메라 케이블 22↔15핀 500 mm (FFC)", 1, "Pi 선반 199a → 카메라: 필요 약 320 mm > 동봉 300 mm (CAP-AI-38)", "살 것 (구매확정표 E18)"),
-    ("USB A-B 케이블 0.5 m", 2, "Pi → UNO", "보유 확인"),
-    ("28BYJ-48 + ULN2003 세트", 2, "마커 X, Y (바닥 F는 리니어 모듈로, 11/12)", "보유 1 → 살 것 1"),
-    ("리니어 모듈 15 mm 스테핑 + M3 리드 슬라이더 (Keshuo 15BY25-77, 행정 62)", 1, "바닥 F — 모터·커플링·리드스크루·너트·봉·베어링 대신 (11/12)", "살 것 [치수도 대표값 — 사서 잼]"),
-    ("DRV8833 2채널 모터 드라이버 모듈", 1, "바닥 F (양극) — UNO 1 D2~D5", "살 것"),
-    ("SG90", 1, "펜 들기 205", "보유 1 (학습 키트, 실물 확인)"),
-    ("MG90S (혼 포함)", 3, "문 112·170·176", "보유 1 (혼 없음, 예비) → 살 것 3 (B2)"),
-    ("마이크로 스위치 KW11-3Z 레버형 (누름 스위치 PSW, NC 접점 씀)", 1, "로드셀·HX711 대신 — 스프링 146이 4.8 mm(0.5 N) 눌리면 축 걸쇠가 누름 (CAP-AI-60, 교수님 피드백)", "추가 (원점 스위치와 같은 것)"),
-    ("Pi 5 RTC 배터리 (공식 충전식 ML-2020, J5 BAT 단자)", 1, "전원이 끊겨도 날짜 유지 → 여왕벌 계절 규칙 (11/06)", "**추가**"),
-    ("마이크로 스위치 KW11-3Z 레버형 (원점)", 3, "F, X, Y — 외형 20×10.2×6.4, 승준 라이브러리 SJ-38", "추가"),
-    ("빛 게이트 Adafruit 2167 (3 mm)", 3, "통로 G1·G4·G6 (11/06 21시: 문 빔은 낱개로 — 승준 SJ-47)", "**살 것 3 (+1)**"),
-    ("적외선 LED 3 mm 940 nm", 6, "문 빔 송신 G2·G2b·G3·G3b·G5·G5b (Ø4.2 구멍에 꽂음)", "**살 것 6 (+4)**"),
-    ("포토트랜지스터 3 mm 940 nm (검은 몸통, 햇빛 거름)", 6, "문 빔 수신, 이미터 팔로어 (빛 받으면 HIGH)", "**살 것 6 (+4)**"),
-    ("저항 220 Ω", 6, "적외선 LED 전류 약 17 mA", "키트 저항 세트 [실물 확인]"),
-    ("로직 레벨 MOSFET 모듈 (D4184 등)", 4, "조명 2 (위·아래) + 송신 켜기 1 + 급이 펌프 1 (CAP-AI-59) — 출구 조명 없앰 (SJ-45)", "살 것 (시험 단계는 보유 릴레이 모듈로 대신 — 켜고 끄기만)"),
-    ("연동 펌프 Adafruit 3910 (5~6 V, 0.5 A, 100 mL/min, 관 3.5 × 5)", 1, "급이 — 바깥 병에서 솜으로, 먹일 때만 (CAP-AI-59)", "**살 것**"),
-    ("다이오드 1N5819 (펌프 역기전력)", 1, "펌프 +, − 양 끝 (K → +5V_B)", "살 것 [사양서 확인]"),
-    ("Nalgene 2104-0008 250 mL 넓은 입 병 + 식품용 실리콘 관 3.5 × 5 약 1.2 m", 1, "급이 병·관 (뚜껑에 구멍 2개)", "**살 것**"),
-    ("저항 10 kΩ", 10, "통로 게이트 풀업 3 + 문 빔 포토TR 부하 6 + 레일 감지 1", "학습 키트 저항 세트에서 [실물 확인]"),
-    ("커패시터 100 nF", 5, "원점 3 + 누름 스위치 1 + 단자대 1", "키트 커패시터 세트에서 [실물 확인]"),
-    ("전해 커패시터 1000 µF 10 V", 1, "서보 허브 (+5V 버스 ↔ GND 버스)", "추가"),
-    ("쇼트키 다이오드 SB540 (5 A 40 V, DO-201) — 역극성 보호 D_RP", 1, "서보 허브, 줄 표시(K) +5V 쪽 — 거꾸로 꽂으면 퓨즈를 끊음 (CAP-AI-50)", "살 것 [사양서 확인]"),
-    ("5 V 3 A 어댑터 + DC 잭 5.5×2.1", 1, "구동 레일", "구매 목록 G2"),
-    ("퓨즈홀더 F-520 + 퓨즈 5×20 3 A", 1, "구동 레일 — 인라인 홀더·T2.5A를 국내 판매처에서 못 찾아 대신 (구매확정표 E3)", "살 것"),
-    ("비상 정지 버튼 (NC)", 1, "구동 레일", "추가"),
-    ("와고 레버 커넥터 221-415 (5구)", 5, "+5V_B 2개 이어 8구 (입력·ULN 3·서보 허브·게이트 허브·조명 2), GND 3개 이어 11구 (+ UNO 1·2 GND) — 단자대 대신 (승준 SJ-43 제안 채택) — 와고에는 20~22 AWG만 꽂음 (가는 선은 허브에서)", "살 것"),
-    ("만능기판 2장 (60 × 40, 70 × 30) + 1 × 40 핀 헤더 2줄", 1, "배치·핀 표 `전기회로/hub_boards.py` (CAP-AI-50): 서보 허브 = 서보 3핀 헤더 4 + 신호 핀 4 + C1·C2·D_RP / 게이트 허브 = 헤더 핀 49 + 10 kΩ 10 + 220 Ω 6, 점퍼 9", "살 것 (헤더는 키트 확인)"),
-    ("20·22 AWG 연선 (와고 꽂는 줄)", 1, "와고 221은 가는 26·28 AWG를 직접 물기 어려움 → 허브까지는 20~22 AWG", "살 것"),
-    ("실리콘 연선 26·28 AWG 각 10~15 m, 20·22 AWG 각 2 m", 1, "배선 약 44 m (가닥 합)", "추가"),
-    ("듀폰·JST-XH 연장 커넥터", 1, "게이트·서보 연장", "추가"),
-    ("(선택) 배터리 상자: LiFePO4 12.8 V 20 Ah (2일, 11/06) + 충전기 + 강압 5.1 V 5 A·5 V 3 A + INA226 + 퓨즈 5 A", 1, "배터리 운용", "현장 시험 날짜 보고"),
+    ("Arduino UNO R3", 2, "UNO 1 움직임, UNO 2 문·게이트·조명·펌프", "보유"),
+    ("아두이노 센서 쉴드 V5.0 SZH-EK049", 2, "UNO 위에 꽂음, SEL 점퍼 뺌", "엑셀"),
+    ("Raspberry Pi 5 + AI HAT+ · 27 W USB-C", 1, "판단", "보유"),
+    ("카메라 모듈 3 + FPC 22P↔15P 300 mm", 1, "Pi CAM0", "엑셀"),
+    ("USB A-B 케이블", 2, "Pi → UNO 1·2", "보유 확인"),
+    ("12 V 5 A 어댑터 (5.5 × 2.1)", 1, "모든 구동 전원", "엑셀"),
+    ("DC 잭 → 단자 SZH-LC002", 1, "어댑터 플러그 → 나사 단자", "엑셀 (2 = 1 + 예비)"),
+    ("퓨즈홀더 FHAM1 + 블레이드 퓨즈 5 A", 1, "12 V 줄, 비상 정지 앞", "엑셀 (퓨즈 3)"),
+    ("비상 정지 KGE-J4R1R 25Φ (NC)", 1, "12 V 줄 — 끊으면 12 V·5 V·7.4 V 모두 꺼짐", "엑셀"),
+    ("와고 221-415", 4, "12 V 1 · GND 2 · 5 V 1", "엑셀 (5 = 4 + 예비)"),
+    ("XL4015 강압 (전압 표시) SZH-PWSDF-036", 2, "① 5.0 V +5V_B ② 7.4 V mightyZAP", "엑셀"),
+    ("듀얼 스텝 드라이버 보드 ARD200928 + DRV8825", 1, "X·Y (DRV8825 2)", "엑셀 (해외, 자비)"),
+    ("LM-NK1134 나사 일체형 스텝 모터", 2, "마커 X·Y", "엑셀"),
+    ("mightyZAP D7-6PT-3 + 선 IR-EW06 PWM 200 mm", 1, "바닥 승강", "엑셀"),
+    ("SG90", 1, "펜 들기 205", "보유"),
+    ("MG90S", 3, "문 112·170·176", "엑셀"),
+    ("리미트 스위치 모듈 VLT-SM006", 2, "원점 X·Y", "엑셀 (3 = 2 + 예비)"),
+    ("빛 게이트 Adafruit 2167 3 mm", 3, "G2·G3b·G5", "엑셀 (4 = 3 + 예비)"),
+    ("MOSFET 4채널 SZH-AT021", 1, "Q1 LED · Q3 펌프 · Q4 송신 (Q2 비움)", "엑셀"),
+    ("LED 3구 모듈 백색 12 V", 2, "위 조명 (카메라 양옆)", "엑셀 (4 = 2 + 예비 2)"),
+    ("연동 펌프 Kamoer NKP 12 V", 1, "급이 (Q3)", "엑셀"),
+    ("저항 10 kΩ", 1, "레일 감지 R_RS (쉴드 2 D2 줄)", "보유 키트"),
+    ("쇼트키 다이오드 1N5819", 1, "펌프 역기전력 D_P — MOSFET Q3 나사 단자에 같이 조임", "**엑셀에 없음**"),
+    ("전해 커패시터 100 µF 25 V", 1, "DRV 보드 VMOT–GND (보드에 있으면 안 삼)", "**엑셀에 없음 — 보드 받고**"),
+    ("연선 20·22 AWG (빨강·검정)", 1, "12 V·5 V·GND 와고 줄 — 길이는 harness.py", "**엑셀에 없음**"),
+    ("듀폰 점퍼선 (암-암·암-수)", 1, "쉴드 ↔ DRV 보드·스위치·MOSFET TRIG, 짧은 선 연장", "보유"),
 ]
 
 UNO_PINS = ["D%d" % i for i in range(2, 14)] + ["A%d" % i for i in range(6)]
-RESERVED = {"U1": set(UNO_PINS) - {"A2"}, "U2": set(UNO_PINS) - {"D13"}}
+RESERVED = {"U1": {"D2", "D6", "D7", "D8", "D9", "D10", "D11", "A0", "A4", "A5"},
+            "U2": {"D2", "D3", "D4", "D6", "D9", "D10", "D11", "A0", "A3", "A4"}}
+NEED_5V = ["SG90.V+", "MG_IN.V+", "MG_CAP.V+", "MG_REL.V+", "SWX.V", "SWY.V", "R_RS.1"] + \
+          ["RX_%s.V+" % g for g in GATES] + ["TX_%s.V+" % g for g in GATES]
+NEED_12V = ["SW_E.NC2", "DRV.VMOT", "MOS.V+", "XL1.IN+", "XL2.IN+", "L1.+", "L2.+", "PUMP.+"]
 
 
 def check():
@@ -185,26 +163,30 @@ def check():
         used = {p for (uu, p) in use if uu == u}
         if used != RESERVED[u]:
             errs.append("%s 쓴 핀 %s, 계획 %s" % (u, sorted(used), sorted(RESERVED[u])))
-    # 서보·게이트 V+ 가 모두 구동 레일인지
-    plus = {n for n, _, _ in NETS["+5V_B"]}
-    for need in ["SG90.V+", "MG_IN.V+", "MG_CAP.V+", "MG_REL.V+"] + ["RX_%s.V+" % g for g in PASS_GATES] + ["R_%s.2" % g for g in PASS_GATES] + ["PT_%s.C" % g for g in DOOR_GATES] + ["RLED_%s.1" % g for g in DOOR_GATES]:
-        if need not in plus:
-            errs.append("%s가 구동 레일에 없음" % need)
-    if any(n.startswith("U1.5V") or n.startswith("U2.5V") for n, _, _ in NETS["+5V_B"]):
-        errs.append("UNO 5V 핀이 구동 레일에 이어짐 (금지)")
+    ends = {net: {n for n, _, _ in nodes} for net, nodes in NETS.items()}
+    errs += ["%s가 +5V_B에 없음" % n for n in NEED_5V if n not in ends["+5V_B"]]
+    errs += ["%s가 +12V(비상 정지 뒤)에 없음" % n for n in NEED_12V if n not in ends["+12V"]]
+    if ends["+7V4"] != {"XL2.OUT+", "MZ.V"}:
+        errs.append("7.4 V 줄에 mightyZAP 말고 다른 것: %s" % sorted(ends["+7V4"]))
+    five = {"SG90", "MG_IN", "MG_CAP", "MG_REL", "SWX", "SWY", "SH1", "SH2", "MZ"} | {"RX_" + g for g in GATES} | {"TX_" + g for g in GATES}
+    errs += ["%s가 12 V에 이어짐" % n for n in ends["+12V"] if n.split(".")[0] in five]
+    if any(n.startswith(("U1.5V", "U2.5V")) for n in ends["+5V_B"]):
+        errs.append("UNO 5V 핀이 +5V_B에 이어짐 (금지 — SEL 점퍼 뺌)")
+    if not ({"JDC.+", "F1.1"} <= ends["V12_RAW"] and {"F1.2", "SW_E.NC1"} <= ends["V12_F"]):
+        errs.append("잭 → 퓨즈 → 비상 정지 순서가 아님")
     return errs, use
 
 
 def write_tables():
     with open(os.path.join(OUT, "netlist.csv"), "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
-        w.writerow(["넷", "끝", "AWG", "비고"])
+        w.writerow(["넷", "끝", "AWG (0 = 산 케이블·플러그)", "비고"])
         for net in sorted(NETS):
             for n, awg, note in NETS[net]:
                 w.writerow([net, n, awg or "", note])
     with open(os.path.join(OUT, "bom.csv"), "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
-        w.writerow(["부품", "수량", "쓰는 곳", "상태"])
+        w.writerow(["부품", "수량 (이 회로)", "쓰는 곳", "상태"])
         w.writerows(BOM)
 
 
@@ -225,120 +207,80 @@ def sheets():
         return elm.IcPin(name=name, side=side, anchorname=anchor or re.sub(r"[^0-9A-Za-z]", "_", name.split()[0]))
 
     # --- 1장: 전원 ---
-    with schemdraw.Drawing(file=os.path.join(IMG, "회로도_1_전원.png"), show=False, dpi=150) as d:
-        d += elm.Label().label("회로도 1/3 — 전원 (콘센트 기본, 같은 플러그로 배터리 상자)", fontsize=14).at((0, 4.2))
-        jb = elm.Ic(pins=[P("-", "right", "pin2"), P("+", "right", "pin1")], edgepadW=1.2, label="DC 잭\n5 V 3 A\n(또는 배터리\n상자 5 V 3 A)").at((0, 0))
+    with schemdraw.Drawing(file=os.path.join(IMG, "회로도_1_전원_1117.png"), show=False, dpi=150) as d:
+        d += elm.Label().label("회로도 1/3 — 전원 (11/17: 12 V 어댑터 하나, 비상 정지가 모든 구동을 끊음)", fontsize=14).at((0, 4.2))
+        jb = elm.Ic(pins=[P("-", "right", "pin2"), P("+", "right", "pin1")], edgepadW=1.4, label="12 V 5 A\n어댑터 →\n잭 변환\nSZH-LC002").at((0, 0))
         d += jb
         d += elm.Line().right(0.8).at(jb.pin1)
-        d += (f := elm.Fuse().right().label("F1\n5×20 3 A", loc="top"))
-        d += (sw := elm.Switch(nc=True).right().label("비상 정지\n(NC)", loc="top"))
-        d += (n1 := elm.Dot())
-        d += elm.Line().right(1.5)
-        d += (tb := elm.Dot().label("+5V_B\n(와고 묶음)", loc="top"))
-        d += elm.Capacitor(polar=True).down(2).at(n1.center).label("C1 1000 µF\n(서보 허브)", loc="top")
-        d += (g1 := elm.Dot())
-        d += elm.Capacitor().down(2).at((n1.center[0] + 1.5, n1.center[1])).label("C2 0.1 µF", loc="bottom")
-        d += elm.Line().left(1.5)
-        d += elm.Wire("-|").at(jb.pin2).to((g1.center[0] - 2.8, g1.center[1]))
-        d += elm.Line().tox(g1.center)
-        d += elm.Ground().at(g1.center)
-        d += elm.Line().right(3.0).at(tb.center)
-        d += (n3 := elm.Dot())
-        d += elm.Diode().up(2).at((n3.center[0], n3.center[1] - 2))
-        d += elm.Label().label("D_RP SB540\n(거꾸로 걸침, 평소 0 A)", fontsize=10, halign="left").at((n3.center[0] + 0.4, n3.center[1] - 1.0))
-        d += elm.Line().at((n3.center[0], n3.center[1] - 2)).tox(tb.center)
-        d += elm.Resistor().right(2.5).at(n3.center).label("R_RS 10 kΩ", loc="top")
-        d += elm.Label().label("→ UNO 2 D2 (레일 감지)", loc="right")
-        d += elm.Label().label("GND 한 점 (와고 GND 묶음) ← UNO 1 GND, UNO 2 GND, 서보·게이트·ULN2003 GND", fontsize=10, halign="left").at((-1, -3.8))
-        d += elm.Label().label("+5V_B → ULN2003 ×3, SG90, MG90S ×3, 게이트 수신·송신 ×9, 풀업 10 kΩ ×9, 조명 ×2", fontsize=10, halign="left").at((-1, -4.4))
-        d += elm.Label().label("UNO 5V 핀과 +5V_B는 잇지 않음 (UNO는 Pi USB에서)", fontsize=10, halign="left").at((-1, -5.0))
-        d += elm.Label().label("Pi 레일 (따로)", fontsize=12, halign="left").at((-1, -6.6))
-        pi = elm.Ic(pins=[P("USB-C", "left", "pin1"), P("USB1", "right", "pin2"), P("USB2", "right", "pin3"),
-                          P("CAM0", "right", "pin4"), P("GPIO2 SDA", "left", "pin5"), P("GPIO3 SCL", "left", "pin6")],
-                    edgepadW=3.6, label="Raspberry Pi 5 + AI HAT+", lblofst=-1.4).at((8, -10))
-        d += pi
-        d += elm.Line().left(1.5).at(pi.pin1)
-        d += elm.Label().label("27 W USB-C 어댑터\n(또는 배터리 상자 5.1 V 5 A)", loc="left")
-        d += elm.Line().right(1.2).at(pi.pin2)
-        d += elm.Label().label("UNO 1 (USB 전원 + 시리얼)", loc="right")
-        d += elm.Line().right(1.2).at(pi.pin3)
-        d += elm.Label().label("UNO 2", loc="right")
-        d += elm.Line().right(1.2).at(pi.pin4)
-        d += elm.Label().label("AI 카메라 (CSI FFC 500 mm)", loc="right")
-        d += elm.Line().left(1.5).at(pi.pin5)
-        d += elm.Label().label("INA226 SDA\n(배터리 상자)", loc="left")
-        d += elm.Line().left(1.5).at(pi.pin6)
-        d += elm.Label().label("INA226 SCL", loc="left")
+        d += elm.Fuse().right().label("FHAM1\n5 A", loc="top")
+        d += elm.Switch(nc=True).right().label("비상 정지\nKGE-J4R1R (NC)", loc="top")
+        d += (n12 := elm.Dot())
+        d += elm.Line().right(2.0)
+        d += elm.Label().label("+12V (와고 12 V) → DRV8825 보드 ARD200928 VMOT → 마커 X·Y 모터", loc="right", fontsize=10)
+        y0 = n12.center[1]
+        for k, txt in enumerate(("MOSFET SZH-AT021 V+ → Q1 LED 모듈 2 (12 V) · Q3 펌프 Kamoer (12 V, 1N5819)",
+                                 "XL4015 ① 5.0 V → +5V_B (와고 5 V) → 센서 쉴드 1·2 나사 단자",
+                                 "XL4015 ② 7.4 V → mightyZAP (IR-EW06 빨강·검정)"), 1):
+            d += elm.Line().down(1.1).at((n12.center[0], y0 - 1.1 * (k - 1)))
+            d += elm.Dot()
+            d += elm.Line().right(2.0)
+            d += elm.Label().label(txt, loc="right", fontsize=10)
+        d += elm.Wire("-|").at(jb.pin2).to((jb.pin2[0] + 1.2, -4.6))
+        d += elm.Ground()
+        d += elm.Label().label("GND 한 점 = 와고 GND 2개 (어댑터 −, DRV, MOSFET, XL4015 ①②, 쉴드 1·2 G, mightyZAP −) — UNO GND는 쉴드로 같은 점", fontsize=10, halign="left").at((-1, -5.6))
+        d += elm.Label().label("+5V_B → 쉴드 V 핀: SG90 · MG90S 3 · 2167 수신 3·송신 3 · 원점 모듈 2 · 레일 감지 10 kΩ (UNO 2 D2)", fontsize=10, halign="left").at((-1, -6.2))
+        d += elm.Label().label("쉴드 SEL 점퍼 뺌 → UNO 5V 핀과 +5V_B는 안 이음 (UNO는 Pi USB로) · 12 V 최대 약 2.5 A [추측] < 5 A", fontsize=10, halign="left").at((-1, -6.8))
+        d += elm.Label().label("Pi 레일 (따로): 27 W USB-C 공식 어댑터 → Raspberry Pi 5 + AI HAT+ → USB1 UNO 1 · USB2 UNO 2 (USB A-B, 전원 + 시리얼) · CAM0 카메라 모듈 3 (FPC 300 mm)", fontsize=10, halign="left").at((-1, -7.8))
 
     # --- 2장: UNO 1 ---
-    with schemdraw.Drawing(file=os.path.join(IMG, "회로도_2_UNO1_움직임.png"), show=False, dpi=150) as d:
-        d += elm.Label().label("회로도 2/3 — UNO 1 (움직임): 스테핑 3 · 펜 서보 · 누름 스위치 · 원점 3", fontsize=14).at((0, 9))
-        right = ["D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13"]
-        left = ["A0", "A1", "A2", "A3", "A4", "A5", "5V", "GND"]
-        u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p) for p in left[::-1]],
-                   edgepadH=0.5, pinspacing=0.6, edgepadW=2.0, label="UNO 1").at((0, 0))
+    with schemdraw.Drawing(file=os.path.join(IMG, "회로도_2_UNO1_움직임_1117.png"), show=False, dpi=150) as d:
+        d += elm.Label().label("회로도 2/3 — UNO 1 + 센서 쉴드 1 (움직임): mightyZAP · DRV8825 X·Y · 펜 서보 · 원점 X·Y", fontsize=14).at((-6, 7.5))
+        right = ["D11", "D10", "D9", "D8", "D7", "D6", "D2"]
+        left = ["A0", "A4", "A5", "G 단자", "V 단자"]
+        u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p.split()[0]) for p in left[::-1]],
+                   pinspacing=1.0, edgepadW=2.4, label="UNO 1\n+ 쉴드 1").at((0, 0))
         d += u
-        # 11/06 다듬기: 선을 한 줄로 모으면 모든 핀이 이어진 것처럼 보임 → 같은 이름표(넷 라벨)끼리 이어진 것으로 그림
-        for k, ax in enumerate("FXY"):
-            ul = elm.Ic(pins=[P("IN%d" % i, "left") for i in range(4, 0, -1)] + [P("XH5", "right")],
-                        pinspacing=0.6, edgepadW=1.6, label="").at((9.5, 5.2 - k * 3.5))
-            d += ul
-            d += elm.Label().label("ULN2003 %s" % ax, fontsize=11).at((ul.center[0], ul.center[1] + 1.75))
-            for i in range(4):
-                a = getattr(u, right[k * 4 + i])
-                b = getattr(ul, "IN%d" % (i + 1))
-                net = "%s_IN%d" % (ax, i + 1)
-                d += elm.Line().right(0.9).at(a).color("#2a78d6")
-                d += elm.Label().label(net, loc="right", fontsize=9).color("#2a78d6")
-                d += elm.Line().left(0.9).at(b).color("#2a78d6")
-                d += elm.Label().label(net, loc="left", fontsize=9).color("#2a78d6")
-            d += elm.Line().right(1.2).at(ul.XH5)
-            d += elm.Label().label("28BYJ-48 %s\n(+5V_B, GND)" % {"F": "바닥", "X": "마커 X", "Y": "마커 Y"}[ax], loc="right")
-        for p, txt in (("A0", "SG90 펜 신호 (전원 +5V_B)"), ("A1", "누름 스위치 PSW (NC → GND, 내부 풀업 — 눌림·끊김 HIGH)"), ("A2", "예비 (HX711 없앰, CAP-AI-60)"), ("GND", "와고 GND (한 점)")):
-            d += elm.Line().left(1.0).at(getattr(u, "p" + p))
-            d += elm.Label().label(txt, loc="left")
-        for p, ax in (("A3", "F"), ("A4", "X"), ("A5", "Y")):
-            d += elm.Line().left(1.0).at(getattr(u, "p" + p))
-            d += elm.Label().label("원점 %s 스위치 → GND (+100 nF)" % ax, loc="left")
-        d += elm.Label().label("원점은 내부 풀업 (눌리면 LOW) + 스위치 옆 100 nF · 파란 이름표가 같은 선끼리 이어짐 (예: D2 = F_IN1 = ULN2003 F IN1)", fontsize=10, halign="left").at((-9, -6))
-
-    # --- 3장: UNO 2 ---
-    with schemdraw.Drawing(file=os.path.join(IMG, "회로도_3_UNO2_문게이트조명.png"), show=False, dpi=150) as d:
-        d += elm.Label().label("회로도 3/3 — UNO 2: 문 서보 3 · 빛 게이트 9쌍 (풀업 10 kΩ, 송신 MOSFET) · 조명 2 · 레일 감지", fontsize=14).at((-6, 13.5))
-        right = ["A0", "A1", "A2", "A3", "A4", "A5", "D7", "D8", "D12"]
-        left = ["D2", "D3", "D4", "D5", "D6", "D9", "D10", "D11"]
-        u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p) for p in left[::-1]],
-                   pinspacing=1.3, edgepadW=2.0, label="UNO 2").at((0, 0))
-        d += u
-        # 게이트: 풀업 + 수신
-        for g in GATES:
-            a = getattr(u, GATE_PIN[g])
-            d += elm.Line().right(1.0).at(a)
-            d += (n := elm.Dot())
-            door = g in DOOR_GATES
-            d += elm.Label().label("10 kΩ → GND" if door else "10 kΩ → +5V_B", loc="top", fontsize=8).at((n.center[0], n.center[1] + 0.3))
-            d += elm.Line().right(1.4).at(n.center)
-            txt = ("포토TR %s 이미터 (%s) · 아날로그" if door else "Adafruit 2167 수신 %s 흰 선 (%s)") % (g, GATE_WHERE[g])
+        for p, txt in (("D2", "mightyZAP 신호 (흰) — 전원 7.4 V는 XL4015 ②"),
+                       ("D6", "X STEP → DRV 보드"), ("D7", "X DIR"), ("D8", "X EN (LOW = 켬)"),
+                       ("D9", "Y STEP"), ("D10", "Y DIR"), ("D11", "Y EN (LOW = 켬)")):
+            d += elm.Line().right(1.0).at(getattr(u, p)).color("#2a78d6")
             d += elm.Label().label(txt, loc="right", fontsize=10)
-        d += elm.Label().label("문 빔 6쌍(A0~A5): +5V_B → 220 Ω → IR LED → Q4 / +5V_B → 포토TR C·E → 핀 + 10 kΩ → GND (빛 받으면 HIGH)", fontsize=10, halign="left").at((1.2, -1.2))
-        d += elm.Label().label("통로 3쌍(D7·D8·D12, Adafruit 2167): 수신 빨강 +5V_B / 검정 GND, 송신 빨강 +5V_B / 검정 → Q4", fontsize=10, halign="left").at((1.2, -1.8))
-        for p, txt in (("D2", "R_RS 10 kΩ ← +5V_B (레일 감지)"), ("D3", "Q1 MOSFET → 위 링 조명 182"), ("D4", "Q4 MOSFET → 송신 9개(LED 6 + 2167 3) GND 쪽 (EMIT_EN)"),
-                       ("D5", "Q2 MOSFET → 아래 조명"), ("D6", "Q3 MOSFET → 급이 펌프 (CAP-AI-59)"),
-                       ("D9", "MG90S 입구 문 112 (주황)"), ("D10", "MG90S 격리 문 170"), ("D11", "MG90S 방생 문 176")):
+        for p, txt in (("A0", "SG90 펜 서보 3핀 그대로"), ("A4", "원점 X VLT-SM006 3핀 (눌리면 LOW)"), ("A5", "원점 Y VLT-SM006 3핀"),
+                       ("G", "와고 GND"), ("V", "+5V_B (XL4015 ①), SEL 점퍼 뺌")):
             d += elm.Line().left(1.0).at(getattr(u, "p" + p))
             d += elm.Label().label(txt, loc="left", fontsize=10)
-        d += elm.Label().label("D13 예비 · D6 = 급이 펌프 · 서보 전원 +5V_B · GND는 와고 한 점 · 끊기면 LOW", fontsize=10).at((-9, -4.4))
+        d += elm.Label().label("DRV 보드: VMOT +12V · GND · 신호 GND ↔ 쉴드 G · 모터 X·Y 4선 · 전류 한도 0.5 A (Vref 0.25 V [가능성 높음]) · 빈 핀 D3 D4 D5 D12 D13 A1 A2 A3", fontsize=10, halign="left").at((-9, -4.2))
+
+    # --- 3장: UNO 2 ---
+    with schemdraw.Drawing(file=os.path.join(IMG, "회로도_3_UNO2_문게이트조명_1117.png"), show=False, dpi=150) as d:
+        d += elm.Label().label("회로도 3/3 — UNO 2 + 센서 쉴드 2: 문 서보 3 · 빛 게이트 3쌍 · LED · 펌프 · 레일 감지", fontsize=14).at((-6, 9.5))
+        right = ["A5", "A4", "A3", "A2", "A1", "A0"]
+        left = ["D2", "D3", "D4", "D6", "D9", "D10", "D11"]
+        u = elm.Ic(pins=[P(p, "right") for p in right] + [P(p, "left", "p" + p) for p in left[::-1]],
+                   pinspacing=1.1, edgepadW=2.4, label="UNO 2\n+ 쉴드 2").at((0, 0))
+        d += u
+        for g in GATES:
+            d += elm.Line().right(1.0).at(getattr(u, GATE_PIN[g])).color("#2a78d6")
+            d += elm.Label().label("2167 수신 %s 3선 (%s)" % (g, GATE_WHERE[g]), loc="right", fontsize=10)
+        for g, p in EMIT_V_PIN.items():
+            d += elm.Line().right(1.0).at(getattr(u, p)).color("#c0392b")
+            d += elm.Label().label("V 핀만: %s 송신 빨강 (+5V_B), 검정 → Q4 OUT−" % g, loc="right", fontsize=10)
+        for p, txt in (("D2", "V 핀 → 10 kΩ → S (레일 감지)"), ("D3", "Q1 TRIG → LED 모듈 2 (12 V)"), ("D4", "Q4 TRIG → 송신 3개 GND 쪽"),
+                       ("D6", "Q3 TRIG → 펌프 Kamoer (12 V)"), ("D9", "MG90S 입구 문 112"), ("D10", "MG90S 격리 문 170"), ("D11", "MG90S 방생 문 176")):
+            d += elm.Line().left(1.0).at(getattr(u, "p" + p))
+            d += elm.Label().label(txt, loc="left", fontsize=10)
+        d += elm.Label().label("빈 핀 D5 (Q2 비움) D7 D8 D12 D13 · 수신은 INPUT_PULLUP, 끊기면 LOW · MOSFET 신호 GND ↔ 쉴드 G · 펌프 다이오드 1N5819는 Q3 나사 단자에", fontsize=10, halign="left").at((-9, -4.6))
 
 
 def main():
     errs, use = check()
     write_tables()
     print("넷 %d개, 끝 %d개" % (len(NETS), sum(len(v) for v in NETS.values())))
-    print("UNO 1 핀 %d/18, UNO 2 핀 %d/17(D13 예비)" % (len([1 for k in use if k[0] == "U1"]), len([1 for k in use if k[0] == "U2"])))
+    print("UNO 1 핀 %d/18, UNO 2 핀 %d/18" % (len([1 for k in use if k[0] == "U1"]), len([1 for k in use if k[0] == "U2"])))
     print("검사:", "통과" if not errs else errs)
     try:
         sheets()
-        print("회로도 3장 → design/img/circuit/")
+        print("회로도 3장 → design/img/circuit/*_1117.png")
     except Exception as e:  # 그림 실패해도 표는 남김
         print("회로도 실패:", repr(e))
     return 0 if not errs else 1

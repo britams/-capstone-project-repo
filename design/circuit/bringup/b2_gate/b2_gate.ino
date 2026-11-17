@@ -1,13 +1,14 @@
 // 2단계 시험 — UNO 2 + 빛 게이트 1쌍 (회로 시험용, 펌웨어 아님) — 서현 CAP-AI-33, 2026-11-06
-// 연결: 게이트 허브 → 통로 게이트 G1 (Adafruit 2167) 수신 흰 선(+10k 풀업) → D7 (11/06 21시 핀 바뀜: 문 빔이 A0~A5),  송신 검정 → MOSFET Q4 OUT-, Q4 TRIG ← D4,  레일 감지 D2 (10k 직렬)
+// 연결 (11/17 v0.3): 센서 쉴드 A0 3핀 → 입구 문 빔 G2 (Adafruit 2167) 수신 (S 흰 선·V 빨강·G 검정, 풀업은 내부), 송신 검정 → MOSFET Q4 OUT-, Q4 TRIG ← D4,  레일 감지 D2 (10k 직렬)
+// G3b는 PIN_GATE = A3, G5는 A4로 바꿔 같은 시험
 // 확인: ① 손으로 빛을 가리면 "BLOCK" ② 's' 입력 → 자가 시험: 송신 끔 → LOW여야, 켬 → HIGH여야 ③ 비상 정지 누르면 RAIL=0
-const int PIN_GATE = 7;    // G1 (통로 게이트, 디지털)
+const int PIN_GATE = A0;   // G2 (입구 문 빔, 디지털로 읽음)
 const int PIN_EMIT = 4;    // EMIT_EN (HIGH = 송신 켬)
 const int PIN_RAIL = 2;    // 힘 전기 감지
 
 void setup() {
   Serial.begin(115200);
-  pinMode(PIN_GATE, INPUT);          // 풀업은 허브의 10 kΩ (내부 풀업 안 씀)
+  pinMode(PIN_GATE, INPUT_PULLUP);   // 11/17 허브 없앰 → 내부 풀업 (trap_doors v0.3과 같음)
   pinMode(PIN_RAIL, INPUT);
   pinMode(PIN_EMIT, OUTPUT);
   digitalWrite(PIN_EMIT, HIGH);
