@@ -14,7 +14,7 @@ def centers():
 
 
 def disc_dxf(path, d=32.0, hole=3.4):
-    """(11/14) 304 바닥 원판 — 같은 2T 판에서 같이 자름 (McMaster 원판 대신)"""
+    """(11/14) 304 바닥 원판 (McMaster 원판 대신) — 11/17부터 백색 불투명 2T, 격자판(투명)과 다른 판"""
     e = ["0\nCIRCLE\n8\nCUT\n10\n0.0\n20\n0.0\n40\n%.4f" % (d / 2), "0\nCIRCLE\n8\nCUT\n10\n0.0\n20\n0.0\n40\n%.4f" % (hole / 2)]
     with open(path, "w", encoding="ascii") as f:
         f.write("0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n" + "\n".join(e) + "\n0\nENDSEC\n0\nEOF\n")

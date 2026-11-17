@@ -29,7 +29,7 @@ DROP_IDS = (20, 30)                        # 판매처 끝 너트·볼 끝 (안 
 ACT = dict(front=42.0, rear=-15.5, rod_face=45.8, hinge_back=7.6, hinge_d=3.5, half_t=7.63)   # STEP 좌표 (축 z, 로드 +z)
 S_REST, STROKE = 8.0, L.STROKE              # 쉼 = 로드 8 mm 나옴, 누름까지 10
 FLOOR_TOP = L.H["rest"]                     # −7
-NUT_T, DISC = 2.4, (32.0, 3.4, 2.0)         # 바닥 = 아크릴 원판 (격자판과 같은 2T 판, DXF print/lift/300f_아크릴바닥원판.dxf)
+NUT_T, DISC = 2.4, (32.0, 3.4, 2.0)         # 바닥 = 백색 불투명 아크릴 원판 2T (11/17, DXF print/lift/300f2_바닥원판_묶음_90x50_백색2T.dxf)
 STACK = NUT_T + DISC[2]                     # 로드 끝 → 바닥 윗면 4.4 (11/14 전 4.67)
 Z0 = FLOOR_TOP - STACK - (ACT["rod_face"] + S_REST)
 SPACER = (6.0, 3.2, 4.0)                    # M3 원형 스페이서 (나사 없음) Ø6 × 4 [상품 미정]
@@ -109,11 +109,11 @@ def make(doc=None):
 
     gray, dark, green = (0.75, 0.75, 0.77), (0.35, 0.35, 0.37), (0.2, 0.7, 0.3)
     rows = [("300_marking_box (마킹실 상자 + 윗면 격자 Ø3 간격 4.4 — 예외 부품 1개, 프린트 파일 print/lift/300_마킹실상자)", L.marking_box(), green, 50),
-            ("300p_acrylic_plate (투명 아크릴 격자판 40 × 40 × 2, 네모 구멍 3.0 간격 4.4 — 주문 제작, DXF print/lift/300p_아크릴격자판.dxf)", L.acrylic_plate(), (0.55, 0.75, 0.95), 60),
+            ("300p_acrylic_plate (위 마킹 격자판 — 투명 아크릴 38 × 38 × 2, 마킹실에서 투명은 이것만 (11/17 서현), 네모 구멍 3.0 간격 4.4 — 레이저 DXF print/lift/300p2_격자판_묶음_100x50_투명2T.dxf)", L.acrylic_plate(), (0.55, 0.75, 0.95), 60),
             ("300s_plate_screws (M3 × 8 냄비 태핑 4 + M3 DIN 125 4 — 상자 밑구멍 Ø2.5, 구매)", L.plate_screws(), dark, 0),
             ("301_mightyZAP_D7-6PT-3 (몸통 — 행정 26, 6 N, 7.4 V, PWM, 디바이스마트, 구매) [%s]" % src, body, gray, 0),
             ("301r_rod (로드 — 움직임) [%s]" % src, rod, gray, 0),
-            ("304_floor (바닥 아크릴 원판 Ø32 × 2T 구멍 Ø3.4 — 격자판과 같이 주문 제작, 로드 끝 너트 위에 얹힘)", fl, (0.55, 0.75, 0.95), 0),
+            ("304_floor (바닥 원판 — 백색 불투명 아크릴 Ø32 × 2T 구멍 Ø3.4 (11/17 서현: 말벌 뒤 배경), 레이저 DXF print/lift/300f2_바닥원판_묶음_90x50_백색2T.dxf, 로드 끝 너트 위에 얹힘)", fl, (0.55, 0.75, 0.95), 0),
             ("304s_stud_nut (M3 × 8 무두 볼트 + M3 너트 — 로드 끝, 구매)", hw, dark, 0),
             ("307v_bar_act (2020 %.1f mm 세움 — 데크 → 상자 밑, 액추에이터 경첩·상자 혀, 구매)" % VBAR["L"], vb, (0.8, 0.8, 0.82), 0),
             ("308s_tongue_screws (M5 × 10 둥근머리 렌치 2 + 20시리즈 M5 스프링너트 2 — 상자 혀 → 세운 막대, 구매)", Part.makeCompound(ts), dark, 0),
