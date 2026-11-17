@@ -30,8 +30,8 @@
 +5V_B,TX_G5.V+,28,"송신 빨강 → 쉴드 A5 줄 V (빈 줄, 신호 핀은 안 씀)"
 +7V4,XL2.OUT+,22,XL4015 ② 7.4 V → mightyZAP 빨강 (IR-EW06)
 +7V4,MZ.V,22,XL4015 ② 7.4 V → mightyZAP 빨강 (IR-EW06)
-CSI,PI.CAM0,,FPC 22P(0.5) ↔ 15P(1.0) 300 mm — 카메라 모듈 3
-CSI,CAM.CSI,,FPC 22P(0.5) ↔ 15P(1.0) 300 mm — 카메라 모듈 3
+CSI,PI.CAM0,,FPC 22P(0.5) ↔ 15P(1.0) 500 mm SC1130 — 카메라 모듈 3
+CSI,CAM.CSI,,FPC 22P(0.5) ↔ 15P(1.0) 500 mm SC1130 — 카메라 모듈 3
 EMIT_LO,TX_G2.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
 EMIT_LO,TX_G3b.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)
 EMIT_LO,TX_G5.GND,28,송신 검정 → MOSFET Q4 OUT− (낮은 쪽 스위치)

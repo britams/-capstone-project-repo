@@ -2,7 +2,7 @@
 Arduino UNO R3,2,"UNO 1 움직임, UNO 2 문·게이트·조명·펌프",보유
 아두이노 센서 쉴드 V5.0 SZH-EK049,2,"UNO 위에 꽂음, SEL 점퍼 뺌",엑셀
 Raspberry Pi 5 + AI HAT+ · 27 W USB-C,1,판단,보유
-카메라 모듈 3 + FPC 22P↔15P 300 mm,1,Pi CAM0,엑셀
+카메라 모듈 3 + FPC 22P↔15P 500 mm (SC1130),1,Pi CAM0,엑셀
 USB A-B 케이블,2,Pi → UNO 1·2,보유 확인
 12 V 5 A 어댑터 (5.5 × 2.1),1,모든 구동 전원,엑셀
 DC 잭 → 단자 SZH-LC002,1,어댑터 플러그 → 나사 단자,엑셀 (2 = 1 + 예비)

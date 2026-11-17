@@ -85,7 +85,7 @@ H = [
 BOUGHT = [
     ("Pi USB → UNO 1 (USB A–B)", "PI_B", "UNO1", 1000),
     ("Pi USB → UNO 2 (USB A–B)", "PI_B", "UNO2", 1000),
-    ("Pi CAM0 → 카메라 모듈 3 (FPC 22P↔15P)", "PI_B", "CAM", 300),
+    ("Pi CAM0 → 카메라 모듈 3 (FPC 22P↔15P SC1130, 11/17 16시 300 → 500)", "PI_B", "CAM", 500),
 ]
 
 

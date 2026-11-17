@@ -67,7 +67,7 @@ con("GND", "MZ.GND", awg=22, note="mightyZAP 검정")
 con("USB_PI", "PSU_A.USBC", "PI.USBC", awg=0, note="27 W 공식 USB-C (보유)")
 con("USB_U1", "PI.USB1", "U1.USB", awg=0, note="USB A-B, UNO 1 전원 + 115200")
 con("USB_U2", "PI.USB2", "U2.USB", awg=0, note="USB A-B, UNO 2")
-con("CSI", "PI.CAM0", "CAM.CSI", awg=0, note="FPC 22P(0.5) ↔ 15P(1.0) 300 mm — 카메라 모듈 3")
+con("CSI", "PI.CAM0", "CAM.CSI", awg=0, note="FPC 22P(0.5) ↔ 15P(1.0) 500 mm SC1130 — 카메라 모듈 3")
 
 # ---- UNO 1 (쉴드 1): 움직임 ----
 con("U1_MZ", "U1.D2", "MZ.PWM", awg=26, note="쉴드 D2 줄 S — mightyZAP 흰(신호)만, V·G는 XL4015 ② (PWM 900~2100 µs)")
@@ -114,7 +114,7 @@ BOM = [
     ("Arduino UNO R3", 2, "UNO 1 움직임, UNO 2 문·게이트·조명·펌프", "보유"),
     ("아두이노 센서 쉴드 V5.0 SZH-EK049", 2, "UNO 위에 꽂음, SEL 점퍼 뺌", "엑셀"),
     ("Raspberry Pi 5 + AI HAT+ · 27 W USB-C", 1, "판단", "보유"),
-    ("카메라 모듈 3 + FPC 22P↔15P 300 mm", 1, "Pi CAM0", "엑셀"),
+    ("카메라 모듈 3 + FPC 22P↔15P 500 mm (SC1130)", 1, "Pi CAM0", "엑셀"),
     ("USB A-B 케이블", 2, "Pi → UNO 1·2", "보유 확인"),
     ("12 V 5 A 어댑터 (5.5 × 2.1)", 1, "모든 구동 전원", "엑셀"),
     ("DC 잭 → 단자 SZH-LC002", 1, "어댑터 플러그 → 나사 단자", "엑셀 (2 = 1 + 예비)"),
@@ -230,7 +230,7 @@ def sheets():
         d += elm.Label().label("GND 한 점 = 와고 GND 2개 (어댑터 −, DRV, MOSFET, XL4015 ①②, 쉴드 1·2 G, mightyZAP −) — UNO GND는 쉴드로 같은 점", fontsize=10, halign="left").at((-1, -5.6))
         d += elm.Label().label("+5V_B → 쉴드 V 핀: SG90 · MG90S 3 · 2167 수신 3·송신 3 · 원점 모듈 2 · 레일 감지 10 kΩ (UNO 2 D2)", fontsize=10, halign="left").at((-1, -6.2))
         d += elm.Label().label("쉴드 SEL 점퍼 뺌 → UNO 5V 핀과 +5V_B는 안 이음 (UNO는 Pi USB로) · 12 V 최대 약 2.5 A [추측] < 5 A", fontsize=10, halign="left").at((-1, -6.8))
-        d += elm.Label().label("Pi 레일 (따로): 27 W USB-C 공식 어댑터 → Raspberry Pi 5 + AI HAT+ → USB1 UNO 1 · USB2 UNO 2 (USB A-B, 전원 + 시리얼) · CAM0 카메라 모듈 3 (FPC 300 mm)", fontsize=10, halign="left").at((-1, -7.8))
+        d += elm.Label().label("Pi 레일 (따로): 27 W USB-C 공식 어댑터 → Raspberry Pi 5 + AI HAT+ → USB1 UNO 1 · USB2 UNO 2 (USB A-B, 전원 + 시리얼) · CAM0 카메라 모듈 3 (FPC 500 mm)", fontsize=10, halign="left").at((-1, -7.8))
 
     # --- 2장: UNO 1 ---
     with schemdraw.Drawing(file=os.path.join(IMG, "회로도_2_UNO1_움직임_1117.png"), show=False, dpi=150) as d:
