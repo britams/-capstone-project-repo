@@ -11,7 +11,7 @@ try:
     want = [("212_beam_plates", ["YA_빔판A_알루미늄3T_M4접시6", "YB_빔판B_알루미늄3T_M4접시6", "XN_X너트판_알루미늄3T_M2탭2"]),
             ("211_y_motor_plate", ["YM_Y모터판_알루미늄3T_M3접시3"]),
             ("217_x_motor_plate", ["217_X모터판_알루미늄3T"]),
-            ("206_carriage_plates", ["CP_캐리지판_알루미늄3T", "SP_안내판_알루미늄3T_M3탭3", "SV_서보판_알루미늄3T"]),
+            ("206_carriage_plates", ["CP_캐리지판_알루미늄3T", "SP_안내판_알루미늄3T_M3탭3_M3접시1", "SV_서보판_알루미늄3T"]),
             ("202_holder_plate_HV", ["HV_홀더판_알루미늄3T_M3접시2"])]
     for pre, names in want:
         o = [x for x in d.Objects if x.Label.startswith(pre)][0]
