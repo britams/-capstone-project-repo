@@ -1275,3 +1275,15 @@
   - 검증 [확실]: PC arduino-cli (arduino:avr:uno, 경고 모두 켬) **경고 0**, 11,226 B / RAM 921 B (v0.2 11,684 / 1,056). PC zig `run_all.ps1` sim_motion 91/91 · sim_doors 90/90. 클라우드 g++ + python: test_pi_link 37/37, test_process 53/53 (첫 실행 1개 FAIL은 시험 쪽 잘못 — 대기 때 보낸 첫 'DOOR REL CLOSE'를 찾음 → 고침). `cad/feeder_check.py` 7개 통과 (PUMP_MAX_MS를 읽음)
   - 문서: `design/인터페이스_정의서.md` (통신 줄 v0.3·PUMP 200·SELFTEST 형식·게이트 줄·이력), 인수인계, 전원 문서 5장
   - 남은 것: 옛 9쌍이 남은 파일 `design/circuit/circuit.py`·`harness.py`·`bringup/b2_gate`·`design/control_sim/trap_sim.py` (회로도·브링업 스케치 — 브레드보드 전에 고침), Kamoer 유량 실측 → `PUMP_MAX_MS`·`feed_pump_ms`, 방생 시각은 Pi 시계 그대로 (RTC 배터리 없음 — 인터넷 시간을 받을 때만 맞음 [가능성 높음]), 실물 시험 `미검증`
+- **(13:40) 서현 "남은 것도 위 순서대로 진행하자" (회로 스크립트 → 시계 → 펌프) + 질문 답 4개 + 놓친 것 질문 2개:**
+  - 짚은 것: 회로 스크립트는 빛 게이트만 옛것이 아니라 전원·XY·바닥·허브·UNO 2 자리가 모두 11/12 이전 → 서현 "11/17 기준으로 전부 다시". 시계는 방생 시각만이 아니라 낮·밤·여왕벌 철도 Pi 시계 → 서현 "폰 핫스팟 + 알림". **UNO 1 펌웨어가 아직 28BYJ 코일 방식이라 산 DRV8825로는 XY가 안 움직임** (오늘 앞에서 놓침) → 서현 "회로 다음에 바로", 핀 X D6·D7·D8 / Y D9·D10·D11 승인
+  - `design/circuit/circuit.py` 11/17 판 다시: 넷 41 · 끝 132, 검사 (핀 겹침·계획 핀·5 V/12 V/7.4 V 줄·비상 정지 뒤·UNO 5V 분리·잭→퓨즈→비상 정지) **통과**, 회로도 3장 `design/img/circuit/*_1117.png` (11/06 그림은 그 회차용으로 둠). 송신 빨강은 쉴드 2 A1·A2·A5 줄 V 핀에 (AI 판단 — 와고에 얇은 선 안 넣으려고)
+  - `design/circuit/harness.py` 11/17 판: 좌표는 PC FreeCAD D5g_full 부품 가운데를 읽음 (읽기만, 모델 안 바꿈). 31묶음 59가닥, 연선 20 AWG 3.3 m · 22 AWG 2.4 m, 기본 선으로 모자라 듀폰·서보 연장 20묶음 (펜 서보 510 mm 움직임), FPC 300 mm 빠듯
+  - 새 문서 `design/2026-11-17_회로_배선표_서현.md` — **엑셀에 없는 것: 연선 20·22 AWG, 1N5819 (펌프), 100 µF (DRV 보드에 없으면)**. `trap_sim.py`·`전기회로/hub_boards.py`·`전기회로/README.md` 옛 기록 표시 (서현 "표시만")
+  - `bringup/b2_gate`: G2 A0 INPUT_PULLUP
+  - `trap_motion.ino` **v0.3**: STEP·DIR·EN, 400 걸음/mm (1/4 스텝, 튜닝표 3장), 걸음 간격 기본 1250 µs (2 mm/s), 원점 느리게 2500 µs (1 mm/s), 최소 100 µs, 방향 뒤집기 상수 `DIR_INV`, 스프링 146 서지 띠 거부 없앰 (11/14 mightyZAP으로 그 스프링이 X·Y와 무관). `sim_motion.cpp` 세계를 DRV8825로 (STEP 올라갈 때 DIR로 셈, EN 꺼진 채 STEP은 걸음 버림)
+  - Pi `process.py`: `clock_synced()` (timedatectl NTPSynchronized) → 안 맞으면 로그 `clock_unsynced`, 시연 스위치 `Params.always_day`, 방생·포획 시각에 `clock_ok`. `test_process.py` [clock] 시험
+  - 새 문서 `design/2026-11-17_펌프_유량_실측법_서현.md` (PUMP 200·100 각 50번 → 무게 → 유량 → PUMP_MAX_MS·feed_pump_ms 식, 고칠 파일 표) — 펌프는 아직 안 받음 (서현)
+  - 검증 [확실]: PC arduino-cli 경고 모두 켬 — trap_motion 12,542 B / RAM 932 B, b2_gate 2,820 B, **경고 0**. PC zig `run_all.ps1` sim_motion 92/92 · sim_doors 90/90. 클라우드: test_pi_link 37/37 · test_process 55/55
+  - 인터페이스 정의서: 구동기 2·3 줄 (핀·걸음/mm), 운용 시간 줄 (시계), 통신 줄 v0.3, 이력. 인수인계 갱신
+  - 남은 것: 엑셀에 연선·1N5819 (·100 µF) 넣을지 서현 결정, 받고 확인 (쉴드 SEL, MOSFET OUT+, ARD200928 헤더·점퍼·콘덴서, VLT-SM006 출력, 2167·LED·펌프 선 끝), Kamoer 유량 실측, XY 튜닝표 1~9장 (실물), 실물 시험 `미검증`
