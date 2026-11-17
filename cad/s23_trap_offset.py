@@ -125,6 +125,10 @@ try:
     holes = [(27.5, (0, 0), (0, 9))] + [(1.7, (sx * 45.5, sy * 26.2), (sx * 45.5, sy * 26.2 + 9)) for sx in (-1, 1) for sy in (-1, 1)]
     holes += [(1.7, (round(x.BoundBox.Center.x, 2), round(x.BoundBox.Center.y, 2)), (round(x.BoundBox.Center.x, 2), round(x.BoundBox.Center.y + 2, 2))) for x in u2st]
     dk.Shape = rehole(dk.Shape, 200.0, 205.0, holes)
+    for x, y in ((-121.5, 83.3), (-61.7, 83.3)):                # (11/17 11:10 발견) MOSFET 긴 나사 2가 데크에 구멍 없이 그려져 있었음 → Ø3.4 관통 + 아래 너트
+        dk.Shape = dk.Shape.cut(cyl(1.7, 7, V(x, y, 199)))
+    sc = o3("198s_board_screws")[0]
+    sc.Label = sc.Label.replace(", 11/17 허브 몫 지움)", ", 11/17 허브 몫 지움 · 긴 나사 2는 데크 Ø3.4 관통 + 아래 M3 너트 = M3 × 16, 키트 A)")
     tp = o3("105_top_plate")[0]
     tp.Shape = rehole(tp.Shape, 610.0, 615.0, [(27.5, (0, 0), (0, -9))])
     rep["deck_holes"] = holes
@@ -145,7 +149,7 @@ try:
           "193kj_shield_jumpers_UNO2", "198u", "101_deck", "105_top_plate")
     ok = (("REF_trap", "REF_trap"), ("102_collar", "REF_trap_ring"), ("102_collar", "100m"), ("100m", "101_deck"), ("104_dome", "REF_trap"), ("104_dome", "105_top"),
           ("111_entry", "110_entry"), ("173_iso", "172_iso"), ("192_", "198u"), ("193k", "192_"), ("193kj", "193k"), ("198u", "101_deck"), ("101_deck", "100"),
-          ("105_top", "100"), ("101_deck", "102_collar"), ("111_entry", "101_deck"), ("REF_trap_awning", "100"), ("193w", "101_deck"))
+          ("105_top", "100"), ("101_deck", "102_collar"), ("101_deck", "198s"), ("111_entry", "101_deck"), ("REF_trap_awning", "100"), ("193w", "101_deck"))
     hits = []
     for la, sa in every:
         ta = la.split(" ", 1)[1]
