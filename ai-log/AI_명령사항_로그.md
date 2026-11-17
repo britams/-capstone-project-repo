@@ -1339,4 +1339,6 @@
   - `al_plates_step_meviy.py`: 가운데가 판 밖인 원호는 '판 끝 홈'으로 따로 적음 → 문판 구멍표 = 관통 Ø2.2 둘 (긴 구멍 양 끝) + 판 끝 홈 Ø6, **17장 끝단 모두 ≥ 1.04 mm** [확실 — CAD]
   - 220 컵받침: 구멍 없이 방생 문 하우징 선반 위에 폼 양면테이프 '(AI 판단, 서현 위임 — A 답과 같이)' → 엑셀 '나중'
   - 엑셀 (`build3.py`): 문판 3장 '지금' (226p 다음, meviy 16장 한 번에 — 144b만 나중), 220 '나중', 읽는 법 할 일 3 고침. recalc 116 · 오류 0. 바탕화면 엑셀·아크릴 읽어주세요 바꿈
-  - 전체 수정 (`_chain_flap2.py`: 문판 → meviy STEP → recolor → full_merge → _make_no → _add_feed → 그림 → 나사 검사 → 움직임 검사 MOTION_ALL·PEN_LIFT 12.1): (결과는 아래 줄)
+  - 전체 수정 (`_chain_flap2.py`: 문판 → meviy STEP → recolor → full_merge → _make_no → _add_feed → 그림 → 나사 검사 → 움직임 검사 MOTION_ALL·PEN_LIFT 12.1) [확실 — CAD]: 나사 검사 옛 218s↔217s 1건뿐, 움직임 **움직이는 28 × 고정 139, 새 겹침 0 · 대기 겹침 0** (03:16)
+  - 검증: 문판 3장 valid · 긴 구멍 닫힘 · 바깥선 1.40 · 통로 4.47 (`_flapslot.json`), meviy 17장 끝단 ≥ 1.04 (`_meviy.json`), 엑셀 recalc 오류 0. 미검증: MG90S 날개 구멍 실제 간격 (받으면 긴 구멍 안에 2개 들어오는지 대 봄), FALCS 구멍 칸, 견적 값
+  - 남은 결정: 없음 (meviy 16장 견적 · 아크릴 9장 견적은 승준/서현이 올리기만)
