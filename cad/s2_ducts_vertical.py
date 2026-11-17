@@ -83,12 +83,13 @@ try:
     b = cone.fuse(cyl(11, E.z + 1.5 - 236.2, V(ce.x, ce.y, 236.2))).fuse(cyl(11, 11, V(ce.x, ce.y, E.z - 0.5)))
     f.Shape = b.cut(cyl(7, 30, V(ce.x, ce.y, 230))).cut(cyl(9.15, 20, E)).removeSplitter()
     f.Label = f.Label.split(" (11/17")[0] + " (11/17 목을 관 110 축 y %.1f로 — 아래 넓은 끝은 데크 구멍 위 그대로, 비스듬한 깔때기)" % ce.y
-    f = ob("173_isolation_funnel")
-    cone = f.Shape.common(Part.makeBox(80, 80, 40, V(-40, -40, 596.2)))
-    cone = shear_y(cone, ci.y / (596.2 - 620.0), 620.0)           # z 596.2에서 y가 ci.y만큼 (−9)
+    f = ob("173_isolation_funnel")                              # 콘은 로프트로 새로 (밀림 변형은 0.01 mm 띠가 생겨 STL이 안 닫힘 — 11/17 10:50)
     E = V(ci.x, ci.y, Gz)
-    b = cone.fuse(cyl(11, 596.2 - (E.z + 0.5) + 0.01, V(ci.x, ci.y, E.z + 0.5))).fuse(cyl(11, 11, V(ci.x, ci.y, E.z + 0.5), V(0, 0, -1)))
-    b = b.cut(cyl(7, 23, V(ci.x, ci.y, 575))).cut(cyl(9.15, 20, E, V(0, 0, -1)))
+    circ = lambda r, c: Part.Wire(Part.makeCircle(r, c))
+    outer = Part.makeLoft([circ(11.0, V(ci.x, ci.y, 596.2)), circ(25.9, V(1.5, 0, 620.0))], True)      # 넓은 끝 Ø52 (1.5, 0) 그대로, 두께 1.5
+    inner = Part.makeLoft([circ(9.5, V(ci.x, ci.y, 596.2)), circ(24.4 + 0.05 * 14.9 / 23.8, V(1.5, -ci.y * 0.05 / 23.8, 620.05))], True)
+    b = outer.cut(inner).fuse(cyl(11, 596.2 - (E.z + 0.5), V(ci.x, ci.y, E.z + 0.5))).fuse(cyl(11, 11, V(ci.x, ci.y, E.z + 0.5), V(0, 0, -1)))
+    b = b.cut(cyl(7, 22, V(ci.x, ci.y, 575))).cut(cyl(9.15, 20, E, V(0, 0, -1)))
     f.Shape = b.cut(Part.makeBox(60, 60, 15.5, V(-28, -30, 560))).removeSplitter()
     f.Label = f.Label.split(" (11/17")[0] + " (11/17 목을 관 172 축 y %.1f로 — 위 넓은 끝은 위판 구멍 그대로, 비스듬한 깔때기)" % ci.y
     for p in ("111_entry_funnel", "173_isolation_funnel", "112_entry_iso_gate_housing"):
@@ -96,8 +97,9 @@ try:
     d.recompute(); _save(d, P)
     # 4) STL (레포 print/3d + 바탕화면)
     import MeshPart
-    for p, nm in (("111_entry_funnel", "111_입구깔때기"), ("112_entry_iso_gate_housing", "112_입구격리문하우징"), ("173_isolation_funnel", "173_격리깔때기")):
-        m = MeshPart.meshFromShape(Shape=ob(p).Shape, LinearDeflection=0.05, AngularDeflection=0.3)
+    for p, nm, ld, ad in (("111_entry_funnel", "111_입구깔때기", 0.05, 0.3), ("112_entry_iso_gate_housing", "112_입구격리문하우징", 0.02, 0.2),
+                          ("173_isolation_funnel", "173_격리깔때기", 0.05, 0.3)):         # 112는 0.05에서 그물이 안 닫힘 → 0.02
+        m = MeshPart.meshFromShape(Shape=ob(p).Shape, LinearDeflection=ld, AngularDeflection=ad)
         fn = os.path.join(HERE, "print", "3d", nm + ".stl"); m.write(fn)
         try:
             shutil.copy(fn, os.path.join(DESK, nm + ".stl"))
