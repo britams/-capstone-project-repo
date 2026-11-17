@@ -60,7 +60,7 @@ try:
                         rmax = max(e.Curve.Radius for e in f.Edges if "Circle" in e.Curve.TypeId)
                         zc = [(e.Curve.Center.x, e.Curve.Center.y, e.Curve.Center.z)[ax] for e in f.Edges if "Circle" in e.Curve.TypeId and abs(e.Curve.Radius - rmax) < 1e-6][0]
                         side = ("+" if zc > (lo[ax] + hi[ax]) / 2 else "−") + "xyz"[ax]
-                        h["csk"] = (round(2 * rmax, 2), round(2 * math.degrees(f.Surface.SemiAngle), 1), side)
+                        h["csk"] = (round(2 * rmax, 2), round(abs(2 * math.degrees(f.Surface.SemiAngle)), 1), side)
             rows = []
             for (p, q), h in sorted(holes.items()):
                 pt = [0, 0, 0]; pt[uax[0]], pt[uax[1]] = p, q; v0 = f0.Vertexes[0].Point; pt[ax] = (v0.x, v0.y, v0.z)[ax]
