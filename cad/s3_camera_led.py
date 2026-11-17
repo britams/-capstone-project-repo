@@ -97,13 +97,16 @@ try:
                     continue
                 if lb.startswith("181s") and dz:          # 기둥은 길이를 바꿔 끼우므로 안 셈
                     continue
-                if s.BoundBox.intersect(sb.BoundBox):
-                    v = s.common(sb).Volume
-                    if v > 0.05:
-                        out.append([la[:30], lb[:40], round(v, 1)])
+                try:
+                    if s.BoundBox.intersect(sb.BoundBox):
+                        v = s.common(sb).Volume
+                        if v > 0.05:
+                            out.append([la[:30], lb[:40], round(v, 1)])
+                except Exception:                         # 빈 모양 (bbox 없음)
+                    pass
         return out
     rep["hits_now"] = hits(0, True)
-    xy_top = max(sb.BoundBox.ZMax for lb, sb in rest if lb.startswith(XY) and sb.BoundBox.YMin < PY1 and sb.BoundBox.YMax > PY0 and sb.BoundBox.ZMax < 540)
+    xy_top = max(sb.BoundBox.ZMax for lb, sb in rest if lb.startswith(XY) and sb.BoundBox.isValid() and sb.BoundBox.YMin < PY1 and sb.BoundBox.YMax > PY0 and sb.BoundBox.ZMax < 540)
     rep["xy_moving_top_z"] = round(xy_top, 1)
     rep["range"] = {}
     for dz in (-35, -30, -20, -10, 10, 15, 19, 25):
