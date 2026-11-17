@@ -17,9 +17,9 @@ PL = [("S2_마킹부", "212_beam_plates", "YA", "YA_빔판A", "3", 1, "X 빔 −
       ("S2_마킹부", "206_carriage_plates", "SP", "SP_안내판", "3", 1, "펜 홀더 안내 (M3 탭 3 · 접시 1)"),
       ("S2_마킹부", "206_carriage_plates", "SV", "SV_서보판", "3", 1, "펜 서보 SG90"),
       ("S2_마킹부", "202_holder_plate_HV", None, "HV_홀더판", "3", 1, "펜 홀더 (P 클립)"),
-      ("S2_마킹부", "112_entry_gate_flap", None, "112f_입구문판", "1.5", 1, "입구 문 (서보 혼)"),
-      ("S2_마킹부", "170_isolation_gate_flap", None, "170f_격리문판", "1.5", 1, "격리 문 (서보 혼)"),
-      ("S2_마킹부", "176_release_gate_flap", None, "176f_방생문판", "1.5", 1, "방생 문 (서보 혼)"),
+      ("S2_마킹부", "112_entry_gate_flap", None, "112f_입구문판", "1.5", 1, "입구 문 (서보 날개 — 긴 구멍 폭 2.2: 양 끝이 Ø2.2 두 개로 보임)"),
+      ("S2_마킹부", "170_isolation_gate_flap", None, "170f_격리문판", "1.5", 1, "격리 문 (서보 날개 — 긴 구멍)"),
+      ("S2_마킹부", "176_release_gate_flap", None, "176f_방생문판", "1.5", 1, "방생 문 (서보 날개 — 긴 구멍)"),
       ("S3_프레임회로", "194b_estop_plate", None, "194b_비상정지판", "4", 1, "비상 정지 스위치 (Ø25.5)"),
       ("S3_프레임회로", "197_drv_bracket", None, "197_드라이버받침", "3", 1, "DRV8825 보드"),
       ("S3_프레임회로", "199a_pi_shelf_plates", "PV", "199a_Pi선반벽", "3", 1, "Pi 선반 벽 (FALCS 2)"),
@@ -72,6 +72,9 @@ try:
         rows = []
         for (p, q), h in sorted(holes.items()):
             pt = [0, 0, 0]; pt[uax[0]], pt[uax[1]] = p, q; v0 = f0.Vertexes[0].Point; pt[ax] = (v0.x, v0.y, v0.z)[ax]
+            if not Part.Face(outer).isInside(V(*pt), 0.001, True):          # (11/18) 가운데가 판 밖 = 판 끝 홈 (바깥선의 일부)
+                rows.append(dict(u=round(p - lo[uax[0]], 2), v=round(q - lo[uax[1]], 2), kind="판 끝 홈 Ø%.1f (구멍 아님 — 바깥선)" % (2 * h["r"]), edge=99.0, land=None))
+                continue
             rr = max(h["r"], (h["csk"][0] / 2) if h["csk"] else 0)
             edge = outer.distToShape(Part.Vertex(V(*pt)))[0] - rr
             r = h["r"]; kind = TAP.get(round(r, 2), "관통 Ø%.1f" % (2 * r))
