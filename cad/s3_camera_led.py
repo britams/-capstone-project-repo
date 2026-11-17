@@ -79,7 +79,8 @@ try:
     for ff in ("S1_급이부", "S2_마킹부", "S2a_바닥구동", "S3_프레임회로"):
         dd = App.openDocument(os.path.join(OUT, ff + ".FCStd"), True)
         every += [(o.Label, o.Shape.copy()) for o in dd.Objects if o.TypeId.startswith("Part::") and not o.Shape.isNull() and not o.Label.startswith(("190_", "REF_"))]
-        App.closeDocument(dd.Name)
+        if dd is not d:                               # S3은 위에서 연 d와 같은 문서 — 닫지 않음
+            App.closeDocument(dd.Name)
     CAM = ("180", "181", "182")
     ok = (("181_", "180"), ("181_", "181s"), ("182", "181_"), ("181s", "105"), ("180s", "180"))
     move = [(la, sa) for la, sa in every if la.startswith(CAM)]
@@ -106,12 +107,13 @@ try:
                     pass
         return out
     rep["hits_now"] = hits(0, True)
-    xy_top = max(sb.BoundBox.ZMax for lb, sb in rest if lb.startswith(XY) and sb.BoundBox.isValid() and sb.BoundBox.YMin < PY1 and sb.BoundBox.YMax > PY0 and sb.BoundBox.ZMax < 540)
-    rep["xy_moving_top_z"] = round(xy_top, 1)
+    under = sorted(((round(sb.BoundBox.ZMax, 1), lb[:50]) for lb, sb in rest if lb.startswith(XY) and sb.BoundBox.isValid() and sb.BoundBox.YMin < PY1 and sb.BoundBox.YMax > PY0 and sb.BoundBox.ZMax < 540), reverse=True)
+    rep["xy_under_top"] = under[:4]
     rep["range"] = {}
-    for dz in (-35, -30, -20, -10, 10, 15, 19, 25):
+    for dz in (-35, -30, -25, -20, -10, 10, 15, 19, 25):
         rep["range"][dz] = len(hits(dz, False))
-    rep["range_detail_25"] = hits(25, False)[:5]
+    rep["range_detail_m30"] = hits(-30, False)[:5]
+    rep["range_detail_m25"] = hits(-25, False)[:5]
     App.closeDocument(d.Name)
     rep["ok"] = True
 except Exception:
