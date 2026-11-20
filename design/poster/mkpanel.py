@@ -1,7 +1,7 @@
 import re, shutil, zipfile, os, sys
 from xml.sax.saxutils import escape as e
 from PIL import Image
-SRC=sys.argv[1]; OUT=sys.argv[2]
+SRC=sys.argv[1]; OUT=sys.argv[2]  # 창의융합 판넬 양식 pptx (배포 양식 — 레포에 넣지 않음). fig_result.png는 말벌 사진이 들어 있어 레포에 안 넣음 (서현 PC capstone_vespai/out에서 만듦)
 D='build/panel'; shutil.rmtree(D,ignore_errors=True); zipfile.ZipFile(SRC).extractall(D)
 S=D+'/ppt/slides/slide1.xml'; RL=D+'/ppt/slides/_rels/slide1.xml.rels'
 x=open(S,encoding='utf-8').read(); rels=open(RL,encoding='utf-8').read()
