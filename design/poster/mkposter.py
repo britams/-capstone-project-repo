@@ -60,6 +60,16 @@ C=__import__('content');
 set_title('직사각형 18',C.TITLE)
 set_team('직사각형 33',C.TEAM)
 for k,v in C.BODY.items(): set_body(k,v)
+# 양식 큰 제목도 본문과 같은 글꼴·왼쪽 맞춤, 본문·제목 왼쪽 시작점 통일 (양식은 6.8~8.3 cm로 들쭉날쭉)
+def fix_head(name, x_cm):
+    global x
+    m=sp_of(name); sp=m.group()
+    sp=re.sub(r'<a:rPr[^>]*/>|<a:rPr[^>]*>.*?</a:rPr>',lambda r: fixfont(r.group()),sp,flags=re.S).replace('algn="just"','algn="l"')
+    sp=re.sub(r'<a:off x="\d+"',f'<a:off x="{int(x_cm*360000)}"',sp,1)
+    x=x[:m.start()]+sp+x[m.end():]
+for n in ['직사각형 22','직사각형 23']: fix_head(n, 8.2)        # marL 없음
+for n in ['직사각형 27','직사각형 41']: fix_head(n, 7.1)        # marL 1.1 cm → 글 시작 8.2
+for n in C.BODY: fix_head(n, 7.1)
 for i,(k,v) in enumerate(C.PICS.items()): add_pic(k,v,f'rId{50+i}')
 x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
 open(S,'w',encoding='utf-8').write(x); open(RL,'w',encoding='utf-8').write(rels)
