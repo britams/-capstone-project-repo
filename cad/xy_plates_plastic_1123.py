@@ -4,6 +4,9 @@
   XN·CP·SV = 아크릴 3T 레이저 (접시·얇은 벽 없음)
   NEMA17 팬케이크 + T8 너트용으로 같이 고침: YM 옛 Ø3.0 × 4 메움 → Ø3.4 × 3 (31 간격) / XN M2 탭·옛 Ø3.4 메움, 가운데 Ø10.5, M3 탭 밑구멍 Ø2.5 × 2 / CP 옛 POM Ø3.4 × 3 메움 → Ø3.4 × 2
   프린트 구멍은 0.2 mm 크게 (FDM은 작게 나옴), 접시는 그대로. 판을 눕혀 (두께 = z) 원점에 놓음. 두께 3 mm 그대로라 다른 부품은 안 바뀜
+  (21시 최종, 승준 위임) YB −x 혀 (x 88.4~90.4 · z 464~) 깎음 — 캐리지 y +17.0에서 SP가 닿던 곳 (M4 접시머리 머리 Ø8.4 이하와 같이: cad/check_xy_plastic_nema17.py)
+    XN·SV도 PETG 프린트 (아크릴은 XN 탭 벽 1.5 mm · SV 귀 구멍 벽 1.04 mm에서 금 갈 수 있음) → 프린트 5 + 아크릴 CP 1. XN·SV 아크릴 DXF는 예비_아크릴/
+    XN M3 탭 밑구멍 Ø2.5는 보정 안 함 (M3를 바로 돌려 넣거나 탭)
   재료: meviy STEP (cad/print/meviy/, 11/18 승준 수정본 = meviy에 올린 것). FreeCAD 없이 OpenCascade (pip install cadquery-ocp ezdxf)
   실행: python3 cad/xy_plates_plastic_1123.py  → cad/print/2026-11-23_XY판_프린트_아크릴/"""
 import os, math
@@ -15,7 +18,7 @@ from OCP.BRepAdaptor import BRepAdaptor_Surface, BRepAdaptor_Curve
 from OCP.GeomAbs import GeomAbs_Cylinder, GeomAbs_Plane, GeomAbs_Line, GeomAbs_Circle
 from OCP.TopoDS import TopoDS
 from OCP.gp import gp_Pnt, gp_Dir, gp_Ax2, gp_Ax1, gp_Trsf, gp_Vec
-from OCP.BRepPrimAPI import BRepPrimAPI_MakeCylinder
+from OCP.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeBox
 from OCP.BRepAlgoAPI import BRepAlgoAPI_Fuse, BRepAlgoAPI_Cut
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
@@ -48,7 +51,8 @@ def cyl(p, d, r, t0, t1):              # 판 두께 축 d (0 x, 1 y), p = 나머
     return BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(*q), gp_Dir(*D)), r, t1 - t0).Shape()
 def clean(s):
     u = ShapeUpgrade_UnifySameDomain(s, True, True, False); u.Build(); return u.Shape()
-def edit(s, d, t0, t1, fill=(), new=()):
+def edit(s, d, t0, t1, fill=(), new=(), boxes=()):
+    for (x0, y0, z0, x1, y1, z1) in boxes: s = BRepAlgoAPI_Cut(s, BRepPrimAPI_MakeBox(gp_Pnt(x0, y0, z0), gp_Pnt(x1, y1, z1)).Shape()).Shape()
     for p, dia in fill: s = BRepAlgoAPI_Fuse(s, cyl(p, d, dia / 2 + 0.02, t0, t1)).Shape()   # +0.02: 좌표 끝수 틈 없게
     s = clean(s)
     for p, dia in new: s = BRepAlgoAPI_Cut(s, cyl(p, d, dia / 2, t0 - 1, t1 + 1)).Shape()
@@ -69,23 +73,27 @@ XN_TAP = [(-65 + 8 * math.cos(a(t)), 425 + 8 * math.sin(a(t))) for t in (150, 24
 # 이름, STEP, 두께 축, [t0, t1], 메울 구멍, 새 구멍, 방식, 위로 올 면 (+1/−1: 두께 축 + 쪽 면을 위로)
 PL = [
  ("YA_빔판A", "YA_빔판A_A5052_3T.step", 1, -59.0, -56.0, [], [], "print", +1),
- ("YB_빔판B", "YB_빔판B_A5052_3T.step", 1, 58.0, 61.0, [], [], "print", -1),
+ ("YB_빔판B", "YB_빔판B_A5052_3T.step", 1, 58.0, 61.0, [], [], "print", -1),          # 혀는 CUT에서
  ("YM_Y모터판", "YM_Y모터판_A5052_3T.step", 1, -101.9, -98.9,
   [((89.9, 441.5), 3.0), ((89.9, 464.5), 3.0), ((112.9, 441.5), 3.0), ((112.9, 464.5), 3.0)],
   [((85.9, 437.5), 3.4), ((85.9, 468.5), 3.4), ((116.9, 468.5), 3.4)], "print", -1),
  ("XN_X너트판", "XN_X너트판_A5052_3T.step", 0, 87.4, 90.4,
   [((-70.5, 421.8), 1.6), ((-59.5, 421.8), 1.6), ((-65.0, 431.35), 3.4)],
-  [((-65.0, 425.0), 10.5)] + [(p, 2.5) for p in XN_TAP], "laser", 0),
+  [((-65.0, 425.0), 10.5)] + [(p, 2.5) for p in XN_TAP], "print", +1),
  ("CP_캐리지판", "CP_캐리지판_A5052_3T.step", 1, -47.0, -44.0,
   [((95.901, 456.175), 3.4), ((106.899, 456.175), 3.4), ((101.4, 446.65), 3.4)],
   [((93.4, 453.0), 3.4), ((109.4, 453.0), 3.4)], "laser", 0),
- ("SV_서보판", "SV_서보판_A5052_3T.step", 0, 100.15, 103.15, [], [], "laser", 0),
+ ("SV_서보판", "SV_서보판_A5052_3T.step", 0, 100.15, 103.15, [], [], "print", +1),
 ]
+CUT = {"YB_빔판B": [(88.3, 57.0, 463.9, 90.4, 62.0, 499.0)]}     # YB −x 혀
+SPARE = {"XN_X너트판", "SV_서보판"}                                  # 아크릴 DXF도 예비로
+NOCOMP = {2.5}                                                        # 탭 밑구멍은 보정 안 함
 COMP = 0.2                              # 프린트 구멍 보정 (지름)
 
 def to_print(s, d, up):                 # 두께 축 → +z, up 면이 위, 원점에
     t = gp_Trsf()
     if d == 1: t.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(1, 0, 0)), math.radians(90 if up > 0 else -90))
+    if d == 0: t.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0)), math.radians(-90 if up > 0 else 90))
     s = BRepBuilderAPI_Transform(s, t, True).Shape()
     x0, y0, z0, *_ = bbox(s); t2 = gp_Trsf(); t2.SetTranslation(gp_Vec(-x0, -y0, -z0))
     return BRepBuilderAPI_Transform(s, t2, True).Shape()
@@ -126,10 +134,15 @@ def to_dxf(s, d, path):                 # 두께 축 − 쪽 면 외곽·구멍 
 if __name__ == "__main__":
     for name, step, d, t0, t1, fill, new, how, up in PL:
         s0 = read(os.path.join(SRC, step))
-        s = edit(s0, d, t0, t1, fill, new) if (fill or new) else s0
-        tag = "_NEMA17" if (fill or new) else ""
+        s = edit(s0, d, t0, t1, fill, new, CUT.get(name, ())) if (fill or new or name in CUT) else s0
+        tag = "_NEMA17" if (fill or new) else "_혀깎음" if name in CUT else ""
+        if name in SPARE:
+            os.makedirs(os.path.join(OUT, "예비_아크릴"), exist_ok=True)
+            k = to_dxf(s, d, os.path.join(OUT, "예비_아크릴", "%s_아크릴3T%s.dxf" % (name, tag)))
+            print("예비 DXF", name, "선 %d개" % k)
         if how == "print":
             for (u, v, dia) in through_holes(s, d):
+                if round(dia, 2) in NOCOMP: continue
                 s = BRepAlgoAPI_Cut(s, cyl((u, v), d, (dia + COMP) / 2, t0 - 1, t1 + 1)).Shape()
             assert BRepCheck_Analyzer(s).IsValid(), name          # (접시와 만나는 곳은 면 합치기 안 함)
             m = to_print(s, d, up)
@@ -143,3 +156,12 @@ if __name__ == "__main__":
             out = os.path.join(OUT, "%s_아크릴3T%s.dxf" % (name, tag))
             k = to_dxf(s, d, out)
             print("DXF", os.path.basename(out), "선 %d개" % k, "구멍", through_holes(s, d))
+
+    # 아크릴몰 자유재단은 50 × 50 밑은 못 자름 → CP 2장 (1장 예비)을 62 × 105 테두리 안에 (300f2 묶음과 같은 방식)
+    src = ezdxf.readfile(os.path.join(OUT, "CP_캐리지판_아크릴3T_NEMA17.dxf"))
+    doc = ezdxf.new("R2010", units=4); msp = doc.modelspace()
+    for dx in (4.0, 33.0):
+        for e in src.modelspace():
+            c = e.copy(); c.translate(dx, 3.0, 0); msp.add_entity(c)
+    for a_, b_ in (((0, 0), (62, 0)), ((62, 0), (62, 105)), ((62, 105), (0, 105)), ((0, 105), (0, 0))): msp.add_line(a_, b_)
+    doc.saveas(os.path.join(OUT, "CP_캐리지판_묶음_62x105_아크릴3T_x2.dxf")); print("DXF 묶음 CP × 2 (62 × 105)")

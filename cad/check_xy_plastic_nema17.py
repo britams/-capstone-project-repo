@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """meviy 담당자 견적 6장(YA·YB·XN·YM·CP·SV)을 빼고 플라스틱 6장 + NEMA17 팬케이크로 조립을 다시 맞추고 부딪힘 검사. 승준 11/23, CAP-AI-SJ-63
-  판 6장: YA·YB·YM = PETG 3D 프린트, XN·CP·SV = 아크릴 3T 레이저 (cad/xy_plates_plastic_1123.py와 같은 구멍 수정 — 조립에서는 이름 치수 구멍)
+  판 6장 (21시 최종): YA·YB·YM·XN·SV = PETG 3D 프린트, CP = 아크릴 3T 레이저, YB −x 혀 깎음 + 그 옆 M4 접시머리 Ø8.0 (cad/xy_plates_plastic_1123.py와 같은 구멍 수정 — 조립에서는 이름 치수 구멍)
   같이 바뀌는 것: X 모터 판 217을 +x 레일 바깥 면으로 (+23, x 180~183) · NEMA17 42 × 42 × 23 상자 · T8 나사 Ø8 (X 155, Y 132)
     · T8 너트 (플랜지 Ø22 × 3.5, 몸 Ø10.2, 길이 15) · XN M3 × 6 (2) · CP M3 + 너트 (2) · 217 M4 둥근머리 (2) · 모터 앞 M3 (X 아래 2, Y 3)
   빼는 옛 부품: LM-NK1134 모터·Tr5 나사·POM 너트와 그 나사, 판 212·211·206 (같은 자리에 PL_ 판), 217·217s
@@ -8,6 +8,7 @@
   결과 (11/23, 승준 PC D5g_full_SJ1123): 정지에서 실제로 손볼 곳 2 — X 너트 플랜지 ↔ Y 원점 기판 2.5 mm³, Y 너트 플랜지 ↔ LMK8UU 나사 0.25 mm³ × 4
     (나머지는 탭·나사 구멍을 안 그려서 생기는 겹침) · 움직임: 캐리지 +58 (y +18)에서만 SP ↔ YB −x 혀 (x 88.4~90.4 · z 464~, 11/17 끝단 수정)
     — 0.1 mm로 보면 y +17.0부터. 원래 설계 그대로라 플라스틱과 무관, 펌웨어 한계 +18보다 1 mm 짧음 (서현 확인) → cad/_xy_plastic_nema17_check.json
+    (21시) YB 혀 깎고 M4 접시머리 Ø8.0으로 다시: 움직임 전부 겹침 0 (캐리지 y 0~58 = 펌웨어 한계 +18까지), 정지는 위와 같음
 실행: FreeCAD에서 D5g_full을 연 채로 매크로 실행 (문서에 PL_ 부품을 만들고 옛 부품은 숨김), 또는 freecad.exe cad/check_xy_plastic_nema17.py (cwd = cad)"""
 import os, math, json, time
 import FreeCAD as App, Part
@@ -35,7 +36,7 @@ XN_TAP = [(-65 + 8 * math.cos(a(t)), 425 + 8 * math.sin(a(t))) for t in (150, 24
 PL = [
  ("YA_PETG", "212_beam_plates", 1, -59.0, -56.0, [], [], "beam"),
  ("YB_PETG", "212_beam_plates", 1, 58.0, 61.0, [], [], "beam"),
- ("XN_acryl", "212_beam_plates", 0, 87.4, 90.4,
+ ("XN_PETG", "212_beam_plates", 0, 87.4, 90.4,
   [((-70.5, 421.8), 1.6), ((-59.5, 421.8), 1.6), ((-65.0, 431.35), 3.4)], [((-65.0, 425.0), 10.5)] + [(p, 2.5) for p in XN_TAP], "beam"),
  ("YM_PETG", "211_y_motor_plate", 1, -101.9, -98.9,
   [((89.9, 441.5), 3.0), ((89.9, 464.5), 3.0), ((112.9, 441.5), 3.0), ((112.9, 464.5), 3.0)],
@@ -43,7 +44,7 @@ PL = [
  ("CP_acryl", "206_carriage_plates", 1, -47.0, -44.0,
   [((95.901, 456.175), 3.4), ((106.899, 456.175), 3.4), ((101.4, 446.65), 3.4)], [((93.4, 453.0), 3.4), ((109.4, 453.0), 3.4)], "carr"),
  ("SP_metal", "206_carriage_plates", 0, 87.15, 90.15, [], [], "carr"),     # SP는 meviy 금속 그대로 (6장에 안 듦)
- ("SV_acryl", "206_carriage_plates", 0, 100.15, 103.15, [], [], "carr"),
+ ("SV_PETG", "206_carriage_plates", 0, 100.15, 103.15, [], [], "carr"),
 ]
 def hole(p, dd, r, t0, t1):
     b = [p[0], p[1]]; b.insert(dd, t0); return cyl(r, t1 - t0, V(*b), X if dd == 0 else Y)
@@ -56,6 +57,8 @@ for name, src, dd, t0, t1, fill, new, g in PL:
     s = plate(src, dd, t0, t1)
     for p, dia in fill: s = s.fuse(hole(p, dd, dia / 2 + 0.02, t0, t1))      # +0.02: 좌표 끝수 틈 없게
     for p, dia in new: s = s.cut(hole(p, dd, dia / 2, t0 - 1, t1 + 1))
+    if name == "YB_PETG":      # (21시 최종) −x 혀 깎음 — SP가 y +17.0에서 닿던 곳 (xy_plates_plastic_1123.py와 같음)
+        s = s.cut(Part.makeBox(2.1, 5, 35.1, V(88.3, 57, 463.9))); fill = True
     NEW.append((name, s.removeSplitter() if (fill or new) else s, g))
 pl = plate("217_x_motor_plate", 0, 157.0, 160.0).copy(); pl.translate(V(23, 0, 0))
 NEW.append(("217_moved", pl, "fixed"))     # +x 레일 바깥 면 (손 가공: 1:1 도안)
@@ -94,11 +97,15 @@ def grp(l):
     return "carr" if l.startswith(CARR) else "beam" if l.startswith(BEAM) else "fixed"
 ALL = [(o.Label, s, grp(o.Label)) for o in parts if not o.Label.startswith(OLD + ("REF_",)) for s in (o.Shape.Solids or [o.Shape])]
 ALL += [(n, s, g) for n, sh, g in NEW for s in sh.Solids]
+# (21시 최종) 혀 옆 M4 접시머리 2개 (YB −y 면, x 94.4 · z 468/492): 모델은 ISO 10642 머리 Ø8.96 → 십자 접시 Ø8.0 (키트 SMG NT-KIT-LS008, 받으면 재 볼 것 ≤ 8.4)
+HEAD = [i for i, (l, s, g) in enumerate(ALL) if l.startswith("212_beam_hardware") and s.BoundBox.XMin < 90.5 and s.BoundBox.ZMin > 460 and abs(s.BoundBox.YMin - 58) < 0.1]
+for i in reversed(HEAD): ALL.pop(i)
+ALL += [("YB_M4접시_머리Ø8", Part.makeCone(4.0, 2.0, 2.2, V(94.4, 58.0, z), Y), "beam") for z in (468, 492)]
 def common(s1, s2):
     return s1.common(s2).Volume if s1.BoundBox.intersect(s2.BoundBox) else 0.0
 
 # ① 정지 (펜 내린 자세): 새 부품 고체마다 나머지 전부
-R = {"고체 수": len(ALL), "정지": []}
+R = {"고체 수": len(ALL), "바꾼 M4 머리 고체": len(HEAD), "정지": []}
 newn = {n for n, _, _ in NEW}
 for i, (l1, s1, _) in enumerate(ALL):
     if l1 not in newn: continue
