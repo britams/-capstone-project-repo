@@ -80,7 +80,7 @@ main.push(body([
   li('말벌 포획부터 판별·고정·점 마킹·내보냄까지 사람 손 없이 자동화'),
   li('YOLO 판별·크기 측정으로 등검은말벌 일벌만 골라 점 마킹'),
   li('지정한 개체만 선택 격리 (현재 여왕벌·다른 종·2마리 이상) — 격리 대상은 설정으로 변경 가능'),
-  li('마킹 색과 재포획 시각으로 내보낸 시간대를 대략 파악 → 말벌집까지 거리 범위 추정'),
+  li('마킹 색으로 내보낸 시간대를, 재포획 시각으로 돌아온 때를 파악 → 왕복 시간으로 말벌집까지 거리 범위 추정'),
   li('새 트랩 제작이 아닌 시판 트랩 위에 얹는 모듈 → 지자체·방제 기관용 조사 장비(B2G)로 보급'),
 ]));
 
@@ -107,7 +107,7 @@ main.push(body([
     ['가중치', 'AI 모델이 학습으로 얻은 숫자 값들의 묶음 — 모델이 배운 내용을 담은 파일'],
     ['파인 튜닝', '처음부터 학습하지 않고, 이미 학습된 가중치에서 출발해 우리 사진으로 조금 더 학습시키는 방법'],
     ['라벨 · 신뢰도', '라벨은 학습 사진에 사람이 "여기가 말벌"이라고 그린 네모 표시, 신뢰도는 AI가 "말벌이다"라고 판단한 확신 정도 (0~1, 본 과제는 0.5 이상만 인정)'],
-    ['중흉배판', '말벌 가슴 등 쪽 가운데의 단단한 판 — 이 판의 폭으로 여왕벌과 일벌을 구분'],
+    ['중순판 (mesoscutum)', '말벌 가슴 등 쪽, 양쪽 날개 뿌리 사이의 단단한 판 — 이 판의 폭으로 여왕벌과 일벌을 구분'],
     ['리드스크루', '모터가 나사 축을 돌리면 축에 끼운 너트가 앞뒤로 곧게 움직이는 부품 (도는 움직임 → 곧은 움직임)'],
     ['스텝 모터 · 서보', '스텝 모터는 정해진 작은 각도씩 끊어 돌아 위치를 정확히 맞추는 모터, 서보는 명령한 각도(또는 길이)로 가서 멈추는 구동기'],
     ['리니어 서보', '막대가 명령한 길이만큼 곧게 나오고 들어가는 서보 — 본 과제에서 바닥을 올리고 내림'],
@@ -124,7 +124,7 @@ main.push(body([
   ], { header: true }),
   head('작품 제작에 필요한 기술'),
   li('객체 검출: YOLOv5s (한 장의 사진에서 물체 위치를 네모로 찾는 딥러닝 모델) + 파인 튜닝 (이미 학습된 가중치를 우리 촬영 조건에 맞게 추가 학습)'),
-  li('크기 측정: 격자 간격 4.4 mm를 자로 써서 가슴(중흉배판) 폭 측정 → 폭 4.4 mm 이상이면 여왕벌로 판정 (Pérez-de-Heredia 2017 기준)'),
+  li('크기 측정: 격자 간격 4.4 mm를 자로 써서 가슴 중순판 폭 측정 → 폭 4.4 mm 이상이면 여왕벌로 판정 — 논문 경계는 4.5 mm이고 불확실 범위가 4.4~4.58 mm라 [33], 여왕벌을 놓치지 않도록 범위의 아래 끝 4.4 mm를 택함'),
   li('기구: 리니어 서보 승강 바닥, XY 리드스크루 이송 + 펜 들기 서보, 문 3개 (MG90S 서보, 스카치 요크 미닫이)'),
   li('센서·제어: 적외선 빛 게이트 3쌍, Raspberry Pi 5 + Camera Module 3, Arduino UNO 2대, 12 V 단일 전원'),
   li('설계 검증: FreeCAD 생성 스크립트·간섭 검사, 역학 계산 (정역학·동역학·재료역학), 펌웨어 PC 시뮬레이션'),
@@ -161,7 +161,7 @@ main.push(body([
   head('결과물의 특장점'),
   li('사람 손 없는 점 마킹: 위험한 손 표시 단계를 기계가 대신해 쏘임 위험 감소'),
   li('판별: YOLOv5s를 VespAI 가중치에서 우리 표본·격자 조건으로 파인 튜닝 → 학습 미사용 표본 917/917 장면 검출 (철망 시험)'),
-  li('여왕벌 구분: 격자 간격 4.4 mm를 자로 써서 가슴 폭 측정 (사진 5장의 중앙값), 못 재면 계절 규칙 적용 (3~5월·9~11월은 여왕벌로 보고 격리)'),
+  li('여왕벌 구분: 격자 간격 4.4 mm를 자로 써서 가슴 중순판 폭 측정 (사진 5장의 중앙값, 4.4 mm 이상이면 여왕벌), 못 재면 계절 규칙 적용 (3~5월·9~11월은 여왕벌로 보고 격리)'),
   li('고정: 여왕벌 마킹 통 원리를 기계화 — 리니어 서보가 백색 바닥을 올려 말벌을 투명 격자판 (2T, 네모 구멍 3.0 mm, 간격 4.4 mm)에 눌러 고정, 위치 지정 서보라 바닥이 격자 아래 5 mm에서 바로 정지'),
   li('점 마킹: XY 이송 장치가 펜을 가슴 위로 옮긴 뒤 격자 구멍으로 점 마킹, 펜 누르는 힘 약 0.3 N (홀더·마커 자중), 마지막 2 mm는 천천히'),
   li('한 마리씩: 입구 문 + 빛 게이트로 한 마리씩 들여보냄, 문틈이 빈 것을 확인한 뒤 닫아 끼임 방지'),
@@ -281,6 +281,7 @@ const refs = [
   'Irish Beekeepers\' Association, "Clipping and Marking a Queen"',
   'Poidatz J., Monceau K., Bonnard O., Thiéry D.(2018), "Activity rhythm and action range of workers of the invasive hornet predator of honeybees Vespa velutina, measured by radio frequency identification tags", 「Ecology and Evolution, Vol. 8 No. 15」, pp. 7588-7598',
   'Riley W.F. 외, 「Engineering Mechanics: Statics」 / Meriam J.L. 외, 「Engineering Mechanics: Dynamics」 / Gere J.M., 「Mechanics of Materials」',
+  'Pérez-de-Heredia I., Darrouzet E., Goldarazena A., Romón P., Iturrondobeitia J.C.(2017), "Differentiating between gynes and workers in the invasive hornet Vespa velutina (Hymenoptera, Vespidae) in Europe", 「Journal of Hymenoptera Research, Vol. 60」, pp. 119-133',
 ];
 main.push(bar('8. 참고문헌'));
 main.push(body(refs.map((t, i) => P([r(`${i + 1}. ${t}`, { size: 16 })], { indent: { left: 360, hanging: 360 }, before: 10, after: 10, line: 250 }))));
