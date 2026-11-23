@@ -91,6 +91,10 @@ for kind,name in ORDER:
     x=x[:m.start()]+sp+x[m.end():]; y+=h; prev=kind
 print('본문 끝 y =',round(y,1),'cm (로고 131.5 위여야 함)'); assert y<131.0
 for i,(k,v) in enumerate(C.PICS.items()): add_pic(k,v,f'rId{50+i}')
+# 11/23 22:27 서현이 PowerPoint에서 오른쪽 그림 4개를 1.06 cm (381000 EMU) 내림 → 그 자리 지킴
+for nm in ['직사각형 45','직사각형 46','직사갌형 47'.replace('갌','각'),'직사각형 48']:
+    mp=[mm for mm in re.finditer(r'<p:pic>.*?</p:pic>',x,re.S) if f'name="그림 {nm}"' in mm.group()][0]
+    x=x[:mp.start()]+re.sub(r'(<a:off x="\d+") y="(\d+)"',lambda r:f'{r.group(1)} y="{int(r.group(2))+381000}"',mp.group(),1)+x[mp.end():]
 x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
 open(S,'w',encoding='utf-8').write(x); open(RL,'w',encoding='utf-8').write(rels)
 out='build/'+C.OUT
