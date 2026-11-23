@@ -146,8 +146,9 @@ f, a = canvas()
 GL = '#BFD9F2'
 # 카메라 + 조명
 a.add_patch(FancyBboxPatch((24, 59), 12, 6, boxstyle='round,pad=0,rounding_size=0.8', fc=NAVY, ec='none'))
-a.add_patch(Rectangle((26.5, 57.6), 7, 1.4, fc=AMBER, ec='none'))
-a.text(38, 62, '카메라 + 링 조명', fontsize=22, color=NAVY, weight='bold', va='center')
+a.add_patch(Rectangle((19.5, 58.2), 4, 1.6, fc=AMBER, ec='none')); a.add_patch(Rectangle((36.5, 58.2), 4, 1.6, fc=AMBER, ec='none'))
+a.add_patch(Rectangle((28.6, 57.9), 2.8, 1.1, fc=NAVY, ec='none'))
+a.text(42, 62, '카메라 + LED 조명', fontsize=22, color=NAVY, weight='bold', va='center')
 a.add_patch(Polygon([(30, 57.6), (17, 37.5), (43, 37.5)], closed=True, fc=GL, ec='none', alpha=0.45))
 # XY 이송 장치
 a.add_patch(Rectangle((6, 47.5), 52, 1.6, fc='#8C96A3', ec='none'))
@@ -163,12 +164,10 @@ a.add_patch(Ellipse((26.0, 35.6), 15, 3.6, fc=AMBER, ec=NAVY, lw=2))
 for sx in (29, 31.5, 34): a.add_patch(Rectangle((sx - 0.5, 34.0), 1.0, 3.2, fc=NAVY, ec='none'))
 a.add_patch(Circle((26.0, 37.2), 0.9, fc='#2563A8', ec='white', lw=1.5, zorder=5))
 # 승강 바닥 + 구동
-a.add_patch(Rectangle((8, 31.6), 44, 2.2, fc='#7FA7D6', ec=NAVY, lw=2))
+a.add_patch(Rectangle((8, 31.6), 44, 2.2, fc='#F7F8FA', ec=NAVY, lw=2))
 a.add_patch(FancyArrowPatch((40, 22), (40, 30.8), arrowstyle='-|>', mutation_scale=30, lw=4, color=BLUE))
-a.add_patch(Rectangle((28.5, 12), 3, 19.6, fc='#B9C2CC', ec='none'))
-for k in range(6): a.plot([27.2, 32.8], [21.5 + k * 1.3, 22.1 + k * 1.3], color=NAVY, lw=2)
-a.add_patch(Rectangle((24.5, 16.5), 11, 3.4, fc='#C77D3A', ec='none'))
-a.add_patch(Rectangle((25, 5), 10, 7, fc=GRAY, ec='none'))
+a.add_patch(Rectangle((29, 21), 2, 10.6, fc='#B9C2CC', ec='none'))
+a.add_patch(FancyBboxPatch((25, 5), 10, 16, boxstyle='round,pad=0,rounding_size=0.6', fc=GRAY, ec='none'))
 # 벽·문
 a.add_patch(Rectangle((5.5, 31.6), 2.5, 10.2, fc='#D5DBE3', ec='none')); a.add_patch(Rectangle((52, 31.6), 2.5, 10.2, fc='#D5DBE3', ec='none'))
 a.add_patch(Rectangle((5.5, 32.6), 2.5, 2.6, fc=AMBER, ec='none')); a.add_patch(Rectangle((52, 32.6), 2.5, 2.6, fc=AMBER, ec='none'))
@@ -180,12 +179,12 @@ def note(y, n, t, s, c=NAVY):
     a.text(R + 5.2, y + 1.6, t, fontsize=24, color=NAVY, weight='bold', va='center')
     a.text(R + 5.2, y - 2.6, s, fontsize=18, color=GRAY, va='center', linespacing=1.3)
 note(58, '1', '찍기 전 촬영', '격자 위 153.5 mm 카메라로\n일벌 확인·가슴 위치 찾음')
-note(42, '2', '바닥 상승 → 고정', '모터·나사가 바닥을 밀어\n말벌을 격자판에 눌러 고정', BLUE)
-note(26, '3', '힘을 재며 멈춤', '스프링 밑 로드셀이 누르는 힘\n측정, 0.5 N이면 정지', BLUE)
+note(42, '2', '바닥 상승 → 고정', '리니어 서보가 바닥을 밀어\n말벌을 격자판에 눌러 고정', BLUE)
+note(26, '3', '정한 높이에서 멈춤', '위치 지정 서보라 격자 아래\n5 mm에서 바로 정지', BLUE)
 note(10, '4', '격자 구멍으로 점', '펜 약 0.3 N, 마지막 2 mm는\n천천히 내려 가슴에 점', BLUE)
-a.text(30, 8.5, '모터', ha='center', va='center', fontsize=17, color='white', weight='bold')
-a.text(36.5, 18.2, '로드셀', fontsize=17, color=GRAY, va='center'); a.text(34, 23.5, '스프링', fontsize=17, color=GRAY, va='center')
-a.text(1, 42.6, '투명 격자판\n(구멍 Ø3)', fontsize=17, color=BLUE, linespacing=1.2); a.plot([11.5, 11.5], [42.4, 39.8], color=BLUE, lw=1.5)
+a.text(30, 15.2, '리니어', ha='center', va='center', fontsize=17, color='white', weight='bold'); a.text(30, 11.4, '서보', ha='center', va='center', fontsize=17, color='white', weight='bold')
+a.text(37, 9, '행정 26 mm', fontsize=17, color=GRAY, va='center'); a.text(44.5, 34.7, '백색 바닥', fontsize=15, color=GRAY, va='center')
+a.text(1, 42.6, '투명 격자판\n(네모 구멍 3 mm)', fontsize=17, color=BLUE, linespacing=1.2); a.plot([11.5, 11.5], [42.4, 39.8], color=BLUE, lw=1.5)
 a.text(1.5, 65.2, '마킹실 작동 원리', fontsize=22, color=NAVY, weight='bold')
 a.text(2, 1.2, '마킹실 단면 개념도 (실제 비율 아님)', fontsize=16, color=GRAY)
 f.savefig('fig_idea.png'); plt.close(f)
@@ -209,7 +208,7 @@ lab(8.5, '시판 트랩', '처음 잡히는 곳', 9.4, 30)
 X = 72
 def box(y, t, fc=LIGHT, tc=NAVY, w=22):
     card(a, X - w / 2, y - 3, w, 6, fc=fc, ec=fc, r=1.2); a.text(X, y, t, ha='center', va='center', fontsize=20, color=tc, weight='bold')
-box(8, '시판 트랩 몸통'); box(22, '입구 통로 (센서 2개)'); box(38, '마킹실', NAVY, 'white')
+box(8, '시판 트랩 몸통'); box(22, '입구 통로 (빛 센서)'); box(38, '마킹실', NAVY, 'white')
 arrow(a, X, 11.2, X, 18.6); arrow(a, X, 25.2, X, 34.6)
 card(a, 58, 52, 20, 9, fc='#FDF3DE', ec='#FDF3DE', r=1.2); a.text(68, 58.4, '밖으로 (귀소)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold'); a.text(68, 54.6, '일벌 · 표시 후', ha='center', va='center', fontsize=16, color='#9A6A0A', weight='bold')
 card(a, 80, 52, 19, 9, fc='#E9ECEF', ec='#E9ECEF', r=1.2); a.text(89.5, 58.4, '포획통 (격리)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold'); a.text(89.5, 54.6, '여왕벌 · 다른 종', ha='center', va='center', fontsize=16, color=GRAY, weight='bold')
@@ -224,8 +223,8 @@ iso = trim('/home/claude/repo/cad/img/D5g_도1_전체_등각.png', 150, 90); ih 
 a.add_patch(FancyBboxPatch((0.2, 0.2), iw + 1.0, PH - 0.4, boxstyle='round,pad=0,rounding_size=0.8', fc='white', ec=LINE, lw=2))
 a.imshow(np.asarray(iso), extent=(0.7, 0.7 + iw, 0.8, 0.8 + ih), zorder=2)
 a.text(iw + 0.6, 0.9, 'CAD 모델', ha='right', va='bottom', fontsize=18, color=GRAY, zorder=3)
-pts = [('시판 트랩 장착형', '시판 트랩 위에 얹는\n2020 알루미늄 프레임'), ('입구 통로', '센서 2개·문으로\n한 마리씩 들여보냄'),
-       ('마킹실', '투명 격자판 (구멍 Ø3)\n승강 바닥·로드셀'), ('XY 펜', '수성 마커, 약 0.3 N\n마지막 2 mm는 천천히'),
+pts = [('시판 트랩 장착형', '시판 트랩 위에 얹는\n2020 알루미늄 프레임'), ('입구 통로', '빛 센서·문으로\n한 마리씩 들여보냄'),
+       ('마킹실', '투명 격자판 (네모 구멍 3 mm)\n리니어 서보 승강 바닥'), ('XY 펜', '수성 아크릴 마커, 약 0.3 N\n마지막 2 mm는 천천히'),
        ('설계 검토', '역학계산 10문제\n부품 167개 간섭 검사')]
 x0 = iw + 2.2
 for i, (t, s) in enumerate(pts):

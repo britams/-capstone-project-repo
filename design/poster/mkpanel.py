@@ -33,7 +33,7 @@ C=__import__('panel_content')
 tb(5.0,26.6,17.8,28.5,C.P11,3000); tb(26.6,26.6,14.6,28.5,C.P12,3000)   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
 pic('fig_p_design.png',44.5,23.4,35.6)                                         # 2번 칸: CAD + 설계 요점 (판넬 전용 그림)
 pic('fig_idea.png',4.8,64.3,36.6); pic('fig_result.png',42.8,64.3,36.6)       # 3번 칸: 마킹실 작동 원리 + 장치 구조·말벌 경로
-tb(8.6,98.0,31.6,12.0,C.P41,3000); tb(44.6,97.6,36.0,12.0,C.P42,3000)
+tb(8.6,97.8,31.6,12.8,C.P41,3000); tb(44.6,97.8,36.0,12.8,C.P42,3000)   # 11/23 '저거밖에 안 돼? 흰 부분 없애' → 6줄씩, 한 줄에 들어가게
 x=x.replace('</p:spTree>',''.join(add)+'</p:spTree>')
 x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
 open(S,'w',encoding='utf-8').write(x); open(RL,'w',encoding='utf-8').write(rels)
