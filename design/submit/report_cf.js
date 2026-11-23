@@ -304,7 +304,7 @@ const doc = new Document({
       P([r('창의융합 경진대회 과제보고서', { bold: true, size: 36 })], { align: AlignmentType.CENTER, after: 160 }),
       info, P('', { before: 0, after: 0 }), big,
       P([r('위와 같이 과제보고서를 제출합니다.', { size: 24 })], { align: AlignmentType.CENTER, before: 500 }),
-      P([r('2026년   11월      일', { size: 24 })], { align: AlignmentType.CENTER, before: 300 }),
+      P([r('2026년  11월  24일', { size: 24 })], { align: AlignmentType.CENTER, before: 300 }),
       P([r('대표학생   이 서 현   (인)', { size: 24 })], { align: AlignmentType.CENTER, before: 300 }),
       P([r('천안공과대학 학장  귀하', { bold: true, size: 32 })], { align: AlignmentType.CENTER, before: 600 }),
     ],
