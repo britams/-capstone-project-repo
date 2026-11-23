@@ -70,6 +70,20 @@ def fix_head(name, x_cm):
 for n in ['직사각형 22','직사각형 23']: fix_head(n, 8.2)        # marL 없음
 for n in ['직사각형 27','직사각형 41']: fix_head(n, 7.1)        # marL 1.1 cm → 글 시작 8.2
 for n in C.BODY: fix_head(n, 7.1)
+# 세로 배치: 양식 위치 대신 실제 줄 수로 위에서부터 같은 간격으로 쌓음 (줄 간격 고정 pt → PowerPoint·LibreOffice 같음)
+ORDER=[('h','직사각형 22'),('b','직사각형 20'),('b','직사각형 21'),('h','직사각형 23'),('b','직사각형 35'),('b','직사각형 37'),
+       ('h','직사각형 27'),('b','직사각형 42'),('h','직사각형 41'),('b','직사각형 43'),('b','직사각형 44')]
+LN={'h':76,'b':58}; GAP={'h':0.2,'b':1.3}; SEC=2.8; y=33.8; prev=None   # pt, cm
+for kind,name in ORDER:
+    m=sp_of(name); sp=m.group()
+    sp=re.sub(r'<a:lnSpc>.*?</a:lnSpc>',f'<a:lnSpc><a:spcPts val="{LN[kind]*100}"/></a:lnSpc>',sp,flags=re.S)
+    sp=re.sub(r'<a:spcBef>.*?</a:spcBef>','<a:spcBef><a:spcPts val="0"/></a:spcBef>',sp,flags=re.S)
+    sp=re.sub(r'<a:spcAft>.*?</a:spcAft>','<a:spcAft><a:spcPts val="0"/></a:spcAft>',sp,flags=re.S)
+    n=len(re.findall(r'<a:p>',sp)); h=0.254+n*LN[kind]*2.54/72
+    if prev: y+=SEC if kind=='h' else GAP[prev]
+    sp=re.sub(r'(<a:off x="\d+") y="\d+"/><a:ext cx="(\d+)" cy="\d+"',lambda r:f'{r.group(1)} y="{int(y*360000)}"/><a:ext cx="{r.group(2)}" cy="{int(h*360000)}"',sp,1)
+    x=x[:m.start()]+sp+x[m.end():]; y+=h; prev=kind
+print('본문 끝 y =',round(y,1),'cm (로고 131.5 위여야 함)'); assert y<130.5
 for i,(k,v) in enumerate(C.PICS.items()): add_pic(k,v,f'rId{50+i}')
 x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
 open(S,'w',encoding='utf-8').write(x); open(RL,'w',encoding='utf-8').write(rels)

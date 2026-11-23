@@ -189,33 +189,27 @@ a.text(1.5, 65.2, '마킹실 작동 원리', fontsize=22, color=NAVY, weight='bo
 a.text(2, 1.2, '마킹실 단면 개념도 (실제 비율 아님)', fontsize=16, color=GRAY)
 f.savefig('fig_idea.png'); plt.close(f)
 
-# ══ 그림 4 (교체): 장치 구조 + 말벌 이동 경로
+# ══ 그림 4 (11/23 밤 다시): CAD 정면도에 번호 + 오른쪽 설명 (판넬 2번 칸 방식, 선 교차 없음)
 f, a = canvas()
-card(a, 0.5, 0.5, 41, 67, fc='white', ec=LINE, r=2.0)
+card(a, 0.5, 0.5, 40, 67, fc='white', ec=LINE, r=2.0)
 fr = Image.open('/home/claude/repo/cad/img/D5g_도2_정면.png').convert('RGB').crop((835, 240, 1565, 1640))
-put(a, fr, 2, 2, 38, 64)
-a.text(2, 64.6, 'CAD 정면도', fontsize=16, color=GRAY)
-def lab(y, t, s=None, yp=None, xp=31):
-    yp = y if yp is None else yp
-    a.plot([xp, 40, 44.5], [yp, y, y], color=BLUE, lw=2); a.add_patch(Circle((xp, yp), 0.7, fc=BLUE, ec='none'))
-    a.text(45.3, y + (1.4 if s else 0), t, fontsize=22, color=NAVY, weight='bold', va='center')
-    if s: a.text(45.3, y - 2.3, s, fontsize=17, color=GRAY, va='center')
-lab(61, '포획통', '격리된 말벌', 60, 26)
-lab(48, '카메라', '격자 위 153.5 mm', 44.8, 27)
-lab(35, '마킹실', 'XY 펜·승강 바닥', 32.8, 27)
-lab(21.5, '제어·전원', 'Pi 5·Arduino', 20.5, 30)
-lab(8.5, '시판 트랩', '처음 잡히는 곳', 9.4, 30)
-# 경로도
-X = 72
-def box(y, t, fc=LIGHT, tc=NAVY, w=22):
-    card(a, X - w / 2, y - 3, w, 6, fc=fc, ec=fc, r=1.2); a.text(X, y, t, ha='center', va='center', fontsize=20, color=tc, weight='bold')
-box(8, '시판 트랩 몸통'); box(22, '입구 통로 (빛 센서)'); box(38, '마킹실', NAVY, 'white')
-arrow(a, X, 11.2, X, 18.6); arrow(a, X, 25.2, X, 34.6)
-card(a, 58, 52, 20, 9, fc='#FDF3DE', ec='#FDF3DE', r=1.2); a.text(68, 58.4, '밖으로 (귀소)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold'); a.text(68, 54.6, '일벌 · 표시 후', ha='center', va='center', fontsize=16, color='#9A6A0A', weight='bold')
-card(a, 80, 52, 19, 9, fc='#E9ECEF', ec='#E9ECEF', r=1.2); a.text(89.5, 58.4, '포획통 (격리)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold'); a.text(89.5, 54.6, '여왕벌 · 다른 종', ha='center', va='center', fontsize=16, color=GRAY, weight='bold')
-arrow(a, 69, 41.4, 68, 51.4, c=AMBER, lw=4); arrow(a, 79, 41.4, 88, 51.4)
-a.text(X + 6, 64.2, '말벌이 지나가는 길', ha='center', fontsize=22, color=NAVY, weight='bold')
-f.savefig('fig_result.png'); plt.close(f)
+put(a, fr, 2, 2, 38, 64)   # → 그림 x 4.3~37.7, y 2~66
+a.text(39.5, 1.6, 'CAD 정면도', ha='right', va='bottom', fontsize=16, color=GRAY, zorder=7, bbox=dict(fc='white', ec='none', pad=2))
+pts = [((21.9, 58.5), '포획통', '여왕벌·다른 종을 표시 없이 가둠'),
+       ((26.3, 46.6), '카메라', '마킹실 위 153.5 mm, AI로 일벌 판별'),
+       ((25.1, 32.2), '마킹실', '리니어 서보 바닥으로 고정, XY 펜으로 점'),
+       ((14.6, 19.8), '제어·전원', 'Raspberry Pi 5·Arduino, 12 V 전원'),
+       ((17.3, 10.7), '시판 트랩', '2020 알루미늄 프레임 아래에 그대로 씀')]
+for i, ((px, py), t, sub) in enumerate(pts):
+    c = BLUE if i == 2 else NAVY
+    a.add_patch(Circle((px, py), 2.0, fc=c, ec='white', lw=3, zorder=5))
+    a.text(px, py, str(i + 1), ha='center', va='center', fontsize=24, color='white', weight='bold', zorder=6)
+    ty = 59 - i * 12.2
+    a.add_patch(Circle((45.5, ty), 2.4, fc=c, ec='none'))
+    a.text(45.5, ty, str(i + 1), ha='center', va='center', fontsize=26, color='white', weight='bold')
+    a.text(49.5, ty + 1.7, t, fontsize=30, color=NAVY, weight='bold', va='center')
+    a.text(49.5, ty - 2.9, sub, fontsize=20, color=GRAY, va='center')
+f.savefig('fig_struct.png'); plt.close(f)
 
 # ══ 판넬 2번 칸 (설계 및 모델링): CAD 등각 + 설계 요점 — 실제 크기 35.6 × 32 cm (11/23 서현 '판넬 정말 별로')
 PW, PH = 35.6, 32.0
