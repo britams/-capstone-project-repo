@@ -181,7 +181,7 @@ def note(y, n, t, s, c=NAVY):
 note(58, '1', '찍기 전 촬영', '격자 위 153.5 mm 카메라로\n일벌 확인·가슴 위치 찾음')
 note(42, '2', '바닥 상승 → 고정', '리니어 서보가 바닥을 밀어\n말벌을 격자판에 눌러 고정', BLUE)
 note(26, '3', '정한 높이에서 멈춤', '위치 지정 서보라 격자 아래\n5 mm에서 바로 정지', BLUE)
-note(10, '4', '격자 구멍으로 점', '펜 약 0.3 N, 마지막 2 mm는\n천천히 내려 가슴에 점', BLUE)
+note(10, '4', '격자 구멍으로 점 마킹', '펜 약 0.3 N, 마지막 2 mm는\n천천히 내려 가슴에 점 마킹', BLUE)
 a.text(30, 15.2, '리니어', ha='center', va='center', fontsize=17, color='white', weight='bold'); a.text(30, 11.4, '서보', ha='center', va='center', fontsize=17, color='white', weight='bold')
 a.text(37, 9, '행정 26 mm', fontsize=17, color=GRAY, va='center'); a.text(44.5, 34.7, '백색 바닥', fontsize=15, color=GRAY, va='center')
 a.text(1, 42.6, '투명 격자판\n(네모 구멍 3 mm)', fontsize=17, color=BLUE, linespacing=1.2); a.plot([11.5, 11.5], [42.4, 39.8], color=BLUE, lw=1.5)
@@ -197,7 +197,7 @@ put(a, fr, 2, 2, 38, 64)   # → 그림 x 4.3~37.7, y 2~66
 a.text(39.5, 1.6, 'CAD 정면도', ha='right', va='bottom', fontsize=16, color=GRAY, zorder=7, bbox=dict(fc='white', ec='none', pad=2))
 pts = [((21.9, 58.5), '포획통', '지정한 개체만 선택 격리'),
        ((26.3, 46.6), '카메라', '마킹실 위 153.5 mm, YOLO로 일벌 판별'),
-       ((25.1, 32.2), '마킹실', '리니어 서보 바닥으로 고정, XY 펜으로 점'),
+       ((25.1, 32.2), '마킹실', '리니어 서보 바닥으로 고정, XY 펜으로 점 마킹'),
        ((14.6, 19.8), '제어·전원', 'Raspberry Pi 5·Arduino, 12 V 전원'),
        ((17.3, 10.7), '시판 트랩', '2020 알루미늄 프레임 아래에 그대로 사용')]
 for i, ((px, py), t, sub) in enumerate(pts):
@@ -265,8 +265,8 @@ f.savefig('fig_ai.png'); plt.close(f)
 # ══ 그림 (오른쪽 4번) B2G 활용 — 자세히 (11/23 밤 서현 "현재 것에서 자세하게"). 근거: 당위성 워드 (Rojas-Nossa 2022 공식, 11-3 색 교체, 조사·방제 모드)
 f, a = canvas()
 a.text(1, 64.5, '활용 — 지자체·방제 기관용 둥지 조사 장비 (B2G)', fontsize=26, color=NAVY, weight='bold', va='center')
-flow = [('트랩 설치', '양봉장 주변 여러 곳\n시판 트랩 위에 장착'), ('자동 표시', '일벌만 점 찍고 내보냄\n시제품: 1시간마다 색 교체'),
-        ('시각 수집', '점 색·재포획 시각으로\n왕복 시간 계산'), ('둥지 제거', '거리 범위 안 수색\n허가 기관이 제거')]
+flow = [('트랩 설치', '양봉장 주변 여러 곳\n시판 트랩 위에 장착'), ('자동 표시', '일벌만 점 마킹 후 내보냄\n시제품: 1시간마다 색 교체'),
+        ('시각 수집', '마킹 색·재포획 시각으로\n왕복 시간 계산'), ('둥지 제거', '거리 범위 안 수색\n허가 기관이 제거')]
 for i, (t, sub) in enumerate(flow):
     x = 1 + i * 25; hl = i == 3
     card(a, x, 33, 22.5, 26, fc=NAVY if hl else LIGHT, ec='none', r=1.6)
@@ -310,7 +310,7 @@ f.savefig('fig_ai.png'); plt.close(f)
 # ══ 오른쪽 그림 1 (11/23 21:27 서현 "대표사진과 fig1 합치기"): 작동 5단계 + ② 판별 사진 2장
 U = '/mnt/user-data/uploads/capstone design/'
 f, a = canvas()
-steps = [('들어옴', '빛 센서·입구 문'), ('판별', 'YOLO 모델'), ('고정', '바닥 올림'), ('표시', 'XY 펜으로 점'), ('내보냄', '방생 문·시각 기록')]
+steps = [('들어옴', '빛 센서·입구 문'), ('판별', 'YOLO 모델'), ('고정', '바닥 올림'), ('표시', 'XY 펜으로 점 마킹'), ('내보냄', '방생 문·시각 기록')]
 cx = [10, 30, 50, 70, 90]
 for i, (t, sub) in enumerate(steps):
     c = AMBER if i == 1 else (BLUE if i in (2, 3) else NAVY)
