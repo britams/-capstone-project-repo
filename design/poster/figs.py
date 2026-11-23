@@ -18,7 +18,7 @@ def arr(a,x1,y1,x2,y2,t=None,tx=0,ty=0.4):
     if t: a.text((x1+x2)/2+tx,(y1+y2)/2+ty,t,ha='center',fontsize=11,color='#444')
 # 1 과제 목표: 동작 흐름
 f,a=fig()
-a.text(1,H-1.6,'한 마리를 사람 손 없이: 가두고 → 가려내고 → 표시하고 → 내보낸다',fontsize=15,weight='bold',color=INK)
+a.text(1,H-1.6,'한 마리를 사람 손 없이: 가두기 → 가려내기 → 표시 → 내보냄',fontsize=15,weight='bold',color=INK)
 bw,bh=6.2,3.0; y1=H-7.2
 xs=[1,8.4,15.8,23.2]
 box(a,xs[0],y1,bw,bh,'① 들어옴','게이트 → 문 닫힘',fs=14)
@@ -62,7 +62,7 @@ arr(a,10.6,9.6,12.3,9.6); arr(a,19.2,9.6,22.4,9.6,'합침',ty=0.4)
 f.savefig('fig_idea.png'); plt.close(f)
 # 3 활용: B2G
 f,a=fig()
-a.text(1,H-1.6,'공공기관 (B2G)용 조사 장비 — 둥지를 없애는 사람에게 범위를 준다',fontsize=15,weight='bold',color=INK)
+a.text(1,H-1.6,'공공기관 (B2G)용 조사 장비 — 둥지 제거 담당에게 범위 제공',fontsize=15,weight='bold',color=INK)
 yy=H-8
 for i,x in enumerate([1,5.6,10.2]):
     box(a,x,yy,4.0,3.0,f'트랩 {i+1}','모듈 장착',fs=13)

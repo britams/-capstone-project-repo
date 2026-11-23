@@ -1,7 +1,7 @@
 import re, shutil, zipfile, os, sys
 from xml.sax.saxutils import escape as e
 from PIL import Image
-SRC=sys.argv[1]; OUT=sys.argv[2]  # 창의융합 판넬 양식 pptx (배포 양식 — 레포에 넣지 않음). fig_result.png는 말벌 사진이 들어 있어 레포에 안 넣음 (서현 PC capstone_vespai/out에서 만듦)
+SRC=sys.argv[1]; OUT=sys.argv[2]
 D='build/panel'; shutil.rmtree(D,ignore_errors=True); zipfile.ZipFile(SRC).extractall(D)
 S=D+'/ppt/slides/slide1.xml'; RL=D+'/ppt/slides/_rels/slide1.xml.rels'
 x=open(S,encoding='utf-8').read(); rels=open(RL,encoding='utf-8').read()
@@ -30,7 +30,7 @@ def pic(img,x0,y0,w):
     add.append(f'<p:pic><p:nvPicPr><p:cNvPr id="{nid[0]}" name="그림 {nid[0]}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="{int(x0*CM)}" y="{int(y0*CM)}"/><a:ext cx="{int(w*CM)}" cy="{int(h*CM)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>')
     return h
 C=__import__('panel_content')
-tb(5.0,26.6,17.8,28.5,C.P11,3600); tb(26.6,26.6,14.6,28.5,C.P12,3600)
+tb(5.0,26.6,17.8,28.5,C.P11,3200); tb(26.6,26.6,14.6,28.5,C.P12,3200)
 hh=(55.8-23.4-0.5)/2; ww=hh*31.4/21.4; xx=43.5+(37.6-ww)/2
 pic('fig_rep.png',xx,23.4,ww); pic('fig_idea.png',xx,23.4+hh+0.5,ww)
 pic('fig_goal.png',4.2,63.2,37.0); pic('fig_result.png',42.0,63.2,37.6)
