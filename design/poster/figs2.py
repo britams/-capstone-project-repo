@@ -199,7 +199,7 @@ pts = [((21.9, 58.5), '포획통', '지정한 개체만 선택 격리'),
        ((26.3, 46.6), '카메라', '마킹실 위 153.5 mm, YOLO로 일벌 판별'),
        ((25.1, 32.2), '마킹실', '리니어 서보 바닥으로 고정, XY 펜으로 점'),
        ((14.6, 19.8), '제어·전원', 'Raspberry Pi 5·Arduino, 12 V 전원'),
-       ((17.3, 10.7), '시판 트랩', '2020 알루미늄 프레임 아래에 그대로 씀')]
+       ((17.3, 10.7), '시판 트랩', '2020 알루미늄 프레임 아래에 그대로 사용')]
 for i, ((px, py), t, sub) in enumerate(pts):
     c = BLUE if i == 2 else NAVY
     a.add_patch(Circle((px, py), 2.0, fc=c, ec='white', lw=3, zorder=5))
@@ -325,7 +325,7 @@ a.text(2.5, 40.2, '② 판별 — 격자 너머에서도 등검은말벌 찾기'
 v = Image.open(U + 'capstone_vespai/out/velutina-frame-1.jpeg').convert('RGB').crop((420, 180, 1620, 1068))
 sy = Image.open('/tmp/syn_3.png').convert('RGB').crop((45, 0, 333, 213))
 for i, (im, t, sub) in enumerate([(v, 'VespAI 원본 모델 (우리 PC에서 실행)', "공개 예시 영상 (O'Shea-Wheller 2024) · 검출 0.85~0.96"),
-                                  (sy, '우리 재학습 사진 — 설계 격자판 합성', '우리 표본 + 아크릴 격자, 빨간 네모 = 학습 라벨')]):
+                                  (sy, 'YOLO 파인 튜닝 — 우리 격자판 조건에 맞춤', '우리 표본 + 설계 아크릴 격자 합성 학습 사진, 빨간 네모 = 학습 라벨')]):
     x = 2 + i * 49
     put(a, im, x, 8.6, 47, 28.6)
     a.text(x + 0.5, 5.6, t, fontsize=15, color=NAVY, weight='bold', va='center')
