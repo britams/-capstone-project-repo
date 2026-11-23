@@ -61,6 +61,7 @@ set_title('직사각형 18',C.TITLE)
 set_team('직사각형 33',C.TEAM)
 for k,v in C.BODY.items(): set_body(k,v)
 for i,(k,v) in enumerate(C.PICS.items()): add_pic(k,v,f'rId{50+i}')
+x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
 open(S,'w',encoding='utf-8').write(x); open(RL,'w',encoding='utf-8').write(rels)
 out='build/'+C.OUT
 if os.path.exists(out): os.remove(out)

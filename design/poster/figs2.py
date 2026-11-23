@@ -123,3 +123,20 @@ a.text(50, 12.5, '지자체·방제 기관용 조사 장비 (B2G)', ha='center',
 a.text(50, 4.5, '양봉농가는 표시 없이 모두 가두는 방제 모드로 사용', ha='center', va='center', fontsize=22, color=GRAY)
 f.savefig('fig_use.png'); plt.close(f)
 print('ok')
+
+# ── D' 결과: 한 일 숫자 타일
+f, a = canvas()
+tiles = [('10', '역학계산 문제', '정역학·동역학·재료역학'), ('167', '부품 간섭 검사', '움직임 포함, 겹침 0'),
+         ('180', '제어 모의 시험', '문·Pi·처리 순서 전부 통과'), ('917/917', 'AI 판별 장면', '격자 너머, 재학습 후'),
+         ('3', '회로도', '12 V 단일 전원'), ('61', '구매 품목', '재료비 60만 원 정산'),
+         ('16+9', '가공 판 + 3D 프린트', '레이저 가공·출력 부품'), ('30', '참고 문헌·자료', '논문·법령·통계')]
+for i, (n, t, s) in enumerate(tiles):
+    r, c = divmod(i, 4); x = 1 + c * 24.75; y = 35 - r * 33
+    hl = i in (0, 1, 2, 3)
+    card(a, x, y, 23.5, 31, fc=NAVY if i == 3 else (LIGHT if hl else 'white'), ec=LINE if not hl else 'none', r=2)
+    col = 'white' if i == 3 else NAVY
+    a.text(x + 11.75, y + 21, n, ha='center', va='center', fontsize=46 if len(n) < 5 else 36, weight='bold', color=AMBER if i == 3 else BLUE)
+    a.text(x + 11.75, y + 11, t, ha='center', va='center', fontsize=24, weight='bold', color=col)
+    a.text(x + 11.75, y + 5, s, ha='center', va='center', fontsize=17, color='#D6E2F2' if i == 3 else GRAY)
+f.savefig('fig_result.png'); plt.close(f)
+print('ok2')
