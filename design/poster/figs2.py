@@ -305,3 +305,29 @@ for i, (im, t, sub) in enumerate([(v, '① VespAI 원본 모델 (우리 PC에서
 card(a, 0.5, 0.5, 99, 10, fc=LIGHT, ec='none', r=1.0)
 a.text(50, 5.5, '재학습 결과 (v3): 학습에 안 쓴 표본, 철망 너머 917/917 장면 검출', ha='center', fontsize=21, color=NAVY, weight='bold', va='center')
 f.savefig('fig_ai.png'); plt.close(f)
+
+
+# ══ 오른쪽 그림 1 (11/23 21:27 서현 "대표사진과 fig1 합치기"): 작동 5단계 + ② 판별 사진 2장
+U = '/mnt/user-data/uploads/capstone design/'
+f, a = canvas()
+steps = [('들어옴', '빛 센서·입구 문'), ('판별', '카메라 AI'), ('고정', '바닥 올림'), ('표시', 'XY 펜으로 점'), ('내보냄', '방생 문·시각 기록')]
+cx = [10, 30, 50, 70, 90]
+for i, (t, sub) in enumerate(steps):
+    c = AMBER if i == 1 else (BLUE if i in (2, 3) else NAVY)
+    a.add_patch(Circle((cx[i], 61), 4.6, fc=c, ec='none', zorder=3))
+    a.text(cx[i], 61, str(i + 1), ha='center', va='center', fontsize=32, color='white', weight='bold', zorder=4)
+    a.text(cx[i], 52.6, t, ha='center', va='center', fontsize=28, color=NAVY, weight='bold')
+    a.text(cx[i], 48.3, sub, ha='center', va='center', fontsize=17, color=GRAY)
+    if i < 4: arrow(a, cx[i] + 5.4, 61, cx[i + 1] - 5.4, 61)
+a.plot([30, 30], [45.6, 43.2], color=AMBER, lw=3)
+card(a, 0.5, 0.5, 99, 42.7, fc='#FFFBF2', ec=AMBER, lw=2.0, r=1.4)
+a.text(2.5, 40.2, '② 판별 — 격자 너머에서도 등검은말벌 찾기', fontsize=19, color=NAVY, weight='bold', va='center')
+v = Image.open(U + 'capstone_vespai/out/velutina-frame-1.jpeg').convert('RGB').crop((420, 180, 1620, 1068))
+sy = Image.open('/tmp/syn_3.png').convert('RGB').crop((45, 0, 333, 213))
+for i, (im, t, sub) in enumerate([(v, 'VespAI 원본 모델 (우리 PC에서 실행)', "공개 예시 영상 (O'Shea-Wheller 2024) · 검출 0.85~0.96"),
+                                  (sy, '우리 재학습 사진 — 설계 격자판 합성', '우리 표본 + 아크릴 격자, 빨간 네모 = 학습 라벨')]):
+    x = 2 + i * 49
+    put(a, im, x, 8.6, 47, 28.6)
+    a.text(x + 0.5, 5.6, t, fontsize=15, color=NAVY, weight='bold', va='center')
+    a.text(x + 0.5, 2.9, sub, fontsize=11.5, color=GRAY, va='center')
+f.savefig('fig_goal_ai.png'); plt.close(f)
