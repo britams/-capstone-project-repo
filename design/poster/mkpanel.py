@@ -17,9 +17,9 @@ for p,t in zip(ps,TITLE):
 a=sp.index('<a:p>'); b=sp.index('</p:txBody>')
 x=x[:m.start()]+sp[:a]+new+sp[b:]+x[m.end():]
 nid=[300]; add=[]
-def tb(x0,y0,w,h,lines,sz=3200):
+def tb(x0,y0,w,h,lines,sz=3200,gap=900):
     nid[0]+=1
-    ps=''.join(f'<a:p><a:pPr marL="457200" indent="-457200"><a:lnSpc><a:spcPct val="115000"/></a:lnSpc><a:spcBef><a:spcPts val="900"/></a:spcBef><a:buFont typeface="Arial"/><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="ko-KR" sz="{sz}" dirty="0"><a:solidFill><a:srgbClr val="1F2A44"/></a:solidFill><a:latin typeface="맑은 고딕"/><a:ea typeface="맑은 고딕"/></a:rPr><a:t>{e(l)}</a:t></a:r></a:p>' for l in lines)
+    ps=''.join(f'<a:p><a:pPr marL="457200" indent="-457200"><a:lnSpc><a:spcPct val="115000"/></a:lnSpc><a:spcBef><a:spcPts val="{gap}"/></a:spcBef><a:buFont typeface="Arial"/><a:buChar char="•"/></a:pPr><a:r><a:rPr lang="ko-KR" sz="{sz}" dirty="0"><a:solidFill><a:srgbClr val="1F2A44"/></a:solidFill><a:latin typeface="맑은 고딕"/><a:ea typeface="맑은 고딕"/></a:rPr><a:t>{e(l)}</a:t></a:r></a:p>' for l in lines)
     add.append(f'<p:sp><p:nvSpPr><p:cNvPr id="{nid[0]}" name="본문 {nid[0]}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="{int(x0*CM)}" y="{int(y0*CM)}"/><a:ext cx="{int(w*CM)}" cy="{int(h*CM)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr><p:txBody><a:bodyPr wrap="square" lIns="0" rIns="0"><a:normAutofit/></a:bodyPr><a:lstStyle/>{ps}</p:txBody></p:sp>')
 ri=[60]
 def pic(img,x0,y0,w):
@@ -30,7 +30,7 @@ def pic(img,x0,y0,w):
     add.append(f'<p:pic><p:nvPicPr><p:cNvPr id="{nid[0]}" name="그림 {nid[0]}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="{int(x0*CM)}" y="{int(y0*CM)}"/><a:ext cx="{int(w*CM)}" cy="{int(h*CM)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>')
     return h
 C=__import__('panel_content')
-tb(5.0,26.6,17.8,28.5,C.P11,3000); tb(26.6,26.6,14.6,28.5,C.P12,3000)   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
+tb(5.0,26.6,17.8,28.8,C.P11,3000,600); tb(24.4,26.6,16.4,28.8,C.P12,3000,600)   # 11/23 15:45 '빈 부분 없게, 연구개요 글 왼쪽으로' → 8개씩, 1.2를 구분선 옆으로 넓힘   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
 pic('fig_p_design.png',44.5,23.4,35.6)                                         # 2번 칸: CAD + 설계 요점 (판넬 전용 그림)
 pic('fig_idea.png',4.8,64.3,36.6); pic('fig_result.png',42.8,64.3,36.6)       # 3번 칸: 마킹실 작동 원리 + 장치 구조·말벌 경로
 tb(8.6,97.8,31.6,12.8,C.P41,3000); tb(44.6,97.8,36.0,12.8,C.P42,3000)   # 11/23 '저거밖에 안 돼? 흰 부분 없애' → 6줄씩, 한 줄에 들어가게
