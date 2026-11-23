@@ -229,3 +229,34 @@ for i, (t, s) in enumerate(pts):
     a.text(x0 + 2.8, y + 0.15, t, fontsize=28, color=NAVY, weight='bold', va='center')
     a.text(x0 + 2.8, y - 1.35, s, fontsize=20, color=GRAY, va='top', linespacing=1.3)
 f.savefig('fig_p_design.png'); plt.close(f)
+
+
+# ══ 그림 4 (11/23 밤): AI 판별 시험 — 실제 사진 + 우리 재학습 결과 (VespAI 사진은 레포에 안 올림 → fig_ai.png는 .gitignore)
+U = '/mnt/user-data/uploads/capstone design/'
+f, a = canvas()
+a.text(1, 64.6, 'AI 판별 시험 — 격자 너머에서도 등검은말벌 찾기', fontsize=26, color=NAVY, weight='bold', va='center')
+v = Image.open(U + 'capstone_vespai/out/velutina-frame-1.jpeg').convert('RGB').crop((480, 180, 1560, 1080))
+card(a, 0.5, 31.5, 46, 29.5, fc='white', ec=LINE, r=1.2); put(a, v, 1.3, 37.6, 44.4, 22.9)
+a.text(1.8, 35.4, '① VespAI 원본 모델을 우리 PC에서 실행', fontsize=17, color=NAVY, weight='bold', va='center')
+a.text(1.8, 33.0, '공개 예시 영상 (O\'Shea-Wheller 2024) · 검출 0.85~0.96', fontsize=13, color=GRAY, va='center')
+g = Image.open(U + 'VespAI_시험/격자_가림_모의.jpg').convert('RGB')
+card(a, 0.5, 0.5, 46, 29.5, fc='white', ec=LINE, r=1.2); put(a, g, 1.3, 6.6, 44.4, 22.9)
+a.text(1.8, 4.4, '② 문제: 격자판이 몸을 가림 (모의 그림)', fontsize=17, color=NAVY, weight='bold', va='center')
+a.text(1.8, 2.0, '원본 모델은 격자를 본 적 없음 → 다시 학습 필요', fontsize=13, color=GRAY, va='center')
+# 오른쪽: 우리 재학습 결과 (vision/2026-11-15, 승준)
+card(a, 48.5, 0.5, 51, 60.5, fc='white', ec=LINE, r=1.2)
+a.text(51, 58, '③ 우리 표본으로 다시 학습 (YOLOv5s)', fontsize=17, color=NAVY, weight='bold', va='center')
+a.text(51, 55.6, '격자 + 말벌 장면 중 말벌을 찾은 비율', fontsize=13, color=GRAY, va='center')
+bars = [('v1', 32.0, '312/975', '흰 종이만'), ('v2', 26.1, '472/1811', '떠 있는 격자 추가'), ('v3', 100.0, '917/917', '격자를 얹어 학습')]
+base, top = 14, 49
+a.plot([51, 97.5], [base, base], color=GRAY, lw=1.5)
+for i, (n, p, fr_, d) in enumerate(bars):
+    cx = 58.5 + i * 15.5; hgt = (top - base) * p / 100; c = BLUE if n == 'v3' else '#B9C2CC'
+    a.add_patch(Rectangle((cx - 5, base), 10, hgt, fc=c, ec='none'))
+    a.text(cx, base + hgt + 2.6, f'{p:.1f} %', ha='center', va='center', fontsize=20, color=NAVY if n == 'v3' else GRAY, weight='bold')
+    a.text(cx, base + hgt + 0.9, fr_, ha='center', va='center', fontsize=12, color=GRAY)
+    a.text(cx, base - 2.0, n, ha='center', va='center', fontsize=17, color=NAVY, weight='bold')
+    a.text(cx, base - 4.3, d, ha='center', va='center', fontsize=12, color=GRAY)
+a.text(51, 6.0, '표본 6마리 · 사진 155장, VespAI 가중치에서 이어 학습', fontsize=12.5, color=GRAY, va='center')
+a.text(51, 3.6, '시험: 학습에 안 쓴 표본 2마리 · 격자만 장면 헛검출 2.1 % (17/797)', fontsize=12.5, color=GRAY, va='center')
+f.savefig('fig_ai.png'); plt.close(f)
