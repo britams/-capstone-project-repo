@@ -8,7 +8,7 @@ x=open(S,encoding='utf-8').read(); rels=open(RL,encoding='utf-8').read()
 CM=360000
 # 제목 상자
 m=[m for m in re.finditer(r'<p:sp>.*?</p:sp>',x,re.S) if 'name="Text Box 9"' in m.group()][0]; sp=m.group()
-TITLE=['등검은말벌 둥지 추적 마킹 트랩','Automatic Marking Trap for Tracking Nests of Vespa velutina','Team 초벌','기계자동차공학부 기계공학전공 이서현 · 이승준']
+TITLE=['YOLO 판별 기반 등검은말벌 자동 마킹·둥지 거리 추정 트랩','YOLO-Based Automatic Marking Trap for Nest Distance Estimation of Vespa velutina','Team 초벌','기계자동차공학부 기계공학전공 이서현 · 이승준']
 ps=re.findall(r'<a:p>.*?</a:p>',sp,re.S); new=''
 for p,t in zip(ps,TITLE):
     ppr=re.search(r'<a:pPr.*?</a:pPr>|<a:pPr[^>]*/>',p,re.S); ppr=ppr.group() if ppr else ''
@@ -21,6 +21,9 @@ for p,t in zip(ps,TITLE):
         new+=f'<a:p>{ppr}<a:r>{rpr}<a:t>{e(t)}</a:t></a:r></a:p>'
 a=sp.index('<a:p>'); b=sp.index('</p:txBody>')
 x=x[:m.start()]+sp[:a]+new+sp[b:]+x[m.end():]
+# 11/23 21:04 서현이 PowerPoint에서 옮긴 4번 칸 아이콘 (Picture 146) 자리 지킴
+mp=[mm for mm in re.finditer(r'<p:pic>.*?</p:pic>',x,re.S) if 'name="Picture 146"' in mm.group()][0]
+x=x[:mp.start()]+re.sub(r'<a:off x="\d+" y="\d+"/>','<a:off x="2183362" y="35374263"/>',mp.group(),1)+x[mp.end():]
 nid=[300]; add=[]
 def tb(x0,y0,w,h,lines,sz=3200,gap=900):
     nid[0]+=1
@@ -38,7 +41,7 @@ C=__import__('panel_content')
 tb(5.0,9956142/CM,17.8,28.8,C.P11,3000,600); tb(24.4,9956142/CM,16.4,28.8,C.P12,3000,600)   # 11/23 15:58 서현이 PowerPoint에서 1.1·1.2 글과 구분선을 1.06 cm 내림 → 그 자리 그대로
 o='<a:off x="8443913" y="9364663"/>'; assert x.count(o)==1; x=x.replace(o,'<a:off x="8443913" y="9744805"/>')   # 구분선 (직사각형 136)도 서현 자리   # 11/23 15:45 '빈 부분 없게, 연구개요 글 왼쪽으로' → 8개씩, 1.2를 구분선 옆으로 넓힘   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
 pic('fig_p_design.png',44.5,23.4,35.6)                                         # 2번 칸: CAD + 설계 요점 (판넬 전용 그림)
-pic('fig_idea.png',4.8,64.3,36.6); pic('fig_result.png',42.8,64.3,36.6)       # 3번 칸: 마킹실 작동 원리 + 장치 구조·말벌 경로
+pic('fig_idea.png',4.8,64.3,36.6); pic('fig_goal_ai.png',42.8,64.3,36.6)       # 3번 칸: 마킹실 작동 원리 + 장치 구조·말벌 경로
 tb(8.6,97.8,31.6,12.8,C.P41,3000); tb(44.6,97.8,36.0,12.8,C.P42,3000)   # 11/23 '저거밖에 안 돼? 흰 부분 없애' → 6줄씩, 한 줄에 들어가게
 x=x.replace('</p:spTree>',''.join(add)+'</p:spTree>')
 x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
