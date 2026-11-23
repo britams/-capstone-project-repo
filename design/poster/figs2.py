@@ -154,7 +154,7 @@ a.add_patch(Rectangle((6, 47.5), 52, 1.6, fc='#8C96A3', ec='none'))
 a.add_patch(FancyBboxPatch((22, 45.2), 8, 6.4, boxstyle='round,pad=0,rounding_size=0.6', fc=BLUE, ec='none'))
 a.add_patch(Polygon([(25.3, 45.2), (26.7, 45.2), (26.0, 40.6)], closed=True, fc=NAVY, ec='none'))
 a.add_patch(FancyArrowPatch((32.5, 45), (32.5, 41.2), arrowstyle='-|>', mutation_scale=26, lw=3, color=BLUE))
-a.text(7, 52.0, 'XY 이송 장치 (펜을 앞뒤·좌우로)', fontsize=20, color=NAVY, weight='bold')
+a.text(36, 53.6, 'XY 이송 장치', fontsize=20, color=NAVY, weight='bold'); a.text(36, 50.6, '펜을 앞뒤·좌우로 옮김', fontsize=17, color=GRAY)
 # 격자판
 a.add_patch(Rectangle((8, 37.5), 44, 2.2, fc=GL, ec=BLUE, lw=2))
 for gx in np.arange(10, 51, 3.0): a.add_patch(Rectangle((gx, 37.5), 1.1, 2.2, fc='white', ec='none'))
@@ -185,7 +185,8 @@ note(26, '3', '힘을 재며 멈춤', '스프링 밑 로드셀이 누르는 힘\
 note(10, '4', '격자 구멍으로 점', '펜 약 0.3 N, 마지막 2 mm는\n천천히 내려 가슴에 점', BLUE)
 a.text(30, 8.5, '모터', ha='center', va='center', fontsize=17, color='white', weight='bold')
 a.text(36.5, 18.2, '로드셀', fontsize=17, color=GRAY, va='center'); a.text(34, 23.5, '스프링', fontsize=17, color=GRAY, va='center')
-a.text(8, 25.5, '투명 격자판 (구멍 Ø3)', fontsize=17, color=BLUE); a.plot([20, 20], [27, 37.4], color=BLUE, lw=1.5)
+a.text(1, 42.6, '투명 격자판\n(구멍 Ø3)', fontsize=17, color=BLUE, linespacing=1.2); a.plot([11.5, 11.5], [42.4, 39.8], color=BLUE, lw=1.5)
+a.text(1.5, 65.2, '마킹실 작동 원리', fontsize=22, color=NAVY, weight='bold')
 a.text(2, 1.2, '마킹실 단면 개념도 (실제 비율 아님)', fontsize=16, color=GRAY)
 f.savefig('fig_idea.png'); plt.close(f)
 
@@ -210,9 +211,27 @@ def box(y, t, fc=LIGHT, tc=NAVY, w=22):
     card(a, X - w / 2, y - 3, w, 6, fc=fc, ec=fc, r=1.2); a.text(X, y, t, ha='center', va='center', fontsize=20, color=tc, weight='bold')
 box(8, '시판 트랩 몸통'); box(22, '입구 통로 (센서 2개)'); box(38, '마킹실', NAVY, 'white')
 arrow(a, X, 11.2, X, 18.6); arrow(a, X, 25.2, X, 34.6)
-card(a, 60, 54, 16, 6, fc='#FDF3DE', ec='#FDF3DE', r=1.2); a.text(68, 57, '밖으로 (귀소)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold')
-card(a, 82, 54, 16, 6, fc='#E9ECEF', ec='#E9ECEF', r=1.2); a.text(90, 57, '포획통 (격리)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold')
-arrow(a, 70, 41.4, 68, 53.4, c=AMBER, lw=4); arrow(a, 78, 41.4, 88, 53.4)
-a.text(60, 47.5, '일벌: 표시 후', fontsize=17, color='#9A6A0A', weight='bold'); a.text(86, 46.5, '그 밖', fontsize=17, color=GRAY, weight='bold')
-a.text(X + 3, 64.5, '말벌이 지나가는 길', ha='center', fontsize=22, color=NAVY, weight='bold')
+card(a, 58, 52, 20, 9, fc='#FDF3DE', ec='#FDF3DE', r=1.2); a.text(68, 58.4, '밖으로 (귀소)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold'); a.text(68, 54.6, '일벌 · 표시 후', ha='center', va='center', fontsize=16, color='#9A6A0A', weight='bold')
+card(a, 80, 52, 19, 9, fc='#E9ECEF', ec='#E9ECEF', r=1.2); a.text(89.5, 58.4, '포획통 (격리)', ha='center', va='center', fontsize=18, color=NAVY, weight='bold'); a.text(89.5, 54.6, '여왕벌 · 다른 종', ha='center', va='center', fontsize=16, color=GRAY, weight='bold')
+arrow(a, 69, 41.4, 68, 51.4, c=AMBER, lw=4); arrow(a, 79, 41.4, 88, 51.4)
+a.text(X + 6, 64.2, '말벌이 지나가는 길', ha='center', fontsize=22, color=NAVY, weight='bold')
 f.savefig('fig_result.png'); plt.close(f)
+
+# ══ 판넬 2번 칸 (설계 및 모델링): CAD 등각 + 설계 요점 — 실제 크기 35.6 × 32 cm (11/23 서현 '판넬 정말 별로')
+PW, PH = 35.6, 32.0
+f = plt.figure(figsize=(PW / 2.54, PH / 2.54), dpi=DPI); a = f.add_axes([0, 0, 1, 1]); a.set_xlim(0, PW); a.set_ylim(0, PH); a.axis('off')
+iso = trim('/home/claude/repo/cad/img/D5g_도1_전체_등각.png', 150, 90); ih = 30.4; iw = ih * iso.width / iso.height
+a.add_patch(FancyBboxPatch((0.2, 0.2), iw + 1.0, PH - 0.4, boxstyle='round,pad=0,rounding_size=0.8', fc='white', ec=LINE, lw=2))
+a.imshow(np.asarray(iso), extent=(0.7, 0.7 + iw, 0.8, 0.8 + ih), zorder=2)
+a.text(iw + 0.6, 0.9, 'CAD 모델', ha='right', va='bottom', fontsize=18, color=GRAY, zorder=3)
+pts = [('시판 트랩 장착형', '시판 트랩 위에 얹는\n2020 알루미늄 프레임'), ('입구 통로', '센서 2개·문으로\n한 마리씩 들여보냄'),
+       ('마킹실', '투명 격자판 (구멍 Ø3)\n승강 바닥·로드셀'), ('XY 펜', '수성 마커, 약 0.3 N\n마지막 2 mm는 천천히'),
+       ('설계 검토', '역학계산 10문제\n부품 167개 간섭 검사')]
+x0 = iw + 2.2
+for i, (t, s) in enumerate(pts):
+    y = PH - 3.4 - i * 6.15
+    a.add_patch(Circle((x0 + 1.1, y), 1.05, fc=BLUE if i in (2, 3) else NAVY, ec='none'))
+    a.text(x0 + 1.1, y, str(i + 1), ha='center', va='center', fontsize=26, color='white', weight='bold')
+    a.text(x0 + 2.8, y + 0.15, t, fontsize=28, color=NAVY, weight='bold', va='center')
+    a.text(x0 + 2.8, y - 1.35, s, fontsize=20, color=GRAY, va='top', linespacing=1.3)
+f.savefig('fig_p_design.png'); plt.close(f)

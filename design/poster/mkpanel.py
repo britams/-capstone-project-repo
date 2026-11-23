@@ -30,11 +30,10 @@ def pic(img,x0,y0,w):
     add.append(f'<p:pic><p:nvPicPr><p:cNvPr id="{nid[0]}" name="그림 {nid[0]}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="{int(x0*CM)}" y="{int(y0*CM)}"/><a:ext cx="{int(w*CM)}" cy="{int(h*CM)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>')
     return h
 C=__import__('panel_content')
-tb(5.0,26.6,17.8,28.5,C.P11,3200); tb(26.6,26.6,14.6,28.5,C.P12,3200)
-hh=(55.8-23.4-0.5)/2; ww=hh*31.4/21.4; xx=43.5+(37.6-ww)/2
-pic('fig_rep.png',xx,23.4,ww); pic('fig_idea.png',xx,23.4+hh+0.5,ww)
-pic('fig_goal.png',4.2,63.2,37.0); pic('fig_result.png',42.0,63.2,37.6)
-tb(8.6,98.0,31.6,12.0,C.P41,3400); tb(44.6,97.6,36.0,12.0,C.P42,3400)
+tb(5.0,26.6,17.8,28.5,C.P11,3000); tb(26.6,26.6,14.6,28.5,C.P12,3000)   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
+pic('fig_p_design.png',44.5,23.4,35.6)                                         # 2번 칸: CAD + 설계 요점 (판넬 전용 그림)
+pic('fig_idea.png',4.8,64.3,36.6); pic('fig_result.png',42.8,64.3,36.6)       # 3번 칸: 마킹실 작동 원리 + 장치 구조·말벌 경로
+tb(8.6,98.0,31.6,12.0,C.P41,3000); tb(44.6,97.6,36.0,12.0,C.P42,3000)
 x=x.replace('</p:spTree>',''.join(add)+'</p:spTree>')
 x=re.sub(r'<a:rPr(?![^>]*noProof)',r'<a:rPr noProof="1"',x)
 open(S,'w',encoding='utf-8').write(x); open(RL,'w',encoding='utf-8').write(rels)
