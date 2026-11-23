@@ -2,7 +2,7 @@
 """XY 모터를 NEMA17 팬케이크(42 × 42 × 23) + T8 리드 8로 바꾸면 부딪히나 — 검사만 (모델은 안 고침). 승준 11/23, CAP-AI-SJ-63
   배경: 모터뱅크 LM-NK1134가 12/4 이후 도착 → 12/2 시연용으로 내써팝 NEMA17 23 mm + TM 200 (절단). 판은 이미 주문 — 손 가공만.
   검사: ① X·Y 몸 지금 자리 ② Y 몸 x 움직임 (빔과 함께) ③ X 수정안 = 217 판을 +x 갠트리 레일 바깥 면으로 (+23) ④ 새 나사 머리·너트
-  결과 (11/23, 승준 PC D5g_full_SJ1118): X 지금 자리 레일 2387 mm³ → 수정안 0 · Y 0 · 원점 쪽 여유 2.0 → 1.4 mm · 새 나사 0
+  결과 (11/23, 승준 PC D5g_full_SJ1118): X 지금 자리 레일 2387 mm³ → 수정안 0 · Y 0 · 원점 쪽: 판이 레버 뒤 0.9 mm에서 원점 팔 (지금 그대로), 몸은 1.4 mm · 새 나사 0
   (M5 머리는 X 몸에 7 mm³ → M4). 판 수정 PDF: design/2026-11-23_XY모터_NEMA17/
 실행: FreeCAD에서 D5g_full을 연 채로 매크로 실행, 또는 freecad.exe cad/check_xy_nema17_pancake.py (cwd = cad, D5g_full.FCStd를 엶)"""
 import os, math, json
@@ -22,15 +22,29 @@ MOVE = ("212_", "211_", "206_", "221_", "222_", "224_", "225_", "209_", "208_", 
 fixed = [o for o in parts if not o.Label.startswith(MOVE) and not o.Label.startswith(OLD)]
 others = [o for o in parts if not o.Label.startswith(OLD)]
 
-def hits(sh, objs, skip=()):
-    return [(o.Label[:40], round(o.Shape.common(sh).Volume, 2)) for o in objs
-            if not o.Label.startswith(skip) and o.Shape.BoundBox.intersect(sh.BoundBox) and o.Shape.common(sh).Volume > 0.01]
-def first_hit(sh, objs, steps):
-    for dx in steps:
-        s = sh.copy(); s.translate(V(dx, 0, 0))
-        h = hits(s, objs)
-        if h: return dx, h
+def hits(sh, objs, skip=()):           # 고체 하나씩 (프레임 브래킷처럼 큰 묶음과 통째로 불리언하면 느림)
+    bb, out = sh.BoundBox, []
+    for o in objs:
+        if o.Label.startswith(skip) or not o.Shape.BoundBox.intersect(bb): continue
+        v = sum(so.common(sh).Volume for so in (o.Shape.Solids or [o.Shape]) if so.BoundBox.intersect(bb))
+        if v > 0.01: out.append((o.Label[:40], round(v, 2)))
+    return out
+def first_hit(sh, objs, a, b):         # 0.5 mm로 찾고 0.1 mm로 좁힘 (a → b 방향)
+    st = 0.5 if b > a else -0.5
+    near = [o for o in objs if o.Shape.BoundBox.intersect(sweep(sh, a, b))]
+    k = 0
+    while abs(k * st) <= abs(b - a):
+        s = sh.copy(); s.translate(V(a + k * st, 0, 0))
+        if hits(s, near):
+            for j in range(1, 6):
+                dx = a + (k - 1) * st + j * st / 5; s = sh.copy(); s.translate(V(dx, 0, 0))
+                h = hits(s, near)
+                if h: return round(dx, 1), h
+        k += 1
     return None
+def sweep(sh, a, b):
+    bb = sh.BoundBox; lo, hi = min(a, b), max(a, b)
+    return App.BoundBox(bb.XMin + lo, bb.YMin, bb.ZMin, bb.XMax + hi, bb.YMax, bb.ZMax)
 cyl = lambda r, h, p, a: Part.makeCylinder(r, h, p, a)
 R = {}
 # 모터 자리 (LM-NK1134 축 그대로): X 축 y −65 z 425, 몸 앞면 x 160, 나사 −x / Y 축 x 101.4 z 453, 몸 앞면 y −101.9, 나사 +y
@@ -41,10 +55,13 @@ R["X_T8_d8"] = hits(cyl(4, 132, V(28, -65, 425), X), others)
 R["Y_T8_d8"] = hits(cyl(4, 132, V(101.4, -101.9, 453), Y), others)
 # Y 몸은 빔과 같이 x로 움직임 — 고정 부품과 처음 닿는 곳 (판 211과 비교)
 yp = one("211_y_motor_plate").Shape
-R["Y_몸_-x"] = first_hit(Yb, fixed, [-i * 0.1 for i in range(0, 600)])
-R["Y_판_-x"] = first_hit(yp, fixed, [-i * 0.1 for i in range(0, 600)])
-R["Y_몸_+x"] = first_hit(Yb, fixed, [i * 0.5 for i in range(0, 200)])
-R["Y_판_+x"] = first_hit(yp, fixed, [i * 0.5 for i in range(0, 200)])
+R["Y_몸_-x"] = first_hit(Yb, fixed, 0, -60)
+R["Y_판_-x"] = first_hit(yp, fixed, 0, -60)
+R["Y_몸_+x"] = first_hit(Yb, fixed, 0, 100)
+R["Y_판_+x"] = first_hit(yp, fixed, 0, 100)
+nosw = [o for o in fixed if not o.Label.startswith("227x_home_switch")]   # 레버를 누른 뒤 더 가면 무엇에 닿나
+R["Y_몸_-x_스위치빼고"] = first_hit(Yb, nosw, 0, -60)
+R["Y_판_-x_스위치빼고"] = first_hit(yp, nosw, 0, -60)
 # X 수정안: 217 판 +23 (레일 바깥 면 x 180~183), 몸 x 183~206, T8 Ø8 × 155 (끝 x 28 그대로)
 pl = one("217_x_motor_plate").Shape.copy(); pl.translate(V(23, 0, 0))
 R["X안_판"] = hits(pl, others, ("217_x_motor_plate", "217s_x_motor_screws"))
