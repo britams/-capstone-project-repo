@@ -52,8 +52,8 @@ def add_pic(name,img,rid):
     pid[0]+=1
     pic=(f'<p:pic><p:nvPicPr><p:cNvPr id="{pid[0]}" name="그림 {name}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>'
          f'<p:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>'
-         f'<p:spPr><a:xfrm><a:off x="{off[0]}" y="{off[1]}"/><a:ext cx="{off[2]}" cy="{off[3]}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>')
-    x=x[:m.start()]+sp2+pic+x[m.end():]
+         f'<p:spPr><a:xfrm><a:off x="{off[0]}" y="{off[1]}"/><a:ext cx="{off[2]}" cy="{off[3]}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:ln w="25400"><a:solidFill><a:srgbClr val="2563A8"/></a:solidFill></a:ln></p:spPr></p:pic>')
+    x=x[:m.start()]+pic+x[m.end():]   # 양식 사각형은 지우고 그림에 네 변 테두리
     fn=os.path.basename(img); shutil.copy(img,f'{D}/ppt/media/{fn}')
     rels=rels.replace('</Relationships>',f'<Relationship Id="{rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/{fn}"/></Relationships>')
 C=__import__('content'); 
