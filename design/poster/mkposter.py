@@ -1,6 +1,6 @@
 import re, shutil, zipfile, os
 from xml.sax.saxutils import escape as e
-import sys; SRC=sys.argv[1]  # 앵커 포스터 양식 pptx (대회 배포 양식 — 레포에 넣지 않음)
+import sys; SRC=sys.argv[1]  # fig_idea.png는 VespAI 예시 영상 장면이 들어가 레포에 안 넣음 (figs.py가 vespai_v.jpg로 만듦)  # 앵커 포스터 양식 pptx (대회 배포 양식 — 레포에 넣지 않음)
 D='build/x'; shutil.rmtree(D,ignore_errors=True); zipfile.ZipFile(SRC).extractall(D)
 S=D+'/ppt/slides/slide1.xml'; RL=D+'/ppt/slides/_rels/slide1.xml.rels'
 x=open(S,encoding='utf-8').read(); rels=open(RL,encoding='utf-8').read()
