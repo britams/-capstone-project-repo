@@ -1,6 +1,6 @@
 import re, shutil, zipfile, os
 from xml.sax.saxutils import escape as e
-import sys; SRC=sys.argv[1]  # fig_idea.png는 VespAI 예시 영상 장면이 들어가 레포에 안 넣음 (figs.py가 vespai_v.jpg로 만듦)  # 앵커 포스터 양식 pptx (대회 배포 양식 — 레포에 넣지 않음)
+SRC='/mnt/user-data/uploads/4d99da49-3._2026____________________________.pptx'
 D='build/x'; shutil.rmtree(D,ignore_errors=True); zipfile.ZipFile(SRC).extractall(D)
 S=D+'/ppt/slides/slide1.xml'; RL=D+'/ppt/slides/_rels/slide1.xml.rels'
 x=open(S,encoding='utf-8').read(); rels=open(RL,encoding='utf-8').read()
@@ -8,9 +8,16 @@ def sp_of(name):
     m=[m for m in re.finditer(r'<p:sp>.*?</p:sp>',x,re.S) if f'name="{name}"' in m.group()]; assert len(m)==1,name; return m[0]
 def paras(sp): return re.findall(r'<a:p>.*?</a:p>',sp,re.S)
 def first_rpr(p): return re.search(r'<a:rPr[^>]*/>|<a:rPr[^>]*>.*?</a:rPr>',p,re.S).group()
+def fixfont(rpr):
+    rpr=rpr.replace('lang="en-US" altLang="ko-KR"','lang="ko-KR" altLang="en-US"')
+    rpr=re.sub(r' spc="-?\d+"','',rpr)
+    if '<a:ea ' not in rpr and '<a:latin' in rpr:
+        rpr=re.sub(r'(<a:latin [^>]*/>)',r'\1<a:ea typeface="맑은 고딕" panose="020B0503020000020004" pitchFamily="50" charset="-127"/>',rpr,1)
+    return rpr
 def mkpara(tpl,text):
     ppr=re.search(r'<a:pPr.*?</a:pPr>|<a:pPr[^>]*/>',tpl,re.S); ppr=ppr.group() if ppr else ''
-    rpr=first_rpr(tpl)
+    ppr=ppr.replace('algn="just"','algn="l"')
+    rpr=fixfont(first_rpr(tpl))
     return f'<a:p>{ppr}<a:r>{rpr}<a:t>{e(text)}</a:t></a:r></a:p>'
 def set_body(name,lines):
     global x
@@ -31,6 +38,7 @@ def set_team(name,rows):
     for p,(lab,val) in zip(ps,rows):
         ppr=re.search(r'<a:pPr.*?</a:pPr>',p,re.S).group()
         rprs=re.findall(r'<a:rPr[^>]*>.*?</a:rPr>|<a:rPr[^>]*/>',p,re.S)
+        rprs=[fixfont(r) for r in rprs]
         out+=f'<a:p>{ppr}<a:r>{rprs[0]}<a:t>{e(lab)}</a:t></a:r><a:r>{rprs[1]}<a:t>{e("| "+val)}</a:t></a:r></a:p>'
     for p in ps[len(rows):]: out+=re.sub(r'<a:t>[^<]*</a:t>','<a:t></a:t>',p)
     body=re.search(r'(<p:txBody>.*?<a:lstStyle/>)(.*)(</p:txBody>)',sp,re.S)
