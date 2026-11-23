@@ -32,6 +32,18 @@
 ## 3. 예비 (안 써도 됨)
 `예비_아크릴/XN_X너트판_아크릴3T_NEMA17.dxf`, `예비_아크릴/SV_서보판_아크릴3T.dxf` — 프린트가 안 될 때만. 50 × 50 밑이라 아크릴몰에는 묶어서.
 
+## 영어 이름 (프린터 PC · 업체용 — 한글 이름이 깨질 때)
+내용은 같고 이름만 영어. 레포에는 안 올리고 PC `XY판_프린트_아크릴_2026-11-23\english_names\` · `XY_plates_1123.zip` (11/23 22시).
+| 영어 이름 | 레포 파일 |
+|---|---|
+| `YA_beam_plate_A_PETG_3T.stl` | `YA_빔판A_PETG_3T.stl` |
+| `YB_beam_plate_B_PETG_3T_trimmed.stl` | `YB_빔판B_PETG_3T_혀깎음.stl` |
+| `YM_Y_motor_plate_PETG_3T_NEMA17.stl` | `YM_Y모터판_PETG_3T_NEMA17.stl` |
+| `XN_X_nut_plate_PETG_3T_NEMA17.stl` | `XN_X너트판_PETG_3T_NEMA17.stl` |
+| `SV_servo_plate_PETG_3T.stl` | `SV_서보판_PETG_3T.stl` |
+| `CP_carriage_plate_x2_62x105_acrylic_3T.dxf` | `CP_캐리지판_묶음_62x105_아크릴3T_x2.dxf` (아크릴몰 주문용) |
+| `CP_carriage_plate_acrylic_3T_single.dxf` | `CP_캐리지판_아크릴3T_NEMA17.dxf` |
+
 ## 4. 조립 때 같이 할 것
 - **YB 옆 M4 접시머리 2개 (SC8UU 쪽 위)는 머리 지름 8.4 mm 이하** (키트 SMG NT-KIT-LS008 십자 접시 — 받으면 재 보기). CAD 모델은 Ø8.0으로 검사 → y +18까지 0. 머리가 더 크면 SP에 닿음.
 - T8 너트 플랜지 줄질 2곳: X 너트 위 1.5 mm 평평하게 (Y 원점 기판), Y 너트 가장자리 4곳 0.5 mm (LMK8UU 나사 머리). `design/2026-11-23_XY모터_NEMA17/img/플라스틱6장_조립검사_한눈에.png`
