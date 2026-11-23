@@ -1,6 +1,8 @@
-﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F mightyZAP, 마커 X·Y 스텝 (DRV8825), 펜 서보, 원점 스위치 2 — v0.3
+﻿// trap_motion.ino — UNO 1 (움직임): 바닥 F mightyZAP, 마커 X·Y 스텝 (DRV8825), 펜 서보, 원점 스위치 2 — v0.4
 // v0.3 (서현 Claude, CAP-AI-62, 2026-11-17): X·Y를 28BYJ-48 코일 4선 → LM-NK1134 + DRV8825 STEP·DIR·EN (서현 11/17 13시 핀),
 //   1/4 스텝 400 걸음/mm (design/2026-11-16_XY_튜닝_체크리스트.md 3장), 스프링 146 서지 띠 거부 없앰 (11/14 mightyZAP으로 스프링 없음)
+// v0.4 (서현 Claude, CAP-AI-62, 2026-11-24): X·Y 모터 LM-NK1134 (리드 2) → NEMA17 + T8 리드 8 일체형 (승준 11/23, 내써팝)
+//   → 1/4 스텝 100 걸음/mm. 걸음 간격 값을 4배로 (속도 mm/s는 그대로: 기본 2, 최대 25, 원점 다시 닿기 1). 핀·명령·응답은 그대로
 // (11/10 밤, CAP-AI-60) 교수님 피드백 '로드셀은 과함' → HX711·로드셀 없앰. 스프링 146(k 103.6 N/m)이 4.8 mm 눌리면(0.5 N)
 //   축 147의 걸쇠가 누름 스위치(KW11, NC 접점)를 누름 → 멈춤. 힘은 스위치 자리로 정함 (저울로 한 번 맞춤)
 // 작성: 서현 (Claude, CAP-AI-40, 2026-11-08). 바탕: control/firmware/trap_controller/trap_controller.ino v0.1 (승준 SJ-19)
@@ -27,7 +29,7 @@
 //   MOVE <F|X|Y> <mm>            → OK MOVE <축> <mm>, 끝나면 DONE MOVE <축> <mm>   (HOME/ZERO 전에는 ERR NOT_HOMED, 펜 DOWN이면 X·Y와 F 올리기는 ERR PEN_DOWN)
 //   STOP                         → OK STOP (HOME 중이면 HOME도 멈춤 → ERR HOME <축> STOPPED)
 //   ZERO <X|Y> <mm>              현재 위치를 <mm>로 (스위치 고장일 때 손으로) → OK ZERO, 그 축은 HOMED (F는 ERR AXIS_F)
-//   SPEED <X|Y> <us>             걸음 간격 (기본 1250 = 2 mm/s, 최소 100 = 25 mm/s → ERR SPEED_MIN) (F는 ERR AXIS_F)
+//   SPEED <X|Y> <us>             걸음 간격 (기본 5000 = 2 mm/s, 최소 400 = 25 mm/s → ERR SPEED_MIN) (F는 ERR AXIS_F)
 //   LIMIT <F|X|Y> <min> <max>    소프트 한계 mm (F는 0 ~ F_HARD_MAX 안에서만)
 //   HOLD <F|X|Y> <0|1>           멈춘 뒤 코일 전류 = DRV8825 EN (기본 모두 0 = 끔). F는 받기만 함 (서보가 스스로 유지)
 //   PRESS <g> [<mm>]             → OK PRESS, DONE PRESS <mm> <g>  — (11/14) 바닥을 F_PRESS_MM(또는 <mm>)까지 올림.
@@ -50,7 +52,7 @@
 #include <Servo.h>
 
 // ---------------- 값 (미검증은 실물에서 맞춤) ----------------
-#define STEPS_PER_MM      400.0f    // X·Y: 200 걸음/회전 × 1/4 스텝 (M0 L·M1 H·M2 L) ÷ 리드 2 mm — 튜닝표 3장에서 실측
+#define STEPS_PER_MM      100.0f    // X·Y: 200 걸음/회전 × 1/4 스텝 (M0 L·M1 H·M2 L) ÷ T8 리드 8 mm (v0.4, 11/24) — 튜닝표 3장에서 실측
 #define STEPS_PER_MM_F    1000.0f   // F (11/14): '걸음' = µm (위치 셈 단위일 뿐, 스테핑 아님)
 #define F_PIN             2
 #define F_US_MIN          900       // mightyZAP PWM: 900 µs = 행정 0, 2100 µs = 26 mm [확실 — 판매처 사양]
@@ -61,9 +63,9 @@
 #define F_HARD_MAX        12.0f     // LIMIT F 위 끝 최대: 바닥이 격자(F 15)에 3 mm 앞 (AI 판단, 서현 위임)
 #define F_UM_PER_MS       25        // 25 mm/s로 셈 — 판매처 무부하 36 mm/s보다 느리게 [추측 — 미검증, 실측으로 맞춤]
 #define F_SETTLE_MS       150       // 도착 뒤 더 기다림 [추측 — 미검증]
-#define HALF_US_DEFAULT   1250UL   // 걸음 간격 µs = 2 mm/s (튜닝표 6장 시작값)
-#define HALF_US_MIN       100UL    // 25 mm/s — UNO 펄스 한계 근처 [추측 — 튜닝표 6장]
-#define HOME_SLOW_US      2500UL   // 원점 다시 닿을 때 1 mm/s (튜닝표 5장)
+#define HALF_US_DEFAULT   5000UL   // 걸음 간격 µs = 2 mm/s (튜닝표 6장 시작값, v0.4 리드 8)
+#define HALF_US_MIN       400UL    // 25 mm/s (v0.4 리드 8 — 리드 2 때 100 µs와 같은 속도) [추측 — 튜닝표 6장]
+#define HOME_SLOW_US      10000UL  // 원점 다시 닿을 때 1 mm/s (튜닝표 5장, v0.4 리드 8)
 #define STEP_PULSE_US     2        // DRV8825 STEP HIGH 최소 1.9 µs
 #define HOME_BACKOFF_MM   1.0f     // 사양: 1 mm 물러났다 다시
 #define HOME_MARGIN_MM    4.0f     // 찾는 최대 거리 = 행정 + 이 값 — (AI 판단) 아래 HOME_MAX 주석
@@ -273,7 +275,7 @@ void fPoll() {
 
 // ---------------- 원점 ----------------
 long homeMaxSteps(const Axis& a) { return mmToSteps(a, a.maxMm - a.homeMm + HOME_MARGIN_MM); }
-// HOME_MAX: 축마다 (행정 + 4 mm) — X 16,800 · Y 24,800 걸음 (AI 판단, CAP-AI-40; v0.3 400 걸음/mm)
+// HOME_MAX: 축마다 (행정 + 4 mm) — X 4,200 · Y 6,200 걸음 (AI 판단, CAP-AI-40; v0.4 100 걸음/mm)
 
 void homeStart(Axis& a) {
   a.offPending = false;
@@ -525,7 +527,7 @@ void setup() {
   }
   // 펜 서보·바닥 서보는 붙이지 않음 (LIMP — mightyZAP은 펄스가 없으면 그 자리) — Pi가 PEN UP·HOME F를 보냄
   lastCmdMs = millis();
-  reply("EVT READY trap_motion v0.3");
+  reply("EVT READY trap_motion v0.4");
 }
 
 void loop() {

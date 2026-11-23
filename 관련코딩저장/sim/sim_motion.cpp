@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 
   printf("[0] 켜기: READY 이름, 코일 꺼짐(EN HIGH), 펜 서보 안 붙임, 스위치 풀업\n");
   setup();
-  CHECK(t_has(0, "EVT READY trap_motion v0.3"), "READY 이름 trap_motion");
+  CHECK(t_has(0, "EVT READY trap_motion v0.4"), "READY 이름 trap_motion");
   CHECK(coils_off(), "켠 직후 X·Y EN HIGH (코일 꺼짐)");
   CHECK(g_pinmode[6] == OUTPUT && g_pinmode[7] == OUTPUT && g_pinmode[8] == OUTPUT && g_pinmode[9] == OUTPUT && g_pinmode[10] == OUTPUT && g_pinmode[11] == OUTPUT, "D6~D11 출력 (X·Y STEP·DIR·EN)");
   CHECK(g_servo_events.empty(), "켤 때 펜·바닥 서보를 붙이지 않음 (LIMP)");
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
   CHECK(t_has(m, "DONE HOME Y"), "DONE HOME Y");
   printf("      %s", t_dump(m).c_str());
   CHECK(std::labs(W[2].mech - W[2].swPos) <= 3, "스위치 자리에서 멈춤");
-  CHECK((long)(58 * STEPS_PER_MM) > 20480, "58 mm = 23,200 걸음 > 20480 (옛 한도로는 못 닿았음)");
+  CHECK(homeMaxSteps(axes[2]) >= (long)(58 * STEPS_PER_MM), "HOME 최대 걸음 ≥ 행정 58 mm (11/24 v0.4 리드 8: 5,800 걸음 — 옛 20480 고정 한도 회귀 막기)");
 
   printf("[4] HOME X 정상 + 이미 눌려 있으면 먼저 물러남\n");
   W[1].mech = 0;                                     // 스위치 위에 앉아 있음 (눌림)
@@ -211,12 +211,12 @@ int main(int argc, char** argv) {
   m = t_cmd("HOLD F 0"); CHECK(t_has(m, "OK HOLD") && coils_off(), "HOLD F 0 → OK (Pi 켜기 순서 그대로), X·Y EN 그대로 꺼짐");
 
   printf("[11] SPEED / LIMIT / ZERO\n");
-  m = t_cmd("SPEED X 50"); CHECK(t_has(m, "ERR SPEED_MIN"), "50 µs → 거부 (최소 100 = 25 mm/s)");
+  m = t_cmd("SPEED X 399"); CHECK(t_has(m, "ERR SPEED_MIN"), "399 µs → 거부 (최소 400 = 25 mm/s, v0.4 리드 8)");
   m = t_cmd("SPEED X 1200"); CHECK(t_has(m, "OK SPEED"), "1200 µs → OK (11/17 스프링 146 없어 서지 띠 거부 없앰)");
-  m = t_cmd("SPEED X 250"); CHECK(t_has(m, "OK SPEED"), "250 µs (10 mm/s) → OK");
+  m = t_cmd("SPEED X 1000"); CHECK(t_has(m, "OK SPEED"), "1000 µs (10 mm/s, v0.4) → OK");
   { long x0 = W[1].mech; m = t_cmd("MOVE X 2", 10); t_wait(m, "DONE MOVE X", 5000);
     CHECK(t_near((W[1].mech - x0) / STEPS_PER_MM, 1.0, 0.01), "10 mm/s로 X 1 → 2 mm (기계 1 mm 이동)"); }
-  t_cmd("SPEED X 1250");
+  t_cmd("SPEED X 5000");
   m = t_cmd("MOVE F 99"); CHECK(t_has(m, "ERR LIMIT"), "행정 밖 → ERR LIMIT");
   m = t_cmd("LIMIT F 5 1"); CHECK(t_has(m, "ERR RANGE"), "LIMIT 거꾸로 → ERR RANGE");
   m = t_cmd("LIMIT F 0 14"); CHECK(t_has(m, "ERR RANGE"), "LIMIT F 위 끝 > 12 (격자 15 앞 3 mm) → ERR RANGE");
