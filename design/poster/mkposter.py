@@ -38,7 +38,7 @@ def set_team(name,rows):
     for p,(lab,val) in zip(ps,rows):
         ppr=re.search(r'<a:pPr.*?</a:pPr>',p,re.S).group()
         rprs=re.findall(r'<a:rPr[^>]*>.*?</a:rPr>|<a:rPr[^>]*/>',p,re.S)
-        rprs=[fixfont(r) for r in rprs]
+        rprs=[fixfont(r).replace('sz="4800"','sz="4400"') for r in rprs]   # 11/23 학부까지 넣어 한 줄에 들어가게 48 → 44 pt
         out+=f'<a:p>{ppr}<a:r>{rprs[0]}<a:t>{e(lab)}</a:t></a:r><a:r>{rprs[1]}<a:t>{e("| "+val)}</a:t></a:r></a:p>'
     for p in ps[len(rows):]: out+=re.sub(r'<a:t>[^<]*</a:t>','<a:t></a:t>',p)
     body=re.search(r'(<p:txBody>.*?<a:lstStyle/>)(.*)(</p:txBody>)',sp,re.S)

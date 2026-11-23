@@ -42,7 +42,7 @@ f.savefig('fig_rep.png'); plt.close(f)
 # ── B 작동 순서
 f, a = canvas()
 steps = [('들어옴', '빛 센서 감지\n입구 문 닫힘'), ('판별', '카메라 AI\n일벌 확인'), ('고정', '바닥 상승\n격자에 고정'),
-         ('표시', 'XY 펜\n가슴에 점'), ('내보냄', '출구 문 열림\n시각 기록')]
+         ('표시', 'XY 펜\n가슴에 점'), ('내보냄', '방생 문 열림\n시각 기록')]
 cx = [10, 30, 50, 70, 90]
 for i, (t, s) in enumerate(steps):
     hl = i in (2, 3)
@@ -194,13 +194,14 @@ f, a = canvas()
 card(a, 0.5, 0.5, 41, 67, fc='white', ec=LINE, r=2.0)
 fr = Image.open('/home/claude/repo/cad/img/D5g_도2_정면.png').convert('RGB').crop((835, 240, 1565, 1640))
 put(a, fr, 2, 2, 38, 64)
+a.text(2, 64.6, 'CAD 정면도', fontsize=16, color=GRAY)
 def lab(y, t, s=None, yp=None, xp=31):
     yp = y if yp is None else yp
     a.plot([xp, 40, 44.5], [yp, y, y], color=BLUE, lw=2); a.add_patch(Circle((xp, yp), 0.7, fc=BLUE, ec='none'))
     a.text(45.3, y + (1.4 if s else 0), t, fontsize=22, color=NAVY, weight='bold', va='center')
     if s: a.text(45.3, y - 2.3, s, fontsize=17, color=GRAY, va='center')
 lab(61, '포획통', '격리된 말벌', 60, 26)
-lab(48, '카메라', '마킹실 위 153.5 mm', 44.8, 27)
+lab(48, '카메라', '격자 위 153.5 mm', 44.8, 27)
 lab(35, '마킹실', 'XY 펜·승강 바닥', 32.8, 27)
 lab(21.5, '제어·전원', 'Pi 5·Arduino', 20.5, 30)
 lab(8.5, '시판 트랩', '처음 잡히는 곳', 9.4, 30)

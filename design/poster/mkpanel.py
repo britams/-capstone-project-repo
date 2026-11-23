@@ -13,7 +13,12 @@ ps=re.findall(r'<a:p>.*?</a:p>',sp,re.S); new=''
 for p,t in zip(ps,TITLE):
     ppr=re.search(r'<a:pPr.*?</a:pPr>|<a:pPr[^>]*/>',p,re.S); ppr=ppr.group() if ppr else ''
     rpr=re.search(r'<a:rPr[^>]*/>|<a:rPr[^>]*>.*?</a:rPr>',p,re.S).group()
-    new+=f'<a:p>{ppr}<a:r>{rpr}<a:t>{e(t)}</a:t></a:r></a:p>'
+    sp_name='Vespa velutina'                                           # 11/23 형식 점검: 학명은 기울임
+    if sp_name in t:
+        h,tl=t.split(sp_name); ri=rpr.replace('<a:rPr','<a:rPr i="1"',1)
+        new+=f'<a:p>{ppr}<a:r>{rpr}<a:t>{e(h)}</a:t></a:r><a:r>{ri}<a:t>{sp_name}</a:t></a:r>'+(f'<a:r>{rpr}<a:t>{e(tl)}</a:t></a:r>' if tl else '')+'</a:p>'
+    else:
+        new+=f'<a:p>{ppr}<a:r>{rpr}<a:t>{e(t)}</a:t></a:r></a:p>'
 a=sp.index('<a:p>'); b=sp.index('</p:txBody>')
 x=x[:m.start()]+sp[:a]+new+sp[b:]+x[m.end():]
 nid=[300]; add=[]
@@ -30,7 +35,8 @@ def pic(img,x0,y0,w):
     add.append(f'<p:pic><p:nvPicPr><p:cNvPr id="{nid[0]}" name="그림 {nid[0]}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="{rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="{int(x0*CM)}" y="{int(y0*CM)}"/><a:ext cx="{int(w*CM)}" cy="{int(h*CM)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>')
     return h
 C=__import__('panel_content')
-tb(5.0,26.6,17.8,28.8,C.P11,3000,600); tb(24.4,26.6,16.4,28.8,C.P12,3000,600)   # 11/23 15:45 '빈 부분 없게, 연구개요 글 왼쪽으로' → 8개씩, 1.2를 구분선 옆으로 넓힘   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
+tb(5.0,9956142/CM,17.8,28.8,C.P11,3000,600); tb(24.4,9956142/CM,16.4,28.8,C.P12,3000,600)   # 11/23 15:58 서현이 PowerPoint에서 1.1·1.2 글과 구분선을 1.06 cm 내림 → 그 자리 그대로
+o='<a:off x="8443913" y="9364663"/>'; assert x.count(o)==1; x=x.replace(o,'<a:off x="8443913" y="9744805"/>')   # 구분선 (직사각형 136)도 서현 자리   # 11/23 15:45 '빈 부분 없게, 연구개요 글 왼쪽으로' → 8개씩, 1.2를 구분선 옆으로 넓힘   # 11/23: PowerPoint에서 1.2가 칸 밖으로 넘침 → 줄 수·글자 줄임
 pic('fig_p_design.png',44.5,23.4,35.6)                                         # 2번 칸: CAD + 설계 요점 (판넬 전용 그림)
 pic('fig_idea.png',4.8,64.3,36.6); pic('fig_result.png',42.8,64.3,36.6)       # 3번 칸: 마킹실 작동 원리 + 장치 구조·말벌 경로
 tb(8.6,97.8,31.6,12.8,C.P41,3000); tb(44.6,97.8,36.0,12.8,C.P42,3000)   # 11/23 '저거밖에 안 돼? 흰 부분 없애' → 6줄씩, 한 줄에 들어가게
