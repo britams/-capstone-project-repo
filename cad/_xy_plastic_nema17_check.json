@@ -1,0 +1,102 @@
+{
+ "고체 수": 3424,
+ "정지": [
+  [
+   "XN_acryl",
+   "XN_M3x6",
+   5.4
+  ],
+  [
+   "XN_acryl",
+   "XN_M3x6",
+   5.4
+  ],
+  [
+   "SP_metal",
+   "206_carriage_hardware (SP–SV: M3 ×",
+   6.48
+  ],
+  [
+   "SP_metal",
+   "206_carriage_hardware (SP–SV: M3 ×",
+   6.48
+  ],
+  [
+   "SP_metal",
+   "206_carriage_hardware (SP–SV: M3 ×",
+   6.48
+  ],
+  [
+   "Xnut_T8",
+   "227ym_home_module_board_Y (Voltly ",
+   2.48
+  ],
+  [
+   "Xnut_T8",
+   "XN_M3x6",
+   24.74
+  ],
+  [
+   "Xnut_T8",
+   "XN_M3x6",
+   24.74
+  ],
+  [
+   "Ynut_T8",
+   "221_y_bearing_screws (M3 × 12 냄비 8",
+   0.25
+  ],
+  [
+   "Ynut_T8",
+   "221_y_bearing_screws (M3 × 12 냄비 8",
+   0.25
+  ],
+  [
+   "Ynut_T8",
+   "221_y_bearing_screws (M3 × 12 냄비 8",
+   0.25
+  ],
+  [
+   "Ynut_T8",
+   "221_y_bearing_screws (M3 × 12 냄비 8",
+   0.25
+  ],
+  [
+   "Ynut_T8",
+   "CP_M3_nut",
+   24.74
+  ],
+  [
+   "Ynut_T8",
+   "CP_M3_nut",
+   24.74
+  ]
+ ],
+ "움직임": {
+  "빔_+x (0~+37)": null,
+  "빔_-x (0~-38)": null,
+  "캐리지_+y (0~58)": [
+   58,
+   [
+    [
+     "SP_metal",
+     "212_beam_hardware (DCB 2025 L 1 + ",
+     0.04
+    ],
+    [
+     "SP_metal",
+     "212_beam_hardware (DCB 2025 L 1 + ",
+     0.04
+    ],
+    [
+     "SP_metal",
+     "YB_PETG",
+     55.82
+    ]
+   ]
+  ],
+  "캐리지+57 · 빔_+x": null,
+  "캐리지+57 · 빔_-x": null
+ },
+ "초": 55.1
+}
