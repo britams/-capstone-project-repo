@@ -287,3 +287,21 @@ card(a, 60, 1, 39, 13.5, fc='#FDF3DE', ec='none', r=1.4)
 a.text(62, 10.5, '방제 모드  ·  양봉농가', fontsize=17, color=NAVY, weight='bold', va='center')
 a.text(62, 4.8, '표시 없이 모두 가둬 피해 줄임', fontsize=16, color=GRAY, va='center')
 f.savefig('fig_use.png'); plt.close(f)
+
+
+# ══ 그림 1 (11/23 21:21 서현 "VespAI 사진하고 2개만"): VespAI 실행 화면 + 우리 재학습 사진 (11/16 주간보고 슬라이드 14, 격자 합성 v4 학습 사진)
+U = '/mnt/user-data/uploads/capstone design/'
+f, a = canvas()
+a.text(1, 64.6, 'AI 판별 — 격자 너머 등검은말벌 찾기', fontsize=26, color=NAVY, weight='bold', va='center')
+v = Image.open(U + 'capstone_vespai/out/velutina-frame-1.jpeg').convert('RGB').crop((420, 180, 1620, 1068))
+sy = Image.open('/tmp/syn_3.png').convert('RGB'); sy = sy.crop((45, 0, 333, 213))
+for i, (im, t, sub) in enumerate([(v, '① VespAI 원본 모델 (우리 PC에서 실행)', "공개 예시 영상 (O'Shea-Wheller 2024) · 검출 0.85~0.96"),
+                                  (sy, '② 우리 재학습 사진 — 설계 격자판 합성', '우리 표본 + 아크릴 격자 (네모 3 mm), 빨간 네모 = 학습 라벨')]):
+    x = 0.5 + i * 50
+    card(a, x, 12.5, 49, 47.5, fc='white', ec=LINE, r=1.2)
+    put(a, im, x + 1.2, 20.8, 46.6, 38.2)
+    a.text(x + 2, 17.6, t, fontsize=18, color=NAVY, weight='bold', va='center')
+    a.text(x + 2, 14.8, sub, fontsize=13, color=GRAY, va='center')
+card(a, 0.5, 0.5, 99, 10, fc=LIGHT, ec='none', r=1.0)
+a.text(50, 5.5, '재학습 결과 (v3): 학습에 안 쓴 표본, 철망 너머 917/917 장면 검출', ha='center', fontsize=21, color=NAVY, weight='bold', va='center')
+f.savefig('fig_ai.png'); plt.close(f)
