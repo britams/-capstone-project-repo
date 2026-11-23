@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>XY 마킹부 설계 변경 설명 (11/23)</title><style>
+@page{size:A4;margin:14mm 13mm 15mm 13mm}
+body{font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif;font-size:10pt;color:#1a202c;line-height:1.5;margin:0}
+h1{font-size:20pt;margin:0 0 1mm} h2{font-size:14pt;margin:0 0 2.5mm;padding:1.8mm 3mm;background:#2c5282;color:#fff;border-radius:2mm}
+h3{font-size:11pt;margin:3.5mm 0 1.5mm;break-after:avoid;color:#2c5282}
+.sub{color:#4a5568;margin:0 0 4mm} .pg{page-break-before:always}
+table{border-collapse:collapse;width:100%;margin:1.5mm 0 3mm} tr{break-inside:avoid}
+th,td{border:0.6pt solid #cbd5e0;padding:1mm 1.8mm;vertical-align:top;text-align:left} th{background:#edf2f7;font-size:9.5pt}
+.box{background:#ebf8ff;border-left:3pt solid #2b6cb0;padding:2.5mm 3.5mm;margin:2mm 0 3.5mm}
+.warn{background:#fffaf0;border-left:3pt solid #dd6b20;padding:2.5mm 3.5mm;margin:2mm 0 3.5mm}
+.fig{text-align:center;margin:2mm 0 3mm;break-inside:avoid} .fig img{max-width:100%} .cap{font-size:8.8pt;color:#4a5568;margin-top:1mm}
+.two{display:flex;gap:4mm} .two>div{flex:1}
+.arrow{font-size:16pt;color:#2b6cb0;text-align:center;align-self:center;flex:0 0 8mm}
+.flow{display:flex;align-items:stretch;gap:2mm;margin:2mm 0 4mm} .flow .s{border:1pt solid #2b6cb0;border-radius:2mm;padding:2mm;background:#ebf8ff;flex:1;font-size:9.3pt;text-align:center}
+.flow .a{align-self:center;font-size:15pt;color:#2b6cb0}
+.tag{font-size:8.5pt;color:#2f855a;font-weight:700} .red{color:#c53030;font-weight:700}
+code{font-size:8.8pt;background:#f7fafc;padding:0 1mm} small{color:#718096}
+ul{margin:1mm 0 3mm;padding-left:5mm} li{margin:0.6mm 0}
+td.ck{width:5mm;text-align:center;font-size:12pt}
+.pg6 td,.pg6 th{padding:0.7mm 1.6mm}
+</style></head><body>
+
+<h1>XY 마킹부 설계 변경 설명 — 2026-11-23</h1>
+<p class="sub">말벌 자동 마킹 트랩 · 승준 (Claude 정리, CAP-AI-SJ-63) · 오늘 바뀐 것만 모음 · 표시: <b>[확실 — CAD]</b> FreeCAD로 검사함 · <b>[가능성 높음]</b> 손계산 · <b>[추측]</b> 확인 못 함 · <span class="red">서현 확인 필요</span>한 것은 빨강</p>
+
+<h3>한눈에 — 무엇이 왜 바뀌었나</h3>
+<div class="flow">
+<div class="s"><b>① 모터가 늦게 옴</b><br>LM-NK1134가 12/4·12/11 도착 → 12/2 시연 못 맞춤</div><div class="a">→</div>
+<div class="s"><b>② 모터 바꿈</b><br>NEMA17 23 mm 팬케이크 + T8 리드 8 (내써팝, 바로 옴)</div><div class="a">→</div>
+<div class="s"><b>③ 판이 늦게 옴</b><br>meviy 담당자 견적 6장 출하 12/02 → <b>주문 취소</b></div><div class="a">→</div>
+<div class="s"><b>④ 판 6장 플라스틱</b><br>PETG 프린트 5 + 아크릴 1, 모터 구멍을 처음부터 넣음</div>
+</div>
+<table>
+<tr><th style="width:20%">부분</th><th style="width:33%">전 (11/18 설계)</th><th style="width:33%">후 (11/23 최종)</th><th>왜</th></tr>
+<tr><td>X · Y 모터</td><td>LM-NK1134 28각, Tr5 리드 2</td><td><b>NEMA17 42 × 42 × 23 + T8 리드 8</b>, 스크류 X 155 · Y 132로 잘라 받음</td><td>납기</td></tr>
+<tr><td>X 모터판 217</td><td>+x 레일 안쪽 면</td><td><b>레일 바깥 면</b>으로 23 mm 옮김, 모터는 프레임 밖</td><td>안쪽이면 몸이 레일에 6 mm 겹침</td></tr>
+<tr><td>YA · YB · YM · XN · SV</td><td>알루미늄 3T (meviy)</td><td><b>PETG 3D 프린트 3T</b> (학교)</td><td>출하 12/02, 아크릴은 접시 · 얇은 벽에 약함</td></tr>
+<tr><td>CP 캐리지판</td><td>알루미늄 3T (meviy)</td><td><b>아크릴 3T 레이저</b> (아크릴몰, 2장 묶음)</td><td>접시 없음, 벽 2 mm</td></tr>
+<tr><td>YB 빔판 B</td><td>−x 쪽 혀 있음 (폭 30)</td><td><b>혀 깎음</b> (폭 28)</td><td>캐리지가 y +17에서 혀에 닿던 문제 해결</td></tr>
+<tr><td>리드 너트</td><td>POM 너트 (작음)</td><td>T8 황동 너트 (플랜지 Ø22) · <b>플랜지 줄질 2곳</b></td><td>플랜지가 1 mm 이하로 걸림</td></tr>
+<tr><td>펌웨어 <small>(서현)</small></td><td>400 걸음/mm</td><td class="red">100 걸음/mm (1/4 스텝)</td><td>리드 2 → 8 mm</td></tr>
+</table>
+<div class="box"><b>결론</b> — 바꾼 조립 전체를 FreeCAD에서 다시 맞춰 보니 <b>멈춰 있을 때 · 움직일 때 모두 새로 막히는 곳이 없다</b> <span class="tag">[확실 — CAD]</span>. 손볼 곳은 T8 너트 플랜지 두 군데를 줄로 조금 갈아내는 것뿐. 캐리지는 펌웨어 끝(Y +18)까지 간다. <span class="red">재료를 알루미늄 → 플라스틱으로 바꾼 것과 펌웨어 값은 서현 확인 필요.</span></div>
+
+<!-- 1 -->
+<div class="pg"><h2>1. XY 모터 — NEMA17 팬케이크로</h2>
+<h3>왜 바꿨나</h3>
+<ul>
+<li>11/20에 자비로 산 <b>LM-NK1134</b> (모터 축이 곧 나사인 28각 모터)이 <b>12/4 또는 12/11</b>에 온다 → 12/2 시연에 못 씀.</li>
+<li>바로 오는 <b>NEMA17 23 mm 팬케이크 + T8 리드 8 일체형</b> (네이버 내써팝)으로 바꿈. 옵션: 23mm + TM200 · 케이블 듀폰 1M · 스크류 절단 (메모 "모터 앞면부터 끝까지 1개 155 mm, 1개 132 mm"). <span class="red">아직 결제 전.</span></li>
+<li>몸이 28 → <b>42 mm 네모</b>라 사방 7 mm 커짐 → CAD에 넣어 부딪히는지 검사.</li>
+</ul>
+<h3>X 모터만 걸림 — 숫자 하나로 <span class="tag">[확실 — CAD]</span></h3>
+<p>X 나사 축 높이는 z 425, 바로 위 갠트리 레일 밑면은 z 440 → 축 위로 <b>15 mm</b>밖에 없다. 42 mm 네모는 반이 21 mm라 <b>6 mm 넘친다</b> (28 mm일 땐 14 mm라 1 mm 남았음). 축 높이는 봉 · 너트 · 판이 정해서 못 바꾼다.</p>
+<div class="two">
+<div class="fig"><img src="img/X_수정전_레일겹침.png"><div class="cap">전 — 217 판이 레일 안쪽 면, 파란 몸 위가 노란 레일과 겹침 (2,387 mm³)</div></div>
+<div class="arrow">→</div>
+<div class="fig"><img src="img/X_수정후_레일바깥면.png"><div class="cap">후 — 217 판을 같은 레일의 <b>바깥 면</b>으로, 모터는 프레임 밖 (겹침 0)</div></div>
+<div class="fig" style="flex:0.62"><img src="img/Y_그대로_안닿음.png"><div class="cap">Y 모터 — 그 자리 그대로 (겹침 0)</div></div>
+</div>
+<table>
+<tr><th style="width:24%">무엇</th><th>바뀐 점</th></tr>
+<tr><td>217 X 모터판 (금속, 11/25 도착)</td><td>모양은 그대로, 붙이는 면만 바뀜. 손 가공 <b>Ø3.4 × 4</b> (31 간격, 위 2개는 레일 쪽 면에 접시) — 인쇄용 1:1 도안 <code>2026-11-23_승준_판구멍_1대1도안.pdf</code></td></tr>
+<tr><td>217을 레일에 다는 나사</td><td>M5 둥근머리 (머리 Ø9.5)는 모터 몸에 0.75 mm 걸림 → <b>M4 × 8 둥근머리 (Ø7.6) + 20시리즈 스프링너트 M4 2</b> (판 구멍 Ø5.5 그대로) <span class="tag">[확실 — CAD]</span></td></tr>
+<tr><td>Y 모터</td><td>그 자리 그대로 들어감. YM 판 구멍만 NEMA17용 (아래 2장)</td></tr>
+<tr><td>원점 쪽 (Y)</td><td>지금 설계도 판이 스위치 레버를 누른 뒤 <b>0.9 mm</b>에서 원점 팔 226p에 닿음 — 팬케이크로 바뀌어도 같음. 원점 찾기는 천천히.</td></tr>
+</table>
+</div>
+
+<!-- 2 -->
+<div class="pg"><h2>2. 판 6장 — 금속 대신 플라스틱</h2>
+<div class="box">meviy 담당자 견적 판 6장 (YA · YB · XN · YM · CP · SV)은 <b>출하 12/02</b>라 시연에 못 맞춰 <b>11/23 주문 취소</b>. 같은 모양 · 같은 두께 3 mm로 플라스틱으로 만든다 → 봉 · 기둥 · 나사 길이는 안 바뀜. NEMA17 · T8 너트용 구멍을 파일에 처음부터 넣어서 <b>손으로 뚫을 판은 217 한 장뿐</b>.</div>
+<table>
+<tr><th style="width:15%">판</th><th style="width:21%">만드는 법</th><th style="width:15%">크기 (mm)</th><th>이 판에서 바뀐 것</th></tr>
+<tr><td><b>YA</b> 빔판 A</td><td>PETG 프린트</td><td>30 × 110.5</td><td>모양 그대로 (M4 접시 6)</td></tr>
+<tr><td><b>YB</b> 빔판 B</td><td>PETG 프린트</td><td><b>28</b> × 73.5</td><td><b>−x 혀 깎음</b> (3장 참고)</td></tr>
+<tr><td><b>YM</b> Y 모터판</td><td>PETG 프린트 <small>(PLA X — 모터 40~60 °C)</small></td><td>43 × 86.5</td><td>옛 모터 구멍 메움 → NEMA17 <b>Ø3.4 × 3</b> (31 간격. 4번째는 기둥 접시 자리를 파고들어 뺌)</td></tr>
+<tr><td><b>XN</b> X 너트판</td><td>PETG 프린트</td><td>28 × 68</td><td>가운데 Ø8.5 → <b>Ø10.5</b> (T8 너트 몸 Ø10.2 통과), 옛 M2 탭 메움, <b>M3 탭 밑구멍 Ø2.5 × 2</b> → M3 × 6</td></tr>
+<tr><td><b>SV</b> 서보판</td><td>PETG 프린트</td><td>32.1 × 30</td><td>모양 그대로</td></tr>
+<tr><td><b>CP</b> 캐리지판</td><td><b>아크릴 3T 레이저</b></td><td>25 × 99</td><td>옛 POM 너트 구멍 메움 → <b>Ø3.4 × 2</b> (가로, T8 너트) + 뒤 M3 너트. 아크릴몰은 50 × 50 밑을 못 잘라 <b>2장 묶음 62 × 105</b>로 주문 (1장 예비)</td></tr>
+</table>
+<div class="fig"><img src="../../cad/print/2026-11-23_XY판_프린트_아크릴/미리보기.png" style="width:88%"><div class="cap">최종 파일 미리보기 — 분홍 = PETG 프린트 (구멍 0.2 mm 크게 넣음), 파랑 = 아크릴 DXF</div></div>
+<h3>왜 이렇게 나눴나</h3>
+<ul>
+<li><b>아크릴은 접시를 못 깎는다</b> (레이저는 똑바로만 자름). 접시머리를 둥근머리로 바꾸면 15개 중 6개가 SC8UU · 캐리지 나사 · 모터 몸에 닿음 <span class="tag">[확실 — CAD]</span> → 접시가 있는 YA · YB · YM은 프린트.</li>
+<li><b>아크릴은 얇은 벽에서 금이 간다.</b> XN은 탭 구멍과 가운데 구멍 사이 벽이 1.5 mm, SV는 서보 구멍과 판 끝이 1.04 mm <span class="tag">[확실 — CAD로 잰 벽]</span> → XN · SV도 PETG (PETG는 휘지 깨지지 않음).</li>
+<li>CP는 접시가 없고 벽이 2 mm 이상, 나사는 너트로 조임 → 아크릴로 충분.</li>
+</ul>
+<h3>프린트 · 주문할 때</h3>
+<table>
+<tr><th style="width:22%">프린트 (학교)</th><td><b>PETG, 채움 100 %</b> (또는 벽 5겹 이상), 층 0.2 mm, 받침 없이, 5장 한 판 (가장 긴 것 110.5). 구멍이 빡빡하면 같은 지름 드릴로 한 번 훑기 — XN의 Ø2.5 (탭 밑구멍)는 훑지 말 것.</td></tr>
+<tr><th>아크릴 (아크릴몰)</th><td>https://www.acrylmall.com/goods/goods_view.php?goodsNo=25555 (아크릴판 레이저 자유재단) → 두께 3 mm · 색 고름 → 옵션 '도면전달'로 <code>CP_캐리지판_묶음_62x105_아크릴3T_x2.dxf</code> 메일</td></tr>
+<tr><th>파일</th><td>레포 <code>cad/print/2026-11-23_XY판_프린트_아크릴/</code> (README) · PC <code>창의적종합설계\XY판_프린트_아크릴_2026-11-23\</code> · 만든 스크립트 <code>cad/xy_plates_plastic_1123.py</code> (meviy STEP에서)</td></tr>
+</table>
+</div>
+
+<!-- 3 -->
+<div class="pg"><h2>3. YB 혀 깎기 — 캐리지가 끝까지 가게</h2>
+<p>조립을 다시 맞추다가 <b>원래 설계</b>에서 문제를 하나 찾았다: 캐리지가 +y로 <b>57.0 mm (y +17.0)</b> 가면 SP 판 끝이 YB의 −x <b>혀</b>에 닿는다. 혀는 11/17에 meviy 끝단 1 mm 규칙 (구멍과 판 끝 사이)을 맞추려고 늘린 곳이다. 펌웨어 한계는 +18이라 1 mm가 모자랐다 <span class="tag">[확실 — CAD, 0.1 mm 간격]</span>. 금속 YB도 같은 모양이라 플라스틱 때문은 아니다.</p>
+<div class="fig"><img src="img/YB_혀깎음_전후.png" style="width:96%"></div>
+<table>
+<tr><th style="width:30%">방법</th><th>결과</th></tr>
+<tr><td>혀만 깎음</td><td>모자람 — 옆 M4 접시머리 (CAD 모델 머리 Ø8.96)가 x 89.92까지 나와 <b>같은 +17.1에서 SP에 닿음</b></td></tr>
+<tr><td><b>혀 깎음 + 머리 Ø8.0 접시머리</b> (선택)</td><td><b>캐리지 Y +18 (펌웨어 끝)까지 겹침 0</b> — SP와 0.25 mm 틈 <span class="tag">[확실 — CAD]</span></td></tr>
+</table>
+<div class="warn"><b>조립할 때 꼭</b>: YB에 SC8UU를 다는 M4 접시머리 4개 중 <b>SP 쪽 2개는 머리 지름 8.4 mm 이하</b>. 키트 (SMG NT-KIT-LS008 십자 접시)를 받으면 캘리퍼스로 재 보기 [추측 — 십자 접시 M4는 보통 머리 약 8 mm]. 8.4 mm면 남는 틈이 0.05 mm라 8.0 mm쯤이 안전.<br>
+<span class="red">나중에 금속 YB로 다시 바꾸면 혀 문제가 되살아남</span> (meviy는 구멍 끝단 1 mm가 안 되면 가공을 안 받음) — 그때는 펌웨어 Y 한계를 +16으로 줄이는 방법이 있음.</div>
+</div>
+
+<!-- 4 -->
+<div class="pg"><h2>4. 조립 검사 결과 — 어디가 닿나</h2>
+<p>FreeCAD (승준 PC)에서 옛 판 · 옛 모터를 숨기고 새 판 6장 · NEMA17 · T8 나사 · T8 너트 · 새 나사를 넣은 뒤 <b>부품끼리 겹치는 부피</b>를 계산했다. 스크립트 <code>cad/check_xy_plastic_nema17.py</code> (55초) → 결과 <code>cad/_xy_plastic_nema17_check.json</code>.</p>
+<div class="fig"><img src="img/플라스틱6장_조립검사_한눈에.png" style="width:78%"><div class="cap">위 — 바꾼 조립 (등각) · 아래 — 실제로 손볼 두 곳 (빨간 동그라미)</div></div>
+</div>
+<div class="pg">
+<h3>멈춰 있을 때 <span class="tag">[확실 — CAD]</span></h3>
+<table>
+<tr><th style="width:34%">닿는 곳</th><th style="width:14%">겹침</th><th>할 일</th></tr>
+<tr><td><b>① X T8 너트 플랜지 위 끝 ↔ Y 원점 기판</b></td><td>2.5 mm³ (위로 1 mm)</td><td>플랜지 위를 <b>1.5 mm 평평하게 줄질</b> (또는 기판을 1.5 mm 올림)</td></tr>
+<tr><td><b>② Y T8 너트 플랜지 가장자리 ↔ LMK8UU 나사 머리 4개</b></td><td>0.25 mm³ × 4 (약 0.3 mm)</td><td>가장자리 4곳 <b>0.5 mm 줄질</b> (또는 그 나사 4개를 뒤집어 끼움)</td></tr>
+<tr><td>그 밖 (SP ↔ L 브래킷 나사, XN M3 ↔ 탭, M3 ↔ 너트 플랜지)</td><td>—</td><td>모델에 나사산 · 플랜지 구멍을 안 그려서 생긴 겹침 — 실제로는 안 닿음</td></tr>
+</table>
+<h3>줄질이란 — 쇠줄로 조금 갈아내기</h3>
+<p>T8 너트 플랜지는 황동이라 무르다. 너트를 바이스나 펜치로 잡고 평줄로 문지르면 몇 분. 갈고 나서 부스러기만 털기.</p>
+<div class="fig">
+<svg width="560" height="250" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans CJK KR, sans-serif">
+<g fill="#FAC775" stroke="#854F0B" stroke-width="1"><circle cx="190" cy="140" r="70"/><circle cx="490" cy="140" r="70"/></g>
+<g fill="#fff" stroke="#888" stroke-width="1"><circle cx="190" cy="140" r="26"/><circle cx="490" cy="140" r="26"/></g>
+<g fill="none" stroke="#888" stroke-width="1"><circle cx="190" cy="89" r="10"/><circle cx="190" cy="191" r="10"/><circle cx="139" cy="140" r="10"/><circle cx="241" cy="140" r="10"/><circle cx="490" cy="89" r="10"/><circle cx="490" cy="191" r="10"/><circle cx="439" cy="140" r="10"/><circle cx="541" cy="140" r="10"/></g>
+<path d="M148 84 A70 70 0 0 1 232 84 Z" fill="#E24B4A" opacity="0.85"/>
+<rect x="140" y="30" width="100" height="44" rx="4" fill="#D3D1C7" stroke="#5F5E5A" opacity="0.9"/><text x="190" y="57" text-anchor="middle" font-size="13" fill="#2C2C2A">Y 원점 기판</text>
+<g fill="#D3D1C7" stroke="#5F5E5A"><circle cx="547" cy="70" r="18"/><circle cx="433" cy="70" r="18"/><circle cx="433" cy="210" r="18"/><circle cx="547" cy="210" r="18"/></g>
+<g fill="#E24B4A"><circle cx="534" cy="86" r="7"/><circle cx="446" cy="86" r="7"/><circle cx="446" cy="194" r="7"/><circle cx="534" cy="194" r="7"/></g>
+<text x="190" y="248" text-anchor="middle" font-size="15" font-weight="700">① X 너트 플랜지</text><text x="190" y="270" text-anchor="middle" font-size="13" fill="#444">위를 1.5 mm 평평하게</text>
+<text x="490" y="248" text-anchor="middle" font-size="15" font-weight="700">② Y 너트 플랜지</text><text x="490" y="270" text-anchor="middle" font-size="13" fill="#444">가장자리 4곳 0.5 mm (회색 = 나사 머리)</text>
+<text x="340" y="296" text-anchor="middle" font-size="13" fill="#c53030">빨간 곳 = 줄로 갈아낼 곳</text>
+</svg></div>
+<h3>움직일 때 (펜을 12.1 mm 든 자세, 1 mm씩) <span class="tag">[확실 — CAD]</span></h3>
+<table>
+<tr><th style="width:45%">움직임</th><th>결과</th></tr>
+<tr><td>빔 x 0 → +37 (끝까지)</td><td>겹침 0</td></tr>
+<tr><td>빔 x 0 → −38 (끝까지)</td><td>겹침 0</td></tr>
+<tr><td>캐리지 y 0 → +58 (대기 −40에서 펌웨어 끝 +18까지)</td><td>겹침 0 <small>(YB 혀 깎은 뒤 — 전에는 +57.1에서 SP ↔ YB)</small></td></tr>
+<tr><td>캐리지 +57에서 빔 양 끝 (모서리)</td><td>겹침 0</td></tr>
+</table>
+</div>
+
+<!-- 5 -->
+<div class="pg"><h2>5. 강도 — 플라스틱 판으로 괜찮나</h2>
+<p>아크릴 · PETG는 알루미늄보다 강도 약 1/4, 단단함(휘지 않는 정도) 약 1/22~1/35. 그래서 모터가 미는 힘으로 굽힘 응력을 어림했다 <span class="tag">[가능성 높음 — 손계산]</span>.</p>
+<table>
+<tr><th style="width:30%">힘</th><th>값</th></tr>
+<tr><td>평소 움직일 때</td><td>5 N 이하 (베어링 마찰 정도)</td></tr>
+<tr><td>가장 나쁜 경우 — 끝에 박혀 모터가 멈춤</td><td>약 60 N (리드 8 나사, 모터 토크 0.15 N·m · 효율 0.5 가정 — <span class="red">토크는 [추측]</span>, 상품 표를 못 읽음)</td></tr>
+</table>
+<table>
+<tr><th style="width:22%">판</th><th style="width:38%">어떻게 힘을 받나</th><th style="width:16%">60 N일 때</th><th>재료 한계</th></tr>
+<tr><td>XN (PETG)</td><td>X 너트가 판을 밀고, 판은 L 브래킷 끝에서 7 mm 떨어져 버팀</td><td>약 11 MPa</td><td>PETG 약 50 MPa → 1/4~1/5</td></tr>
+<tr><td>YM (PETG)</td><td>Y 모터 중심이 기둥 3개 삼각형 밖 12.6 mm</td><td>약 13 MPa</td><td>약 50 MPa → 1/4</td></tr>
+<tr><td>CP (아크릴)</td><td>Y 너트 플랜지가 베어링 나사 두 줄 사이를 거의 덮음</td><td>거의 0</td><td>아크릴 약 65 MPa</td></tr>
+</table>
+<ul>
+<li>평소 (5 N)에는 위 값의 1/12 — 휘는 양도 0.01 mm대라 마킹 위치에 영향 없음.</li>
+<li><b>약한 곳은 힘이 아니라 나사 조이는 곳</b>: 그래서 얇은 벽이 있는 XN · SV를 아크릴 대신 PETG로 (2장).</li>
+<li>YM은 모터 열 (40~60 °C) 때문에 PETG — PLA는 약 55 °C에서 물러짐 [가능성 높음].</li>
+</ul>
+<div class="warn"><b>조립 규칙</b>: 와셔 받치기 · 세게 조이지 않기 · <b>나사 고정제(록타이트)는 플라스틱에 쓰지 않기</b> (아크릴은 금 감) · 플라스틱은 시간이 지나면 조금 눌리니 <b>시연 전에 한 번 다시 조이기</b>.</div>
+</div>
+
+<!-- 6 -->
+<div class="pg pg6"><h2>6. 조립 전 할 일 · 살 것 (체크리스트)</h2>
+<table>
+<tr><th></th><th style="width:34%">할 일</th><th>자세히</th><th style="width:13%">누가</th></tr>
+<tr><td class="ck">☐</td><td>NEMA17 모터 2개 결제</td><td>내써팝 — 23mm + TM200 · 듀폰 1M · 스크류 절단 (X 155 · Y 132). 결제하면 엑셀 구매목록 62번 B열 O · 실제 금액</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>모터뱅크 LM-NK1134 취소 여부</td><td>엑셀 구매목록 2번</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>PETG 5장 프린트</td><td>YA · YB(혀깎음) · YM · XN · SV — 학교 프린터, 채움 100 %</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>아크릴 CP 주문</td><td>아크릴몰 자유재단 3T, 2장 묶음 DXF (엑셀 주문제작 44번)</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>스프링너트 M4 2개</td><td>디바이스마트 또는 공구상 (엑셀 구매목록 63번). M4 × 8 둥근머리는 키트 A</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>217 판 손 가공</td><td>11/25 도착하면 1:1 도안 인쇄 (실제 크기) → Ø3.4 × 4, 위 2개 레일 쪽 접시</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>M4 접시머리 머리 지름 재기</td><td>YB SP 쪽 2개는 ≤ 8.4 mm (3장)</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>T8 너트 플랜지 줄질 2곳</td><td>X 위 1.5 mm · Y 가장자리 4곳 0.5 mm (4장)</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td>XN 탭</td><td>Ø2.5 두 구멍에 M3 × 6을 바로 돌려 넣거나 M3 탭 — 너트를 판에 대 보고 구멍 간격 확인 (PCD 16 [추측])</td><td>승준</td></tr>
+<tr><td class="ck">☐</td><td class="red">재료 변경 확인</td><td>알루미늄 → PETG 5 + 아크릴 1</td><td class="red">서현</td></tr>
+<tr><td class="ck">☐</td><td class="red">펌웨어</td><td>1/4 스텝 400 → <b>100 걸음/mm</b>, 원점 찾기 천천히 (Y 0.9 mm), DRV8825 전류 NEMA17 정격으로, X 모터 선이 프레임 밖 → 길이 · 묶기</td><td class="red">서현</td></tr>
+</table>
+<h3>미검증 (실물로 확인)</h3>
+<ul><li>T8 너트 구멍 간격 PCD 16 [추측] — XN 탭 · CP 구멍 자리</li><li>모터 토크 0.15 N·m [추측] — 강도 계산</li><li>학교 프린터 (모멘트 M200) 실제 출력 크기 — 110.5 mm는 들어갈 가능성 높음</li><li>팬케이크 23 mm의 힘 — 가벼운 캐리지라 될 가능성 높음, 받으면 돌려 보기</li></ul>
+<h3>관련 파일</h3>
+<table style="font-size:8.6pt">
+<tr><td style="width:40%">변경 문서 (전체 기록)</td><td><code>docs/2026-11-23_승준_XY모터_NEMA17_팬케이크_변경.md</code></td></tr>
+<tr><td>프린트 · 아크릴 파일</td><td><code>cad/print/2026-11-23_XY판_프린트_아크릴/</code></td></tr>
+<tr><td>217 1:1 도안 · 판 비교</td><td><code>design/2026-11-23_XY모터_NEMA17/</code></td></tr>
+<tr><td>조립 검사</td><td><code>cad/check_xy_plastic_nema17.py</code> → <code>cad/_xy_plastic_nema17_check.json</code></td></tr>
+<tr><td>부품 · 상자 · 배송</td><td><code>purchase/부품정리_2026-11-18.xlsx</code>, <code>design/2026-11-23_승준_부품분류표_조립파트별.pdf</code>, <code>design/2026-11-23_승준_배송대기_부품.pdf</code></td></tr>
+<tr><td>FreeCAD 모델 (레포에 안 올림)</td><td>승준 PC <code>FreeCAD_2026-11-18\D5g_full_SJ1123_플라스틱판_NEMA17.FCStd</code></td></tr>
+</table>
+</div>
+</body></html>
