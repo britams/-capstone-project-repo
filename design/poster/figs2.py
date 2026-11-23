@@ -260,3 +260,30 @@ for i, (n, p, fr_, d) in enumerate(bars):
 a.text(51, 6.0, '표본 6마리 · 사진 155장, VespAI 가중치에서 이어 학습', fontsize=12.5, color=GRAY, va='center')
 a.text(51, 3.6, '시험: 학습에 안 쓴 표본 2마리 · 격자만 장면 헛검출 2.1 % (17/797)', fontsize=12.5, color=GRAY, va='center')
 f.savefig('fig_ai.png'); plt.close(f)
+
+
+# ══ 그림 (오른쪽 4번) B2G 활용 — 자세히 (11/23 밤 서현 "현재 것에서 자세하게"). 근거: 당위성 워드 (Rojas-Nossa 2022 공식, 11-3 색 교체, 조사·방제 모드)
+f, a = canvas()
+a.text(1, 64.5, '활용 — 지자체·방제 기관용 둥지 조사 장비 (B2G)', fontsize=26, color=NAVY, weight='bold', va='center')
+flow = [('트랩 설치', '양봉장 주변 여러 곳\n시판 트랩 위에 장착'), ('자동 표시', '일벌만 점 찍고 내보냄\n1시간마다 마커 색 교체'),
+        ('시각 수집', '다시 잡히면 시각 기록\n→ 왕복 시간 계산'), ('둥지 제거', '거리 범위 안 수색\n허가 기관이 제거')]
+for i, (t, sub) in enumerate(flow):
+    x = 1 + i * 25; hl = i == 3
+    card(a, x, 33, 22.5, 26, fc=NAVY if hl else LIGHT, ec='none', r=1.6)
+    a.add_patch(Circle((x + 3.2, 55.3), 2.0, fc=BLUE if not hl else 'white', ec='none'))
+    a.text(x + 3.2, 55.3, str(i + 1), ha='center', va='center', fontsize=20, weight='bold', color='white' if not hl else NAVY)
+    a.text(x + 11.25, 48.5, t, ha='center', va='center', fontsize=27, weight='bold', color='white' if hl else NAVY)
+    a.text(x + 11.25, 39.3, sub, ha='center', va='center', fontsize=17, color='white' if hl else GRAY, linespacing=1.45)
+    if i < 3: arrow(a, x + 22.8, 46, x + 25.6, 46)
+card(a, 1, 1, 57, 29, fc='white', ec=LINE, r=1.4)
+a.text(3, 26.3, '둥지 거리 추정 (Rojas-Nossa 2022)', fontsize=20, color=NAVY, weight='bold', va='center')
+a.text(3, 19.8, '거리 = (왕복 시간 − 45 s) ÷ 2 × 1.8~5.4 m/s', fontsize=19, color=BLUE, weight='bold', va='center')
+a.text(3, 13.5, '둥지 195~1,331 m  ↔  왕복 약 2~25분', fontsize=18, color=NAVY, va='center')
+a.text(3, 6.0, '45 s = 둥지에 머무는 시간, 1.8~5.4 m/s = 비행 속도', fontsize=14, color=GRAY, va='center')
+card(a, 60, 16.5, 39, 13.5, fc=LIGHT, ec='none', r=1.4)
+a.text(62, 26, '조사 모드  ·  지자체·방제 기관', fontsize=17, color=NAVY, weight='bold', va='center')
+a.text(62, 20.3, '일벌 표시 후 내보내 둥지 추적', fontsize=16, color=GRAY, va='center')
+card(a, 60, 1, 39, 13.5, fc='#FDF3DE', ec='none', r=1.4)
+a.text(62, 10.5, '방제 모드  ·  양봉농가', fontsize=17, color=NAVY, weight='bold', va='center')
+a.text(62, 4.8, '표시 없이 모두 가둬 피해 줄임', fontsize=16, color=GRAY, va='center')
+f.savefig('fig_use.png'); plt.close(f)
