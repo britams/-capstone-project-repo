@@ -7,6 +7,7 @@
   (21시 최종, 승준 위임) YB −x 혀 (x 88.4~90.4 · z 464~) 깎음 — 캐리지 y +17.0에서 SP가 닿던 곳 (M4 접시머리 머리 Ø8.4 이하와 같이: cad/check_xy_plastic_nema17.py)
     XN·SV도 PETG 프린트 (아크릴은 XN 탭 벽 1.5 mm · SV 귀 구멍 벽 1.04 mm에서 금 갈 수 있음) → 프린트 5 + 아크릴 CP 1. XN·SV 아크릴 DXF는 예비_아크릴/
     XN M3 탭 밑구멍 Ø2.5는 보정 안 함 (M3를 바로 돌려 넣거나 탭)
+  (11/24) DXF는 R12로 저장 — 아크릴몰이 R2010 DXF를 못 엶 (11/18에 받아 준 9장은 R12)
   재료: meviy STEP (cad/print/meviy/, 11/18 승준 수정본 = meviy에 올린 것). FreeCAD 없이 OpenCascade (pip install cadquery-ocp ezdxf)
   실행: python3 cad/xy_plates_plastic_1123.py  → cad/print/2026-11-23_XY판_프린트_아크릴/"""
 import os, math
@@ -111,7 +112,7 @@ def to_dxf(s, d, path):                 # 두께 축 − 쪽 면 외곽·구멍 
     f = best[1]
     x0, y0, z0, *_ = bbox(s); org = [x0, y0, z0]
     P = lambda p: ((p.X(), p.Y(), p.Z())[keep[0]] - org[keep[0]], (p.X(), p.Y(), p.Z())[keep[1]] - org[keep[1]])
-    doc = ezdxf.new("R2010", units=4); msp = doc.modelspace(); n = 0
+    doc = ezdxf.new("R12", units=4); msp = doc.modelspace(); n = 0
     e = TopExp_Explorer(f, TopAbs_EDGE)
     while e.More():
         c = BRepAdaptor_Curve(TopoDS.Edge(e.Current())); t0, t1 = c.FirstParameter(), c.LastParameter()
@@ -127,7 +128,7 @@ def to_dxf(s, d, path):                 # 두께 축 − 쪽 면 외곽·구멍 
                 msp.add_arc(cc, r, s0, s1) if ccw else msp.add_arc(cc, r, s1, s0)
         else:
             k = 24; pts = [P(c.Value(t0 + (t1 - t0) * i / k)) for i in range(k + 1)]
-            msp.add_lwpolyline(pts)
+            msp.add_polyline2d(pts)
         n += 1; e.Next()
     doc.saveas(path); return n
 
@@ -159,7 +160,7 @@ if __name__ == "__main__":
 
     # 아크릴몰 자유재단은 50 × 50 밑은 못 자름 → CP 2장 (1장 예비)을 62 × 105 테두리 안에 (300f2 묶음과 같은 방식)
     src = ezdxf.readfile(os.path.join(OUT, "CP_캐리지판_아크릴3T_NEMA17.dxf"))
-    doc = ezdxf.new("R2010", units=4); msp = doc.modelspace()
+    doc = ezdxf.new("R12", units=4); msp = doc.modelspace()
     for dx in (4.0, 33.0):
         for e in src.modelspace():
             c = e.copy(); c.translate(dx, 3.0, 0); msp.add_entity(c)
